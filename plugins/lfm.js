@@ -7,7 +7,7 @@ listen({
     command: {
         root: "lfm",
         options: "-bind -prev",
-        help: "Syntax: lfm -bind <account> - lfm -prev [<account>]"
+        help: "Syntax: lfm [<account if not bound>] - lfm -bind <account> - lfm -prev [<account>]"
     },
     callback: function (input) {
         var result, uri, boundName, target, args = input.match[1].split(" ");
