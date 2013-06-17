@@ -9,11 +9,9 @@ listen({
 	    } else { return; }
 		if (userDB.exists) {
 		    var from = input.from;
-//			userDB.store("last", { message: input.data, seen: date });
             userDB.store(input.from.toLowerCase(), { last: input.data, seen: date });
 		} else {
 			setTimeout(function () {
-//				userDB.store("last", { message: input.data, seen: date });
                 userDB.store(input.from.toLowerCase(), { last: input.data, seen: date });
 			}, 2000);
 		}
