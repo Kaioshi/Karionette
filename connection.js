@@ -1,0 +1,184 @@
+﻿/* 
+ * CONNECTION: This module handles connection to the IRC server,
+ * 			   as well as sending and receiving data from it.
+ */
+var net = require("net"),
+	ListDB = require("./lib/db_plainlist.js");
+
+module.exports = function (Eventpipe) {
+	var socket = new net.Socket(),
+		ignoreDB = new ListDB("ignore"),
+		buffer = {
+			ob: new Buffer(4096),
+			size: 0
+		};
+
+	// Handles incoming data
+	function dataHandler(data) {
+		var regArr,
+			input = {
+				raw: data,
+				from: "",
+				host: "",
+				context: "",
+				data: ""
+			};
+		// Log the data if not a ping
+		Logger("<- " + data);
+		// Check it's a PRIVMSG in a context
+		if (data.indexOf('PRIVMSG') > -1) {
+			regArr = (/^:([^!]+)!(.*@.*) PRIVMSG ([^ ]+) :(.*)/i).exec(data);
+			if (regArr) {
+				input.from = regArr[1];
+				input.host = regArr[2];
+				input.data = regArr[4];
+				// Reply to PMs
+				input.context = (irc_config.nickname.some(function (element) {
+					return (element.toUpperCase() === regArr[3].toUpperCase());
+				}) ? regArr[1] : regArr[3]);
+				// Check if 'from' should be ignored
+				if (ignoreDB.hasValue(input.from, true)) {
+					console.log('IGNORED ' + input.from);
+					return;
+				}
+			}
+		}
+		// Fire any events
+		Eventpipe.fire(input);
+	}
+
+	// Utilise a Buffer on the data - this can also be used to catch data before it's handled
+	function dataBuffer(data) {
+		var newlineIdx;
+		data = data.replace("\r", "");
+		while ((newlineIdx = data.indexOf("\n")) > -1) {
+			if (buffer.size > 0) {
+				data = buffer.ob.toString("utf8", 0, buffer.size) + data;
+				newlineIdx += buffer.size;
+				buffer.size = 0;
+			}
+			dataHandler(data.substr(0, newlineIdx));
+			data = data.slice(newlineIdx + 1);
+		}
+		if (data.length > 0) {
+			buffer.ob.write(data, buffer.size, "utf8");
+			buffer.size += data.length;
+		}
+	}
+
+	// Send a message via the open socket
+	function send(data, silent) {
+		if (!data || data.length === 0) {
+			console.log("[ERROR] Tried to send no data");
+			return;
+		}
+		if (data.length > 510) {
+			console.log("[ERROR] Tried to send data > 510 chars in length: " + data);
+			return;
+		}
+		socket.write(data + '\r\n', 'utf8', function () {
+			if (!silent) { console.log("-> " + data); }
+		});
+	}
+
+	// Configure the socket appropriately
+	function configureSocket() {
+		socket.setNoDelay(true);
+		socket.setEncoding("utf8");
+		// Connection TimeOut support
+		socket.setTimeout(240 * 1000, function () {
+			// If fails, error and close events trigger
+			send("VERSION");
+		});
+		socket.on("close", function () {
+			process.exit();
+		});
+		socket.on("data", dataBuffer);
+	}
+
+	// Sanatise a string for use in IRC
+	function sanitise(string) {
+		if (!string) {
+			return string;
+		}
+		/* Note:
+		* 0x00 (null character) is invalid
+		* 0x01 signals a CTCP message, which we shouldn't ever need to do
+		* 0x02 is bold in mIRC (and thus other GUI clients)
+		* 0x03 precedes a color code in mIRC (and thus other GUI clients)
+		* 0x04 thru 0x19 are invalid control codes, except for:
+		* 0x16 is "reverse" (swaps fg and bg colors) in mIRC
+		*/
+		return string.replace(/\n/g, "\\n").replace(/\r/g, "\\r")
+			.replace(/[^\x02-\x03|\x16|\x20-\x7e]/g, "");
+	}
+
+	return {
+		open: function (params) {
+			configureSocket();
+			socket.connect(params.port, params.server, function () {
+				send("NICK " + sanitise(params.nickname));
+				send("USER " + sanitise(params.username) + " localhost * " + sanitise(params.realname));
+			});
+		},
+		quit: function () {
+			send("QUIT");
+		},
+		raw: function (stuff) {
+			send(stuff);
+		},
+		// IRC COMMANDS
+		pong: function (server) {
+			send("PONG :" + server, true);
+		},
+		join: function (channel, key) {
+			var cmd = "JOIN :" + sanitise(channel);
+			if (key) {
+				cmd += " " + sanitise(key);
+			}
+			send(cmd);
+		},
+		part: function (channel) {
+			send("PART :" + sanitise(channel));
+		},
+		say: function (context, message, sanitiseMessage) {
+			var privmsg, max, maxMessages;
+			if (context && message) {
+				context = sanitise(context); // Avoid sanitising more than once
+				privmsg = "PRIVMSG " + context + " :";
+				max = 480 - privmsg.length;
+				maxMessages = 3;
+				if (sanitiseMessage !== false) {
+					message = sanitise(message);
+				}
+				if (Eventpipe.isInAlias === false) {
+					while (message && (maxMessages -= 1) > 0) {
+						send(privmsg + message.slice(0, max));
+						message = message.slice(max);
+					}
+				} else {
+					Eventpipe.addEventlet(message);
+				}
+			}
+		},
+		action: function (channel, action) {
+			if (channel && action) {
+				send("PRIVMSG " + sanitise(channel) + " :\x01ACTION " + sanitise(action) + "\x01");
+			}
+		},
+		// CORE COMMANDS
+		reload: function () {},
+		help: function () {
+			return Eventpipe.getCommands();
+		},
+		ignore: function (user) {
+			ignoreDB.store(user);
+		},
+		unignore: function (user) {
+			ignoreDB.remove(user, true);
+		},
+		ignoreList: function () {
+			return (ignoreDB.getEntire().join(", ") || "Ignoring no one ;)");
+		}
+	}
+}
