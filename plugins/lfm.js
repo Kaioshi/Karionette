@@ -41,10 +41,12 @@ listen({
                 result = JSON.parse(body).recenttracks;
                 if (prev) var tn = 1;
                 else var tn = 0;
-                if (result.track[tn]) {
-                    irc.say(input.context, target + ": " + result.track[tn].artist["#text"] + " ~ " + result.track[tn].name, false);
-                } else {
-                    irc.say(input.context, "Pantsu~", false);
+                try {
+                    var artist = result.track[tn].artist["#text"];
+                    var song = result.track[tn].name;
+                    irc.say(input.context, target + ": " + artist + " ~ " + song,false);
+                } catch (err) {
+                    irc.say(input.context, "Pantsu~",false);
                 }
             });
         }
