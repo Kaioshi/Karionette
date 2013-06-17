@@ -6,14 +6,20 @@ listen({
 	    if (input.context[0] === '#') {
 		    var userDB = new jsonDB("users/" + input.context),
 			    date = new Date();
-	    } else { return; }
-		if (userDB.exists) {
-		    var from = input.from;
-            userDB.store(input.from.toLowerCase(), { last: input.data, seen: date });
-		} else {
-			setTimeout(function () {
-                userDB.store(input.from.toLowerCase(), { last: input.data, seen: date });
-			}, 2000);
-		}
-	}
+            
+            if (input.data.substring(0,7) === "\u0001ACTION") {
+	            var msg = "* "+input.from+input.data.slice(7,-1);
+            } else {
+                var msg = "<"+input.from+"> "+input.data;
+            }
+            
+            if (userDB.exists) {
+                userDB.store(input.from.toLowerCase(), { last: msg, seen: date });
+            } else {
+                setTimeout(function () {
+                    userDB.store(input.from.toLowerCase(), { last: msg, seen: date });
+                }, 2000);
+            }
+        }
+    }
 });

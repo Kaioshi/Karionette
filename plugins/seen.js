@@ -38,11 +38,11 @@ listen({
 			}
 			time = timeDiff(last.seen);
 			seenString = (time.years == 0 ?
-					(time.days == 0 ?
+    					(time.days == 0 ?
 						(time.hours == 0 ? time.mins + " minutes, " : time.hours + " hours, ")
 						: time.days + " days, ")
 				: time.years + " years, ")
-				+ time.secs + " seconds ago, saying: "
+				+ time.secs + " seconds ago: "
 				+ last.last;
 			irc.say(input.context, args[0] + " was last seen " + seenString);
 		} else { irc.say(input.context, "Wat? It's my first time. :<"); }
