@@ -16,7 +16,8 @@ irc_config = {
     port: 6667,
     secret: 'HuHu74Kfj&', // Pass to become admin
     //logging: 'silent' // options are "silent" or "on"
-    logging_noping: 'true',
-    logging_nomotd: 'true',
-    logging_nowrite: 'true'
+    logging_noping: 'true',  // hides PING event
+    logging_nomotd: 'true',  // hides MOTD
+    logging_nowrite: 'true', // hides "JSON saved blahblah"
+    logging_nochat: 'false'   // hides PRIVMSGs, NOTICE, etc.
 };
