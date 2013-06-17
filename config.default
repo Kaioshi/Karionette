@@ -15,5 +15,8 @@ irc_config = {
     server: 'irc.esper.net',
     port: 6667,
     secret: 'HuHu74Kfj&', // Pass to become admin
-	 logging: 'silent' // options are "silent" or "on"
+    //logging: 'silent' // options are "silent" or "on"
+    logging_noping: 'true',
+    logging_nomotd: 'true',
+    logging_nowrite: 'true'
 };
