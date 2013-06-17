@@ -28,10 +28,14 @@ listen({
 	callback: function (input) {
 		var last, time, seenString,
 			args = input.match[1].split(" "),
-			userDB = new jsonDB("users/" + args[0], true);
+            userDB = new jsonDB("users/" + input.context, true);
 		
 		if (userDB.exists) {
-			last = userDB.getOne("last");
+			last = userDB.getOne(args[0].toLowerCase());
+			if (!last) {
+			    irc.say(input.context, "I don't recognise that Pokemon");
+			    return;
+			}
 			time = timeDiff(last.seen);
 			seenString = (time.years == 0 ?
 					(time.days == 0 ?
@@ -39,10 +43,9 @@ listen({
 						: time.days + " days, ")
 				: time.years + " years, ")
 				+ time.secs + " seconds ago, saying: "
-				+ last.message;
+				+ last.last;
 			irc.say(input.context, args[0] + " was last seen " + seenString);
-		} else {
-			irc.say(input.context, "I don't recognise that Pokemon");
-		}
+		} else { irc.say(input.context, "Wat? It's my first time. :<"); }
 	}
 });
+

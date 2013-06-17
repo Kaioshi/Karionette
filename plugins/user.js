@@ -3,13 +3,18 @@ listen({
 	handle: "privmsgListen",
 	regex: /^:[^!]+!.*@.* PRIVMSG [^ ]+ :.*/i,
 	callback: function (input) {
-		var userDB = new jsonDB("users/" + input.from),
-			date = new Date();
+	    if (input.context[0] === '#') {
+		    var userDB = new jsonDB("users/" + input.context),
+			    date = new Date();
+	    } else { return; }
 		if (userDB.exists) {
-			userDB.store("last", { message: input.data, seen: date });
+		    var from = input.from;
+//			userDB.store("last", { message: input.data, seen: date });
+            userDB.store(input.from.toLowerCase(), { last: input.data, seen: date });
 		} else {
 			setTimeout(function () {
-				userDB.store("last", { message: input.data, seen: date });
+//				userDB.store("last", { message: input.data, seen: date });
+                userDB.store(input.from.toLowerCase(), { last: input.data, seen: date });
 			}, 2000);
 		}
 	}
