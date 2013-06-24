@@ -1,0 +1,5 @@
+{
+    "echo": "sayuni {args*}",
+    "search": "google {args*}",
+    "yt": "google site:youtube.com {args*}"
+}
