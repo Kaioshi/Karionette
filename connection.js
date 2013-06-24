@@ -24,7 +24,7 @@ module.exports = function (Eventpipe) {
 				data: ""
 			};
 		// Log the data if not a ping
-		logger("<-", data);
+		log2_filter(data);
 		// Check it's a PRIVMSG in a context
 		if (data.indexOf('PRIVMSG') > -1) {
 			regArr = (/^:([^!]+)!(.*@.*) PRIVMSG ([^ ]+) :(.*)$/i).exec(data);
@@ -38,7 +38,7 @@ module.exports = function (Eventpipe) {
 				}) ? regArr[1] : regArr[3]);
 				// Check if 'from' should be ignored
 				if (ignoreDB.getOne(input.from, true)) {
-					console.log('IGNORED ' + input.from);
+					console.log(lib.timestamp('IGNORED ' + input.from));
 					return;
 				}
 			}
@@ -69,15 +69,15 @@ module.exports = function (Eventpipe) {
 	// Send a message via the open socket
 	function send(data, silent) {
 		if (!data || data.length === 0) {
-			console.log("[ERROR] Tried to send no data");
+			log2("error", "Tried to send no data");
 			return;
 		}
 		if (data.length > 510) {
-			console.log("[ERROR] Tried to send data > 510 chars in length: " + data);
+			log2("error", "Tried to send data > 510 chars in length: " + data);
 			return;
 		}
 		socket.write(data + '\r\n', 'utf8', function () {
-			if (!silent) { console.log("-> " + data); }
+			if (!silent) { log2("sent", data); }
 		});
 	}
 
@@ -135,11 +135,13 @@ module.exports = function (Eventpipe) {
 			send("PONG :" + server, true);
 		},
 		join: function (channel, key) {
-			var cmd = "JOIN :" + sanitise(channel);
-			if (key) {
-				cmd += " " + sanitise(key);
+			if (channel) {
+				var cmd = "JOIN :" + sanitise(channel);
+				if (key) {
+					cmd += " " + sanitise(key);
+				}
+				send(cmd);
 			}
-			send(cmd);
 		},
 		part: function (channel) {
 			send("PART :" + sanitise(channel));
@@ -167,6 +169,11 @@ module.exports = function (Eventpipe) {
 		action: function (channel, action) {
 			if (channel && action) {
 				send("PRIVMSG " + sanitise(channel) + " :\x01ACTION " + sanitise(action) + "\x01");
+			}
+		},
+		notice: function (target, notice) {
+			if (target && notice) {
+				send("NOTICE " + sanitise(target) + " :" + sanitise(notice));
 			}
 		},
 		// CORE COMMANDS

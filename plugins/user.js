@@ -83,7 +83,7 @@ listen({
 		}
 	}
 });
-
+/*
 listen({
 	handle: "onJoin",
 	regex: regexFactory.onJoin(),
@@ -91,6 +91,6 @@ listen({
 		input.from = input.match[1];
 		input.host = input.match[2];
 		input.channel = input.match[3];
-		console.log("[Info] JOIN HAPPENED!");
+		log2("info", "JOIN HAPPENED!");
 	}
-});
+}); */

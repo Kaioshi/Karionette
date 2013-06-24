@@ -20,20 +20,20 @@ module.exports = (function () {
 			clearCache();
 			for (i = 0; i < scripts.length; i += 1) {
 				if (scripts[i].substr(-3) === '.js' && scripts[i].substr(-9) !== '.child.js') {
-					console.log("Loading plugin " + scripts[i] + "...");
+					log2("info", "Loading plugin " + scripts[i] + "...");
 					current = fs.readFileSync('plugins/' + scripts[i]);
 					if (current) {
 						try {
 							vm.runInNewContext(current, sandbox, scripts[i]);
 						} catch (err) {
-							console.log("Error in plugin " + scripts[i] + ": " + err);
+							log2("error", "Error in plugin " + scripts[i] + ": " + err);
 						}
 					}
 				}
 			}
 			current = null;
 			scripts = null;
-			console.log("Scripts loaded.");
+			log2("info", "Scripts loaded.");
 		}
 	}
 }());

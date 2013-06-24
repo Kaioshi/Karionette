@@ -27,7 +27,7 @@ IRC.reload = function () {
 };
 
 process.on('uncaughtException', function (err) {
-	console.log('[ERROR] Uncaught Exception: ' + err);
+	log2("error", "Uncaught Exception: " + err);
 });
 
 Plugin.loadAll(sandbox);
@@ -41,4 +41,4 @@ IRC.open({
 	realname: irc_config.realname
 });
 
-repl.start({ prompt: '> ', ignoreUndefined: true });
+repl.start({ prompt: '', ignoreUndefined: true });

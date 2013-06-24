@@ -87,7 +87,7 @@ module.exports = (function () {
 				try {
 					listeners[keyCache[i]].callback(input);
 				} catch (err) {
-					console.log("Caught error in listener " + keyCache[i] + ": " + err);
+					log2("error", "Caught error in listener " + keyCache[i] + ": " + err);
 				}
 				if (listeners[keyCache[i]].once) {
 					delete listeners[keyCache[i]];
@@ -101,7 +101,7 @@ module.exports = (function () {
 		bind: function (evParams) {
 			// Error handling
 			if (!(evParams.handle && evParams.regex && evParams.callback) || toString.call(evParams.regex) !== '[object RegExp]') {
-				console.log("[ERROR] Script handle " + evParams.handle + ": listen method requires an object with handle, (valid!) regex and callback properties.");
+				log2("error", "Script handle " + evParams.handle + ": listen method requires an object with handle, (valid!) regex and callback properties.");
 				return;
 			}
 			// Default values
