@@ -3,24 +3,7 @@ var chanser = {
 	channel: null,
 	DB: null
 };
-// Calculate difference in time
-function timeDiff(base, altTime) {
-	var timeBase = new Date(base),
-		altTime = altTime || new Date(),
-		secs = Math.floor((altTime - timeBase) / 1000),
-		mins = Math.floor(secs / 60),
-		hours = Math.floor(mins / 60),
-		days = Math.floor(hours / 24) % 365.25,
-		years = Math.floor(days / 365.25),
-		diff = {
-			years: years,
-			days: days,
-			hours: hours % 24,
-			mins: mins % 60,
-			secs: secs % 60
-		};
-	return diff;
-}
+
 // Handle channel transition and cleanup
 function resolveChan(channel) {
 	if (chanser.channel !== channel) {
@@ -70,14 +53,9 @@ listen({
 		resolveChan(input.context);
 		user = chanser.DB.getOne(args[0].toLowerCase());
 		if (user) {
-			time = timeDiff(user.last.seen);
-			seenString = (time.years === 0 ? "" : time.years + " years, ")
-				+ (time.days === 0 ? "" : time.days + " days, ")
-				+ (time.hours === 0 ? "" : time.hours + " hours, ")
-				+ (time.mins === 0 ? "" : time.mins + " mins, ")
-				+ time.secs + " seconds ago ~ "
-				+ user.last.message;
-			irc.say(input.context, args[0] + " was last seen " + seenString);
+			irc.say(input.context, args[0] + " was last seen " 
+				+ lib.duration(new Date(user.last.seen))
+				+ " ago ~ " + user.last.message);
 		} else {
 			irc.say(input.context, "I don't recognise that Pokemon");
 		}
