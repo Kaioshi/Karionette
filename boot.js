@@ -17,7 +17,8 @@ var IRC = global.mari = new Connection(Eventpipe),
 		lib: lib,
 		require: require,
 		regexFactory: require('./lib/regexFactory'),
-		listen: Eventpipe.bind
+		listen: Eventpipe.bind,
+		globals: { startTime: new Date() }
 	};
 
 IRC.reload = function () {
