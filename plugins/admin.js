@@ -123,3 +123,47 @@ listen_admin({
 	}
 });
 
+listen_admin({
+	handle: 'join',
+	regex: regexFactory.startsWith("join"),
+	callback: function (input) {
+		if (isChannelName(input.match[1])) {
+			irc.join(input.match[1]);
+		}
+	}
+});
+
+listen_admin({
+	handle: 'autojoin',
+	regex: regexFactory.startsWith("autojoin"),
+	callback: function (input) {
+		if (isChannelName(input.match[1])) {
+			autojoinDB.saveOne(input.match[1]);
+			irc.say(input.context, "Added " + input.match[1] + " to autojoin list");
+		}
+	}
+});
+
+listen_admin({
+	handle: 'unautojoin',
+	regex: regexFactory.startsWith("unautojoin"),
+	callback: function (input) {
+		if (isChannelName(input.match[1])) {
+			autojoinDB.removeOne(input.match[1], true);
+			irc.say(input.context, "Removed " + input.match[1] + " from autojoin list");
+		}
+	}
+});
+
+listen_admin({
+	handle: 'part',
+	regex: regexFactory.startsWith("part"),
+	callback: function (input) {
+		if (isChannelName(input.match[1])) {
+			irc.part(input.match[1]);
+		} else if (input.match[1].length === 0 && isChannelName(input.context)) {
+			irc.part(input.context);
+		}
+	}
+});
+

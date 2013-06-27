@@ -72,50 +72,6 @@ listen({
  */
 
 listen({
-	handle: 'join',
-	regex: regexFactory.startsWith("join"),
-	callback: function (input) {
-		if (isChannelName(input.match[1])) {
-			irc.join(input.match[1]);
-		}
-	}
-});
-
-listen({
-	handle: 'autojoin',
-	regex: regexFactory.startsWith("autojoin"),
-	callback: function (input) {
-		if (isChannelName(input.match[1])) {
-			autojoinDB.saveOne(input.match[1]);
-			irc.say(input.context, "Added " + input.match[1] + " to autojoin list");
-		}
-	}
-});
-
-listen({
-	handle: 'unautojoin',
-	regex: regexFactory.startsWith("unautojoin"),
-	callback: function (input) {
-		if (isChannelName(input.match[1])) {
-			autojoinDB.removeOne(input.match[1], true);
-			irc.say(input.context, "Removed " + input.match[1] + " from autojoin list");
-		}
-	}
-});
-
-listen({
-	handle: 'part',
-	regex: regexFactory.startsWith("part"),
-	callback: function (input) {
-		if (isChannelName(input.match[1])) {
-			irc.part(input.match[1]);
-		} else if (input.match[1].length === 0 && isChannelName(input.context)) {
-			irc.part(input.context);
-		}
-	}
-});
-
-listen({
 	handle: 'say',
 	regex: regexFactory.startsWith("say", "optional"),
 	command: {

@@ -1,5 +1,6 @@
 ﻿var aliasDB = new DB.Json({filename: "alias/alias"}),
-	varDB = new DB.Json({filename: "alias/vars"});
+	varDB = new DB.Json({filename: "alias/vars"}),
+	vAccessDB = new DB.Json({filename: "alias/vAccess"});
 
 // Handles Alias interface
 listen({
@@ -158,6 +159,73 @@ listen({
 				}
 				irc.say(input.context, list);
 				break;
+			case "access":
+				if (args[1]) {
+					switch (args[1]) {
+					case "deny":
+						if (args[2] && args[3]) {
+							var varName = "{"+args[2]+"}",
+								user = args[3].toLowerCase(),
+								act = modifyAccessList(varName, "deny", user);
+							if (!act) {
+								irc.say(input.context, "Added " + args[3] + " to " + varName + "'s deny list.");
+							} else {
+								if (act == "removed") {
+									irc.say(input.context, "Removed " + args[3] + " from " + varName + "'s deny list.");
+								} else {
+									irc.say(input.context, "[Help] There is no " + varName + " variable.");
+								}
+							}
+						} else {
+							irc.say(input.context, "[Help] Syntax: var access deny <varname> <user> - if the user is already in the list, they will be removed.");
+						}
+						break;
+					case "allow":
+						if (args[2] && args[3]) {
+							var varName = "{"+args[2]+"}",
+								user = args[3].toLowerCase(),
+								act = modifyAccessList(varName, "allow", user);
+							if (!act) {
+								irc.say(input.context, "Added " + args[3] + " to " + varName + "'s allow list.");
+							} else {
+								if (act == "removed") {
+									irc.say(input.context, "Removed " + args[3] + " from " + varName + "'s allow list.");
+								} else {
+									irc.say(input.context, "[Help] There is no " + varName + " variable.");
+								}
+							}
+						} else {
+							irc.say(input.context, "[Help] Syntax: var access allow <varname> <user> - if the user is already in the list, they will be removed.");
+						}
+						break;
+					case "list":
+						if (args[2]) {
+							var varName = "{" + args[2] + "}";
+							var entry = vAccessDB.getOne(varName);
+							if (entry) { 
+								if (entry.deny && entry.deny.length > 0) {
+									irc.say(input.context, varName + "'s deny list: " + entry.deny.join(", "));
+								} else {
+									irc.say(input.context, varName + "'s deny list is empty.");
+								}
+								if (entry.allow && entry.allow.length > 0) {
+									irc.say(input.context, varName + "'s allow list: " + entry.allow.join(", "));
+								} else {
+									irc.say(input.context, varName + "'s allow list is empty.");
+								}
+							} else {
+								irc.say(input.context, varName + " has no access lists yet.");
+							}
+						} else {
+							irc.say(input.context, "[Help] Syntax: var list <varname>");
+						}
+						break;
+					default:
+						irc.say(input.context, "[Help] Syntax: var access <allow / deny / list> [varname] [user]");
+						break;
+					}
+				}
+				break;
 			default:
 				irc.say(input.context, "[Help] Options are: add, remove, list");
 				break;
@@ -167,3 +235,38 @@ listen({
 		}
 	}
 });
+
+function modifyAccessList(varName, list, user) {
+	// if it's in the list, remove, otherwise add.
+	if (varName && user && (list == "deny" || list == "allow")) {
+		if (varDB.getOne(varName)) {
+			var entry = vAccessDB.getOne(varName),
+				rm = 0;
+			if (entry) {
+				if (list == "deny") {
+					if (entry.deny.some(function (item) { return (item === user); })) {
+						entry.deny = entry.deny.filter(function (item) { return (item !== user); });
+						rm = 1;
+					} else {
+						entry.deny.push(user);
+					}
+				} else {
+					if (entry.allow.some(function (item) { return (item === user); })) {
+						entry.allow = entry.allow.filter(function (item) { return (item !== user); });
+						rm = 1;
+					} else {
+						entry.allow.push(user);
+					}
+				}
+			} else { 
+				if (list == "deny") var entry = { allow: [], deny: [ user ] };
+				else var entry = { allow: [ user ], deny: [] };
+			}
+			vAccessDB.saveOne(varName, entry);
+			if (rm == 1) return "removed";
+			return;
+		} else { return "novar"; }
+	} else {
+		log2("warn", "(modifyAccessList) improper syntax.");
+	}
+}

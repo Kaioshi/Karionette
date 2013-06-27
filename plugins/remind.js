@@ -26,7 +26,7 @@ listen({
 		} else {
 			rMatch = (/^me (to|that) (.*) in (\d*) (seconds?|minutes?|hours?)$/i).exec(input.match[1]);
 			if (!rMatch) {
-				irc.say(input.context, "You should probably look at ;help remind");
+				irc.say(input.context, "Wrong syntax ~ ;remind " + this.command.options);
 				return;
 			}
 			time = parseInt(rMatch[3], 10);
