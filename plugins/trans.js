@@ -1,4 +1,4 @@
-//0cb48
+// translates!
 listen({
 	handle: "trans",
 	regex: regexFactory.startsWith(["trans", "translate"]),
