@@ -197,6 +197,26 @@ listen({
 			case "access":
 				if (args[1]) {
 					switch (args[1]) {
+					case "owner":
+						if (args[2] && args[3]) {
+							var varName = "{"+args[2]+"}",
+								gotten = varDB.getOne(varName);
+							if (gotten) {
+								var entry = vAccessDB.getOne(varName);
+								if (entry.owner === input.from.toLowerCase()) {
+									entry.owner = args[3].toLowerCase();
+									vAccessDB.saveOne(varName, entry);
+									irc.say(input.context, args[3] + " is the proud new owner of " + varName);
+								} else {
+									irc.reply(input, "you need to be the owner to transfer ownership.");
+								}
+							} else {
+								irc.reply(input, "there is no " + varName + " variable.");
+							}
+						} else {
+							irc.say(input.context, "[Help] Syntax: var access owner <varname> <newowner>");
+						}
+						break;
 					case "deny":
 						if (args[2] && args[3]) {
 							var varName = "{"+args[2]+"}",
