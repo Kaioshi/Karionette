@@ -33,8 +33,10 @@ listen({
 						if (res.Entries) var tr = res.Entries["0"].FirstTranslation["term"];
 						else if (res.PrincipalTranslations) var tr = res.PrincipalTranslations["0"].FirstTranslation["term"];
 						if (result.original && result.original.Compounds) {
-							var comp = result.original.Compounds["0"].OriginalTerm["term"] + " -> " + result.original.Compounds["0"].FirstTranslation["term"];
-							var tr = tr + " ~ " + comp;
+							var keys = Object.keys(result.original.Compounds),
+								compound = keys[(Math.floor(Math.random() * keys.length))],
+								comp = result.original.Compounds[compound].OriginalTerm["term"] + " -> " + result.original.Compounds[compound].FirstTranslation["term"],
+								tr = tr + " ~~~ " + comp;
 						}
 						if (tr) irc.say(input.context, "(en) "+term+" -> ("+dict.slice(2)+") "+tr, false);
 						else irc.say(input.context, "Something has gone awry.");
