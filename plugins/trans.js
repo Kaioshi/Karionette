@@ -32,7 +32,7 @@ listen({
 					if (res) {
 						if (res.Entries) var tr = res.Entries["0"].FirstTranslation["term"];
 						else if (res.PrincipalTranslations) var tr = res.PrincipalTranslations["0"].FirstTranslation["term"];
-						if (result.original.Compounds) {
+						if (result.original && result.original.Compounds) {
 							var comp = result.original.Compounds["0"].OriginalTerm["term"] + " -> " + result.original.Compounds["0"].FirstTranslation["term"];
 							var tr = tr + " ~ " + comp;
 						}
