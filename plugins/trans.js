@@ -32,9 +32,15 @@ listen({
 					if (res) {
 						if (res.Entries) var tr = res.Entries["0"].FirstTranslation["term"];
 						else if (res.PrincipalTranslations) var tr = res.PrincipalTranslations["0"].FirstTranslation["term"];
+						if (result.original.Compounds) {
+							var comp = result.original.Compounds["0"].OriginalTerm["term"] + " -> " + result.original.Compounds["0"].FirstTranslation["term"];
+							var tr = tr + " ~ " + comp;
+						}
+						if (tr) irc.say(input.context, "(en) "+term+" -> ("+dict.slice(2)+") "+tr, false);
+						else irc.say(input.context, "Something has gone awry.");
+					} else {
+						irc.say(input.context, "No translation was found for "+term);
 					}
-					if (tr) irc.say(input.context, "(en) "+term+" -> ("+dict.slice(2)+") "+tr, false);
-					else irc.say(input.context, "Something went wrong.");
 				}
 			});
 		} else {
