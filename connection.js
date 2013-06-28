@@ -3,8 +3,9 @@
  * 			   as well as sending and receiving data from it.
  */
 var net = require("net"),
+	fs = require("fs"),
 	DB = require("./lib/fileDB.js");
-
+	
 module.exports = function (Eventpipe) {
 	var socket = new net.Socket(),
 		ignoreDB = new DB.List({filename: "ignore"}),
@@ -24,7 +25,8 @@ module.exports = function (Eventpipe) {
 				data: ""
 			};
 		// Log the data if not a ping
-		log2_filter(data);
+		logger.filter(data);
+		fs.appendFile("data/logs/all.txt", lib.timestamp(logger.filter(data, true))+"\n");
 		// Check it's a PRIVMSG in a context
 		if (data.indexOf('PRIVMSG') > -1) {
 			regArr = (/^:([^!]+)!(.*@.*) PRIVMSG ([^ ]+) :(.*)$/i).exec(data);
@@ -33,12 +35,10 @@ module.exports = function (Eventpipe) {
 				input.host = regArr[2];
 				input.data = regArr[4];
 				// Reply to PMs
-				input.context = (irc_config.nickname.some(function (element) {
-					return (element.toUpperCase() === regArr[3].toUpperCase());
-				}) ? regArr[1] : regArr[3]);
+				input.context = (regArr[3][0] === '#') ? regArr[3] : input.from;				
 				// Check if 'from' should be ignored
 				if (ignoreDB.getOne(input.from, true)) {
-					console.log(lib.timestamp('IGNORED ' + input.from));
+					logger.misc("Ignored " + input.from);
 					return;
 				}
 			}
@@ -69,15 +69,15 @@ module.exports = function (Eventpipe) {
 	// Send a message via the open socket
 	function send(data, silent) {
 		if (!data || data.length === 0) {
-			log2("error", "Tried to send no data");
+			logger.error("Tried to send no data");
 			return;
 		}
 		if (data.length > 510) {
-			log2("error", "Tried to send data > 510 chars in length: " + data);
+			logger.error("Tried to send data > 510 chars in length: " + data);
 			return;
 		}
 		socket.write(data + '\r\n', 'utf8', function () {
-			if (!silent) { log2("sent", data); }
+			if (!silent) logger.sent(data);
 		});
 	}
 

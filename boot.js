@@ -28,7 +28,7 @@ IRC.reload = function () {
 };
 
 process.on('uncaughtException', function (err) {
-	log2("error", "Uncaught Exception: " + err);
+	logger.error("Uncaught Exception: " + err);
 });
 
 Plugin.loadAll(sandbox);

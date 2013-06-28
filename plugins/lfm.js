@@ -15,7 +15,7 @@ listen({
 			tn = 0;
 		
 		if (config.api.lfm.length < 1) {
-			log2("warn", "No lfm API key.");
+			logger.warn("No lfm API key.");
 		}
 		
 		if (args[0]) {

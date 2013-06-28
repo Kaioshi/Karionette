@@ -69,6 +69,6 @@ listen({
 		input.from = input.match[1];
 		input.host = input.match[2];
 		input.channel = input.match[3];
-		log2("info", "JOIN HAPPENED!");
+		logger.info("JOIN HAPPENED!");
 	}
 }); */

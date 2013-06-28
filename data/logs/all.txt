@@ -1,0 +1,62 @@
+[00:09:39] [Chat] :kaioshi!kaioshi@i.love.debian.org PRIVMSG #testing :hello[00:09:50] [Chat] :kaioshi!kaioshi@i.love.debian.org PRIVMSG #testing :hello![00:10:18] [Serv] :hybrid7.debian.local NOTICE AUTH :*** Looking up your hostname...
+[00:10:18] [Serv] :hybrid7.debian.local NOTICE AUTH :*** Checking Ident
+[00:10:18] [Serv] :hybrid7.debian.local NOTICE AUTH :*** Got Ident response
+[00:10:18] [Serv] :hybrid7.debian.local NOTICE AUTH :*** Found your hostname
+[00:10:18] [Serv] :hybrid7.debian.local NOTICE Kari :*** Spoofing your IP. congrats.
+[00:10:18] [Serv] :hybrid7.debian.local NOTICE Kari :*** You are exempt from K/D/G lines. congrats.
+[00:10:18] [Serv] :hybrid7.debian.local NOTICE Kari :*** You are exempt from user limits. congrats.
+[00:10:18] [Serv] :hybrid7.debian.local 001 Kari :Welcome to the debian Internet Relay Chat Network Kari
+[00:10:18] [Serv] :hybrid7.debian.local 002 Kari :Your host is hybrid7.debian.local[127.0.0.1/6667], running version hybrid-7.2.2.dfsg.2-6
+[00:10:18] [Serv] :hybrid7.debian.local 003 Kari :This server was created Feb  3 2013 at 01:13:03
+[00:10:18] [Serv] :hybrid7.debian.local 004 Kari hybrid7.debian.local hybrid-7.2.2.dfsg.2-6 DGabcdfgiklnorsuwxyz biklmnopstveIh bkloveIh
+[00:10:18] [Serv] :hybrid7.debian.local 005 Kari CALLERID CASEMAPPING=rfc1459 DEAF=D KICKLEN=160 MODES=4 NICKLEN=15 PREFIX=(ohv)@%+ STATUSMSG=@%+ TOPICLEN=350 NETWORK=debian MAXLIST=beI:25 MAXTARGETS=4 CHANTYPES=#& :are supported by this server
+[00:10:18] [Serv] :hybrid7.debian.local 005 Kari CHANLIMIT=#&:15 CHANNELLEN=50 EXCEPTS=e INVEX=I CHANMODES=eIb,k,l,imnpst AWAYLEN=160 KNOCK ELIST=CMNTU SAFELIST :are supported by this server
+[00:10:18] [Serv] :hybrid7.debian.local 251 Kari :There are 0 users and 2 invisible on 1 servers
+[00:10:18] [Serv] :hybrid7.debian.local 254 Kari 1 :channels formed
+[00:10:18] [Serv] :hybrid7.debian.local 255 Kari :I have 2 clients and 0 servers
+[00:10:18] [Serv] :hybrid7.debian.local 265 Kari :Current local users: 2  Max: 2
+[00:10:18] [Serv] :hybrid7.debian.local 266 Kari :Current global users: 2  Max: 2
+[00:10:18] [Serv] :hybrid7.debian.local 250 Kari :Highest connection count: 2 (2 clients) (43 connections received)
+[00:10:18] [Serv] :hybrid7.debian.local 375 Kari :- hybrid7.debian.local Message of the Day - 
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-         _,met$$$$$gg.       ircd-hybrid 7.2.2
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-      ,g$$$$$$$$$$$$$$$P.    -----------------
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-   ,$$P'              `$$$.  If you are seeing this, you have
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-    ,g$$P""       """Y$$.".  
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :- ',$$P       ,ggs.     `$$b: installed the ircd-hybrid package and
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :- `d$$'     ,$P"'   .    $$$  you are now connected to your new IRC
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-  $$P      d$'     ,    $$P  server -- congratulations.
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-  $$:      $$.   -    ,d$$'  
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-  $$;      Y$b._   _,d$P'    Since you have just installed the
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-  Y$$.    `.`"Y$$$$P"'       package, there are some things you
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-  `$$b      "-.__            should do before going any further:
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-   `Y$$b                     
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-    `Y$$.                    1. Edit /etc/ircd-hybrid/ircd.conf to
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-        `Y$$b.               been removed or moved into other blocks in
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-      `$$b.                  suit your needs. Beware some options have
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-          `"Y$b._            the configuration file since
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-             `""""           ircd-hybrid 7.0.3.
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :- 
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-                             2. Edit /etc/ircd-hybrid/ircd.motd (this
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-                             MOTD) to suit your needs. You are free
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-                             to use this Debian swirl under the
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-                             Debian Open Use Logo License. :)
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :- 
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-                             ircd-hybrid restart.
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-                             3. Restart the server using invoke-rc.d
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :- 
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-                             -- Joshua Kwan <joshk@triplehelix.org>
+[00:10:18] [Serv] :hybrid7.debian.local 376 Kari :End of /MOTD command.
+[00:10:18] [Serv] :hybrid7.debian.local 372 Kari :-                             -- Aurélien GÉRÔME <ag@roxor.cx>
+[00:10:18] [Traf] :Kari!kaioshi@i.love.debian.org MODE Kari :+i
+[00:10:23] [Traf] :Kari!kaioshi@i.love.debian.org JOIN :#testing
+[00:10:23] [Serv] :hybrid7.debian.local 353 Kari = #testing :Kari kaioshi
+[00:10:23] [Serv] :hybrid7.debian.local 366 Kari #testing :End of /NAMES list.
+[00:10:36] [Chat] :kaioshi!kaioshi@i.love.debian.org PRIVMSG #testing :hallo!
+[00:10:57] [Chat] :kaioshi!kaioshi@i.love.debian.org PRIVMSG #testing :blah de blah b
+[00:10:58] [Chat] :kaioshi!kaioshi@i.love.debian.org PRIVMSG #testing :.
+[00:10:58] [Chat] :kaioshi!kaioshi@i.love.debian.org PRIVMSG #testing :.
+[00:10:58] [Chat] :kaioshi!kaioshi@i.love.debian.org PRIVMSG #testing :.
+[00:10:59] [Chat] :kaioshi!kaioshi@i.love.debian.org PRIVMSG #testing :.
+[00:14:59] [Serv] :hybrid7.debian.local 351 Kari hybrid-7.2.2.dfsg.2-6(SVN). hybrid7.debian.local :eGgHIKMZ6 TS6ow
+[00:14:59] [Serv] :hybrid7.debian.local 005 Kari CALLERID CASEMAPPING=rfc1459 DEAF=D KICKLEN=160 MODES=4 NICKLEN=15 PREFIX=(ohv)@%+ STATUSMSG=@%+ TOPICLEN=350 NETWORK=debian MAXLIST=beI:25 MAXTARGETS=4 CHANTYPES=#& :are supported by this server
+[00:14:59] [Serv] :hybrid7.debian.local 005 Kari CHANLIMIT=#&:15 CHANNELLEN=50 EXCEPTS=e INVEX=I CHANMODES=eIb,k,l,imnpst AWAYLEN=160 KNOCK ELIST=CMNTU SAFELIST :are supported by this server
