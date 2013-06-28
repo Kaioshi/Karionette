@@ -26,7 +26,6 @@ module.exports = function (Eventpipe) {
 			};
 		// Log the data if not a ping
 		logger.filter(data);
-		fs.appendFile("data/logs/all.txt", lib.timestamp(logger.filter(data, true))+"\n");
 		// Check it's a PRIVMSG in a context
 		if (data.indexOf('PRIVMSG') > -1) {
 			regArr = (/^:([^!]+)!(.*@.*) PRIVMSG ([^ ]+) :(.*)$/i).exec(data);

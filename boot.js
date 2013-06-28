@@ -1,5 +1,6 @@
 require("./lib/funcs.js");
 require("./config.js");
+require("./globals.js");
 var Eventpipe = require("./eventpipe.js"),
 	Connection = require("./connection.js"),
 	Plugin = require("./plugin.js"),
@@ -18,7 +19,7 @@ var IRC = global.mari = new Connection(Eventpipe),
 		require: require,
 		regexFactory: require('./lib/regexFactory'),
 		listen: Eventpipe.bind,
-		globals: { startTime: new Date() }
+		globals: globals
 	};
 
 IRC.reload = function () {
