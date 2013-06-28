@@ -89,7 +89,7 @@ listen({
 							checkAccessList(varName, input.from.toLowerCase(), true); // adds owner
 							irc.say(input.context, "Created :)");
 						} else {
-							irc.say(input.context, "you don't have permission to overwrite " + varName);
+							irc.reply(input, "you don't have permission to overwrite " + varName);
 						}
 					} else {
 						varDB.saveOne(varName, varString);
