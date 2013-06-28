@@ -69,7 +69,7 @@ listen({
 	regex: regexFactory.startsWith("var"),
 	command: {
 		root: "var",
-		options: "write, remove, append, seppend, seprem, list",
+		options: "write, remove, append, seppend, seprem, list, access list, access allow, access deny",
 		help: "Allows {vars} to be used in aliases. Default vars are:{input.from}, {channel}, {randThing}."
 	},
 	callback: function (input) {
@@ -77,15 +77,27 @@ listen({
 			args = input.match[1].split(" "),
 			varString = args.slice(2).join(" ");
 		if (args[0]) {
-			// What option is picked
 			switch (args[0]) {
+			case "add":
 			case "write":
 				if (args[1] && varString) {
 					varName = "{" + args[1] + "}";
-					varDB.saveOne(varName, varString);
-					irc.say(input.context, "Created :)");
+					var gotten = varDB.getOne(varName);
+					if (gotten) {
+						if (checkAccessList(varName, input.from.toLowerCase())) {
+							varDB.saveOne(varName, varString);
+							checkAccessList(varName, input.from.toLowerCase(), true); // adds owner
+							irc.say(input.context, "Created :)");
+						} else {
+							irc.say(input.context, "you don't have permission to overwrite " + varName);
+						}
+					} else {
+						varDB.saveOne(varName, varString);
+						checkAccessList(varName, input.from.toLowerCase(), true); // adds owner
+						irc.say(input.context, "Created :)");
+					}
 				} else {
-					irc.say(input.context, "[Help] var write VARNAME VARDATA");
+					irc.say(input.context, "[Help] var write <variable> <entry>");
 				}
 				break;
 			case "append":
@@ -93,13 +105,19 @@ listen({
 					varName = "{" + args[1] + "}";
 					gotten = varDB.getOne(varName);
 					if (gotten) {
-						varDB.saveOne(varName, gotten + " " + varString);
+						if (checkAccessList(varName, input.from.toLowerCase())) {
+							varDB.saveOne(varName, gotten + " " + varString);
+							irc.say(input.context, "Added o7");
+						} else {
+							irc.reply(input, "you don't have permission to do that.");
+						}
 					} else {
 						varDB.saveOne(varName, varString);
+						checkAccessList(varName, input.from.toLowerCase(), true); // adds owner
+						irc.say(input.context, "Added o7");
 					}
-					irc.say(input.context, "Added o7");
 				} else {
-					irc.say(input.context, "[Help] var append VARNAME VARDATA");
+					irc.say(input.context, "[Help] var append <variable> <entry>, for example: var append towatch ranma's DIY guide to unplugging a butt.");
 				}
 				break;
 			case "seppend":
@@ -108,47 +126,63 @@ listen({
 					varName = "{" + args[1] + "}";
 					gotten = varDB.getOne(varName);
 					if (gotten) {
-						varDB.saveOne(varName, gotten + (args[2] === "," ? ", "
-							: " " + args[2] + " ") + varString.trim());
+						if (checkAccessList(varName, input.from.toLowerCase())) {
+							varDB.saveOne(varName, gotten + (args[2] === "," ? ", "
+								: " " + args[2] + " ") + varString.trim());
+							irc.say(input.context, "Added o7");
+						} else {
+							irc.reply(input, "you don't have permission to do that.");
+						}
 					} else {
 						varDB.saveOne(varName, varString.trim());
+						checkAccessList(varName, input.from.toLowerCase(), true); // adds owner
+						irc.say(input.context, "Added o7");
 					}
-					irc.say(input.context, "Added o7");
 				} else {
-					irc.say(input.context, "[Help] var seppend VARNAME SEPARATOR VARDATA");
+					irc.say(input.context, "[Help] Syntax: var seppend <variable> <separator> <entry>, for example: var seppend towatch | Black Books");
 				}
 				break;
 			case "seprem":
-				varString = args.slice(3).join(" ");
+				var varString = args.slice(3).join(" ");
 				if (args[1] && args[2] && varString) {
-					varName = "{" + args[1] + "}";
-					gotten = varDB.getOne(varName);
+					var varName = "{" + args[1] + "}",
+						gotten = varDB.getOne(varName);
 					if (gotten) {
-						if (gotten === varString) {
-							varDB.removeOne(varName);
-							irc.say(input.context, "Removed o7");
+						if (checkAccessList(varName, input.from.toLowerCase())) {
+							if (gotten === varString) {
+								varDB.removeOne(varName);
+								vAccessDB.removeOne(varName);
+								irc.say(input.context, "Removed o7");
+							} else {
+								varDB.saveOne(varName, gotten.split((args[2] === "," ? ", " : " " + args[2] + " "))
+									.filter(function (element) {
+										return (element !== varString);
+									})
+									.join((args[2] === "," ? ", " : " " + args[2] + " ")));
+								irc.say(input.context, "Removed o7");
+							}
 						} else {
-							varDB.saveOne(varName, gotten.split((args[2] === "," ? ", " : " " + args[2] + " "))
-								.filter(function (element) {
-									return (element !== varString);
-								})
-								.join((args[2] === "," ? ", " : " " + args[2] + " ")));
-							irc.say(input.context, "Removed o7");
+							irc.reply(input, "you don't have permission to do that.");
 						}
 					} else {
-						irc.say("[Error] seprem requires a variable to look up, a separator and an entry to remove");
+						irc.say("[Error] There is no " + varName + " variable.");
 					}
 				} else {
-					irc.say(input.context, "[Help] var seprem VARNAME SEPARATOR ENTRY");
+					irc.say(input.context, "[Help] Syntax: var seprem <varname> <separator> <entry>, for example: var seprem anime_list | Boku no Pico");
 				}
 				break;
 			case "remove":
 				if (args[1]) {
-					varName = "{" + args[1] + "}";
-					varDB.removeOne(varName);
-					irc.say(input.context, "Removed :)");
+					var varName = "{" + args[1] + "}";
+					if (checkAccessList(varName, input.from.toLowerCase())) {
+						varDB.removeOne(varName);
+						vAccessDB.removeOne(varName);
+						irc.say(input.context, "Removed o7");
+					} else {
+						irc.reply(input, "you don't have permission to do that.");
+					}
 				} else {
-					irc.say(input.context, "[Help] Tell me which var to remove");
+					irc.say(input.context, "[Help] Syntax: var remove <variable>");
 				}
 				break;
 			case "list":
@@ -157,7 +191,8 @@ listen({
 				for (i = 0; i < keys.length; i += 1) {
 					list += keys[i] + ", ";
 				}
-				irc.say(input.context, list);
+				if (!list) irc.say(input.context, "There are no variables yet.");
+				else irc.say(input.context, list);
 				break;
 			case "access":
 				if (args[1]) {
@@ -202,19 +237,17 @@ listen({
 						if (args[2]) {
 							var varName = "{" + args[2] + "}";
 							var entry = vAccessDB.getOne(varName);
-							if (entry) { 
+							if (entry) {
+								var accessList = "Owner: " + entry.owner;
 								if (entry.deny && entry.deny.length > 0) {
-									irc.say(input.context, varName + "'s deny list: " + entry.deny.join(", "));
-								} else {
-									irc.say(input.context, varName + "'s deny list is empty.");
+									accessList += " - Deny: " + entry.deny.join(", ");
 								}
 								if (entry.allow && entry.allow.length > 0) {
-									irc.say(input.context, varName + "'s allow list: " + entry.allow.join(", "));
-								} else {
-									irc.say(input.context, varName + "'s allow list is empty.");
+									accessList += " - Allow: " + entry.allow.join(", ");
 								}
+								irc.say(input.context, varName + " access list -> " + accessList);
 							} else {
-								irc.say(input.context, varName + " has no access lists yet.");
+								irc.say(input.context, varName + " has no access list or doesn't exist.");
 							}
 						} else {
 							irc.say(input.context, "[Help] Syntax: var list <varname>");
@@ -227,14 +260,39 @@ listen({
 				}
 				break;
 			default:
-				irc.say(input.context, "[Help] Options are: add, remove, list");
+				irc.say(input.context, "[Help] Options are: " + this.command.options);
 				break;
 			}
 		} else {
-			irc.say(input.context, "[Help] Options are: add, remove, list");
+			irc.say(input.context, "[Help] Options are: " + this.command.options);
 		}
 	}
 });
+
+function checkAccessList(varName, user, create) {
+	if (varName && user && create) {
+		// someone is creating a variable, they need to be set as the owner
+		var entry = vAccessDB.getOne(varName);
+		if (entry) {
+			entry.owner = user;
+		} else {
+			var entry = { owner: user, deny: [], allow: [] };
+		}
+		vAccessDB.saveOne(varName, entry);
+	} else if (varName && user) {
+		var entry = vAccessDB.getOne(varName);
+		if (entry) {
+			if (entry.owner === user) return true;
+			if (entry.deny.some(function (item) { return (item === user); })) { return false; }
+			if (entry.allow.length > 0) {
+				if (entry.allow.some(function (item) { return (item === user); })) { return true; }
+				return false;
+			}
+		} else {
+			return true;
+		}
+	}
+}
 
 function modifyAccessList(varName, list, user) {
 	// if it's in the list, remove, otherwise add.
@@ -249,6 +307,10 @@ function modifyAccessList(varName, list, user) {
 						rm = 1;
 					} else {
 						entry.deny.push(user);
+						// added to deny - check if they're in the allow list, remove if so
+						if (entry.allow.some(function (item) { return (item === user); })) {
+							entry.allow = entry.allow.filter(function (item) { return (item !== user); });
+						}
 					}
 				} else {
 					if (entry.allow.some(function (item) { return (item === user); })) {
@@ -256,6 +318,10 @@ function modifyAccessList(varName, list, user) {
 						rm = 1;
 					} else {
 						entry.allow.push(user);
+						// added to allow - check if they're in the deny list, remove them if so
+						if (entry.deny.some(function (item) { return (item === user); })) {
+							entry.deny = entry.deny.filter(function (item) { return (item !== user); });
+						}
 					}
 				}
 			} else { 
@@ -266,7 +332,5 @@ function modifyAccessList(varName, list, user) {
 			if (rm == 1) return "removed";
 			return;
 		} else { return "novar"; }
-	} else {
-		log2("warn", "(modifyAccessList) improper syntax.");
 	}
 }

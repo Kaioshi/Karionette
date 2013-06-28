@@ -166,6 +166,9 @@ module.exports = function (Eventpipe) {
 				}
 			}
 		},
+		reply: function (input, message) {
+			this.say(input.context, input.from + ": " + message);
+		},
 		action: function (channel, action) {
 			if (channel && action) {
 				send("PRIVMSG " + sanitise(channel) + " :\x01ACTION " + sanitise(action) + "\x01");
