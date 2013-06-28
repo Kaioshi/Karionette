@@ -308,6 +308,7 @@ function checkAccessList(varName, user, create) {
 				if (entry.allow.some(function (item) { return (item === user); })) { return true; }
 				return false;
 			}
+			return true;
 		} else {
 			return true;
 		}
