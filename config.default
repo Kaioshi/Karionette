@@ -12,7 +12,8 @@ irc_config = {
 	nickserv_password: 'password',
 
 	api: {
-		lfm: ""
+		lfm: "",
+		wordreference: ""
 	},
 	
 	command_prefix: ';',
