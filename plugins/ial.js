@@ -56,7 +56,7 @@ listen({
 			address = match[2],
 			channel = match[3];
 		if (nick === config.nick) irc.raw("WHO "+channel);
-	   ialAdd(channel, nick, address);
+		ialAdd(channel, nick, address);
 	}
 });
 
