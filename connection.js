@@ -28,7 +28,7 @@ module.exports = function (Eventpipe) {
 		logger.filter(data);
 		// Check it's a PRIVMSG in a context
 		if (data.indexOf('PRIVMSG') > -1) {
-			regArr = (/^:([^!]+)!(.*@.*) PRIVMSG ([^ ]+) :(.*)$/i).exec(data);
+			regArr = (/^:([^!]+)!([^ ]+@[^ ]+) PRIVMSG ([^ ]+) :(.*)$/i).exec(data);
 			if (regArr) {
 				input.from = regArr[1];
 				input.host = regArr[2];
