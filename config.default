@@ -1,6 +1,7 @@
 irc_config = {
 	realname: 'Karionette',
 	nickname: ['Kari', 'Karionette', 'Kerza'],
+	nick: 'Kari',
 	username: 'Kyuu',
 
 	/* NickServ details, case-insensitive.
