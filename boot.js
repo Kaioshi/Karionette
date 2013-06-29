@@ -1,4 +1,5 @@
 require("./lib/funcs.js");
+require("./lib/logger.js");
 require("./config.js");
 require("./globals.js");
 var Eventpipe = require("./eventpipe.js"),
