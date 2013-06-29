@@ -19,9 +19,9 @@ function listen_admin(params) {
 		handle: params.handle,
 		regex: params.regex,
 		command: params.command,
-		callback: function (input) {
+		callback: function (input, match) {
 			if (isAdmin(input.from)) {
-				params.callback(input);
+				params.callback(input, match);
 			} else {
 				irc.say(input.context, "Bitch_, please.");
 			}
@@ -38,8 +38,8 @@ listen_admin({
 		options: "add, remove, list",
 		help: "Adds, removes and lists admins. Admin only."
 	},
-	callback: function (input) {
-		var args = input.match[1].split(" ");
+	callback: function (input, match) {
+		var args = match[1].split(" ");
 		if (args[0]) {
 			switch (args[0]) {
 			case "add":
@@ -66,10 +66,10 @@ listen_admin({
 listen({
 	handle: 'secret',
 	regex: regexFactory.startsWith("secret"),
-	callback: function (input) {
+	callback: function (input, match) {
 		if (isAdmin(input.from)) {
 			irc.say(input.context, "You are already an admin.");
-		} else if (input.match[1] === config.secret) {
+		} else if (match[1] === config.secret) {
 			adminDB.saveOne(input.from);
 			irc.say(input.context, "You are now an admin.");
 		}
@@ -79,12 +79,12 @@ listen({
 listen_admin({
 	handle: 'ignore',
 	regex: regexFactory.startsWith("ignore"),
-	callback: function (input) {
-		if (isAdmin(input.match[1])) {
-			irc.say(input.context, input.match[1] + " is an admin, can't be ignored");
+	callback: function (input, match) {
+		if (isAdmin(match[1])) {
+			irc.say(input.context, match[1] + " is an admin, can't be ignored");
 		} else {
-			irc.ignore(input.match[1]);
-			irc.say(input.context, input.match[1] + " is now ignored.");
+			irc.ignore(match[1]);
+			irc.say(input.context, match[1] + " is now ignored.");
 		}
 	}
 });
@@ -92,9 +92,9 @@ listen_admin({
 listen_admin({
 	handle: 'unignore',
 	regex: regexFactory.startsWith("unignore"),
-	callback: function (input) {
-		irc.unignore(input.match[1]);
-		irc.say(input.context, input.match[1] + " unignored");
+	callback: function (input, match) {
+		irc.unignore(match[1]);
+		irc.say(input.context, match[1] + " unignored");
 	}
 });
 
@@ -118,17 +118,17 @@ listen_admin({
 listen_admin({
 	handle: 'raw',
 	regex: regexFactory.startsWith('raw'),
-	callback: function (input) {
-		irc.raw(input.match[1]);
+	callback: function (input, match) {
+		irc.raw(match[1]);
 	}
 });
 
 listen_admin({
 	handle: 'join',
 	regex: regexFactory.startsWith("join"),
-	callback: function (input) {
-		if (isChannelName(input.match[1])) {
-			irc.join(input.match[1]);
+	callback: function (input, match) {
+		if (isChannelName(match[1])) {
+			irc.join(match[1]);
 		}
 	}
 });
@@ -136,10 +136,10 @@ listen_admin({
 listen_admin({
 	handle: 'autojoin',
 	regex: regexFactory.startsWith("autojoin"),
-	callback: function (input) {
-		if (isChannelName(input.match[1])) {
-			autojoinDB.saveOne(input.match[1]);
-			irc.say(input.context, "Added " + input.match[1] + " to autojoin list");
+	callback: function (input, match) {
+		if (isChannelName(match[1])) {
+			autojoinDB.saveOne(match[1]);
+			irc.say(input.context, "Added " + match[1] + " to autojoin list");
 		}
 	}
 });
@@ -147,10 +147,10 @@ listen_admin({
 listen_admin({
 	handle: 'unautojoin',
 	regex: regexFactory.startsWith("unautojoin"),
-	callback: function (input) {
-		if (isChannelName(input.match[1])) {
-			autojoinDB.removeOne(input.match[1], true);
-			irc.say(input.context, "Removed " + input.match[1] + " from autojoin list");
+	callback: function (input, match) {
+		if (isChannelName(match[1])) {
+			autojoinDB.removeOne(match[1], true);
+			irc.say(input.context, "Removed " + match[1] + " from autojoin list");
 		}
 	}
 });
@@ -158,10 +158,10 @@ listen_admin({
 listen_admin({
 	handle: 'part',
 	regex: regexFactory.startsWith("part"),
-	callback: function (input) {
-		if (isChannelName(input.match[1])) {
-			irc.part(input.match[1]);
-		} else if (input.match[1].length === 0 && isChannelName(input.context)) {
+	callback: function (input, match) {
+		if (isChannelName(match[1])) {
+			irc.part(match[1]);
+		} else if (match[1].length === 0 && isChannelName(input.context)) {
 			irc.part(input.context);
 		}
 	}

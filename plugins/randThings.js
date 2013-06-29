@@ -7,9 +7,9 @@ listen({
 		options: "add",
 		help: "add to randThings"
 	},
-	callback: function (input) {
+	callback: function (input, match) {
 		var keys,
-			args = input.match[1].split(" "),
+			args = match[1].split(" "),
 			opt = args[0],
 			txt = args.slice(1).join(" ");
 

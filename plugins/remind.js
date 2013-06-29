@@ -14,17 +14,17 @@ listen({
 		options: "me in {when} {time unit} to/that {what}",
 		help: "Reminds you to do something in"
 	},
-	callback: function (input) {
+	callback: function (input, match) {
 		var time, timeUnits, what, rMatch;
 
-		rMatch = (/^me in (\d*) (seconds?|minutes?|hours?) (to|that) (.*)$/i).exec(input.match[1]);
+		rMatch = (/^me in (\d*) (seconds?|minutes?|hours?) (to|that) (.*)$/i).exec(match[1]);
 		if (rMatch) {
 			time = parseInt(rMatch[1], 10);
 			timeUnits = rMatch[2];
 			time = transformTime(timeUnits, time);
 			what = rMatch[4];
 		} else {
-			rMatch = (/^me (to|that) (.*) in (\d*) (seconds?|minutes?|hours?)$/i).exec(input.match[1]);
+			rMatch = (/^me (to|that) (.*) in (\d*) (seconds?|minutes?|hours?)$/i).exec(match[1]);
 			if (!rMatch) {
 				irc.say(input.context, "Wrong syntax ~ ;remind " + this.command.options);
 				return;

@@ -56,9 +56,9 @@ listen({
 		options: "{What to flip}",
 		help: "Flips a motherflipper"
 	},
-	callback: function (input) {
+	callback: function (input, match) {
 		var i, c, r, last, result,
-			target = input.match[1].toLowerCase(),
+			target = match[1].toLowerCase(),
 			flipTable = {
 				a : '\u0250',
 				b : 'q',

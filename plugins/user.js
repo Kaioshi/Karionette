@@ -46,9 +46,9 @@ listen({
 		options: "{Person to search}",
 		help: "Displays the last known time {person} was seen, and what they last said."
 	},
-	callback: function (input) {
+	callback: function (input, match) {
 		var last, time, seenString, user,
-			args = input.match[1].split(" ");
+			args = match[1].split(" ");
 
 		resolveChan(input.context);
 		user = chanser.DB.getOne(args[0].toLowerCase());
@@ -65,10 +65,10 @@ listen({
 listen({
 	handle: "onJoin",
 	regex: regexFactory.onJoin(),
-	callback: function (input) {
-		input.from = input.match[1];
-		input.host = input.match[2];
-		input.channel = input.match[3];
+	callback: function (input, match) {
+		input.from = match[1];
+		input.host = match[2];
+		input.channel = match[3];
 		logger.info("JOIN HAPPENED!");
 	}
 }); */

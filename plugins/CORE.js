@@ -10,8 +10,8 @@ function isChannelName(str) {
 listen({
 	handle: 'ping',
 	regex: /^PING :(.+)$/i,
-	callback: function (input) {
-		irc.pong(input.match[1]);
+	callback: function (input, match) {
+		irc.pong(match[1]);
 	}
 });
 
@@ -79,16 +79,16 @@ listen({
 		options: "{What you want me to say}",
 		help: "Makes me say something. Duh!"
 	},
-	callback: function (input) {
-		irc.say(input.context, input.match[1]);
+	callback: function (input, match) {
+		irc.say(input.context, match[1]);
 	}
 });
 
 listen({
 	handle: 'sayuni',
 	regex: regexFactory.startsWith("sayuni", "optional"),
-	callback: function (input) {
-		irc.say(input.context, input.match[1], false);
+	callback: function (input, match) {
+		irc.say(input.context, match[1], false);
 	}
 });
 
@@ -100,8 +100,8 @@ listen({
 		options: "{What you want me to do}",
 		help: "Makes me do something. Duh!"
 	},
-	callback: function (input) {
-		irc.action(input.context, input.match[1]);
+	callback: function (input, match) {
+		irc.action(input.context, match[1]);
 	}
 });
 
@@ -113,9 +113,9 @@ listen({
 		options: "{command you're interested in}",
 		help: "Seriously?"
 	},
-	callback: function (input) {
+	callback: function (input, match) {
 		var i,
-			args = input.match[1].split(" "),
+			args = match[1].split(" "),
 			cmdArr = irc.help(),
 			cmdList = "",
 			notFound = true;
@@ -144,7 +144,6 @@ listen({
     regex: regexFactory.startsWith("memstats"),
     command: {
         root: "memstats",
-        options: "No options",
         help: "Shows memory usage."
     },
     callback: function (input) {

@@ -34,8 +34,8 @@ listen({
 		options: "[person] [message]",
 		help: "Passes along a message when the person in question next joins."
 	},
-	callback: function (input) {
-		var msgMatch = /^([^ ]+) (.+)$/.exec(input.match[1]);
+	callback: function (input, match) {
+		var msgMatch = /^([^ ]+) (.+)$/.exec(match[1]);
 		if (msgMatch && isUser(msgMatch[1])) {
 			messagesDB.saveOne(input.context + "@" + msgMatch[1] + ": " + "message from " + input.from + ": " + msgMatch[2]);
 			irc.say(input.context, "I'll tell them when they get back.");
@@ -47,12 +47,13 @@ listen({
 // Listen for join
 listen({
 	handle: "tell_join",
-	regex: /:([^!]+)!.*JOIN :?(.*)$/i,
-	callback: function (input) {
+	//regex: /:([^!]+)!.*JOIN :?(.*)$/i,
+	regex: regexFactory.onJoin(),
+	callback: function (input, match) {
 		var i,
-			userMessages = getMessages(input.match[2], input.match[1]);
+			userMessages = getMessages(match[2], match[1]);
 		for (i = 0; i < userMessages.length; i += 1) {
-			irc.say(input.match[2], input.match[1] + ", " + userMessages[i]);
+			irc.say(match[2], match[1] + ", " + userMessages[i]);
 		}
 	}
 });

@@ -76,25 +76,21 @@ module.exports = (function () {
 
 	// Check if the data fires a plugin, and then do so
 	function fireEvent(input) {
-		var i;
-		maxEventFire -= 1;
 		transformAlias(input);
-		//isInAlias = false;
-		// Find appropriate listener and call the callback
-		for (i = 0; i < keyCache.length; i += 1) {
-			input.match = listeners[keyCache[i]].regex.exec(input.raw);
-			if (input.match) {
+		keyCache.forEach(function (element) {
+			var match = listeners[element].regex.exec(input.raw);
+			if (match) {
 				try {
-					listeners[keyCache[i]].callback(input);
+					listeners[element].callback(input, match);
 				} catch (err) {
-					logger.error("Caught error in listener " + keyCache[i] + ": " + err);
+					logger.error("Caught error in listener " + element + ": " + err);
 				}
-				if (listeners[keyCache[i]].once) {
-					delete listeners[keyCache[i]];
+				if (listeners[element].once) {
+					delete listeners[element];
 					setHandles();
 				}
 			}
-		}
+		});
 	}
 
 	return {

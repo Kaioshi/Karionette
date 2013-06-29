@@ -37,10 +37,10 @@ listen({
 		options: "-bind, -top, -pop, -l",
 		help: "Allows you to search MyAnimeList (anime). Optional commands can be executed by prepending a dash. -bind binds your nick to your account (requires mal username and password in that order), -top is Top Anime, -pop is Popular anime, and -l is to just retrieve a link"
 	},
-	callback: function (input) {
+	callback: function (input, match) {
 		var result, uri, doRes, boundName, toPost,
 			isGet = true;
-			args = input.match[1].split(" ");
+			args = match[1].split(" ");
 		
 		switch (args[0]) {
 			case "-bind":
@@ -74,7 +74,7 @@ listen({
 				// }
 				// break;
 			default:
-				uri = "http://mal-api.com/anime/search?q=" + input.match[1];
+				uri = "http://mal-api.com/anime/search?q=" + match[1];
 				doRes = search;
 				break;
 		}
@@ -99,9 +99,9 @@ listen({
 		options: "-l",
 		help: "Allows you to search MyAnimeList (manga). -l retrieves a link"
 	},
-	callback: function (input) {
+	callback: function (input, match) {
 		var result, uri, doRes
-			args = input.match[1].split(" ");
+			args = match[1].split(" ");
 		
 		switch (args[0]) {
 			case "-l":
@@ -109,7 +109,7 @@ listen({
 				doRes = linkIt;
 				break;
 			default:
-				uri = "http://mal-api.com/manga/search?q=" + input.match[1];
+				uri = "http://mal-api.com/manga/search?q=" + match[1];
 				doRes = search;
 				break;
 		}

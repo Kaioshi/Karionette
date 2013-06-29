@@ -7,9 +7,9 @@ listen({
 		options: "No options",
 		help: "Look up something from Urban dictionary!"
 	},
-	callback: function (input) {
+	callback: function (input, match) {
 		var result,
-			uri = 'http://api.urbandictionary.com/v0/define?term=' + input.match[1];
+			uri = 'http://api.urbandictionary.com/v0/define?term=' + match[1];
 		web.get(uri, function (error, response, body) {
 			result = JSON.parse(body).list;
 			if (result[0]) {

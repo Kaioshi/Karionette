@@ -9,9 +9,9 @@ listen({
 		options: "-bind",
 		help: "Get's your last played track. Use -bind to bind your nick to your lfm account, allowing you to not have to supply an account name. Else just supply your account name."
 	},
-	callback: function (input) {
+	callback: function (input, match) {
 		var uri, user,
-			args = input.match[1].split(" "),
+			args = match[1].split(" "),
 			tn = 0;
 		
 		if (config.api.lfm.length < 1) {
@@ -32,7 +32,7 @@ listen({
 			case "-prev":
 				tn = 1;
 			default:
-				user = (tn === 0 ? input.match[1] 
+				user = (tn === 0 ? match[1]
 					: (args[1] || lfmBindingsDB.getOne(input.from)));
 				break;
 			}

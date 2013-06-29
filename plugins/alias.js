@@ -11,9 +11,9 @@ listen({
 		options: "add, remove, list, info",
 		help: "Allows user defined 'commands' (Eg: The command yt becomes google site:youtube.com). Vars can be used- see var help for more information"
 	},
-	callback: function (input) {
+	callback: function (input, match) {
 		var aKeys, aliasList, i,
-			args = input.match[1].split(" "),
+			args = match[1].split(" "),
 			cmd = args[1],
 			aliasString = args.slice(2).join(" ");
 		if (args[0]) {
@@ -72,9 +72,9 @@ listen({
 		options: "write, remove, append, seppend, seprem, list, access list, access allow, access deny",
 		help: "Allows {vars} to be used in aliases. Default vars are:{input.from}, {channel}, {randThing}."
 	},
-	callback: function (input) {
+	callback: function (input, match) {
 		var keys, list, i, gotten, varName,
-			args = input.match[1].split(" "),
+			args = match[1].split(" "),
 			varString = args.slice(2).join(" ");
 		if (args[0]) {
 			switch (args[0]) {

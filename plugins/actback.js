@@ -34,11 +34,11 @@ function transformObj(args, num) {
 listen({
 	handle: "actback",
 	regex: regexFactory.actionMatching(config.nickname),
-	callback: function (input) {
+	callback: function (input, match) {
 		var randThings = randDB.getAll(),
 			randReplies = repliesDB.getAll(),
 			randReply,
-			args = input.match[0].split(" "),
+			args = match[0].split(" "),
 			verb = args[1],
 			singVerb = verb,
 			obj = transformObj(args, 2),

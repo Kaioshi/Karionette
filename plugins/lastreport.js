@@ -7,8 +7,8 @@ listen({
 		options: "error, warning",
 		help: "Shows the last error /warning, if there is one."
 	},
-	callback: function (input) {
-		var args = input.match[1].split(" ");
+	callback: function (input, match) {
+		var args = match[1].split(" ");
 		if (args[0]) {
 			switch (args[0]) {
 				case "err":

@@ -7,12 +7,12 @@ listen({
 		options: "[-d dict] <word/term>",
 		help: "attempts to translate from language to language. Example: trans -d enfr pants - see http://www.wordreference.com/docs/api.aspx for a list of dictionaries."
 	},
-	callback: function (input) {
+	callback: function (input, match) {
 		if (!config.api.wordreference) {
-			irc.say(input.context, "sorry, the wordreference API key is missing from config.");
+			irc.say(input.context, "Sorry, the wordreference API key is missing from config.");
 			return;
 		}
-		var args = input.match[1].split(" "), uri, dict, term, result;
+		var args = match[1].split(" "), uri, dict, term, result;
 		if (args[0]) {
 			if (args[0] === "-d" && args[1] && args[2]) {
 				dict = args[1];
