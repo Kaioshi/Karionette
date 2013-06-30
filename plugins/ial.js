@@ -99,8 +99,7 @@ listen({
 	callback: function (input, match) {
 		var oldnick = match[1],
 			address = match[2],
-			newnick = match[3],
-			channels = [];
+			newnick = match[3];
 		// update our own nicks
 		if (config.nick === oldnick) {
 			config.nick = newnick;
@@ -111,8 +110,7 @@ listen({
 				});
 			}
 		}
-		channels = ialChannels(oldnick);
-		channels.forEach(function (item) {
+		ialChannels(oldnick).forEach(function (item) {
 			ialRemove(item, oldnick);
 			ialAdd(item, newnick, address);
 		});
