@@ -105,11 +105,10 @@ listen({
 		if (config.nick === oldnick) {
 			config.nick = newnick;
 			if (!config.nickname.some(function (item) { return (item == newnick); })) {
-				for (var i = 0; i <= config.nickname.length; i++) {
-					if (config.nickname[i] == oldnick) {
-						config.nickname[i] = newnick;
-					}
-				}
+				config.nickname = config.nickname.map(function (nick) {
+					if (nick == oldnick) return newnick;
+					return nick;
+				});
 			}
 		} else {
 			channels = ialChannels(oldnick);
