@@ -110,13 +110,12 @@ listen({
 					return nick;
 				});
 			}
-		} else {
-			channels = ialChannels(oldnick);
-			channels.forEach(function (item) {
-				delete globals.channels[item].users[oldnick];
-				globals.channels[item].users[newnick] = { nick: newnick, address: address };
-			});
 		}
+		channels = ialChannels(oldnick);
+		channels.forEach(function (item) {
+			ialRemove(item, oldnick);
+			ialAdd(item, newnick, address);
+		});
 	}
 });
 
