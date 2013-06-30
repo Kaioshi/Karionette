@@ -20,6 +20,7 @@ var IRC = global.mari = new Connection(Eventpipe),
 		require: require,
 		regexFactory: require('./lib/regexFactory'),
 		listen: Eventpipe.bind,
+		logger: logger,
 		globals: globals
 	};
 
