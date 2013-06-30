@@ -93,6 +93,34 @@ listen({
 	}
 });
 
+listen({
+	handle: "ialNick",
+	regex: regexFactory.onNick(),
+	callback: function (input, match) {
+		var oldnick = match[1],
+			address = match[2],
+			newnick = match[3],
+			channels = [];
+		// update our own nicks
+		if (config.nick === oldnick) {
+			config.nick = newnick;
+			if (!config.nickname.some(function (item) { return (item == newnick); })) {
+				for (var i = 0; i <= config.nickname.length; i++) {
+					if (config.nickname[i] == oldnick) {
+						config.nickname[i] = newnick;
+					}
+				}
+			}
+		} else {
+			channels = ialChannels(oldnick);
+			channels.forEach(function (item) {
+				delete globals.channels[item].users[oldnick];
+				globals.channels[item].users[newnick] = { nick: newnick, address: address };
+			});
+		}
+	}
+});
+
 function ialAdd(channel, nick, address) {
 	if (!globals.channels[channel]) globals.channels[channel] = {};
 	if (!globals.channels[channel].users) globals.channels[channel].users = {};
