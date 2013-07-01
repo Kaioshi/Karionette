@@ -49,6 +49,8 @@ listen({
 					track = result.recenttracks.track[tn];
 					irc.say(input.context, track.artist["#text"] + " ~ " + track.name, false);
 				} else {
+					logger.error("Couldn't look up track for " + user + ": " + result.error);
+					globals.lastLFMerr = result;
 					irc.say(input.context, "Pantsu.", false);
 				}
 			});

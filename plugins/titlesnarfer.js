@@ -1,4 +1,6 @@
 // url title snarfer
+var ent = require("./lib/entities.js");
+
 listen({
 	handle: "titleSnarfer",
 	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :?.*((?:https?:\\/\\/)[^ ]+)"),
@@ -9,11 +11,12 @@ listen({
 		web.get(uri, function (error, response, body) {
 			if (error) logger.error("titleSnarfer: "+error);
 			else {
-				if (body && body.match(/<title>.+?<\/title>/ig)) {
-					title = getTitle(body);
-					if (title) irc.say(input.context, title.trim() + " ~ " + response.request.host);
-					else logger.warn("titleSnarfer: couldn't get title for "+uri);
-				} else logger.warn("titleSnarfer: <title> wasn't found in body for "+uri);
+				title = getTitle(body);
+				if (title) {
+					title = ent.decode(title);
+					irc.say(input.context, title.trim() + " ~ " + response.request.host);
+				}
+				else logger.warn("titleSnarfer: couldn't get title for "+uri);
 			}
 		});
 	}
