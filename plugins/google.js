@@ -1,4 +1,5 @@
 ﻿// Returns first Google search result
+var ent = require("./lib/entities.js");
 listen({
 	handle: "google",
 	regex: regexFactory.startsWith(["google", "g"]),
@@ -13,7 +14,7 @@ listen({
 		web.get(uri, function (error, response, body) {
 			var result = JSON.parse(body).responseData.results[0];
 			if (result.titleNoFormatting) {
-				irc.say(input.context, result.titleNoFormatting + ' ~ ' + result.unescapedUrl, false);
+				irc.say(input.context, ent.decode(result.titleNoFormatting) + ' ~ ' + result.unescapedUrl, false);
 			} else {
 				irc.say(input.context, "P-P-PANTSU!");
 			}

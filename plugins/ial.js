@@ -66,11 +66,8 @@ listen({
 	handle: "ialJoin",
 	regex: regexFactory.onJoin(),
 	callback: function (input, match) {
-		var nick = match[1],
-			address = match[2],
-			channel = match[3];
-		if (nick === config.nick) irc.raw("WHO "+channel);
-		ial.Add(channel, nick, address);
+		if (match[1] === config.nick) irc.raw("WHO "+match[3]);
+		ial.Add(match[3], match[1], match[2]);
 	}
 });
 
@@ -78,11 +75,8 @@ listen({
 	handle: "ialPart",
 	regex: regexFactory.onPart(),
 	callback: function (input, match) {
-		var nick = match[1],
-			address = match[2],
-			channel = match[3];
-		if (nick === config.nick) ial.Remove(channel);
-		else ial.Remove(channel, nick);
+		if (match[1] === config.nick) ial.Remove(match[3]);
+		else ial.Remove(match[3], match[1]);
 	}
 });
 
@@ -90,10 +84,8 @@ listen({
 	handle: "ialKick",
 	regex: regexFactory.onKick(),
 	callback: function (input, match) {
-		var nick = match[3],
-			channel = match[2];
-		if (nick === config.nick) ial.Remove(channel);
-		else ial.Remove(channel, nick);
+		if (match[3] === config.nick) ial.Remove(match[2]);
+		else ial.Remove(match[2], match[3]);
 	}
 });
 
@@ -101,9 +93,8 @@ listen({
 	handle: "ialQuit",
 	regex: regexFactory.onQuit(),
 	callback: function (input, match) {
-		var nick = match[1];
-		if (nick === config.nick) return;
-		ial.Channels(nick).forEach(function (item) { ial.Remove(item, nick); });
+		if (match[1] === config.nick) return;
+		ial.Channels(match[1]).forEach(function (item) { ial.Remove(item, match[1]); });
 	}
 });
 

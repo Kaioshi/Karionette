@@ -49,7 +49,7 @@ module.exports = function (Eventpipe) {
 	// Utilise a Buffer on the data - this can also be used to catch data before it's handled
 	function dataBuffer(data) {
 		var newlineIdx;
-		data = data.replace("\r", "");
+		data = data.replace(/\r/g, "");
 		while ((newlineIdx = data.indexOf("\n")) > -1) {
 			if (buffer.size > 0) {
 				data = buffer.ob.toString("utf8", 0, buffer.size) + data;
