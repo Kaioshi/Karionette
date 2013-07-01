@@ -38,6 +38,7 @@ listen({
 			}
 		} else {
 			user = lfmBindingsDB.getOne(input.from);
+			if (!user) user = input.from;
 		}
 		
 		if (user) {
@@ -49,9 +50,11 @@ listen({
 					track = result.recenttracks.track[tn];
 					irc.say(input.context, track.artist["#text"] + " ~ " + track.name, false);
 				} else {
-					logger.error("Couldn't look up track for " + user + ": " + result.error);
-					globals.lastLFMerr = result;
-					irc.say(input.context, "Pantsu.", false);
+					if (result.error && result.message) {
+						irc.say(input.context, "Couldn't look up " + user + "'s track information: "+result.message+" (code: "+result.error+"). Pantsu.");
+					} else {
+						irc.say(input.context, "Pantsu.", false);
+					}
 				}
 			});
 		} else {
