@@ -6,8 +6,11 @@ listen({
 	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :?.*((?:https?:\\/\\/)[^ ]+)"),
 	callback: function (input, match) {
 		var result, title, host,
-			uri = match[1];
-		logger.info("Looking up title for "+uri);
+			uri = match[1],
+			ext = uri.split("/"),
+			ext = ext[ext.length-1].split(".")[1],
+			reject = [ 'jpg', 'png', 'jpeg', 'swf', 'mp3', 'mp4', 'avi', 'wmv', '7z', 'zip', 'rar' ];
+		if (reject.some(function (item) { return (ext === item); })) return;
 		web.get(uri, function (error, response, body) {
 			if (error) logger.error("titleSnarfer: "+error);
 			else {
