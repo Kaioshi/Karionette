@@ -71,8 +71,8 @@ module.exports = function (Eventpipe) {
 			logger.error("Tried to send no data");
 			return;
 		}
-		if (data.length > 1530) {
-			logger.error("Tried to send data > 1530 chars in length: " + data);
+		if (data.length > 510) {
+			logger.error("Tried to send data > 510 chars in length: " + data);
 			return;
 		}
 		socket.write(data + '\r\n', 'utf8', function () {
@@ -146,25 +146,20 @@ module.exports = function (Eventpipe) {
 			send("PART :" + sanitise(channel));
 		},
 		say: function (context, message, sanitiseMessage) {
-			var privmsg, max, maxMessages, maxlength;
+			var privmsg, max, maxMessages;
 			if (context && message) {
 				context = sanitise(context); // Avoid sanitising more than once
 				privmsg = "PRIVMSG " + context + " :";
-				max = 480 - privmsg.length;
+				max = 476 - privmsg.length;
 				maxMessages = 3;
-				maxlength = max*maxMessages;
 				if (sanitiseMessage !== false) {
 					message = sanitise(message);
 				}
 				if (Eventpipe.isInAlias === false) {
-					if (message.length > maxlength) {
-						message = message.slice(maxlength);
-					}
-					send(privmsg + message);
-					/*while (message && (maxMessages -= 1) > 0) {
+					while (message && (maxMessages -= 1) > 0) {
 						send(privmsg + message.slice(0, max));
 						message = message.slice(max);
-					}*/
+					}
 				} else {
 					Eventpipe.addEventlet(message);
 				}
