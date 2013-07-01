@@ -9,7 +9,7 @@ listen({
 			uri = match[1],
 			ext = uri.split("/"),
 			ext = ext[ext.length-1].split(".")[1],
-			reject = [ 'jpg', 'png', 'jpeg', 'swf', 'mp3', 'mp4', 'avi', 'wmv', '7z', 'zip', 'rar' ];
+			reject = [ 'jpg', 'png', 'jpeg', 'gif', 'swf', 'mp3', 'mp4', 'avi', 'wmv', '7z', 'zip', 'rar', 'xls' ];
 		if (reject.some(function (item) { return (ext === item); })) return;
 		web.get(uri, function (error, response, body) {
 			if (error) logger.error("titleSnarfer: "+error);
