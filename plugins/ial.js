@@ -15,6 +15,18 @@ listen({
 			args = match[1].split(" ");
 		
 		if (args[0]) {
+			if (args[0] == "-maskSearch" && args[1]) {
+				var matches = ial.maskSearch(args[1]);
+				if (matches.length > 0) {
+					var channels = [],
+						response = [];
+					matches.forEach(function (nick) {
+						response.push(nick+" ("+ial.Channels(nick).join(", ")+")");
+					});
+					irc.say(input.context, response.join(" - "));
+				} else irc.say(input.context, "No matches found.");
+				return;
+			}
 			if (args[0][0] === '#') {
 				if (ial.Channels().some(function (item) { return (args[0] === item); })) {
 					var channel = args[0];
