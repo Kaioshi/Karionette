@@ -71,8 +71,8 @@ module.exports = function (Eventpipe) {
 			logger.error("Tried to send no data");
 			return;
 		}
-		if (data.length > 510) {
-			logger.error("Tried to send data > 510 chars in length: " + data);
+		if (data.length > 1530) {
+			logger.error("Tried to send data > 1530 chars in length: " + data);
 			return;
 		}
 		socket.write(data + '\r\n', 'utf8', function () {
