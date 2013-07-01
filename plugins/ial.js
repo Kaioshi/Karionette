@@ -16,20 +16,28 @@ listen({
 		
 		if (args[0]) {
 			if (args[0] == "-maskSearch" && args[1]) {
-				var matches = ial.maskSearch(args[1]);
-				if (matches.length > 0) {
-					var channels = [],
-						response = [];
-					matches.forEach(function (nick) {
-						response.push(nick+" ("+ial.Channels(nick).join(", ")+")");
-					});
-					irc.say(input.context, response.join(" - "));
-				} else irc.say(input.context, "No matches found.");
+				if (args[2] && args[2][0] === '#') {
+					if (!ial.Channel(args[2])) {
+						irc.say(input.context, "I'm not on "+args[2]);
+						return;
+					} else {
+						var result = ial.maskSearch(args[1], args[2]);
+						if (result) irc.say(input.context, args[2]+": "+result.join(", "));
+						else irc.say(input.context, "No matches found in "+args[2]);
+						return;
+					}
+				}
+				ial.Channels().forEach(function (channel) {
+					var result = ial.maskSearch(args[1], channel);
+					if (result) list.push(channel+": "+result.join(", "));
+				});
+				if (list) irc.say(input.context, list.join(" - "));
+				else irc.say(input.context, "No matches.");
 				return;
 			}
 			if (args[0][0] === '#') {
 				if (ial.Channels().some(function (item) { return (args[0] === item); })) {
-					var channel = args[0];
+					channel = args[0];
 				} else {
 					irc.say(input.context, "I'm not on that channel.");
 					return;
