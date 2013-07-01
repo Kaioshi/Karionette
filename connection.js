@@ -146,20 +146,25 @@ module.exports = function (Eventpipe) {
 			send("PART :" + sanitise(channel));
 		},
 		say: function (context, message, sanitiseMessage) {
-			var privmsg, max, maxMessages;
+			var privmsg, max, maxMessages, maxlength;
 			if (context && message) {
 				context = sanitise(context); // Avoid sanitising more than once
 				privmsg = "PRIVMSG " + context + " :";
 				max = 480 - privmsg.length;
 				maxMessages = 3;
+				maxlength = max*maxMessages;
 				if (sanitiseMessage !== false) {
 					message = sanitise(message);
 				}
 				if (Eventpipe.isInAlias === false) {
-					while (message && (maxMessages -= 1) > 0) {
+					if (message.length > maxlength) {
+						message = message.slice(maxlength);
+					}
+					send(privmsg + message);
+					/*while (message && (maxMessages -= 1) > 0) {
 						send(privmsg + message.slice(0, max));
 						message = message.slice(max);
-					}
+					}*/
 				} else {
 					Eventpipe.addEventlet(message);
 				}
