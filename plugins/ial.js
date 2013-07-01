@@ -1,4 +1,5 @@
-// internal address list, updates globals.channels whenever there is movement.
+// internal address list, updates itself whenever there is movement.
+// NOTE: the ;ial command is there for testing the ial functions. It's not intended to be used this way.
 listen({
 	handle: "ial",
 	regex: regexFactory.startsWith("ial"),
@@ -8,28 +9,29 @@ listen({
 		help: "Shows the contents of the internal address list."
 	},
 	callback: function (input, match) {
-		var keys = [],
+		var nicks = [],
 			list = [],
 			channel = input.context,
 			args = match[1].split(" ");
 		
-		if (args[0] && args[0][0] === '#') {
-			if (ialChannels().some(function (item) { return (args[0] === item); })) {
-				var channel = args[0];
-			} else {
-				irc.say(input.context, "I'm not on that channel.");
-				return;
+		if (args[0]) {
+			if (args[0][0] === '#') {
+				if (ial.Channels().some(function (item) { return (args[0] === item); })) {
+					var channel = args[0];
+				} else {
+					irc.say(input.context, "I'm not on that channel.");
+					return;
+				}
 			}
 		}
-		keys = Object.keys(globals.channels[channel].users);
-		keys.forEach(function (item) {
-			list.push(globals.channels[channel].users[item].nick +
-				" (" + globals.channels[channel].users[item].address + ")");
+		nicks = ial.Nicks(channel);
+		nicks.forEach(function (nick) {
+			list.push(nick + " (" + ial.Channel(channel).users[nick].address + ")");
 		});
 		if (list) {
-			list = list.join(" - ");
+			list = list.join(", ");
 			if (list.length > 400) irc.say(input.context, "The list is too long, sorry.");
-			else irc.say(input.context, "IAL for "+channel+": "+list);
+			else irc.say(input.context, "Users in "+channel+": "+list);
 		}
 		else irc.say(input.context, "Something has gone awry.");
 	}
@@ -43,7 +45,7 @@ listen({
 		var channel = match[1],
 			address = match[2]+"@"+match[3],
 			nick = match[4];
-		ialAdd(channel, nick, address);
+		ial.Add(channel, nick, address);
 	}
 });
 */
@@ -56,7 +58,7 @@ listen({
 			address = match[2],
 			channel = match[3];
 		if (nick === config.nick) irc.raw("WHO "+channel);
-		ialAdd(channel, nick, address);
+		ial.Add(channel, nick, address);
 	}
 });
 
@@ -67,8 +69,8 @@ listen({
 		var nick = match[1],
 			address = match[2],
 			channel = match[3];
-		if (nick === config.nick) ialRemove(channel);
-		else ialRemove(channel, nick);
+		if (nick === config.nick) ial.Remove(channel);
+		else ial.Remove(channel, nick);
 	}
 });
 
@@ -78,8 +80,8 @@ listen({
 	callback: function (input, match) {
 		var nick = match[3],
 			channel = match[2];
-		if (nick === config.nick) ialRemove(channel);
-		else ialRemove(channel, nick);
+		if (nick === config.nick) ial.Remove(channel);
+		else ial.Remove(channel, nick);
 	}
 });
 
@@ -89,7 +91,7 @@ listen({
 	callback: function (input, match) {
 		var nick = match[1];
 		if (nick === config.nick) return;
-		ialChannels(nick).forEach(function (item) { ialRemove(item, nick); });
+		ial.Channels(nick).forEach(function (item) { ial.Remove(item, nick); });
 	}
 });
 
@@ -110,42 +112,10 @@ listen({
 				});
 			}
 		}
-		ialChannels(oldnick).forEach(function (item) {
-			ialRemove(item, oldnick);
-			ialAdd(item, newnick, address);
+		ial.Channels(oldnick).forEach(function (item) {
+			ial.Remove(item, oldnick);
+			ial.Add(item, newnick, address);
 		});
 	}
 });
 
-function ialAdd(channel, nick, address) {
-	if (!globals.channels[channel]) globals.channels[channel] = {};
-	if (!globals.channels[channel].users) globals.channels[channel].users = {};
-	globals.channels[channel].users[nick] = { nick: nick, address: address };
-}
-
-function ialRemove(channel, nick) {
-	if (!nick) delete globals.channels[channel];
-	else {
-		if (globals.channels[channel].users[nick]) {
-			delete globals.channels[channel].users[nick];
-		}
-	}
-}
-
-function ialChannels(nick) {
-	// if nick is supplied, returns a list of channels we share with them
-	// otherwise returns a list of all channels we're in.
-	var keys = Object.keys(globals.channels),
-		channels = [];
-	if (keys.length > 0) {
-		if (nick) {
-			keys.forEach(function (item) {
-				if (globals.channels[item].users[nick]) channels.push(item);
-			});
-		} else {
-			keys.forEach(function (item) { channels.push(item); });
-		}
-	}
-	if (channels.length > 0) return channels;
-	return [];
-}

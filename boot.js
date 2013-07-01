@@ -1,5 +1,6 @@
 require("./lib/funcs.js");
 require("./lib/logger.js");
+require("./lib/ial.js");
 require("./config.js");
 require("./globals.js");
 var Eventpipe = require("./eventpipe.js"),
@@ -17,6 +18,7 @@ var IRC = global.mari = new Connection(Eventpipe),
 		web: require('./lib/web.js'),
 		DB: require("./lib/fileDB.js"),
 		lib: lib,
+		ial: ial,
 		require: require,
 		regexFactory: require('./lib/regexFactory'),
 		listen: Eventpipe.bind,
