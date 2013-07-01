@@ -9,8 +9,17 @@
 
 var adminDB = new DB.List({filename: 'admins'});
 
-function isAdmin(username) {
-	return adminDB.getOne(username, true);
+function isAdmin(user) {
+	adminDB.getAll().forEach(function (entry) {
+		if (entry) {
+			var ret = ial.maskMatch(user, entry);
+			console.log("isAdmin: ret = "+ret+" for "+user+" - "+entry);
+			if (ret == true) return true;
+		}
+	});
+	//console.log("Not an admin!");
+	console.log("isAdmin: returning false");
+	return false;
 }
 
 // Admin Only
@@ -20,10 +29,10 @@ function listen_admin(params) {
 		regex: params.regex,
 		command: params.command,
 		callback: function (input, match) {
-			if (isAdmin(input.from)) {
+			if (isAdmin(input.user)) {
 				params.callback(input, match);
 			} else {
-				irc.say(input.context, "Bitch_, please.");
+				irc.say(input.context, "Bitchu_, please.");
 			}
 		}
 	});
@@ -67,7 +76,7 @@ listen({
 	handle: 'secret',
 	regex: regexFactory.startsWith("secret"),
 	callback: function (input, match) {
-		if (isAdmin(input.from)) {
+		if (isAdmin(input.user)) {
 			irc.say(input.context, "You are already an admin.");
 		} else if (match[1] === config.secret) {
 			adminDB.saveOne(input.from);
@@ -80,12 +89,8 @@ listen_admin({
 	handle: 'ignore',
 	regex: regexFactory.startsWith("ignore"),
 	callback: function (input, match) {
-		if (isAdmin(match[1])) {
-			irc.say(input.context, match[1] + " is an admin, can't be ignored");
-		} else {
-			irc.ignore(match[1]);
-			irc.say(input.context, match[1] + " is now ignored.");
-		}
+		irc.ignore(match[1]);
+		irc.say(input.context, match[1] + " is now ignored.");
 	}
 });
 
@@ -109,7 +114,7 @@ listen_admin({
 listen_admin({
 	handle: 'reload',
 	regex: regexFactory.only('reload'),
-	callback: function (input) {
+	callback: function (input, match) {
 		irc.reload();
 		irc.say(input.context, "Reloaded scripts");
 	}

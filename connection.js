@@ -21,6 +21,7 @@ module.exports = function (Eventpipe) {
 				raw: data,
 				from: "",
 				host: "",
+				user: "",
 				context: "",
 				data: ""
 			};
@@ -33,6 +34,7 @@ module.exports = function (Eventpipe) {
 				input.from = regArr[1];
 				input.host = regArr[2];
 				input.data = regArr[4];
+				input.user = regArr[1]+"!"+regArr[2];
 				// Reply to PMs
 				input.context = (regArr[3][0] === '#') ? regArr[3] : input.from;				
 				// Check if 'from' should be ignored
