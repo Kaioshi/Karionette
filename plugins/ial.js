@@ -16,12 +16,13 @@ listen({
 		
 		if (args[0]) {
 			if (args[0] == "-toMask" && args[1]) {
+				var chan = args[2] || input.context;
 				if (args[1].indexOf('*') > -1) {
-					var result = ial.maskSearch(args[1], input.context);
+					var result = ial.maskSearch(args[1], chan);
 					if (result) {
 						// we have a list of nicks.
 						result.forEach(function (nick) {
-							var user = ial.User(nick, input.context).user,
+							var user = ial.User(nick, chan).user,
 								mask = ial.toMask(user);
 							if (mask) list.push(user+" -> "+mask);
 						});
