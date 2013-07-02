@@ -10,16 +10,11 @@
 var adminDB = new DB.List({filename: 'admins'});
 
 function isAdmin(user) {
+	var ret = false;
 	adminDB.getAll().forEach(function (entry) {
-		if (entry) {
-			var ret = ial.maskMatch(user, entry);
-			console.log("isAdmin: ret = "+ret+" for "+user+" - "+entry);
-			if (ret == true) return true;
-		}
+		if (ial.maskMatch(user, entry)) ret = true;
 	});
-	//console.log("Not an admin!");
-	console.log("isAdmin: returning false");
-	return false;
+	return ret;
 }
 
 // Admin Only
@@ -32,7 +27,7 @@ function listen_admin(params) {
 			if (isAdmin(input.user)) {
 				params.callback(input, match);
 			} else {
-				irc.say(input.context, "Bitchu_, please.");
+				irc.say(input.context, "Bitch_, please.");
 			}
 		}
 	});
@@ -49,11 +44,15 @@ listen_admin({
 	},
 	callback: function (input, match) {
 		var args = match[1].split(" ");
-		if (args[0]) {
+		if (args[0] && args[1]) {
 			switch (args[0]) {
 			case "add":
-				adminDB.saveOne(args[1]);
-				irc.say(input.context, "Added :)");
+				if (args[1].indexOf('*') > -1 || (args[1].indexOf('!') > -1 && args[1].indexOf('@') > -1 && args[1].indexOf('*') == -1)) {
+					adminDB.saveOne(args[1]);
+					irc.say(input.context, "Added :)");
+				} else {
+					irc.say(input.context, "You either need to give me a nick*!*user@*.host.org mask or a complete Nick!user@host.org user.");
+				}
 				break;
 			case "remove":
 				adminDB.removeOne(args[1], true);

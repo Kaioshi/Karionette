@@ -31,7 +31,7 @@ listen({
 					var result = ial.maskSearch(args[1], channel);
 					if (result) list.push(channel+": "+result.join(", "));
 				});
-				if (list) irc.say(input.context, list.join(" - "));
+				if (list.length > 0) irc.say(input.context, list.join(" - "));
 				else irc.say(input.context, "No matches.");
 				return;
 			}

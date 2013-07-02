@@ -2,6 +2,7 @@
  * CONNECTION: This module handles connection to the IRC server,
  * 			   as well as sending and receiving data from it.
  */
+require("./lib/ial.js");
 var net = require("net"),
 	fs = require("fs"),
 	DB = require("./lib/fileDB.js");
@@ -17,6 +18,7 @@ module.exports = function (Eventpipe) {
 	// Handles incoming data
 	function dataHandler(data) {
 		var regArr,
+			ignore = false,
 			input = {
 				raw: data,
 				from: "",
@@ -36,12 +38,17 @@ module.exports = function (Eventpipe) {
 				input.data = regArr[4];
 				input.user = regArr[1]+"!"+regArr[2];
 				// Reply to PMs
-				input.context = (regArr[3][0] === '#') ? regArr[3] : input.from;				
+				input.context = (regArr[3][0] === '#') ? regArr[3] : input.from;
 				// Check if 'from' should be ignored
-				if (ignoreDB.getOne(input.from, true)) {
-					logger.misc("Ignored " + input.from);
-					return;
+				if (ignoreDB.getOne(input.from, true)) ignore = true;
+				else {
+					ignoreDB.getAll().some(function (entry) {
+						if (ial.maskMatch(input.user, entry)) {
+							ignore = true;
+						}
+					});
 				}
+				if (ignore) return;
 			}
 		}
 		// Fire any events
