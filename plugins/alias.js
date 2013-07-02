@@ -236,11 +236,14 @@ listen({
 					case "owner":
 						if (args[2] && args[3]) {
 							var varName = "{"+args[2]+"}",
-								gotten = varDB.getOne(varName),
-								entry = {};
+								gotten = varDB.getOne(varName);
 							if (gotten) {
 								var entry = vAccessDB.getOne(varName);
-								if (!entry.owner || entry.owner === input.from.toLowerCase()) {
+								if (!entry) {
+									entry = { owner: args[3].toLowerCase() };
+									vAccessDB.saveOne(varName, entry);
+									irc.say(input.context, args[3] + " is the proud new owner of the previously unclaimed variable " + varName);
+								} else if (entry.owner === input.from.toLowerCase()) {
 									entry.owner = args[3].toLowerCase();
 									vAccessDB.saveOne(varName, entry);
 									irc.say(input.context, args[3] + " is the proud new owner of " + varName);
