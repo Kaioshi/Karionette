@@ -31,7 +31,7 @@ listen({
 					} else irc.say(input.context, "No match found.");
 					return;
 				} else {
-					var user = ial.User(args[1], input.context);
+					var user = ial.User(args[1], chan);
 					if (user) {
 						var mask = ial.toMask(user.user);
 						if (mask) irc.say(input.context, user.user + " -> " + mask);
