@@ -15,6 +15,30 @@ listen({
 			args = match[1].split(" ");
 		
 		if (args[0]) {
+			if (args[0] == "-toMask" && args[1]) {
+				if (args[1].indexOf('*') > -1) {
+					var result = ial.maskSearch(args[1], input.context);
+					if (result) {
+						// we have a list of nicks.
+						result.forEach(function (nick) {
+							var user = ial.User(nick, input.context).user,
+								mask = ial.toMask(user);
+							if (mask) list.push(user+" -> "+mask);
+						});
+						if (list.length > 0) irc.say(input.context, list.join(" - "));
+						else irc.say(input.context, "Something has gone awry in ial.toMask()");
+					} else irc.say(input.context, "No match found.");
+					return;
+				} else {
+					var user = ial.User(args[1], input.context);
+					if (user) {
+						var mask = ial.toMask(user.user);
+						if (mask) irc.say(input.context, user.user + " -> " + mask);
+						else irc.say(input.context, "Something has gone awry in ial.toMask()");
+					} else irc.say(input.context, "I don't know of any \""+args[1]+"\" :<")
+				}
+				return;
+			}
 			if (args[0] == "-maskSearch" && args[1]) {
 				if (args[2] && args[2][0] === '#') {
 					if (!ial.Channel(args[2])) {
