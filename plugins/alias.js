@@ -208,8 +208,8 @@ listen({
 							permstr = "";
 						if (varperms && varperms.owner) {
 							permstr = permstr + " (Owner: " + varperms.owner;
-							if (varperms.allow.length > 0) permstr = permstr + " -- Allow: " + varperms.allow.join(", ");
-							if (varperms.deny.length > 0) permstr = permstr + " -- Deny: " + varperms.deny.join(", ");
+							if (varperms.allow && varperms.allow.length > 0) permstr = permstr + " -- Allow: " + varperms.allow.join(", ");
+							if (varperms.deny && varperms.deny.length > 0) permstr = permstr + " -- Deny: " + varperms.deny.join(", ");
 							permstr = permstr + ")";
 						}
 						if (permstr) irc.say(input.context, "Variable " + varName + " contains: \"" + variable + "\"" + permstr);
