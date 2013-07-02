@@ -171,6 +171,25 @@ listen({
 					irc.say(input.context, "[Help] Syntax: var seprem <varname> <separator> <entry>, for example: var seprem anime_list | Boku no Pico");
 				}
 				break;
+			case "randstats":
+				if (args[1] && args[2] && args[3]) {
+					var varName = "{" + args[1] + "}",
+						gotten = varDB.getOne(varName);
+					if (gotten) {
+						var arr = gotten.split(" "+args[2]+" "),
+							stats = {},
+							max = args[3],
+							ret = [];
+						for (var i = 0; i <= max; i++) {
+							var entry = arr[Math.floor(Math.random() * arr.length)];
+							if (!stats[entry]) stats[entry] = 1;
+							stats[entry]++;
+						}
+						Object.keys(stats).some(function (item) { ret.push(item + ": "+stats[item]); });
+						irc.say(input.context, ret.join(", "));
+					} else irc.say(input.context, "There is no " + varName +" variable.");
+				} else irc.say(input.context, "[Help] Syntax: var randstats <varname> <separator> <max>");
+				break;
 			case "seprand":
 				if (args[1] && args[2]) {
 					var varName = "{" + args[1] + "}",
