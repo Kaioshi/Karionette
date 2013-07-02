@@ -239,7 +239,7 @@ listen({
 								gotten = varDB.getOne(varName);
 							if (gotten) {
 								var entry = vAccessDB.getOne(varName);
-								if (entry.owner === input.from.toLowerCase()) {
+								if (!entry || entry.owner === input.from.toLowerCase()) {
 									entry.owner = args[3].toLowerCase();
 									vAccessDB.saveOne(varName, entry);
 									irc.say(input.context, args[3] + " is the proud new owner of " + varName);
