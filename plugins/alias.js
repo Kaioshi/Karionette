@@ -206,7 +206,7 @@ listen({
 					if (variable) {
 						var varperms = vAccessDB.getOne(varName),
 							permstr = "";
-						if (varperms.owner) {
+						if (varperms && varperms.owner) {
 							permstr = permstr + " (Owner: " + varperms.owner;
 							if (varperms.allow.length > 0) permstr = permstr + " -- Allow: " + varperms.allow.join(", ");
 							if (varperms.deny.length > 0) permstr = permstr + " -- Deny: " + varperms.deny.join(", ");
