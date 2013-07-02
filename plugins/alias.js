@@ -199,6 +199,28 @@ listen({
 					irc.say(input.context, "[Help] Syntax: var remove <variable>");
 				}
 				break;
+			case "info":
+				if (args[1]) {
+					var varName = "{" + args[1] + "}",
+						variable = varDB.getOne(varName);
+					if (variable) {
+						var varperms = vAccessDB.getOne(varName),
+							permstr = "";
+						if (varperms.owner) {
+							permstr = permstr + " (Owner: " + varperms.owner;
+							if (varperms.allow.length > 0) permstr = permstr + " -- Allow: " + varperms.allow.join(", ");
+							if (varperms.deny.length > 0) permstr = permstr + " -- Deny: " + varperms.deny.join(", ");
+							permstr = permstr + ")";
+						}
+						if (permstr) irc.say(input.context, "Variable " + varName + " contains: \"" + variable + "\"" + permstr);
+						else irc.say(input.context, "Variable " +varName + " contains: \"" + variable + "\"");
+					} else {
+						irc.say(input.context, "There is no such variable.");
+					}
+				} else {
+					irc.say(input.context, "[Help] Syntax: var info <variable>");
+				}
+				break;
 			case "list":
 				keys = varDB.getKeys();
 				list = "";
@@ -304,17 +326,18 @@ listen({
 });
 
 function checkAccessList(varName, user, create) {
+	var entry = {};
 	if (varName && user && create) {
 		// someone is creating a variable, they need to be set as the owner
-		var entry = vAccessDB.getOne(varName);
+		entry = vAccessDB.getOne(varName);
 		if (entry) {
 			entry.owner = user;
 		} else {
-			var entry = { owner: user, deny: [], allow: [] };
+			entry = { owner: user, deny: [], allow: [] };
 		}
 		vAccessDB.saveOne(varName, entry);
 	} else if (varName && user) {
-		var entry = vAccessDB.getOne(varName);
+		entry = vAccessDB.getOne(varName);
 		if (entry) {
 			if (entry.owner === user) return true;
 			if (entry.deny.some(function (item) { return (item === user); })) { return false; }
@@ -322,10 +345,8 @@ function checkAccessList(varName, user, create) {
 				if (entry.allow.some(function (item) { return (item === user); })) { return true; }
 				return false;
 			}
-			return true;
-		} else {
-			return true;
 		}
+		return true;
 	}
 }
 
