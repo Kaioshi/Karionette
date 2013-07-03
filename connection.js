@@ -159,7 +159,11 @@ module.exports = function (Eventpipe) {
 			if (context && message) {
 				context = sanitise(context); // Avoid sanitising more than once
 				privmsg = "PRIVMSG " + context + " :";
-				max = 476 - privmsg.length;
+				if (irc_config.address) {
+					max = 510 - (irc_config.nick.length+irc_config.address.length+3+privmsg.length);
+				} else {
+					max = 473 - privmsg.length; // yay magic numbers - haven't joined a channel yet.
+				}
 				maxMessages = 3;
 				if (sanitiseMessage !== false) {
 					message = sanitise(message);
@@ -172,7 +176,7 @@ module.exports = function (Eventpipe) {
 							while (message[max - i] !== " ") {
 								i += 1;
 							}
-							tempMsg = message.slice(0, (max - i)) + "...";
+							tempMsg = message.slice(0, (max - i)) + " ..";
 						}
 						send(privmsg + tempMsg.trim());
 						message = message.slice(max - i);

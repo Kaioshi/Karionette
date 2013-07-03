@@ -99,8 +99,12 @@ listen({
 	handle: "ialJoin",
 	regex: regexFactory.onJoin(),
 	callback: function (input, match) {
-		if (match[1] === config.nick) irc.raw("WHO "+match[3]);
-		ial.Add(match[3], match[1], match[2]);
+		if (match[1] === config.nick) {
+			if (!config.address) config.address = match[2];
+			irc.raw("WHO "+match[3]);
+		} else {
+			ial.Add(match[3], match[1], match[2]);
+		}
 	}
 });
 
