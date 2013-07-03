@@ -173,6 +173,7 @@ module.exports = function (Eventpipe) {
 						var i = 0;
 						tempMsg = message.slice(0, max);
 						if (message.length > tempMsg.length) {
+							max = max-3;
 							while (message[max - i] !== " ") {
 								i += 1;
 							}
