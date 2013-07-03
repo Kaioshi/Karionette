@@ -1,11 +1,12 @@
-﻿var malBindingsDB = new DB.Json({filename: "mal"});
+﻿var malBindingsDB = new DB.Json({filename: "mal"}),
+	ent = require("./lib/entities.js");
 
 function search(context, body) {
 	var result = JSON.parse(body)[0];
 	if (result) {
-		irc.say(context, "(" + result.members_score + ") " + result.title + " ~ " + result.synopsis, false);
+		irc.say(context, "(" + result.members_score + ") " + ent.decode(result.title) + " ~ " + ent.decode(result.synopsis));
 	} else {
-		irc.say(context, "Pantsu.", false);
+		irc.say(context, "Pantsu.");
 	}
 }
 
@@ -14,7 +15,7 @@ function listIt(context, body) {
 		topArr = [],
 		result = JSON.parse(body);
 	for (i=0; i < 10; i+=1) {
-		topArr.push((i+1) + ".) " + result[i].title);
+		topArr.push((i+1) + ".) " + ent.decode(result[i].title));
 	}
 	irc.say(context, topArr.join(", "), false);
 }
@@ -22,7 +23,7 @@ function listIt(context, body) {
 function linkIt(context, body) {
 	var result = JSON.parse(body)[0];
 	if (result) {
-		irc.say(context, result.title + " ~ " + "http://myanimelist.net/anime/" + result.id, false);
+		irc.say(context, ent.decode(result.title) + " ~ " + "http://myanimelist.net/anime/" + result.id, false);
 	} else {
 		irc.say(context, "Pantsu.", false);
 	}

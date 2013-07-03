@@ -120,7 +120,7 @@ module.exports = function (Eventpipe) {
 		* 0x04 thru 0x19 are invalid control codes, except for:
 		* 0x16 is "reverse" (swaps fg and bg colors) in mIRC
 		*/
-		return string.replace(/\n/g, "").replace(/\r/g, "")
+		return string.replace(/\n/g, "\\n").replace(/\r/g, "\\r")
 			.replace(/[^\x02-\x03|\x16|\x20-\x7e]/g, "");
 	}
 
