@@ -17,13 +17,13 @@ function listIt(context, body) {
 	for (i=0; i < 10; i+=1) {
 		topArr.push((i+1) + ".) " + ent.decode(result[i].title));
 	}
-	irc.say(context, topArr.join(", "), false);
+	irc.say(context, topArr.join(", "));
 }
 
 function linkIt(context, body) {
 	var result = JSON.parse(body)[0];
 	if (result) {
-		irc.say(context, ent.decode(result.title) + " ~ " + "http://myanimelist.net/anime/" + result.id, false);
+		irc.say(context, ent.decode(result.title) + " ~ " + "http://myanimelist.net/anime/" + result.id);
 	} else {
 		irc.say(context, "Pantsu.", false);
 	}
