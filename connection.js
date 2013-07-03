@@ -165,9 +165,17 @@ module.exports = function (Eventpipe) {
 					message = sanitise(message);
 				}
 				if (Eventpipe.isInAlias === false) {
-					while (message && (maxMessages -= 1) > 0) {
-						send(privmsg + message.slice(0, max));
-						message = message.slice(max);
+					while (message && (maxMessages -= 1) >= 0) {
+						var i = 0;
+						tempMsg = message.slice(0, max);
+						if (message.length > tempMsg.length) {
+							while (message[max - i] !== " ") {
+								i += 1;
+							}
+							tempMsg = message.slice(0, (max - i)) + "...";
+						}
+						send(privmsg + tempMsg.trim());
+						message = message.slice(max - i);
 					}
 				} else {
 					Eventpipe.addEventlet(message);
