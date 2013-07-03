@@ -4,6 +4,7 @@
 function search(context, body) {
 	var result = JSON.parse(body)[0];
 	if (result) {
+		result.synopsis = result.synopsis.replace(/\n/g, "").replace(/<br>/g, "");
 		irc.say(context, "(" + result.members_score + ") " + ent.decode(result.title) + " ~ " + ent.decode(result.synopsis));
 	} else {
 		irc.say(context, "Pantsu.");
