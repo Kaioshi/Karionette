@@ -1,6 +1,5 @@
 ﻿var aliasDB = new DB.Json({filename: "alias/alias"}),
-	varDB = new DB.Json({filename: "alias/vars"}),
-	vAccessDB = new DB.Json({filename: "alias/vAccess"});
+	varDB = new DB.Json({filename: "alias/vars"});
 
 // Handles Alias interface
 listen({
@@ -84,16 +83,19 @@ listen({
 					varName = "{" + args[1] + "}";
 					var gotten = varDB.getOne(varName);
 					if (gotten) {
-						if (checkAccessList(varName, input.from.toLowerCase())) {
+						var permission = true,
+							owners = permissions.List("variable", args[1], "owner");
+						if (owners && owners.length > 0) permission = permissions.isOwner("variable", args[1], input.user);
+						else permission = permissions.Check("variable", args[1], input.user);
+						if (permission) {
 							varDB.saveOne(varName, varString);
-							checkAccessList(varName, input.from.toLowerCase(), true); // adds owner
-							irc.say(input.context, "Created :)");
+							irc.say(input.context, "Overwritten :S");
 						} else {
 							irc.reply(input, "you don't have permission to overwrite " + varName);
 						}
 					} else {
 						varDB.saveOne(varName, varString);
-						checkAccessList(varName, input.from.toLowerCase(), true); // adds owner
+						permissions.Owner.Add(input.user, "variable", args[1], ial.toMask(input.user));
 						irc.say(input.context, "Created :)");
 					}
 				} else {
@@ -105,7 +107,7 @@ listen({
 					varName = "{" + args[1] + "}";
 					gotten = varDB.getOne(varName);
 					if (gotten) {
-						if (checkAccessList(varName, input.from.toLowerCase())) {
+						if (permissions.Check("variable", args[1], input.user)) {
 							varDB.saveOne(varName, gotten + " " + varString);
 							irc.say(input.context, "Added o7");
 						} else {
@@ -113,7 +115,7 @@ listen({
 						}
 					} else {
 						varDB.saveOne(varName, varString);
-						checkAccessList(varName, input.from.toLowerCase(), true); // adds owner
+						permissions.Owner.Add(input.user, "variable", args[1], ial.toMask(input.user));
 						irc.say(input.context, "Added o7");
 					}
 				} else {
@@ -126,7 +128,7 @@ listen({
 					varName = "{" + args[1] + "}";
 					gotten = varDB.getOne(varName);
 					if (gotten) {
-						if (checkAccessList(varName, input.from.toLowerCase())) {
+						if (permissions.Check("variable", args[1], input.user)) {
 							varDB.saveOne(varName, gotten + (args[2] === "," ? ", "
 								: " " + args[2] + " ") + varString.trim());
 							irc.say(input.context, "Added o7");
@@ -135,7 +137,7 @@ listen({
 						}
 					} else {
 						varDB.saveOne(varName, varString.trim());
-						checkAccessList(varName, input.from.toLowerCase(), true); // adds owner
+						permissions.Owner.Add(input.user, "variable", args[1], ial.toMask(input.user));
 						irc.say(input.context, "Added o7");
 					}
 				} else {
@@ -148,11 +150,15 @@ listen({
 					var varName = "{" + args[1] + "}",
 						gotten = varDB.getOne(varName);
 					if (gotten) {
-						if (checkAccessList(varName, input.from.toLowerCase())) {
+						if (permissions.Check("variable", args[1], input.user)) {
 							if (gotten === varString) {
-								varDB.removeOne(varName);
-								vAccessDB.removeOne(varName);
-								irc.say(input.context, "Removed o7");
+								if (permissions.isOwner("variable", args[1], input.user)) {
+									varDB.removeOne(varName);
+									permissions.Delete("variable", args[1], input.user);
+									irc.say(input.context, "Removed o7");
+								} else {
+									irc.say(input.context, "This would remove the last entry, and thus the variable - you need to be an owner to do that.");
+								}
 							} else {
 								varDB.saveOne(varName, gotten.split((args[2] === "," ? ", " : " " + args[2] + " "))
 									.filter(function (element) {
@@ -206,10 +212,9 @@ listen({
 				break;
 			case "remove":
 				if (args[1]) {
-					var varName = "{" + args[1] + "}";
-					if (checkAccessList(varName, input.from.toLowerCase())) {
-						varDB.removeOne(varName);
-						vAccessDB.removeOne(varName);
+					if (permissions.isOwner("variable", args[1], input.user)) {
+						varDB.removeOne("{"+args[1]+"}");
+						permissions.Delete("variable", args[1], input.user);
 						irc.say(input.context, "Removed o7");
 					} else {
 						irc.reply(input, "you don't have permission to do that.");
@@ -223,16 +228,7 @@ listen({
 					var varName = "{" + args[1] + "}",
 						variable = varDB.getOne(varName);
 					if (variable) {
-						var varperms = vAccessDB.getOne(varName),
-							permstr = "";
-						if (varperms && varperms.owner) {
-							permstr = permstr + " (Owner: " + varperms.owner;
-							if (varperms.allow && varperms.allow.length > 0) permstr = permstr + " -- Allow: " + varperms.allow.join(", ");
-							if (varperms.deny && varperms.deny.length > 0) permstr = permstr + " -- Deny: " + varperms.deny.join(", ");
-							permstr = permstr + ")";
-						}
-						if (permstr) irc.say(input.context, "Variable " + varName + " contains: \"" + variable + "\"" + permstr);
-						else irc.say(input.context, "Variable " +varName + " contains: \"" + variable + "\"");
+						irc.say(input.context, "Variable " +varName + " contains: \"" + variable + "\"");
 					} else {
 						irc.say(input.context, "There is no such variable.");
 					}
@@ -249,95 +245,6 @@ listen({
 				if (!list) irc.say(input.context, "There are no variables yet.");
 				else irc.say(input.context, list);
 				break;
-			case "access":
-				if (args[1]) {
-					switch (args[1]) {
-					case "owner":
-						if (args[2] && args[3]) {
-							var varName = "{"+args[2]+"}",
-								gotten = varDB.getOne(varName);
-							if (gotten) {
-								var entry = vAccessDB.getOne(varName);
-								if (!entry) {
-									entry = { owner: args[3].toLowerCase() };
-									vAccessDB.saveOne(varName, entry);
-									irc.say(input.context, args[3] + " is the proud new owner of the previously unclaimed variable " + varName);
-								} else if (entry.owner === input.from.toLowerCase()) {
-									entry.owner = args[3].toLowerCase();
-									vAccessDB.saveOne(varName, entry);
-									irc.say(input.context, args[3] + " is the proud new owner of " + varName);
-								} else {
-									irc.reply(input, "you need to be the owner to transfer ownership.");
-								}
-							} else {
-								irc.reply(input, "there is no " + varName + " variable.");
-							}
-						} else {
-							irc.say(input.context, "[Help] Syntax: var access owner <varname> <newowner>");
-						}
-						break;
-					case "deny":
-						if (args[2] && args[3]) {
-							var varName = "{"+args[2]+"}",
-								user = args[3].toLowerCase(),
-								act = modifyAccessList(varName, "deny", user);
-							if (!act) {
-								irc.say(input.context, "Added " + args[3] + " to " + varName + "'s deny list.");
-							} else {
-								if (act == "removed") {
-									irc.say(input.context, "Removed " + args[3] + " from " + varName + "'s deny list.");
-								} else {
-									irc.say(input.context, "[Help] There is no " + varName + " variable.");
-								}
-							}
-						} else {
-							irc.say(input.context, "[Help] Syntax: var access deny <varname> <user> - if the user is already in the list, they will be removed.");
-						}
-						break;
-					case "allow":
-						if (args[2] && args[3]) {
-							var varName = "{"+args[2]+"}",
-								user = args[3].toLowerCase(),
-								act = modifyAccessList(varName, "allow", user);
-							if (!act) {
-								irc.say(input.context, "Added " + args[3] + " to " + varName + "'s allow list.");
-							} else {
-								if (act == "removed") {
-									irc.say(input.context, "Removed " + args[3] + " from " + varName + "'s allow list.");
-								} else {
-									irc.say(input.context, "[Help] There is no " + varName + " variable.");
-								}
-							}
-						} else {
-							irc.say(input.context, "[Help] Syntax: var access allow <varname> <user> - if the user is already in the list, they will be removed.");
-						}
-						break;
-					case "list":
-						if (args[2]) {
-							var varName = "{" + args[2] + "}";
-							var entry = vAccessDB.getOne(varName);
-							if (entry) {
-								var accessList = "Owner: " + entry.owner;
-								if (entry.deny && entry.deny.length > 0) {
-									accessList += " - Deny: " + entry.deny.join(", ");
-								}
-								if (entry.allow && entry.allow.length > 0) {
-									accessList += " - Allow: " + entry.allow.join(", ");
-								}
-								irc.say(input.context, varName + " access list -> " + accessList);
-							} else {
-								irc.say(input.context, varName + " has no access list or doesn't exist.");
-							}
-						} else {
-							irc.say(input.context, "[Help] Syntax: var list <varname>");
-						}
-						break;
-					default:
-						irc.say(input.context, "[Help] Syntax: var access <allow / deny / list> [varname] [user]");
-						break;
-					}
-				}
-				break;
 			default:
 				irc.say(input.context, "[Help] Options are: " + this.command.options);
 				break;
@@ -348,68 +255,3 @@ listen({
 	}
 });
 
-function checkAccessList(varName, user, create) {
-	var entry = {};
-	if (varName && user && create) {
-		// someone is creating a variable, they need to be set as the owner
-		entry = vAccessDB.getOne(varName);
-		if (entry) {
-			entry.owner = user;
-		} else {
-			entry = { owner: user, deny: [], allow: [] };
-		}
-		vAccessDB.saveOne(varName, entry);
-	} else if (varName && user) {
-		entry = vAccessDB.getOne(varName);
-		if (entry) {
-			if (entry.owner === user) return true;
-			if (entry.deny.some(function (item) { return (item === user); })) { return false; }
-			if (entry.allow.length > 0) {
-				if (entry.allow.some(function (item) { return (item === user); })) { return true; }
-				return false;
-			}
-		}
-		return true;
-	}
-}
-
-function modifyAccessList(varName, list, user) {
-	// if it's in the list, remove, otherwise add.
-	if (varName && user && (list == "deny" || list == "allow")) {
-		if (varDB.getOne(varName)) {
-			var entry = vAccessDB.getOne(varName),
-				rm = 0;
-			if (entry) {
-				if (list == "deny") {
-					if (entry.deny.some(function (item) { return (item === user); })) {
-						entry.deny = entry.deny.filter(function (item) { return (item !== user); });
-						rm = 1;
-					} else {
-						entry.deny.push(user);
-						// added to deny - check if they're in the allow list, remove if so
-						if (entry.allow.some(function (item) { return (item === user); })) {
-							entry.allow = entry.allow.filter(function (item) { return (item !== user); });
-						}
-					}
-				} else {
-					if (entry.allow.some(function (item) { return (item === user); })) {
-						entry.allow = entry.allow.filter(function (item) { return (item !== user); });
-						rm = 1;
-					} else {
-						entry.allow.push(user);
-						// added to allow - check if they're in the deny list, remove them if so
-						if (entry.deny.some(function (item) { return (item === user); })) {
-							entry.deny = entry.deny.filter(function (item) { return (item !== user); });
-						}
-					}
-				}
-			} else { 
-				if (list == "deny") var entry = { allow: [], deny: [ user ] };
-				else var entry = { allow: [ user ], deny: [] };
-			}
-			vAccessDB.saveOne(varName, entry);
-			if (rm == 1) return "removed";
-			return;
-		} else { return "novar"; }
-	}
-}

@@ -24,6 +24,7 @@ irc_config = {
 	// options: true or false.
 	logging_timestamp: true,  // timestamp the log
 	logging_info: false,      // show [Info] messages (DB writes/Queues)
+	logging_debug: true,      // show [DEBUG] messages
 	logging_chat: true,       // show [Chat] messages (privmsg, notice, etc.)
 	logging_serv: true,       // show [Serv] messages (motd, server stats, etc.)
 	logging_traffic: true     // show [Traf] messages (join/part/quit/mode/topic, etc)

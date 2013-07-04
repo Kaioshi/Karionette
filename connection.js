@@ -49,6 +49,20 @@ module.exports = function (Eventpipe) {
 					});
 				}
 				if (ignore) return;
+				regArr = /^;([^ ]+)/.exec(input.data);
+				if (regArr) {
+					var matches = permissions.Search(regArr[1]),
+						permission = true;
+					if (matches.length > 0) {
+						matches.forEach(function (entry) {
+							permission = permissions.Check(entry[0], entry[1], input.user);
+						});
+						if (!permission) {
+							logger.info("Denied "+input.from+" access to "+regArr[1]);
+							return;
+						}
+					}
+				}
 			}
 		}
 		// Fire any events
