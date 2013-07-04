@@ -13,8 +13,11 @@ listen({
 		if (args && args[1]) {
 			var entry = varsDB.getOne("{"+args[0]+"}");
 			if (entry) {
-				var regex = new RegExp(args.slice(1).join(" "));
-				irc.say(input.context, regex.exec(entry).join(" - "));
+				var regex = new RegExp(args.slice(1).join(" ")),
+					entries = entry.split("|");
+				entries.forEach(function (item) {
+					irc.say(input.context, regex.exec(item).join(" "));
+				});
 			} else irc.say(input.context, "No such variable.");
 		} else {
 			irc.say(input.context, this.command.help);
