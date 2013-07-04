@@ -20,18 +20,29 @@ listen({
 			switch (args[0]) {
 			case "add":
 				if (cmd && aliasString) {
+					var gotten = aliasDB.getOne(cmd);
+					if (gotten && !permissions.isOwner("alias", cmd, input.user)) {
+						irc.say(input.context, "You need to own the "+cmd+" alias to overwrite it.");
+						return;
+					}
 					if (cmd !== "alias" && args[2] !== "alias") {
+						permissions.Owner.Add(input.user, "alias", cmd, ial.toMask(input.user));
 						aliasDB.saveOne(cmd, aliasString);
 						irc.say(input.context, "Added :)");
 					} else {
 						irc.say(input.context, "Naughty :(");
 					}
 				} else {
-					irc.say(input.context, "[Help] alias add ALIASCOMMAND ALIAS STRING");
+					irc.say(input.context, "[Help] Syntax: alias add <alias name> <command> - Example: alias add mitchslap action mitchslaps {args1}");
 				}
 				break;
 			case "remove":
 				if (cmd) {
+					var gotten = aliasDB.getOne(cmd);
+					if (gotten && !permissions.isOwner("alias", cmd, input.user)) {
+						irc.say(input.context, "You need to own the "+cmd+" alias to remove it.");
+						return;
+					}
 					aliasDB.removeOne(cmd);
 					irc.say(input.context, "Removed :)");
 				} else {
@@ -54,11 +65,11 @@ listen({
 				}
 				break;
 			default:
-				irc.say(input.context, "[Help] Options are: add, remove, list, info");
+				irc.say(input.context, "[Help] Options are: " + this.command.options);
 				break;
 			}
 		} else {
-			irc.say(input.context, "[Help] Options are: add, remove, list, info");
+			irc.say(input.context, "[Help] Options are: " + this.command.options);
 		}
 	}
 });
