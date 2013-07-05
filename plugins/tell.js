@@ -2,28 +2,28 @@
 var messagesDB = new DB.List({filename: 'messages'});
 
 function isUser(str) {
-    return str[0] !== "#";
+	return str[0] !== "#";
 }
 
 function getMessages(room, user) {
-    var i,
+	var i,
 		userMessages = [],
 		messagesToRemove = [],
 		prefix = room + "@" + user + ": ",
 		messages = messagesDB.getAll();
-
-    for (i = 0; i < messages.length; i += 1) {
-        if (messages[i].toLowerCase().indexOf(prefix.toLowerCase()) === 0) {
-            messagesToRemove.push(messages[i]);
-            userMessages.push(messages[i].substr(prefix.length));
-        }
-    }
-
-    for (i = 0; i < messagesToRemove.length; i += 1) {
-        messagesDB.removeOne(messagesToRemove[i], true);
-    }
-
-    return userMessages;
+	
+	for (i = 0; i < messages.length; i += 1) {
+		if (messages[i].toLowerCase().indexOf(prefix.toLowerCase()) === 0) {
+			messagesToRemove.push(messages[i]);
+			userMessages.push(messages[i].substr(prefix.length));
+		}
+	}
+	
+	for (i = 0; i < messagesToRemove.length; i += 1) {
+		messagesDB.removeOne(messagesToRemove[i], true);
+	}
+	
+	return userMessages;
 }
 
 listen({
@@ -52,10 +52,9 @@ listen({
 	//regex: /:([^!]+)!.*JOIN :?(.*)$/i,
 	regex: regexFactory.onJoin(),
 	callback: function (input, match) {
-		var i,
-			userMessages = getMessages(match[2], match[1]);
+		var i, userMessages = getMessages(match[3], match[1]);
 		for (i = 0; i < userMessages.length; i += 1) {
-			irc.say(match[2], match[1] + ", " + userMessages[i]);
+			irc.say(match[3], match[1] + ", " + userMessages[i]);
 		}
 	}
 });
