@@ -7,6 +7,7 @@
 
 // Reminds you about things
 listen({
+	plugin: "remind",
 	handle: "remind",
 	regex: regexFactory.startsWith("remind"),
 	command: {
@@ -40,3 +41,4 @@ listen({
 		}, time);
 	}
 });
+

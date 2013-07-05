@@ -32,6 +32,7 @@ function linkIt(context, body) {
 
 // MyAnimeList anime API
 listen({
+	plugin: "mal",
 	handle: "mal",
 	regex: regexFactory.startsWith("mal"),
 	command: {
@@ -94,6 +95,7 @@ listen({
 
 // MyAnimeList manga API
 listen({
+	plugin: "mal",
 	handle: "mml",
 	regex: regexFactory.startsWith("mml"),
 	command: {
@@ -121,3 +123,4 @@ listen({
 		});
 	}
 });
+

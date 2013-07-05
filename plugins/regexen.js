@@ -2,6 +2,7 @@
 var varsDB = new DB.Json({ filename: "alias/vars" });
 
 listen({
+	plugin: "regexen",
 	handle: "regexen",
 	regex: regexFactory.startsWith("regexen"),
 	command: {
@@ -24,3 +25,4 @@ listen({
 		}
 	}
 });
+

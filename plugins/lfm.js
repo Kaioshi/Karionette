@@ -2,6 +2,7 @@
 
 // Last.fm
 listen({
+	plugin: "lfm",
 	handle: "lfm",
 	regex: regexFactory.startsWith("lfm"),
 	command: {
@@ -62,3 +63,4 @@ listen({
 		}
 	}
 });
+

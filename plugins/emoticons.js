@@ -2,6 +2,7 @@
 // http://rishida.net/tools/conversion/
 
 listen({
+	plugin: "emoticons",
 	handle: 'mad',
 	regex: regexFactory.only("get mad"),
 	callback: function (input) {
@@ -10,6 +11,7 @@ listen({
 });
 
 listen({
+	plugin: "emoticons",
 	handle: 'dis',
 	regex: regexFactory.only("dis"),
 	callback: function (input) {
@@ -18,6 +20,7 @@ listen({
 });
 
 listen({
+	plugin: "emoticons",
 	handle: 'soviet russia',
 	regex: regexFactory.only("soviet russia"),
 	callback: function (input) {
@@ -26,6 +29,7 @@ listen({
 });
 
 listen({
+	plugin: "emoticons",
 	handle: 'calm',
 	regex: regexFactory.only("calm down"),
 	callback: function (input) {
@@ -34,6 +38,7 @@ listen({
 });
 
 listen({
+	plugin: "emoticons",
 	handle: 'cool',
 	regex: regexFactory.only("be cool"),
 	callback: function (input) {
@@ -49,6 +54,7 @@ listen({
 
 // flips dudes
 listen({
+	plugin: "emoticons",
 	handle: "flip",
 	regex: regexFactory.startsWith("flip"),
 	command: {
@@ -107,3 +113,4 @@ listen({
 		irc.say(input.context, "(\u256F\u00B0\u25A1\u00B0\uFF09\u256F\uFE35 " + result, false);
 	}
 });
+

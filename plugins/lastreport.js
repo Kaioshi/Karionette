@@ -1,5 +1,6 @@
 // shows the last recorded error.
 listen({
+	plugin: "lastreport",
 	handle: "last",
 	regex: regexFactory.startsWith("last"),
 	command: {

@@ -1,5 +1,6 @@
 ﻿// gets BTC
 listen({
+	plugin: "btc",
 	handle: "btc",
 	regex: regexFactory.startsWith("btc"),
 	command: {

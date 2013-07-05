@@ -1,5 +1,6 @@
 ﻿var randDB = new DB.List({filename: "randomThings"});
 listen({
+	plugin: "randThing",
 	handle: "randThing",
 	regex: regexFactory.startsWith("thing"),
 	command: {

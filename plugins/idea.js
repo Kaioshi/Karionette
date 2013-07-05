@@ -1,5 +1,6 @@
 ﻿// Idea from 'this for that'
 listen({
+	plugin: "idea",
 	handle: "idea",
 	regex: regexFactory.startsWith("idea"),
 	command: {

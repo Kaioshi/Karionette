@@ -1,5 +1,6 @@
 // translates!
 listen({
+	plugin: "trans",
 	handle: "trans",
 	regex: regexFactory.startsWith(["trans", "translate"]),
 	command: {
@@ -50,3 +51,4 @@ listen({
 		}
 	}
 });
+

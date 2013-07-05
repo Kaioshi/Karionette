@@ -1,6 +1,7 @@
 // internal address list, updates itself whenever there is movement.
 // NOTE: the ;ial command is there for testing the ial functions. It's not intended to be used this way.
 listen({
+	plugin: "ial",
 	handle: "ial",
 	regex: regexFactory.startsWith("ial"),
 	command: {
@@ -96,6 +97,7 @@ listen({
 */
 
 listen({
+	plugin: "ial",
 	handle: "ialJoin",
 	regex: regexFactory.onJoin(),
 	callback: function (input, match) {
@@ -109,6 +111,7 @@ listen({
 });
 
 listen({
+	plugin: "ial",
 	handle: "ialPart",
 	regex: regexFactory.onPart(),
 	callback: function (input, match) {
@@ -118,6 +121,7 @@ listen({
 });
 
 listen({
+	plugin: "ial",
 	handle: "ialKick",
 	regex: regexFactory.onKick(),
 	callback: function (input, match) {
@@ -127,6 +131,7 @@ listen({
 });
 
 listen({
+	plugin: "ial",
 	handle: "ialQuit",
 	regex: regexFactory.onQuit(),
 	callback: function (input, match) {
@@ -136,6 +141,7 @@ listen({
 });
 
 listen({
+	plugin: "ial",
 	handle: "ialNick",
 	regex: regexFactory.onNick(),
 	callback: function (input, match) {

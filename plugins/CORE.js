@@ -8,6 +8,7 @@ function isChannelName(str) {
 
 // Keeps the bot connected
 listen({
+	plugin: "CORE",
 	handle: 'ping',
 	regex: /^PING :(.+)$/i,
 	callback: function (input, match) {
@@ -16,6 +17,7 @@ listen({
 });
 
 listen({
+	plugin: "CORE",
 	handle: 'nickChange',
 	regex: /433/i,
 	once: true,
@@ -36,6 +38,7 @@ listen({
 });
 
 listen({
+	plugin: "CORE",
 	handle: 'nickserv',
 	regex: new RegExp('^:' + config.nickserv_nickname + '!' + config.nickserv_hostname + ' NOTICE [^ ]+ :This nickname is registered', 'i'),
 	callback: function () {
@@ -44,6 +47,7 @@ listen({
 });
 
 listen({
+	plugin: "CORE",
 	handle: 'joinChannels',
 	regex: /376/i,
 	once: true,
@@ -72,6 +76,7 @@ listen({
  */
 
 listen({
+	plugin: "CORE",
 	handle: 'say',
 	regex: regexFactory.startsWith("say", "optional"),
 	command: {
@@ -85,6 +90,7 @@ listen({
 });
 
 listen({
+	plugin: "CORE",
 	handle: 'sayuni',
 	regex: regexFactory.startsWith("sayuni", "optional"),
 	callback: function (input, match) {
@@ -93,6 +99,7 @@ listen({
 });
 
 listen({
+	plugin: "CORE",
 	handle: 'action',
 	regex: regexFactory.startsWith("action"),
 	command: {
@@ -106,6 +113,7 @@ listen({
 });
 
 listen({
+	plugin: "CORE",
 	handle: "help",
 	regex: regexFactory.startsWith("help"),
 	command: {
@@ -140,13 +148,28 @@ cmdChek:	for (i = 0; i < cmdArr.length; i += 1) {
 
 // Memory usage report
 listen({
-    handle: "memstats",
-    regex: regexFactory.startsWith("memstats"),
-    command: {
-        root: "memstats",
-        help: "Shows memory usage."
-    },
-    callback: function (input) {
-        irc.say(input.context, input.from + ": I'm currently using " + lib.memUse() + " MiB of memory.");
-    }
+	plugin: "CORE",
+	handle: "memstats",
+	regex: regexFactory.startsWith("memstats"),
+	command: {
+		root: "memstats",
+		help: "Shows memory usage."
+	},
+	callback: function (input) {
+		irc.say(input.context, input.from + ": I'm currently using " + lib.memUse() + " MiB of memory.");
+	}
+});
+
+// get uptime
+listen({
+	plugin: "CORE",
+	handle: "uptime",
+	regex: regexFactory.startsWith("uptime"),
+	command: {
+		root: "uptime",
+		help: "Shows uptime since the bot was started."
+	},
+	callback: function (input) {
+		irc.say(input.context, "I've been running for " + lib.duration(globals.startTime) + ".");
+	}
 });

@@ -20,6 +20,7 @@ function isAdmin(user) {
 // Admin Only
 function listen_admin(params) {
 	listen({
+		plugin: params.plugin,
 		handle: params.handle,
 		regex: params.regex,
 		command: params.command,
@@ -35,7 +36,8 @@ function listen_admin(params) {
 
 
 listen_admin({
-	handle: 'admin',
+	plugin: "admin",
+	handle: "admin",
 	regex: regexFactory.startsWith("admin"),
 	command: {
 		root: "admin",
@@ -72,7 +74,8 @@ listen_admin({
 });
 
 listen({
-	handle: 'secret',
+	plugin: "admin",
+	handle: "secret",
 	regex: regexFactory.startsWith("secret"),
 	callback: function (input, match) {
 		if (isAdmin(input.user)) {
@@ -85,7 +88,8 @@ listen({
 });
 
 listen_admin({
-	handle: 'ignore',
+	plugin: "admin",
+	handle: "ignore",
 	regex: regexFactory.startsWith("ignore"),
 	callback: function (input, match) {
 		irc.ignore(match[1]);
@@ -94,7 +98,8 @@ listen_admin({
 });
 
 listen_admin({
-	handle: 'unignore',
+	plugin: "admin",
+	handle: "unignore",
 	regex: regexFactory.startsWith("unignore"),
 	callback: function (input, match) {
 		irc.unignore(match[1]);
@@ -103,7 +108,8 @@ listen_admin({
 });
 
 listen_admin({
-	handle: 'ignorelist',
+	plugin: "admin",
+	handle: "ignorelist",
 	regex: regexFactory.only("ignorelist"),
 	callback: function (input) {
 		irc.say(input.context, irc.ignoreList());
@@ -111,7 +117,8 @@ listen_admin({
 });
 
 listen_admin({
-	handle: 'reload',
+	plugin: "admin",
+	handle: "reload",
 	regex: regexFactory.only('reload'),
 	callback: function (input, match) {
 		irc.reload();
@@ -120,15 +127,17 @@ listen_admin({
 });
 
 listen_admin({
-	handle: 'raw',
-	regex: regexFactory.startsWith('raw'),
+	plugin: "admin",
+	handle: "raw",
+	regex: regexFactory.startsWith("raw"),
 	callback: function (input, match) {
 		irc.raw(match[1]);
 	}
 });
 
 listen_admin({
-	handle: 'join',
+	plugin: "admin",
+	handle: "join",
 	regex: regexFactory.startsWith("join"),
 	callback: function (input, match) {
 		if (isChannelName(match[1])) {
@@ -138,7 +147,8 @@ listen_admin({
 });
 
 listen_admin({
-	handle: 'autojoin',
+	plugin: "admin",
+	handle: "autojoin",
 	regex: regexFactory.startsWith("autojoin"),
 	callback: function (input, match) {
 		if (isChannelName(match[1])) {
@@ -149,7 +159,8 @@ listen_admin({
 });
 
 listen_admin({
-	handle: 'unautojoin',
+	plugin: "admin",
+	handle: "unautojoin",
 	regex: regexFactory.startsWith("unautojoin"),
 	callback: function (input, match) {
 		if (isChannelName(match[1])) {
@@ -160,7 +171,8 @@ listen_admin({
 });
 
 listen_admin({
-	handle: 'part',
+	plugin: "admin",
+	handle: "part",
 	regex: regexFactory.startsWith("part"),
 	callback: function (input, match) {
 		if (isChannelName(match[1])) {

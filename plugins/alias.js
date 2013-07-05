@@ -3,6 +3,7 @@
 
 // Handles Alias interface
 listen({
+	plugin: "alias",
 	handle: "alias",
 	regex: regexFactory.startsWith("alias"),
 	command: {
@@ -75,6 +76,7 @@ listen({
 });
 
 listen({
+	plugin: "alias",
 	handle: "var",
 	regex: regexFactory.startsWith("var"),
 	command: {

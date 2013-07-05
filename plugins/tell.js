@@ -27,6 +27,7 @@ function getMessages(room, user) {
 }
 
 listen({
+	plugin: "tell",
 	handle: "tell",
 	regex: regexFactory.startsWith("tell"),
 	command: {
@@ -46,6 +47,7 @@ listen({
 });
 // Listen for join
 listen({
+	plugin: "tell",
 	handle: "tell_join",
 	//regex: /:([^!]+)!.*JOIN :?(.*)$/i,
 	regex: regexFactory.onJoin(),

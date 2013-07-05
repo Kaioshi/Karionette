@@ -1,5 +1,6 @@
 ﻿// Urban dictionary look-up
 listen({
+	plugin: "ud",
 	handle: "ud",
 	regex: regexFactory.startsWith("ud"),
 	command: {

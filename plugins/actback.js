@@ -32,6 +32,7 @@ function transformObj(args, num) {
 }
 
 listen({
+	plugin: "actback",
 	handle: "actback",
 	regex: regexFactory.actionMatching(config.nickname),
 	callback: function (input, match) {

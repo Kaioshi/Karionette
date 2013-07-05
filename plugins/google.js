@@ -1,6 +1,7 @@
 ﻿// Returns first Google search result
 var ent = require("./lib/entities.js");
 listen({
+	plugin: "google",
 	handle: "google",
 	regex: regexFactory.startsWith(["google", "g"]),
 	command: {

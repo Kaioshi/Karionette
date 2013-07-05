@@ -80,14 +80,20 @@ module.exports = (function () {
 		keyCache.forEach(function (element) {
 			var match = listeners[element].regex.exec(input.raw);
 			if (match) {
-				try {
-					listeners[element].callback(input, match);
-				} catch (err) {
-					logger.error("Caught error in listener " + element + ": " + err);
-				}
-				if (listeners[element].once) {
-					delete listeners[element];
-					setHandles();
+				var permission = true;
+				if (listeners[element].plugin && input.user) permission = permissions.Check("plugin", listeners[element].plugin, input.user);
+				if (permission) {
+					try {
+						listeners[element].callback(input, match);
+					} catch (err) {
+						logger.error("Caught error in listener " + element + ": " + err);
+					}
+					if (listeners[element].once) {
+						delete listeners[element];
+						setHandles();
+					}
+				} else {
+					logger.info("Denied " + input.from + " access to " + listeners[element].plugin + " plugin.");
 				}
 			}
 		});
@@ -105,9 +111,20 @@ module.exports = (function () {
 			evParams.prefixed = evParams.prefixed || true;
 			evParams.command = evParams.command || null;
 			evParams.alias = evParams.alias || null;
-
+			
+			// Record handles associated with the plugin
+			/* don't seem to need this after all - might be handy later.
+			if (evParams.plugin) {
+				if (!globals.plugins) globals.plugins = {};
+				if (!globals.plugins[evParams.plugin]) globals.plugins[evParams.plugin] = {};
+				if (!globals.plugins[evParams.plugin]["handles"]) globals.plugins[evParams.plugin]["handles"] = [];
+				globals.plugins[evParams.plugin]["handles"].push(evParams.handle);
+			}
+			*/
+			
 			// Fill listener object
 			listeners[evParams.handle] = {
+				plugin: evParams.plugin,
 				regex: evParams.regex,
 				callback: evParams.callback,
 				once: evParams.once,

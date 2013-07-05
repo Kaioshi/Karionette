@@ -22,6 +22,7 @@ function isAction(data) {
 
 // This plugin handles stuff that goes into data/users
 listen({
+	plugin: "user",
 	handle: "channelMsgListener",
 	regex: /^:[^!]+!.*@.* PRIVMSG #[^ ]+ :.*/i,
 	callback: function (input) {
@@ -39,6 +40,7 @@ listen({
 
 // Handles Last Seen interface
 listen({
+	plugin: "user",
 	handle: "seen",
 	regex: regexFactory.startsWith("seen"),
 	command: {
@@ -61,14 +63,4 @@ listen({
 		}
 	}
 });
-/*
-listen({
-	handle: "onJoin",
-	regex: regexFactory.onJoin(),
-	callback: function (input, match) {
-		input.from = match[1];
-		input.host = match[2];
-		input.channel = match[3];
-		logger.info("JOIN HAPPENED!");
-	}
-}); */
+

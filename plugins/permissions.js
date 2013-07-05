@@ -1,5 +1,6 @@
 // permissions for any type of thing! huzzah.
 listen({
+	plugin: "permissions",
 	handle: "permissions",
 	regex: regexFactory.startsWith("permissions"),
 	command: {
@@ -14,10 +15,10 @@ listen({
 				case "allow":
 					switch (args[1]) {
 						case "add":
-							irc.say(input.context, permissions.Allow.Add(args[2], args[3], args[4]));
+							irc.say(input.context, permissions.Allow.Add(input.user, args[2], args[3], args[4]));
 							break;
 						case "remove":
-							irc.say(input.context, permissions.Allow.Remove(args[2], args[3], args[4]));
+							irc.say(input.context, permissions.Allow.Remove(input.user, args[2], args[3], args[4]));
 							break;
 						case "list":
 							irc.say(input.context, permissions.Allow.List(args[2], args[3]));
@@ -30,10 +31,10 @@ listen({
 				case "deny":
 					switch (args[1]) {
 						case "add":
-							irc.say(input.context, permissions.Deny.Add(args[2], args[3], args[4]));
+							irc.say(input.context, permissions.Deny.Add(input.user, args[2], args[3], args[4]));
 							break;
 						case "remove":
-							irc.say(input.context, permissions.Deny.Remove(args[2], args[3], args[4]));
+							irc.say(input.context, permissions.Deny.Remove(input.user, args[2], args[3], args[4]));
 							break;
 						case "list":
 							irc.say(input.context, permissions.Deny.List(args[2], args[3]));
