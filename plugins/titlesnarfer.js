@@ -1,5 +1,5 @@
 // url title snarfer
-
+/* Disabled until I can get it to only fetch the first ~10KB or so.
 var ent = require("./lib/entities.js");
 
 listen({
@@ -11,7 +11,7 @@ listen({
 			uri = match[1],
 			ext = uri.split("/"),
 			ext = ext[ext.length-1].split(".")[1],
-			reject = [ 'jpg', 'png', 'jpeg', 'gif', 'swf', 'mp3', 'mp4', 'avi', 'wmv', '7z', 'zip', 'rar', 'xls', 'txt', 'doc', 'odf' ];
+			reject = [ 'jpg', 'png', 'jpeg', 'gif', 'swf', 'mp3', 'mp4', 'mkv', 'avi', 'wmv', '7z', 'zip', 'rar', 'xls', 'txt', 'doc', 'odf' ];
 		if (reject.some(function (item) { return (ext === item); })) return;
 		web.get(uri, function (error, response, body) {
 			if (error) logger.error("titleSnarfer: "+error);
@@ -23,4 +23,4 @@ listen({
 		});
 	}
 });
-
+*/
