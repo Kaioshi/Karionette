@@ -1,26 +1,38 @@
-// url title snarfer
-/* Disabled until I can get it to only fetch the first ~10KB or so.
-var ent = require("./lib/entities.js");
+// url title snarfer - THIS ONLY WORKS ON UNIX - must have wget, head and egrep installed.
+var ent = require("./lib/entities.js"),
+	sys = require("sys"),
+	url = require("url"),
+	fs = require("fs");
 
 listen({
 	plugin: "titleSnarfer",
 	handle: "titleSnarfer",
 	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :?.*((?:https?:\\/\\/)[^ ]+)"),
 	callback: function (input, match) {
-		var result, reg, host,
-			uri = match[1],
-			ext = uri.split("/"),
-			ext = ext[ext.length-1].split(".")[1],
-			reject = [ 'jpg', 'png', 'jpeg', 'gif', 'swf', 'mp3', 'mp4', 'mkv', 'avi', 'wmv', '7z', 'zip', 'rar', 'xls', 'txt', 'doc', 'odf' ];
-		if (reject.some(function (item) { return (ext === item); })) return;
-		web.get(uri, function (error, response, body) {
-			if (error) logger.error("titleSnarfer: "+error);
-			else {
-				reg = (/(<title?.*>)(.+?)(<\/title>)/ig).exec(body);
-				if (reg) irc.say(input.context, ent.decode(reg[2]).trim() + " ~ " + response.request.host);
-				else logger.warn("titleSnarfer: couldn't get title for "+uri);
+		var uri = url.parse(match[1]),
+			tmpwget = "",
+			ext = /.*\.([a-zA-Z0-9]+)$/.exec(uri.path),
+			allow = [ 'htm', 'html', 'asp', 'aspx', 'php', 'php3', 'php5' ];
+		if (ext) {
+			logger.debug("Checking if file extension is OK.");
+			if (!allow.some(function (item) { return (ext[1] === item); })) {
+				logger.debug("Rejected ext: "+ext[1]);
+				return;
 			}
-		});
+		}
+		tmpwget = "data/.tmp.wget."+Math.floor(Math.random()*8175).toString();
+		sys.exec("wget -q -O - "+uri.href+" | head -c 5000 | egrep \\<title?.*\\>\\(.*?\\)\\</title\\> > "+tmpwget);
+		setTimeout(function () {
+			var title = fs.readFileSync(tmpwget).toString();
+			if (title) {
+				var reg = /(<title?.*>)(.+?)(<\/title>)/ig.exec(title);
+				if (reg) irc.say(input.context, ent.decode(reg[2].trim()) + " ~ " + uri.host);
+				else logger.debug("No title found in the first 5000 bytes of "+uri.href);
+				reg = null;
+				title = null;
+			}
+			fs.unlink(tmpwget);
+		}, 2000);
 	}
 });
-*/
+
