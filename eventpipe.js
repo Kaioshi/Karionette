@@ -61,13 +61,14 @@ module.exports = (function () {
 		for (i = 0; i < aliasKeys.length; i += 1) {
 			aliasMatch = regexFactory.startsWith(aliasKeys[i]).exec(input.raw);
 			if (aliasMatch) {
-				//isInAlias = true;
 				aliasVars = makeVars(aliasMatch, input.context, input.from);
 				toTransform = evaluateAlias(aliasDB.getOne(aliasKeys[i]), aliasVars);
 				if (aliasMatch[1]) {
 					input.raw = input.raw.slice(0, -(aliasMatch[1].length) - 1);
 				}
-				input.raw = input.raw.replace(irc_config.command_prefix + aliasKeys[i], irc_config.command_prefix + toTransform);
+				input.raw = input.raw.replace(
+								new RegExp("("+irc_config.command_prefix+"|"+irc_config.nickname.join("[:,-]? |")+"[:,-]? )"+aliasKeys[i],"i")
+									,irc_config.command_prefix + toTransform);
 				return input.raw;
 			}
 		}
@@ -81,7 +82,9 @@ module.exports = (function () {
 			var match = listeners[element].regex.exec(input.raw);
 			if (match) {
 				var permission = true;
-				if (listeners[element].plugin && input.user) permission = permissions.Check("plugin", listeners[element].plugin, input.user);
+				if (listeners[element].plugin && input.user) {
+					permission = permissions.Check("plugin", listeners[element].plugin, input.user);
+				}
 				if (permission) {
 					try {
 						listeners[element].callback(input, match);
