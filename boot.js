@@ -3,7 +3,14 @@ require("./lib/logger.js");
 require("./lib/ial.js");
 require("./lib/permissions.js");
 require("./config.js");
-require("./globals.js");
+
+globals = {
+	lastError: "",
+	lastWarning: "",
+	channels: {},
+	startTime: new Date()
+};
+
 var Eventpipe = require("./eventpipe.js"),
 	Connection = require("./connection.js"),
 	Plugin = require("./plugin.js"),
