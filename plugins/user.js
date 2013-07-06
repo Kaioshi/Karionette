@@ -42,7 +42,7 @@ listen({
 listen({
 	plugin: "user",
 	handle: "seen",
-	regex: regexFactory.startsWith("seen"),
+	regex: regexFactory.startsWith(["seen", "have you seen"]),
 	command: {
 		root: "seen",
 		options: "{Person to search}",
