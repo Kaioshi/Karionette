@@ -51,7 +51,8 @@ listen({
 	callback: function (input, match) {
 		var last, time, seenString, user,
 			args = match[1].split(" ");
-
+		args[0] = args[0].replace("?", "");
+		
 		resolveChan(input.context);
 		user = chanser.DB.getOne(args[0].toLowerCase());
 		if (user) {
