@@ -49,7 +49,7 @@ listen({
 					result = JSON.parse(body);
 				if (!result.error && result.recenttracks.track) {
 					track = result.recenttracks.track[tn];
-					irc.say(input.context, track.artist["#text"] + " ~ " + track.name, false);
+					irc.say(input.context, user + ": " + track.artist["#text"] + " ~ " + track.name, false);
 				} else {
 					if (result.error && result.message) {
 						irc.say(input.context, "Couldn't look up " + user + "'s track information: "+result.message+" (code: "+result.error+"). Pantsu.");
