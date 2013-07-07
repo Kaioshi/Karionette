@@ -13,11 +13,8 @@ listen({
 			tmpwget = "",
 			ext = /.*\.([a-zA-Z0-9]+)$/.exec(uri.path),
 			allow = [ 'htm', 'html', 'asp', 'aspx', 'php', 'php3', 'php5' ];
-		if (ext && ext[0].indexOf('?') === -1) {
-			logger.debug("ext[0]: "+ext[0]);
-			logger.debug("Checking if file extension is OK.");
+		if (ext && !ext[0].match(/&|\?/)) {
 			if (!allow.some(function (item) { return (ext[1] === item); })) {
-				logger.debug("Rejected ext: "+ext[1]);
 				return;
 			}
 		}
