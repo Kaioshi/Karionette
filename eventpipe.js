@@ -22,7 +22,8 @@ module.exports = (function () {
 
 	// Create the supplant object for alias vars
 	function makeVars(match, context, from) {
-		var i, args, newMatch,
+		var i, args, newMatch, av;
+		if (match[1]) {
 			av = lib.mix(varDB.getAll(), {
 				"{from}": from,
 				"{channel}": context,
@@ -36,7 +37,6 @@ module.exports = (function () {
 				"{args2*}": "",
 				"{args3*}": ""
 			}, false);
-		if (match[1]) {
 			newMatch = lib.supplant(match[1], av);
 			args = newMatch.split(" ");
 			av["{args*}"] = newMatch;
