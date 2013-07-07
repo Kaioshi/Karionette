@@ -22,21 +22,24 @@ module.exports = (function () {
 
 	// Create the supplant object for alias vars
 	function makeVars(match, context, from) {
-		var i, args, newMatch, av;
+		var i, args, newMatch,
+			av = {
+					"{from}": from,
+					"{channel}": context,
+					"{randThing}": (match[1].match(/\{randThing\}/g) ? randThings[Math.floor(Math.random() * randThings.length)] : ""),
+					"{args1}": "",
+					"{args2}": "",
+					"{args3}": "",
+					"{args*}": "",
+					"{args-1}": "",
+					"{args1*}": "",
+					"{args2*}": "",
+					"{args3*}": ""
+				};
 		if (match[1]) {
-			av = lib.mix(varDB.getAll(), {
-				"{from}": from,
-				"{channel}": context,
-				"{randThing}": randThings[Math.floor(Math.random() * randThings.length)],
-				"{args1}": "",
-				"{args2}": "",
-				"{args3}": "",
-				"{args*}": "",
-				"{args-1}": "",
-				"{args1*}": "",
-				"{args2*}": "",
-				"{args3*}": ""
-			}, false);
+			if (match[1].match(/\{[^ ]+\}/g)) {
+				av = lib.mix(varDB.getAll(), av, false);
+			}
 			newMatch = lib.supplant(match[1], av);
 			args = newMatch.split(" ");
 			av["{args*}"] = newMatch;
