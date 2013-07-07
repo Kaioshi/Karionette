@@ -26,7 +26,7 @@ module.exports = (function () {
 			av = {
 					"{from}": from,
 					"{channel}": context,
-					"{randThing}": (match[1].match(/\{randThing\}/g) ? randThings[Math.floor(Math.random() * randThings.length)] : ""),
+					"{randThing}": randThings[Math.floor(Math.random() * randThings.length)],
 					"{args1}": "",
 					"{args2}": "",
 					"{args3}": "",
