@@ -4,6 +4,14 @@ require("./lib/ial.js");
 require("./lib/permissions.js");
 require("./config.js");
 
+var DB = require("./lib/fileDB.js"),
+	web = require("./lib/web.js"),
+	regexFactory = require("./lib/regexFactory.js"),
+	Eventpipe = require("./eventpipe.js"),
+	Connection = require("./connection.js"),
+	Plugin = require("./plugin.js"),
+	repl = require('repl');
+
 globals = {
 	lastError: "",
 	lastWarning: "",
@@ -11,33 +19,30 @@ globals = {
 	startTime: new Date()
 };
 
-var Eventpipe = require("./eventpipe.js"),
-	Connection = require("./connection.js"),
-	Plugin = require("./plugin.js"),
-	repl = require('repl');
-
-var IRC = global.mari = new Connection(Eventpipe),
-	sandbox = {
+function createSandbox() {
+	return {
 		irc: IRC,
 		config: irc_config,
 		console: console,
 		setTimeout: setTimeout,
 		setInterval: setInterval,
-		web: require('./lib/web.js'),
-		DB: require("./lib/fileDB.js"),
+		web: web,
+		DB: DB,
 		lib: lib,
 		ial: ial,
 		require: require,
-		regexFactory: require('./lib/regexFactory'),
+		regexFactory: regexFactory,
 		listen: Eventpipe.bind,
 		logger: logger,
 		permissions: permissions,
 		globals: globals
 	};
+}
 
+var IRC = global.mari = new Connection(Eventpipe);
 IRC.reload = function () {
 	Eventpipe.purgeAll();
-	Plugin.loadAll(sandbox);
+	Plugin.loadAll(createSandbox());
 	Eventpipe.setHandles();
 };
 
@@ -45,7 +50,7 @@ process.on('uncaughtException', function (err) {
 	logger.error("Uncaught Exception: " + err);
 });
 
-Plugin.loadAll(sandbox);
+Plugin.loadAll(createSandbox());
 Eventpipe.setHandles();
 
 IRC.open({

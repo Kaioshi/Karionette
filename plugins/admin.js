@@ -9,14 +9,6 @@
 
 var adminDB = new DB.List({filename: 'admins'});
 
-function isAdmin(user) {
-	var ret = false;
-	adminDB.getAll().forEach(function (entry) {
-		if (ial.maskMatch(user, entry)) ret = true;
-	});
-	return ret;
-}
-
 // Admin Only
 function listen_admin(params) {
 	listen({
@@ -25,7 +17,7 @@ function listen_admin(params) {
 		regex: params.regex,
 		command: params.command,
 		callback: function (input, match) {
-			if (isAdmin(input.user)) {
+			if (permissions.isAdmin(input.user)) {
 				params.callback(input, match);
 			} else {
 				irc.say(input.context, "Bitch_, please.");
@@ -46,22 +38,16 @@ listen_admin({
 	},
 	callback: function (input, match) {
 		var args = match[1].split(" ");
-		if (args[0] && args[1]) {
+		if (args[0]) {
 			switch (args[0]) {
 			case "add":
-				if (args[1].indexOf('*') > -1 || (args[1].indexOf('!') > -1 && args[1].indexOf('@') > -1 && args[1].indexOf('*') == -1)) {
-					adminDB.saveOne(args[1]);
-					irc.say(input.context, "Added :)");
-				} else {
-					irc.say(input.context, "You either need to give me a nick*!*user@*.host.org mask or a complete Nick!user@host.org user.");
-				}
+				irc.say(input.context, permissions.Admin.Add(input.user, args[1]));
 				break;
 			case "remove":
-				adminDB.removeOne(args[1], true);
-				irc.say(input.context, "Removed :)");
+				irc.say(input.context, permissions.Admin.Remove(input.user, args[1]));
 				break;
 			case "list":
-				irc.say(input.context, "Admins: " + adminDB.getAll().join(", "));
+				irc.say(input.context, permissions.Admin.List(input.user));
 				break;
 			default:
 				irc.say(input.context, "[Help] Options are: add, remove, list");
@@ -78,11 +64,10 @@ listen({
 	handle: "secret",
 	regex: regexFactory.startsWith("secret"),
 	callback: function (input, match) {
-		if (isAdmin(input.user)) {
+		if (permissions.isAdmin(input.user)) {
 			irc.say(input.context, "You are already an admin.");
-		} else if (match[1] === config.secret) {
-			adminDB.saveOne(input.from);
-			irc.say(input.context, "You are now an admin.");
+		} else if (match[1]) {
+			irc.say(input.context, permissions.Admin.Secret(input.user, match[1]));
 		}
 	}
 });
@@ -121,8 +106,12 @@ listen_admin({
 	handle: "reload",
 	regex: regexFactory.only('reload'),
 	callback: function (input, match) {
+		var before = lib.memUse(true), gain;
 		irc.reload();
-		irc.say(input.context, "Reloaded scripts");
+		gain = (lib.memUse(true)-before)/1024;
+		if (gain > 1024) gain = (gain/1024).toString().slice(0,3)+" MiB.. ;~;";
+		else gain = gain.toString()+" KiB. :D";
+		irc.say(input.context, "Reloaded scripts - Gained " + gain);
 	}
 });
 

@@ -16,6 +16,7 @@ module.exports = (function () {
 		// Load all scripts and bind events
 		loadAll: function (sandbox) {
 			var i, current,
+				context = vm.createContext(sandbox),
 				scripts = fs.readdirSync('plugins');
 			clearCache();
 			for (i = 0; i < scripts.length; i += 1) {
@@ -24,7 +25,7 @@ module.exports = (function () {
 					current = fs.readFileSync('plugins/' + scripts[i]);
 					if (current) {
 						try {
-							vm.runInNewContext(current, sandbox, scripts[i]);
+							vm.runInContext("(function() {" + current + "}())", context, scripts[i]);
 						} catch (err) {
 							logger.error("Error in plugin " + scripts[i] + ": " + err);
 						}

@@ -66,9 +66,7 @@ module.exports = (function () {
 				if (aliasMatch[1]) {
 					input.raw = input.raw.slice(0, -(aliasMatch[1].length) - 1);
 				}
-				input.raw = input.raw.replace(
-								new RegExp("("+irc_config.command_prefix+"|"+irc_config.nickname.join("[:,-]? |")+"[:,-]? )"+aliasKeys[i],"i")
-									,irc_config.command_prefix + toTransform);
+				input.raw = input.raw.replace(new RegExp("("+irc_config.command_prefix+"|"+irc_config.nickname.join("[:,-]? |")+"[:,-]? )"+aliasKeys[i],"i"),irc_config.command_prefix + toTransform);
 				return input.raw;
 			}
 		}
