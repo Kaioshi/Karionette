@@ -35,7 +35,7 @@ listen({
 	},
 	callback: function (input, match) {
 		if (match[1]) {
-			var uri = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&rsz=1&q="+match[1];
+			var uri = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&safe=moderate&rsz=1&q="+match[1];
 			web.get(uri, function (error, response, body) {
 				if (error) {
 					irc.say(input.context, "Something has gone awry.");
