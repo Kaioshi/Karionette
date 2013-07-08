@@ -44,7 +44,7 @@ listen({
 				}
 				body = JSON.parse(body).responseData.results;
 				if (body[0]) {
-					irc.say(input.context, body[0].titleNoFormatting + " (" + body[0].width + "x" + body[0].height + "): " + body[0].url);
+					irc.say(input.context, ent.decode(body[0].titleNoFormatting) + " (" + body[0].width + "x" + body[0].height + "): " + body[0].url);
 				} else {
 					irc.say(input.context, "No image found. :<");
 				}
