@@ -43,7 +43,11 @@ listen({
 					return;
 				}
 				body = JSON.parse(body).responseData.results;
-				irc.say(input.context, body[0].titleNoFormatting + " (" + body[0].width + "x" + body[0].height + "): " + body[0].url);
+				if (body[0]) {
+					irc.say(input.context, body[0].titleNoFormatting + " (" + body[0].width + "x" + body[0].height + "): " + body[0].url);
+				} else {
+					irc.say(input.context, "No image found. :<");
+				}
 			});
 		} else {
 			irc.say(input.context, this.command.syntax);
