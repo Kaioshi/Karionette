@@ -9,6 +9,7 @@ listen({
 	handle: "titleSnarfer",
 	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :?.*((?:https?:\\/\\/)[^ ]+)"),
 	callback: function (input, match) {
+		if (input.data[0] === config.command_prefix) return;
 		var uri = url.parse(match[1]),
 			tmpwget = "",
 			ext = /.*\.([a-zA-Z0-9]+)$/.exec(uri.path),
