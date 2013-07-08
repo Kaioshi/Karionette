@@ -25,23 +25,53 @@ listen({
 
 listen({
 	plugin: "google",
+	handle: "gi",
+	regex: regexFactory.startsWith("gi"),
+	command: {
+		root: "gi",
+		options: "{What to search for}",
+		help: "Google's image search",
+		syntax: "[Help] Syntax: " + config.command_prefix + "gi pantsu"
+	},
+	callback: function (input, match) {
+		var width, height, title, url, 
+			uri = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&rsz=1&q="+match[1];
+		web.get(uri, function (error, response, body) {
+			if (!match[1]) {
+				irc.say(input.context, this.command.syntax);
+				return;
+			}
+			if (error) {
+				irc.say(input.context, "Something has gone awry.");
+				logger.error("[google-images] error looking up " + match[1] + " -> " + error);
+				return;
+			}
+			body = JSON.parse(body).responseData.results;
+			irc.say(input.context, body[0].titleNoFormatting + " (" + body[0].width + "x" + body[0].height + "): " + body[0].url);
+		});
+	}
+});
+
+listen({
+	plugin: "google",
 	handle: "define",
 	regex: regexFactory.startsWith(["define", "dict"]),
 	command: {
 		root: "define",
 		options: "{Word to define}",
 		help: "Google search's define: keyword.",
-		syntax: config.command_prefix + "define <word>"
+		syntax: "[Help] Syntax: " + config.command_prefix + "define <word>"
 	},
 	callback: function (input, match) {
 		if (!match[1]) {
-			irc.say(input.context, "[Help] Syntax: "+this.command.syntax);
+			irc.say(input.context, this.command.syntax);
 			return;
 		}
 		var reg, rep, garbage, definition,
 			uri = "http://www.google.com/dictionary/json?callback=a&sl=en&tl=en&q=" + match[1];
 		web.get(uri, function (error, response, body) {
 			if (error) {
+				irc.say(input.context, "Something has gone awry.");
 				logger.error("[google-define] error looking up " + match[1] + " -> " + error);
 				return;
 			}
