@@ -24,6 +24,7 @@ module.exports = (function () {
 	function makeVars(match, context, from) {
 		var i, args, newMatch,
 			av = lib.mix(varDB.getAll(), {
+					"{me}": irc_config.nick,
 					"{from}": from,
 					"{channel}": context,
 					"{randThing}": randThings[Math.floor(Math.random() * randThings.length)],
