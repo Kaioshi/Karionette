@@ -34,21 +34,20 @@ listen({
 		syntax: "[Help] Syntax: " + config.command_prefix + "gi pantsu"
 	},
 	callback: function (input, match) {
-		var width, height, title, url, 
-			uri = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&rsz=1&q="+match[1];
-		web.get(uri, function (error, response, body) {
-			if (!match[1]) {
-				irc.say(input.context, this.command.syntax);
-				return;
-			}
-			if (error) {
-				irc.say(input.context, "Something has gone awry.");
-				logger.error("[google-images] error looking up " + match[1] + " -> " + error);
-				return;
-			}
-			body = JSON.parse(body).responseData.results;
-			irc.say(input.context, body[0].titleNoFormatting + " (" + body[0].width + "x" + body[0].height + "): " + body[0].url);
-		});
+		if (match[1]) {
+			var uri = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&rsz=1&q="+match[1];
+			web.get(uri, function (error, response, body) {
+				if (error) {
+					irc.say(input.context, "Something has gone awry.");
+					logger.error("[google-images] error looking up " + match[1] + " -> " + error);
+					return;
+				}
+				body = JSON.parse(body).responseData.results;
+				irc.say(input.context, body[0].titleNoFormatting + " (" + body[0].width + "x" + body[0].height + "): " + body[0].url);
+			});
+		} else {
+			irc.say(input.context, this.command.syntax);
+		}
 	}
 });
 
@@ -63,42 +62,42 @@ listen({
 		syntax: "[Help] Syntax: " + config.command_prefix + "define <word>"
 	},
 	callback: function (input, match) {
-		if (!match[1]) {
-			irc.say(input.context, this.command.syntax);
-			return;
-		}
-		var reg, rep, garbage, definition,
-			uri = "http://www.google.com/dictionary/json?callback=a&sl=en&tl=en&q=" + match[1];
-		web.get(uri, function (error, response, body) {
-			if (error) {
-				irc.say(input.context, "Something has gone awry.");
-				logger.error("[google-define] error looking up " + match[1] + " -> " + error);
-				return;
-			}
-			garbage = [ '\\\\x3cem', '\\\\x3cb', '\\\\x27s', '\\\\x3c', '\\\\x3e' ],
-				reg = /^a\((\{.*\})[^ ]+\)/.exec(body);
-			garbage.some(function (item) {
-				rep = new RegExp(item, "g");
-				reg[1] = reg[1].replace(rep, "");
+		if (match[1]) {
+			var reg, rep, garbage, definition,
+				uri = "http://www.google.com/dictionary/json?callback=a&sl=en&tl=en&q=" + match[1];
+			web.get(uri, function (error, response, body) {
+				if (error) {
+					irc.say(input.context, "Something has gone awry.");
+					logger.error("[google-define] error looking up " + match[1] + " -> " + error);
+					return;
+				}
+				garbage = [ '\\\\x3cem', '\\\\x3cb', '\\\\x27s', '\\\\x3c', '\\\\x3e' ],
+					reg = /^a\((\{.*\})[^ ]+\)/.exec(body);
+				garbage.some(function (item) {
+					rep = new RegExp(item, "g");
+					reg[1] = reg[1].replace(rep, "");
+				});
+				try { 
+					body = JSON.parse(reg[1]); 
+				} catch (err) {
+					logger.error("[google-define] more garbage found in body - "+err);
+					return;
+				}
+				if (!body.primaries) {
+					irc.say(input.context, "No result. :<");
+					return;
+				}
+				body = body.primaries[0];
+				if (body.entries) {
+					if (body.entries[1]) definition = body.entries[1].terms[0].text;
+					else definition = body.entries[0].terms[0].text;
+				}
+				if (body.terms) irc.say(input.context, match[1] + " - \""+body.terms[0].text+"\" - " + definition, false);
+				else irc.say(input.context, match[1] + " - "+definition);
 			});
-			try { 
-				body = JSON.parse(reg[1]); 
-			} catch (err) {
-				logger.error("[google-define] more garbage found in body - "+err);
-				return;
-			}
-			if (!body.primaries) {
-				irc.say(input.context, "No result. :<");
-				return;
-			}
-			body = body.primaries[0];
-			if (body.entries) {
-				if (body.entries[1]) definition = body.entries[1].terms[0].text;
-				else definition = body.entries[0].terms[0].text;
-			}
-			if (body.terms) irc.say(input.context, match[1] + " - \""+body.terms[0].text+"\" - " + definition, false);
-			else irc.say(input.context, match[1] + " - "+definition);
-		});
+		} else {
+			irc.say(input.context, this.command.syntax);
+		}
 	}
 });
 
