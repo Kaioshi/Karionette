@@ -22,3 +22,53 @@ listen({
 		});
 	}
 });
+
+listen({
+	plugin: "google",
+	handle: "define",
+	regex: regexFactory.startsWith(["define", "dict"]),
+	command: {
+		root: "define",
+		options: "{Word to define}",
+		help: "Google search's define: keyword.",
+		syntax: config.command_prefix + "define <word>"
+	},
+	callback: function (input, match) {
+		if (!match[1]) {
+			irc.say(input.context, "[Help] Syntax: "+this.command.syntax);
+			return;
+		}
+		var reg, rep, garbage, definition,
+			uri = "http://www.google.com/dictionary/json?callback=a&sl=en&tl=en&q=" + match[1];
+		web.get(uri, function (error, response, body) {
+			if (error) {
+				logger.error("[google-define] error looking up " + match[1] + " -> " + error);
+				return;
+			}
+			garbage = [ '\\\\x3cem', '\\\\x3cb', '\\\\x27s', '\\\\x3c', '\\\\x3e' ],
+				reg = /^a\((\{.*\})[^ ]+\)/.exec(body);
+			garbage.some(function (item) {
+				rep = new RegExp(item, "g");
+				reg[1] = reg[1].replace(rep, "");
+			});
+			try { 
+				body = JSON.parse(reg[1]); 
+			} catch (err) {
+				logger.error("[google-define] more garbage found in body - "+err);
+				return;
+			}
+			if (!body.primaries) {
+				irc.say(input.context, "No result. :<");
+				return;
+			}
+			body = body.primaries[0];
+			if (body.entries) {
+				if (body.entries[1]) definition = body.entries[1].terms[0].text;
+				else definition = body.entries[0].terms[0].text;
+			}
+			if (body.terms) irc.say(input.context, match[1] + " - \""+body.terms[0].text+"\" - " + definition, false);
+			else irc.say(input.context, match[1] + " - "+definition);
+		});
+	}
+});
+
