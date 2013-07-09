@@ -45,7 +45,8 @@ listen({
 			obj = transformObj(args, 2),
 			rNum = Math.floor(Math.random() * 100),
 			randThing = randThings[Math.floor(Math.random() * randThings.length)],
-			method = (rNum > 50 ? "say" : "action");
+			method = (rNum > 50 ? "say" : "action"),
+			delay;
 
 		if (verb.slice(-2) === "ly") { verb += " " + args[2]; }
 		if (verb[verb.length - 1] === "s") { singVerb = verb.slice(0, -1); }
@@ -58,18 +59,19 @@ listen({
 			"{singVerb}": singVerb,
 			"{obj}": obj
 		};
-
-		setTimeout(function () {
-			if (!randReplies[verb] && !randReplies.alts[verb]) {
-				randReply = randReplies.defa[method][Math.floor(Math.random() * randReplies.defa[method].length)];
-				irc[method](input.context, lib.supplant(randReply, suppVars));
-			} else {
-				if (randReplies.alts[verb]) {
-					verb = randReplies.alts[verb];
-				}
-				randReply = randReplies[verb][method][Math.floor(Math.random() * randReplies[verb][method].length)];
-				irc[method](input.context, lib.supplant(randReply, suppVars));
+		
+		if (!randReplies[verb] && !randReplies.alts[verb]) {
+			randReply = randReplies.defa[method][Math.floor(Math.random() * randReplies.defa[method].length)];
+		} else {
+			if (randReplies.alts[verb]) {
+				verb = randReplies.alts[verb];
 			}
-		}, 3000);
+			randReply = randReplies[verb][method][Math.floor(Math.random() * randReplies[verb][method].length)];
+		}
+		randReply = lib.supplant(randReply, suppVars);
+		delay = (randReply.length/5)/1.5*500;
+		setTimeout(function () {
+			irc[method](input.context, randReply);
+		}, delay);
 	}
 });
