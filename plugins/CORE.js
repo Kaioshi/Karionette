@@ -114,6 +114,30 @@ listen({
 
 listen({
 	plugin: "CORE",
+	handle: "notice",
+	regex: regexFactory.startsWith("notice"),
+	command: {
+		root: "notice",
+		options: "{Who and what you want me to notice}",
+		help: "I'll notice someone. Being shifty, probably.",
+		syntax: "[Help] Syntax: " + config.command_prefix + "notice <nick> <notice message>"
+	},
+	callback: function (input, match) {
+		var args = match[1].split(" "),
+			target = args[0],
+			notice = args.slice(1).join(" ");
+		if (target[0] === "#") {
+			if (!permissions.isAdmin(input.user)) {
+				irc.notice(input.from, "No. Only admins can make me notice an entire channel.");
+				return;
+			}
+		}
+		irc.notice(target, notice);
+	}
+});
+
+listen({
+	plugin: "CORE",
 	handle: "help",
 	regex: regexFactory.startsWith("help"),
 	command: {
