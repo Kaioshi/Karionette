@@ -24,13 +24,14 @@ function isAction(data) {
 listen({
 	plugin: "user",
 	handle: "channelMsgListener",
-	regex: /^:[^!]+!.*@.* PRIVMSG #[^ ]+ :.*/i,
+	regex: /^:[^!]+![^ ]+@[^ ]+ PRIVMSG #[^ ]+ :.*/i,
 	callback: function (input) {
 		var user, data,
 			from = input.from.toLowerCase(),
 			date = new Date(),
 			data = (isAction(input.data) ? "* " + input.from + input.data.slice(7, -1)
 				: "<" + input.from + "> " + input.data);
+		ial.addActive(input.context, input.from, input.data, date.getTime());
 		resolveChan(input.context);
 		user = chanser.DB.getOne(from) || {};
 		user.last = { message: data, seen: date };
