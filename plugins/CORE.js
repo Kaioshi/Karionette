@@ -19,7 +19,7 @@ listen({
 listen({
 	plugin: "CORE",
 	handle: 'nickChange',
-	regex: /433/i,
+	regex: /^:[^ ]+ 433 [^ ]+ [^ ]+ :.*$/,
 	once: true,
 	callback: function () {
 		nickArr = nickArr.filter(function (element) {
