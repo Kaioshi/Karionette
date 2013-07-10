@@ -38,8 +38,13 @@ listen({
 	callback: function (input, match) {
 		var msgMatch = /^([^ ]+) (.+)$/.exec(match[1]);
 		if (msgMatch && isUser(msgMatch[1])) {
-			messagesDB.saveOne(input.context + "@" + msgMatch[1] + ": " + "message from " + input.from + ": " + msgMatch[2]);
-			irc.say(input.context, "I'll tell them when they get back.");
+			if (ial.ison(input.context, msgMatch[1])) {
+				for (var rev = [], i = msgMatch[2].length; i >= 0; i--) rev.push(msgMatch[2][i]);
+				irc.say(input.context, msgMatch[1] + ": "+rev.join(""));
+			} else {
+				messagesDB.saveOne(input.context + "@" + msgMatch[1] + ": " + "message from " + input.from + ": " + msgMatch[2]);
+				irc.say(input.context, "I'll tell them when they get back.");
+			}
 		} else {
 			irc.say(input.context, "[Help] tell [user] [some message]");
 		}
@@ -49,7 +54,6 @@ listen({
 listen({
 	plugin: "tell",
 	handle: "tell_join",
-	//regex: /:([^!]+)!.*JOIN :?(.*)$/i,
 	regex: regexFactory.onJoin(),
 	callback: function (input, match) {
 		var i, userMessages = getMessages(match[3], match[1]);
@@ -58,3 +62,23 @@ listen({
 		}
 	}
 });
+
+// Listen for nick change
+listen({
+	plugin: "tell",
+	handle: "tell_nick",
+	regex: regexFactory.onNick(),
+	callback: function (input, match) {
+		setTimeout(function () {
+			var i, userMessages, 
+				channels = ial.Channels(match[3]);
+			channels.forEach(function (channel) {
+				userMessages = getMessages(channel, match[3]);
+				for (i = 0; i < userMessages.length; i++) {
+					irc.say(channel, match[3] + ", " + userMessages[i]);
+				}
+			});
+		}, 3000); // <- making sure IAL is updated first
+	}
+});
+
