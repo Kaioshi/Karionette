@@ -129,7 +129,7 @@ listen_admin({
 	handle: "join",
 	regex: regexFactory.startsWith("join"),
 	callback: function (input, match) {
-		if (isChannelName(match[1])) {
+		if (match[1][0] === "#") {
 			irc.join(match[1]);
 		}
 	}
@@ -140,7 +140,7 @@ listen_admin({
 	handle: "autojoin",
 	regex: regexFactory.startsWith("autojoin"),
 	callback: function (input, match) {
-		if (isChannelName(match[1])) {
+		if (match[1][0] === "#") {
 			autojoinDB.saveOne(match[1]);
 			irc.say(input.context, "Added " + match[1] + " to autojoin list");
 		}
@@ -152,7 +152,7 @@ listen_admin({
 	handle: "unautojoin",
 	regex: regexFactory.startsWith("unautojoin"),
 	callback: function (input, match) {
-		if (isChannelName(match[1])) {
+		if (match[1][0] === "#") {
 			autojoinDB.removeOne(match[1], true);
 			irc.say(input.context, "Removed " + match[1] + " from autojoin list");
 		}
@@ -164,9 +164,9 @@ listen_admin({
 	handle: "part",
 	regex: regexFactory.startsWith("part"),
 	callback: function (input, match) {
-		if (isChannelName(match[1])) {
+		if (match[1][0] === "#") {
 			irc.part(match[1]);
-		} else if (match[1].length === 0 && isChannelName(input.context)) {
+		} else if (match[1].length === 0 && input.context[0] === "#") {
 			irc.part(input.context);
 		}
 	}
