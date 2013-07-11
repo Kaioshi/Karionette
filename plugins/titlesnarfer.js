@@ -30,7 +30,8 @@ listen({
 				} else { // imgur is weird.
 					reg = /(<title?.*>)(.*)/ig.exec(title);
 				}
-				if (reg) irc.say(input.context, ent.decode(reg[2].trim()) + " ~ " + uri.host);
+				reg[2] = ent.decode(reg[2].trim());
+				if (reg && reg[2].length > 0) irc.say(input.context, reg[2] + " ~ " + uri.host);
 				else logger.debug("No title found in the first 5000 bytes of "+uri.href);
 				reg = null;
 				title = null;
