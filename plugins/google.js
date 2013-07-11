@@ -14,10 +14,10 @@ listen({
 			uri = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=1&q=' + match[1];
 		web.get(uri, function (error, response, body) {
 			var result = JSON.parse(body).responseData.results[0];
-			if (result.titleNoFormatting) {
+			if (result && result.titleNoFormatting) {
 				irc.say(input.context, ent.decode(result.titleNoFormatting) + ' ~ ' + result.unescapedUrl, false);
 			} else {
-				irc.say(input.context, "P-P-PANTSU!");
+				irc.action(input.context, "can't find it. :<");
 			}
 		});
 	}
