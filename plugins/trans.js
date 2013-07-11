@@ -39,7 +39,7 @@ listen({
 								comp = result.original.Compounds[compound].OriginalTerm["term"] + " -> " + result.original.Compounds[compound].FirstTranslation["term"],
 								tr = tr + " ~~~ " + comp;
 						}
-						if (tr) irc.say(input.context, "(en) "+term+" -> ("+dict.slice(2)+") "+tr, false);
+						if (tr) irc.say(input.context, "("+dict.slice(0,2)+") "+term+" -> ("+dict.slice(2)+") "+tr, false);
 						else irc.say(input.context, "Something has gone awry.");
 					} else {
 						irc.say(input.context, "No translation was found for "+term);
