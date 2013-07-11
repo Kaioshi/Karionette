@@ -43,7 +43,7 @@ listen({
 					return;
 				}
 				body = JSON.parse(body).responseData.results;
-				if (body[0]) {
+				if (body && body[0]) {
 					irc.say(input.context, ent.decode(body[0].titleNoFormatting) + " (" + body[0].width + "x" + body[0].height + "): " + body[0].url);
 				} else {
 					irc.say(input.context, "No image found. :<");
@@ -75,12 +75,13 @@ listen({
 					logger.error("[google-define] error looking up " + match[1] + " -> " + error);
 					return;
 				}
-				garbage = [ '\\\\x3cem', '\\\\x3cb', '\\\\x27s', '\\\\x3c', '\\\\x3e' ],
+				garbage = [ '\\\\x3cem', '\\\\x3c\/em', '\\\\x3cb', '\\\\x27', '\\\\x3c', '\\\\x3e' ],
 					reg = /^a\((\{.*\})[^ ]+\)/.exec(body);
 				garbage.some(function (item) {
 					rep = new RegExp(item, "g");
 					reg[1] = reg[1].replace(rep, "");
 				});
+				
 				try { 
 					body = JSON.parse(reg[1]); 
 				} catch (err) {
