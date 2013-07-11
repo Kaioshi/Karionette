@@ -1,18 +1,20 @@
+var url = require('url');
+
 listen({
 	plugin: "geoip",
 	handle: "geoip",
 	regex: regexFactory.startsWith("geoip"),
 	command: {
 		root: "geoip",
-		help: "Stalks motherflippers",
-		syntax: "[Help] Syntax: " + config.command_prefix + "geoip <hostname/IP address/nick>"
+		help: "Stalks motherflippers - Syntax: " + config.command_prefix + "geoip <nick/hostname/IP/url>",
+		syntax: "[Help] Syntax: " + config.command_prefix + "geoip <nick/hostname/IP/url>"
 	},
 	callback: function (input, match) {
 		var args = match[1].split(" "),
 			target, resp = [], isnick = false;
 		if (args && args[0].length > 0) {
 			if (args[0].indexOf('.') > -1) {
-				if (args[0].indexOf('http') > -1) target = args[0].replace(/https?:\/\//,'');
+				if (args[0].match(/https?:\/\/[^ ]+/)) target = url.parse(args[0]).host;
 				else target = args[0];
 			} else {
 				target = ial.User(args[0], input.context);
