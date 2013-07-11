@@ -75,13 +75,12 @@ listen({
 					logger.error("[google-define] error looking up " + match[1] + " -> " + error);
 					return;
 				}
-				garbage = [ '\\\\x3cem', '\\\\x3c\/em', '\\\\x3cb', '\\\\x27', '\\\\x3c', '\\\\x3e' ],
-					reg = /^a\((\{.*\})[^ ]+\)/.exec(body);
+				garbage = [ '\\\\x3c', '\\\\x27', '\\\\x3e', '\\\\x26', '\\\\x22', '\\\\xA0', '\\\\xA3', '\\\\xA2', '\\\\xA9', '\\\\xA5' ],
+				reg = /^a\((\{.*\})[^ ]+\)/.exec(body);
 				garbage.some(function (item) {
 					rep = new RegExp(item, "g");
-					reg[1] = reg[1].replace(rep, "");
+					reg[1] = reg[1].replace(rep, String.fromCharCode(parseInt(item.substr(3), 16)));
 				});
-				
 				try { 
 					body = JSON.parse(reg[1]); 
 				} catch (err) {
