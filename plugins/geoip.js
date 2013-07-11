@@ -11,7 +11,7 @@ listen({
 	},
 	callback: function (input, match) {
 		var args = match[1].split(" "),
-			target, resp = [], isnick = false;
+			target, resp = [], nick;
 		if (args && args[0].length > 0) {
 			if (args[0].indexOf('.') > -1) {
 				if (args[0].match(/https?:\/\/[^ ]+/)) target = url.parse(args[0]).host;
@@ -19,8 +19,8 @@ listen({
 			} else {
 				target = ial.User(args[0], input.context);
 				if (target.address) {
+					nick = target.nick;
 					target = target.address.split("@")[1];
-					isnick = true;
 				} else {
 					irc.say(input.context, "I don't see a "+args[0]+" in here.");
 					irc.say(input.context, this.command.syntax);
@@ -39,8 +39,7 @@ listen({
 					if (body.city) resp.push(body.city);
 				}
 				if (resp.length > 0) {
-					if (isnick) target = args[0];
-					irc.say(input.context, target + " is in "+resp.join(", "));
+					irc.say(input.context, (nick ? nick: target) + " is in "+resp.join(", "));
 				} else {
 					irc.say(input.context, "Ninja detected.");
 				}
