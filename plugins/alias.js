@@ -45,6 +45,7 @@ listen({
 						return;
 					}
 					aliasDB.removeOne(cmd);
+					permissions.Delete("alias", cmd, input.user);
 					irc.say(input.context, "Removed :)");
 				} else {
 					irc.say(input.context, "[Help] What should I remove?");
