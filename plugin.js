@@ -25,7 +25,9 @@ module.exports = (function () {
 					current = fs.readFileSync('plugins/' + scripts[i]);
 					if (current) {
 						try {
+							lib.memProf("loading plugin "+scripts[i]);
 							vm.runInContext("(function() {" + current + "}())", context, scripts[i]);
+							lib.memProf("loading plugin "+scripts[i]);
 						} catch (err) {
 							logger.error("Error in plugin " + scripts[i] + ": " + err);
 						}

@@ -1,3 +1,11 @@
+globals = {
+	lastError: "",
+	lastWarning: "",
+	channels: {},
+	startTime: new Date(),
+	memProf: { "loading requires": process.memoryUsage().rss }
+};
+
 require("./lib/funcs.js");
 require("./lib/logger.js");
 require("./lib/ial.js");
@@ -11,13 +19,7 @@ var DB = require("./lib/fileDB.js"),
 	Connection = require("./connection.js"),
 	Plugin = require("./plugin.js"),
 	repl = require('repl');
-
-globals = {
-	lastError: "",
-	lastWarning: "",
-	channels: {},
-	startTime: new Date()
-};
+lib.memProf("loading requires");
 
 function createSandbox() {
 	return {
