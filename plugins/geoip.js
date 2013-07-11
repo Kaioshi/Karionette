@@ -18,7 +18,7 @@ listen({
 				else target = args[0];
 			} else {
 				target = ial.User(args[0], input.context);
-				if (target) {
+				if (target.address) {
 					target = target.address.split("@")[1];
 					isnick = true;
 				} else {
