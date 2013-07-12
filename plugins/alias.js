@@ -21,6 +21,7 @@ listen({
 			switch (args[0]) {
 			case "add":
 				if (cmd && aliasString) {
+					cmd = cmd.toLowerCase();
 					var gotten = aliasDB.getOne(cmd);
 					if (gotten && !permissions.isOwner("alias", cmd, input.user)) {
 						irc.say(input.context, "You need to own the "+cmd+" alias to overwrite it.");
@@ -99,6 +100,7 @@ listen({
 			case "add":
 			case "write":
 				if (args[1] && varString) {
+					args[1] = args[1].toLowerCase();
 					varName = "{" + args[1] + "}";
 					var gotten = varDB.getOne(varName);
 					if (gotten) {
