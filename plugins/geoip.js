@@ -27,6 +27,11 @@ listen({
 					return;
 				}
 			}
+			if (target.indexOf(":") > -1) {
+				// freegeoip fails on IPv6 :(
+				irc.say(input.context, "Sorry, the service used for ;geoip fails on IPv6.");
+				return;
+			}
 			web.get("http://freegeoip.net/json/"+target, function (error, response, body) {
 				if (error) {
 					logger.error("[GeoIP] Error - "+error);
