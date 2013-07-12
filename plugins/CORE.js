@@ -49,30 +49,30 @@ listen({
 listen({
 	plugin: "CORE",
 	handle: 'joinChannels',
-	regex: /376/i,
+	regex: /^:[^ ]+ 376 [^ ]+ :.*$/,
 	once: true,
 	callback: function () {
 		// 376 is the end of MOTD
-		setTimeout(function () {
-			var channels = autojoinDB.getAll(), i;
-			for (i in channels) {
-				irc.join(channels[i]);
-			}
-		}, 5000); // wait 5 seconds for a cloak to apply
+		if (autojoinDB.size() > 0) {
+			setTimeout(function () {
+				var channels = autojoinDB.getAll(), i;
+				for (i in channels) {
+					irc.join(channels[i]);
+				}
+			}, 2000); // wait 2 seconds for a cloak to apply
+		}
 	}
 });
 
 /*
  * COMMANDS:
- *	- join
- *	- part
- *	- autojoin
- *	- unautojoin
  *	- say
  *	- sayuni
  *	- action
+ *	- notice
  *	- help
  *	- memstats
+ *	- uptime
  */
 
 listen({
