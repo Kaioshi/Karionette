@@ -52,12 +52,17 @@ listen({
 				}
 				break;
 			case "list":
-				aKeys = aliasDB.getKeys();
-				aliasList = "";
-				for (i = 0; i < aKeys.length; i += 1) {
-					aliasList += aKeys[i] + ", ";
+				if (aliasDB.size() > 0) {
+					list = [];
+					aliasDB.getKeys().forEach(function (item) {
+						list.push(item);
+					});
+					if (list.length > 0) {
+						irc.say(input.context, list.join(", "));
+						break;
+					}
 				}
-				irc.say(input.context, aliasList.substring(0, aliasList.length - 2));
+				irc.say(input.context, "There are no aliases yet.");
 				break;
 			case "info":
 				if (cmd) {
@@ -251,13 +256,14 @@ listen({
 				}
 				break;
 			case "list":
-				keys = varDB.getKeys();
-				list = "";
-				for (i = 0; i < keys.length; i += 1) {
-					list += keys[i] + ", ";
+				if (varDB.size() > 0) {
+					list = [];
+					varDB.getKeys().forEach(function (item) {
+						list.push(item);
+					});
 				}
 				if (!list) irc.say(input.context, "There are no variables yet.");
-				else irc.say(input.context, list);
+				else irc.say(input.context, list.join(", "));
 				break;
 			default:
 				irc.say(input.context, "[Help] Options are: " + this.command.options);
