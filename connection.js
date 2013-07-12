@@ -39,10 +39,12 @@ module.exports = function (Eventpipe) {
 				// Reply to PMs
 				input.context = (regArr[3][0] === '#') ? regArr[3] : input.from;
 				// Check if 'from'/'user' should be ignored
-				ignores = ignoreDB.getAll();
-				for (i = 0; i <= ignores.length; i++) {
-					if (ignores[i] === input.from) return;
-					if (ial.maskMatch(input.user, ignores[i])) return;
+				if (ignoreDB.size() > 0) {
+					ignores = ignoreDB.getAll();
+					for (i = 0; i <= ignores.length; i++) {
+						if (ignores[i] === input.from) return;
+						if (ial.maskMatch(input.user, ignores[i])) return;
+					}
 				}
 				regArr = /^;([^ ]+)/.exec(input.data);
 				if (regArr) {
