@@ -17,8 +17,7 @@ module.exports = function (Eventpipe) {
 
 	// Handles incoming data
 	function dataHandler(data) {
-		var regArr,
-			ignore = false,
+		var regArr, ignores, i,
 			input = {
 				raw: data,
 				from: "",
@@ -39,16 +38,12 @@ module.exports = function (Eventpipe) {
 				input.user = regArr[1]+"!"+regArr[2];
 				// Reply to PMs
 				input.context = (regArr[3][0] === '#') ? regArr[3] : input.from;
-				// Check if 'from' should be ignored
-				if (ignoreDB.getOne(input.from, true)) ignore = true;
-				else {
-					ignoreDB.getAll().some(function (entry) {
-						if (ial.maskMatch(input.user, entry)) {
-							ignore = true;
-						}
-					});
+				// Check if 'from'/'user' should be ignored
+				ignores = ignoreDB.getAll();
+				for (i = 0; i <= ignores.length; i++) {
+					if (ignores[i] === input.from) return;
+					if (ial.maskMatch(input.user, ignores[i])) return;
 				}
-				if (ignore) return;
 				regArr = /^;([^ ]+)/.exec(input.data);
 				if (regArr) {
 					var matches = permissions.Search(regArr[1]),
