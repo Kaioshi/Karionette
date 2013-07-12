@@ -88,7 +88,7 @@ listen({
 	regex: regexFactory.startsWith("var"),
 	command: {
 		root: "var",
-		options: "write, remove, append, seppend, seprem, list, access list, access allow, access deny",
+		options: "write, remove, append, seppend, seprem, seprand, list",
 		help: "Allows {vars} to be used in aliases. Default vars are:{input.from}, {channel}, {randThing}."
 	},
 	callback: function (input, match) {
