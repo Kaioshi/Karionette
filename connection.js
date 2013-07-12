@@ -5,11 +5,11 @@
 require("./lib/ial.js");
 var net = require("net"),
 	fs = require("fs"),
-	DB = require("./lib/fileDB.js");
+	DB = require("./lib/fileDB.js"),
+	ignoreDB = new DB.List({filename: "ignore"});
 	
 module.exports = function (Eventpipe) {
 	var socket = new net.Socket(),
-		ignoreDB = new DB.List({filename: "ignore"}),
 		buffer = {
 			ob: new Buffer(4096),
 			size: 0
@@ -48,15 +48,13 @@ module.exports = function (Eventpipe) {
 				}
 				regArr = /^;([^ ]+)/.exec(input.data);
 				if (regArr) {
-					var matches = permissions.Search(regArr[1]),
-						permission = true;
+					var matches = permissions.Search(regArr[1]);
 					if (matches.length > 0) {
-						matches.forEach(function (entry) {
-							permission = permissions.Check(entry[0], entry[1], input.user);
-						});
-						if (!permission) {
-							logger.info("Denied "+input.from+" access to "+regArr[1]);
-							return;
+						for (i = 0; i <= matches.length-1; i++) {
+							if (!permissions.Check(matches[i][0], matches[i][1], input.user)) {
+								logger.info("Denied "+input.from+" access to "+regArr[1]);
+								return;
+							}
 						}
 					}
 				}
@@ -181,8 +179,8 @@ module.exports = function (Eventpipe) {
 				}
 				if (Eventpipe.isInAlias === false) {
 					while (message && (maxMessages -= 1) >= 0) {
-						var i = 0;
-						tempMsg = message.slice(0, max);
+						var i = 0, 
+							tempMsg = message.slice(0, max);
 						if (message.length > tempMsg.length) {
 							max = max-3;
 							while (message[max - i] !== " ") {
