@@ -2,10 +2,6 @@
 	nickArr = config.nickname,
 	currentNick = config.nickname[0];
 
-function isChannelName(str) {
-	return str[0] === "#";
-}
-
 // Keeps the bot connected
 listen({
 	plugin: "CORE",
@@ -126,11 +122,9 @@ listen({
 		var args = match[1].split(" "),
 			target = args[0],
 			notice = args.slice(1).join(" ");
-		if (target[0] === "#") {
-			if (!permissions.isAdmin(input.user)) {
-				irc.notice(input.from, "No. Only admins can make me notice an entire channel.");
-				return;
-			}
+		if (target[0] === "#" && !permissions.isAdmin(input.user)) {
+			irc.notice(input.from, "No. Only admins can make me notice an entire channel.");
+			return;
 		}
 		irc.notice(target, notice);
 	}
