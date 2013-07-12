@@ -6,7 +6,8 @@ listen({
 	command: {
 		root: "last",
 		options: "error, warning",
-		help: "Shows the last error /warning, if there is one."
+		help: "Shows the last error/warning, if there is one.",
+		syntax: "[Help] Syntax: " + config.command_prefix + "last <warning/error> [clear]"
 	},
 	callback: function (input, match) {
 		var args = match[1].split(" ");
@@ -15,25 +16,44 @@ listen({
 				case "err":
 				case "error":
 					if (globals.lastError) {
+						if (args[1]) { 
+							if (args[1] === "clear") {
+								globals.lastError = "";
+								irc.say(input.context, "Last error cleared.");
+								break;
+							}
+							irc.say(input.context, this.command.syntax);
+							break;
+						}
 						irc.say(input.context, "The last recorded error was: "+globals.lastError);
-					} else {
-						irc.say(input.context, "There haven't been any errors.");
+						break;
 					}
+					irc.say(input.context, "There haven't been any errors.");
 					break;
 				case "warn":
 				case "warning":
 					if (globals.lastWarning) {
+						if (args[1]) { 
+							if (args[1] === "clear") {
+								globals.lastWarning = "";
+								irc.say(input.context, "Last warning cleared.");
+								break;
+							}
+							irc.say(input.context, this.command.syntax);
+							break;
+						}
 						irc.say(input.context, "The last recorded warning was: "+globals.lastWarning);
-					} else {
-						irc.say(input.context, "There haven't been any warnings.");
+						break;
 					}
+					irc.say(input.context, "There haven't been any warnings.");
 					break;
 				default:
-					irc.say(input.context, "[Help] Syntax: last "+this.command.options);
+					irc.say(input.context, this.command.syntax);
 					break;
 			}
 		} else {
-			irc.say(input.context, "[Help] Syntax: last "+this.command.options);
+			irc.say(input.context, this.command.syntax);
 		}
 	}
 });
+
