@@ -58,7 +58,7 @@ listen({
 						list.push(item);
 					});
 					if (list.length > 0) {
-						irc.say(input.context, list.join(", "));
+						irc.say(input.context, list.sort().join(", "));
 						break;
 					}
 				}
@@ -263,7 +263,7 @@ listen({
 					});
 				}
 				if (!list) irc.say(input.context, "There are no variables yet.");
-				else irc.say(input.context, list.join(", "));
+				else irc.say(input.context, list.sort().join(", "));
 				break;
 			default:
 				irc.say(input.context, "[Help] Options are: " + this.command.options);
