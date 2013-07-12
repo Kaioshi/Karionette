@@ -164,7 +164,7 @@ cmdChek:	for (i = 0; i < cmdArr.length; i += 1) {
 		} else {
 			cmdList = cmdArr.map(function (element) {
 				return element.root;
-			}).join(", ");
+			}).sort().join(", ");
 			irc.say(input.context, "Commands: " + cmdList);
 		}
 	}
