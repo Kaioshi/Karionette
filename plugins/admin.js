@@ -41,13 +41,15 @@ listen_admin({
 		if (args[0]) {
 			switch (args[0]) {
 			case "add":
-				irc.say(input.context, permissions.Admin.Add(input.user, args[1]));
+				irc.say(input.context, permissions.Admin.Add(input.user, args[1], args[2]));
 				break;
 			case "remove":
-				irc.say(input.context, permissions.Admin.Remove(input.user, args[1]));
+				if (!args[2]) irc.say(input.context, permissions.Admin.Remove(input.user, args[1]));
+				else irc.say(input.context, permissions.Admin.Remove(input.user, args[1], args[2]));
 				break;
 			case "list":
-				irc.say(input.context, permissions.Admin.List(input.user));
+				if (args[1]) irc.say(input.context, permissions.Admin.List(input.user, args[1]));
+				else irc.say(input.context, permissions.Admin.List(input.user));
 				break;
 			default:
 				irc.say(input.context, "[Help] Options are: add, remove, list");
@@ -64,11 +66,16 @@ listen({
 	handle: "secret",
 	regex: regexFactory.startsWith("secret"),
 	callback: function (input, match) {
+		var args = match[1].split(" ");
 		if (permissions.isAdmin(input.user)) {
 			irc.say(input.context, "You are already an admin.");
-		} else if (match[1]) {
-			irc.say(input.context, permissions.Admin.Secret(input.user, match[1]));
+			return;
 		}
+		if (!args[0]) { 
+			irc.say(input.context, "[Help] Syntax: secret <secret> [mask]");
+			return;
+		}
+		irc.say(input.context, permissions.Admin.Secret(input.user, args[0], args[1]));
 	}
 });
 

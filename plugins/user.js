@@ -31,7 +31,7 @@ listen({
 			date = new Date(),
 			data = (isAction(input.data) ? "* " + input.from + input.data.slice(7, -1)
 				: "<" + input.from + "> " + input.data);
-		ial.addActive(input.context, input.from, input.data, date.getTime());
+		ial.addActive(input.context, input.from, input.data, date.getTime(), input.user);
 		resolveChan(input.context);
 		user = chanser.DB.getOne(from) || {};
 		user.last = { message: data, seen: date };

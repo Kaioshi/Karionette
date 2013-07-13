@@ -46,7 +46,7 @@ listen({
 						return;
 					}
 					aliasDB.removeOne(cmd);
-					permissions.Delete("alias", cmd, input.user);
+					permissions.Delete(input.user, "alias", cmd);
 					irc.say(input.context, "Removed :)");
 				} else {
 					irc.say(input.context, "[Help] What should I remove?");
@@ -175,7 +175,7 @@ listen({
 							if (gotten === varString) {
 								if (permissions.isOwner("variable", args[1], input.user)) {
 									varDB.removeOne(varName);
-									permissions.Delete("variable", args[1], input.user);
+									permissions.Delete(input.user, "variable", args[1]);
 									irc.say(input.context, "Removed o7");
 								} else {
 									irc.say(input.context, "This would remove the last entry, and thus the variable - you need to be an owner to do that.");
@@ -235,7 +235,7 @@ listen({
 				if (args[1]) {
 					if (permissions.isOwner("variable", args[1], input.user)) {
 						varDB.removeOne("{"+args[1]+"}");
-						permissions.Delete("variable", args[1], input.user);
+						permissions.Delete(input.user, "variable", args[1]);
 						irc.say(input.context, "Removed o7");
 					} else {
 						irc.reply(input, "you don't have permission to do that.");

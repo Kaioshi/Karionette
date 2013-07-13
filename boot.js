@@ -1,6 +1,7 @@
 globals = {
 	lastError: "",
 	lastWarning: "",
+	admins: { lastCheck: new Date().getTime() },
 	channels: {},
 	startTime: new Date(),
 	memProf: { "loading requires": process.memoryUsage().rss }

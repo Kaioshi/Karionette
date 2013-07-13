@@ -42,8 +42,11 @@ listen({
 	handle: "ialKick",
 	regex: regexFactory.onKick(),
 	callback: function (input, match) {
-		if (match[3] === config.nick) ial.Remove(match[2]);
-		else ial.Remove(match[2], match[3]);
+		if (match[4] === config.nick) {
+			ial.Remove(match[3]);
+			return;
+		}
+		ial.Remove(match[3], match[4]);
 	}
 });
 
@@ -53,7 +56,13 @@ listen({
 	regex: regexFactory.onQuit(),
 	callback: function (input, match) {
 		if (match[1] === config.nick) return;
-		ial.Channels(match[1]).forEach(function (item) { ial.Remove(item, match[1]); });
+		ial.Channels(match[1]).forEach(function (channel) {
+			ial.Remove(channel, match[1]);
+		});
+		if (globals.admins[match[1]+"!"+match[2]] !== undefined) {
+			logger.debug("Removed cached admin " + match[1]+"!"+match[2]);
+			delete globals.admins[match[1]+"!"+match[2]];
+		}
 	}
 });
 
@@ -75,10 +84,15 @@ listen({
 				});
 			}
 		}
-		ial.Channels(oldnick).forEach(function (item) {
-			ial.Remove(item, oldnick);
-			ial.Add(item, newnick, address);
+		ial.Channels(oldnick).forEach(function (channel) {
+			ial.Remove(channel, oldnick);
+			ial.Add(channel, newnick, address);
 		});
+		var user = oldnick+"!"+address;
+		if (globals.admins[user] !== undefined) {
+			logger.debug("Removed cached admin " + user);
+			delete globals.admins[user];
+		}
 	}
 });
 
