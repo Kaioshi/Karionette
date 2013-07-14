@@ -44,7 +44,6 @@ function createSandbox() {
 
 var IRC = global.mari = new Connection(Eventpipe);
 IRC.reload = function (plugin) {
-	console.log("IRC.reload("+plugin+") called");
 	if (!plugin) {
 		Eventpipe.purgeAll();
 		Plugin.loadAll(createSandbox());

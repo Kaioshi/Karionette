@@ -7,7 +7,8 @@
 //     ~unignore user - the bot will once more respond to messages input.from [user]
 //     ~reload - reload scripts
 
-var adminDB = new DB.List({filename: 'admins'});
+var adminDB = new DB.List({filename: 'admins'}),
+	fs = require('fs');
 
 // Admin Only
 function listen_admin(params) {
@@ -116,6 +117,10 @@ listen_admin({
 		if (match[1]) {
 			var args = match[1].split(" "),
 				before = lib.memUse(true), gain;
+				if (!fs.existsSync('plugins/'+args[0]+'.js')) {
+					irc.say(input.context, "There is no such plugin. o.o;");
+					return;
+				}
 				irc.reload(args[0]);
 		} else {
 			var before = lib.memUse(true), gain;

@@ -39,13 +39,12 @@ module.exports = (function () {
 			logger.info("Scripts loaded.");
 		},
 		loadOne: function (sandbox, plugin) {
-			console.log("loadOne(sandbox, "+plugin+") called");
 			if (fs.existsSync('plugins/'+plugin+'.js')) {
 				var context = vm.createContext(sandbox),
 					script = fs.readFileSync('plugins/'+plugin+'.js');
 				if (script) {
 					clearCache();
-					logger.info("Loading plugin "+plugin);
+					logger.info("Loading plugin "+plugin+"...");
 					try {
 						lib.memProf("loading plugin "+plugin);
 						vm.runInContext("(function() {"+script+"}())", context, plugin);
@@ -55,6 +54,8 @@ module.exports = (function () {
 					}
 				}
 				script = null;
+			} else {
+				logger.error("Plugin "+plugin+" not found.");
 			}
 		}
 	}

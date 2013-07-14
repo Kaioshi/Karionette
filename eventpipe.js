@@ -137,7 +137,7 @@ module.exports = (function () {
 			var keys = Object.keys(listeners),
 				cmds = [];
 			keys.forEach(function (listener) {
-				if (listeners[listener].plugin === plugin) {
+				if (listeners[listener].plugin.toLowerCase() === plugin.toLowerCase()) {
 					delete listeners[listener];
 				}
 			});
