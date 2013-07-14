@@ -43,10 +43,17 @@ function createSandbox() {
 }
 
 var IRC = global.mari = new Connection(Eventpipe);
-IRC.reload = function () {
-	Eventpipe.purgeAll();
-	Plugin.loadAll(createSandbox());
-	Eventpipe.setHandles();
+IRC.reload = function (plugin) {
+	console.log("IRC.reload("+plugin+") called");
+	if (!plugin) {
+		Eventpipe.purgeAll();
+		Plugin.loadAll(createSandbox());
+		Eventpipe.setHandles();
+	} else {
+		Eventpipe.purgeOne(plugin);
+		Plugin.loadOne(createSandbox(), plugin);
+		Eventpipe.setHandles();
+	}
 };
 
 process.on('uncaughtException', function (err) {

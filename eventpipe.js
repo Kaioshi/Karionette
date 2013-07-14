@@ -117,16 +117,6 @@ module.exports = (function () {
 			evParams.command = evParams.command || null;
 			evParams.alias = evParams.alias || null;
 			
-			// Record handles associated with the plugin
-			/* don't seem to need this after all - might be handy later.
-			if (evParams.plugin) {
-				if (!globals.plugins) globals.plugins = {};
-				if (!globals.plugins[evParams.plugin]) globals.plugins[evParams.plugin] = {};
-				if (!globals.plugins[evParams.plugin]["handles"]) globals.plugins[evParams.plugin]["handles"] = [];
-				globals.plugins[evParams.plugin]["handles"].push(evParams.handle);
-			}
-			*/
-			
 			// Fill listener object
 			listeners[evParams.handle] = {
 				plugin: evParams.plugin,
@@ -141,6 +131,16 @@ module.exports = (function () {
 		purge: function (key) {
 			delete listeners[key];
 			setHandles();
+		},
+		purgeOne: function (plugin) {
+			// delete any listeners belonging to plugin
+			var keys = Object.keys(listeners),
+				cmds = [];
+			keys.forEach(function (listener) {
+				if (listeners[listener].plugin === plugin) {
+					delete listeners[listener];
+				}
+			});
 		},
 		purgeAll: function () {
 			listeners = {};

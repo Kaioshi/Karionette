@@ -11,7 +11,7 @@ module.exports = (function () {
 			delete require.cache[key];
 		}
 	}
-
+	
 	return {
 		// Load all scripts and bind events
 		loadAll: function (sandbox) {
@@ -37,6 +37,25 @@ module.exports = (function () {
 			current = null;
 			scripts = null;
 			logger.info("Scripts loaded.");
+		},
+		loadOne: function (sandbox, plugin) {
+			console.log("loadOne(sandbox, "+plugin+") called");
+			if (fs.existsSync('plugins/'+plugin+'.js')) {
+				var context = vm.createContext(sandbox),
+					script = fs.readFileSync('plugins/'+plugin+'.js');
+				if (script) {
+					clearCache();
+					logger.info("Loading plugin "+plugin);
+					try {
+						lib.memProf("loading plugin "+plugin);
+						vm.runInContext("(function() {"+script+"}())", context, plugin);
+						lib.memProf("loading plugin "+plugin);
+					} catch (err) {
+						logger.error("Error in plugin " + plugin + ": " + err);
+					}
+				}
+				script = null;
+			}
 		}
 	}
 }());

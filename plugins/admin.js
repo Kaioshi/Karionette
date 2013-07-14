@@ -111,14 +111,20 @@ listen_admin({
 listen_admin({
 	plugin: "admin",
 	handle: "reload",
-	regex: regexFactory.only('reload'),
+	regex: regexFactory.startsWith('reload'),
 	callback: function (input, match) {
-		var before = lib.memUse(true), gain;
-		irc.reload();
+		if (match[1]) {
+			var args = match[1].split(" "),
+				before = lib.memUse(true), gain;
+				irc.reload(args[0]);
+		} else {
+			var before = lib.memUse(true), gain;
+			irc.reload();
+		}
 		gain = (lib.memUse(true)-before)/1024;
 		if (gain > 1024) gain = (gain/1024).toString().slice(0,3)+" MiB.. ;~;";
 		else gain = gain.toString()+" KiB. :D";
-		irc.say(input.context, "Reloaded scripts - Gained " + gain);
+		irc.say(input.context, "Reloaded "+(args && args[0] ? args[0] : "scripts")+" - Gained " + gain);
 	}
 });
 

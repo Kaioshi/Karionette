@@ -174,7 +174,7 @@ listen({
 		help: "Shows memory usage."
 	},
 	callback: function (input) {
-		irc.say(input.context, input.from + ": I'm currently using " + lib.memUse() + " MiB of memory.");
+		irc.say(input.context, "I'm currently using " + lib.memUse() + " MiB of memory.");
 	}
 });
 
