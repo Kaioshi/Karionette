@@ -51,6 +51,7 @@ listen({
 					var song = {};
 					song.artist = result.recenttracks.track[tn].artist["#text"];
 					song.track = result.recenttracks.track[tn].name;
+					song.tense = " listened to ";
 					if (result.recenttracks.track[tn].date)	{
 						var then = new Date(parseInt(result.recenttracks.track[tn].date.uts)*1000),
 							now = new Date().valueOf();
@@ -58,6 +59,7 @@ listen({
 					}
 					else if (result.recenttracks.track[tn]['@attr'] && result.recenttracks.track[tn]['@attr'].nowplaying) {
 						song.date = "right now";
+						song.tense = " is listening to ";
 					}
 					uri = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&username="+user+"&api_key="+config.api.lfm+"&artist="+song.artist+"&track="+song.track+"&format=json";
 					web.get(uri, function (error, response, body) {
@@ -83,7 +85,7 @@ listen({
 							} else {
 								song.tags.push("No tags found");
 							}
-							irc.say(input.context, user + " listened to \"" + song.artist+" ~ "+song.track+"\" ["+song.tags.join(", ")+"] ("+song.duration+") ~ "+song.date+" - User Plays: "+song.userplays+" - Total Plays: "+song.playcount+" - Current Listeners: "+song.listeners);
+							irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+"\" ["+song.tags.join(", ")+"] ("+song.duration+") ~ "+song.date+" - User Plays: "+song.userplays+" - Total Plays: "+song.playcount+" - Current Listeners: "+song.listeners);
 						});
 					});
 				} else {
