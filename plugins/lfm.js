@@ -51,7 +51,10 @@ listen({
 					var song = {};
 					song.artist = result.recenttracks.track[tn].artist["#text"];
 					song.track = result.recenttracks.track[tn].name;
-					song.date = lib.duration(new Date(result.recenttracks.track[tn].date["#text"])).split(',')[0];
+					if (result.recenttracks.track[tn].date)	song.date = lib.duration(new Date(result.recenttracks.track[tn].date["#text"])).split(',')[0] + " ago";
+					else if (result.recenttracks.track[tn]['@attr'] && result.recenttracks.track[tn]['@attr'].nowplaying) {
+						song.date = "right now";
+					}
 					uri = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&username="+user+"&api_key="+config.api.lfm+"&artist="+song.artist+"&track="+song.track+"&format=json";
 					web.get(uri, function (error, response, body) {
 						var result = JSON.parse(body);
@@ -66,11 +69,18 @@ listen({
 							var result = JSON.parse(body);
 							//globals.lastATI = result;
 							song.tags = [];
-							var keys = Object.keys(result.toptags.tag);
-							for (var i = 0; i < 3; i++) {
-								song.tags.push(result.toptags.tag[i].name);
+							if (Array.isArray(result.toptags.tag)) {
+								var keys = Object.keys(result.toptags.tag),
+									max = (keys.length < 3 ? keys.length : 3);
+								for (var i = 0; i < max; i++) {
+									song.tags.push(result.toptags.tag[i].name);
+								}
+							} else if (result.toptags.tag.name) {
+								song.tags.push(result.toptags.tag.name);
+							} else {
+								song.tags.push("No tags found");
 							}
-							irc.say(input.context, user + " listened to \"" + song.artist+" ~ "+song.track+"\" ["+song.tags.join(", ")+"] ("+song.duration+") ~ "+song.date+" ago - User Plays: "+song.userplays+" - Total Plays: "+song.playcount+" - Current Listeners: "+song.listeners);
+							irc.say(input.context, user + " listened to \"" + song.artist+" ~ "+song.track+"\" ["+song.tags.join(", ")+"] ("+song.duration+") ~ "+song.date+" - User Plays: "+song.userplays+" - Total Plays: "+song.playcount+" - Current Listeners: "+song.listeners);
 						});
 					});
 				} else {
@@ -88,7 +98,7 @@ listen({
 				hours = (hours % 24);
 				if (hours) ret.push(hours);
 				if (mins) ret.push(mins);
-				ret.push(secs);
+				ret.push((secs > 9 ? secs : "0"+secs));
 				return ret.join(":");
 				
 			}
