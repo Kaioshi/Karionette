@@ -51,7 +51,11 @@ listen({
 					var song = {};
 					song.artist = result.recenttracks.track[tn].artist["#text"];
 					song.track = result.recenttracks.track[tn].name;
-					if (result.recenttracks.track[tn].date)	song.date = lib.duration(new Date(result.recenttracks.track[tn].date["#text"])).split(',')[0] + " ago";
+					if (result.recenttracks.track[tn].date)	{
+						var then = new Date(parseInt(result.recenttracks.track[tn].date.uts)*1000),
+							now = new Date().valueOf();
+						song.date = timeAgo(then, now);
+					}
 					else if (result.recenttracks.track[tn]['@attr'] && result.recenttracks.track[tn]['@attr'].nowplaying) {
 						song.date = "right now";
 					}
@@ -63,7 +67,6 @@ listen({
 						song.playcount = result.track.playcount;
 						song.listeners = result.track.listeners;
 						song.duration = dura(result.track.duration);
-						// http://ws.audioscrobbler.com/2.0/?method=artist.gettoptags&artist=cher&api_key=2dc440a6a2d4373c875f25a15c69bd8d&format=json
 						uri = "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptags&artist="+song.artist+"&api_key="+config.api.lfm+"&format=json";
 						web.get(uri, function (error, response, body) {
 							var result = JSON.parse(body);
@@ -101,6 +104,24 @@ listen({
 				ret.push((secs > 9 ? secs : "0"+secs));
 				return ret.join(":");
 				
+			}
+			
+			function timeAgo(then, now) {
+				var dura = now - then,
+					secs = Math.floor(dura/1000),
+					mins = Math.floor(secs/60),
+					hours = Math.floor(mins/60),
+					days = Math.floor(hours/24),
+					years = Math.floor(days/365.25);
+				secs = (secs % 60);
+				mins = (mins % 60);
+				hours = (hours % 24);
+				days %= 365.25;
+				if (years) return years + " years ago";
+				if (days) return days + " days ago";
+				if (hours) return hours + " hours ago";
+				if (mins) return mins + " minutes ago";
+				return secs + " seconds ago";
 			}
 		} else {
 			irc.say(input.context, "You're not bound! See ;help lfm");
