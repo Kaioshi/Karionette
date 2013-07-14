@@ -43,21 +43,55 @@ listen({
 		}
 		
 		if (user) {
-			uri = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=" + user + "&api_key=" + config.api.lfm + "&format=json";
+			var uri = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=" + user + "&api_key=" + config.api.lfm + "&format=json";
 			web.get(uri, function (error, response, body) {
-				var track,
-					result = JSON.parse(body);
+				var result = JSON.parse(body);
+				//globals.lastLFMResult = result;
 				if (!result.error && result.recenttracks.track) {
-					track = result.recenttracks.track[tn];
-					irc.say(input.context, user + ": " + track.artist["#text"] + " ~ " + track.name, false);
+					var song = {};
+					song.artist = result.recenttracks.track[tn].artist["#text"];
+					song.track = result.recenttracks.track[tn].name;
+					song.date = lib.duration(new Date(result.recenttracks.track[tn].date["#text"])).split(',')[0];
+					uri = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&username="+user+"&api_key="+config.api.lfm+"&artist="+song.artist+"&track="+song.track+"&format=json";
+					web.get(uri, function (error, response, body) {
+						var result = JSON.parse(body);
+						//globals.lastGTI = result;
+						song.userplays = result.track.userplaycount;
+						song.playcount = result.track.playcount;
+						song.listeners = result.track.listeners;
+						song.duration = dura(result.track.duration);
+						// http://ws.audioscrobbler.com/2.0/?method=artist.gettoptags&artist=cher&api_key=2dc440a6a2d4373c875f25a15c69bd8d&format=json
+						uri = "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptags&artist="+song.artist+"&api_key="+config.api.lfm+"&format=json";
+						web.get(uri, function (error, response, body) {
+							var result = JSON.parse(body);
+							//globals.lastATI = result;
+							song.tags = [];
+							var keys = Object.keys(result.toptags.tag);
+							for (var i = 0; i < 3; i++) {
+								song.tags.push(result.toptags.tag[i].name);
+							}
+							irc.say(input.context, user + " listened to \"" + song.artist+" ~ "+song.track+"\" ["+song.tags.join(", ")+"] ("+song.duration+") ~ "+song.date+" ago - User Plays: "+song.userplays+" - Total Plays: "+song.playcount+" - Current Listeners: "+song.listeners);
+						});
+					});
 				} else {
-					if (result.error && result.message) {
-						irc.say(input.context, "Couldn't look up " + user + "'s track information: "+result.message+" (code: "+result.error+"). Pantsu.");
-					} else {
-						irc.say(input.context, "Pantsu.", false);
-					}
+					logger.error(result.error);
 				}
 			});
+			
+			function dura(ms) {
+				var secs = Math.floor(ms/1000),
+					mins = Math.floor(secs/60),
+					hours = Math.floor(mins/60),
+					ret = [];
+				secs = (secs % 60);
+				mins = (mins % 60);
+				hours = (hours % 24);
+				if (hours) ret.push(hours);
+				if (mins) ret.push(mins);
+				ret.push(secs);
+				return ret.join(":");
+				
+			}
 		} else {
 			irc.say(input.context, "You're not bound! See ;help lfm");
 		}
