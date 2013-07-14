@@ -7,7 +7,7 @@ listen({
 	regex: regexFactory.startsWith("lfm"),
 	command: {
 		root: "lfm",
-		options: "-bind",
+		options: "-bind -prev -top",
 		help: "Get's your last played track. Use -bind to bind your nick to your lfm account, allowing you to not have to supply an account name. Else just supply your account name."
 	},
 	callback: function (input, match) {
@@ -30,6 +30,52 @@ listen({
 				}
 				return;
 				break;
+			case "-top":
+				if (!args[1]) {
+					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"lfm -top <artists/tracks>");
+					return;
+				}
+				if (args[1] === "artists" || args[1] === "tracks") {
+					var method = (args[1] === "tracks" ? "chart.gettoptracks" : "chart.gettopartists");
+					// show the top 5
+					var uri = "http://ws.audioscrobbler.com/2.0/?method="+method+"&api_key="+config.api.lfm+"&limit=5&format=json";
+					web.get(uri, function (error, response, body) {
+						var result = JSON.parse(body), ret = [];
+						if (args[1] === "artists") {
+							keys = Object.keys(result.artists.artist);
+							for (var i = 0; i < keys.length; i++) {
+								var artist = result.artists.artist[i];
+								ret.push("#"+(i+1)+" "+artist.name+" (Playcount: "+artist.playcount+")");
+							}
+						} else {
+							keys = Object.keys(result.tracks.track);
+							for (var i = 0; i < keys.length; i++) {
+								var track = result.tracks.track[i];
+								ret.push("#"+(i+1)+" "+track.artist.name+" ~ "+track.name+" (Playcount: "+track.playcount+")");
+							}
+						}
+						irc.say(input.context, ret.join(", "));
+					});
+					return;
+				}
+				// assume we've gone ;lfm -top <artist name>
+				var artist = args.slice(1).join(" "),
+					uri = "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptracks&artist="+artist+"&api_key="+config.api.lfm+"&limit=5&format=json";
+				web.get(uri, function (error, response, body) {
+					var result = JSON.parse(body);
+					if (result.error) {
+						irc.say(input.context, result.message+" (Code: "+result.error+"). Pantsu.");
+						return;
+					}
+					var keys = Object.keys(result.toptracks.track),
+						ret = [];
+					for (var i = 0; i < keys.length; i++) {
+						var track = result.toptracks.track[i];
+						ret.push("#"+(i+1)+" "+track.artist.name+" ~ "+track.name+" (Playcount: "+track.playcount+")");
+					}
+					irc.say(input.context, ret.join(", "));
+				});
+				return;
 			case "-prev":
 				tn = 1;
 			default:
