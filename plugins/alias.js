@@ -67,7 +67,9 @@ listen({
 				break;
 			case "info":
 				if (cmd) {
-					irc.say(input.context, "The alias string for " + cmd + " is: " + aliasDB.getOne(cmd));
+					var alias = aliasDB.getOne(cmd);
+					if (alias) irc.say(input.context, "The alias string for " + cmd + " is: " + alias);
+					else irc.say(input.context, "There is no such alias.");
 				} else {
 					irc.say(input.context, "[Help] Which alias do you want info about?");
 				}
