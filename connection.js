@@ -50,7 +50,7 @@ module.exports = function (Eventpipe) {
 				if (regArr) {
 					var matches = permissions.Search(regArr[1]);
 					if (matches.length > 0) {
-						for (i = 0; i <= matches.length-1; i++) {
+						for (i = 0; i < matches.length; i++) {
 							if (!permissions.Check(matches[i][0], matches[i][1], input.user)) {
 								logger.info("Denied "+input.from+" access to "+regArr[1]);
 								return;
@@ -179,7 +179,7 @@ module.exports = function (Eventpipe) {
 				}
 				if (Eventpipe.isInAlias === false) {
 					while (message && (maxMessages -= 1) >= 0) {
-						var i = 0, 
+						var i = 0,
 							tempMsg = message.slice(0, max);
 						if (message.length > tempMsg.length) {
 							max = max-3;

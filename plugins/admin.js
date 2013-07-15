@@ -120,13 +120,13 @@ listen_admin({
 				irc.say(input.context, "There is no such plugin. o.o;");
 				return;
 			}
-			before = lib.memUse(true), gain;
+			var before = lib.memUse(true), gain;
 			irc.reload(args[0]);
 		} else {
 			var before = lib.memUse(true), gain;
 			irc.reload();
 		}
-		gain = (lib.memUse(true)-before)/1024;
+		var gain = (lib.memUse(true)-before)/1024;
 		if (gain === 0) gain = " - Gained NOTHING! HA! 8D";
 		else {
 			if (gain > 1024) gain = " - Gained "+(gain/1024).toString().slice(0,3)+" MiB.. ;~;";

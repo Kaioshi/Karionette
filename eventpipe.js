@@ -103,7 +103,7 @@ module.exports = (function () {
 			}
 		});
 	}
-
+	
 	return {
 		bind: function (evParams) {
 			// Error handling
