@@ -67,9 +67,13 @@ listen({
 				break;
 			case "info":
 				if (cmd) {
-					var alias = aliasDB.getOne(cmd);
-					if (alias) irc.say(input.context, "The alias string for " + cmd + " is: " + alias);
-					else irc.say(input.context, "There is no such alias.");
+					var alias = aliasDB.getOne(cmd), 
+						perms;
+					if (alias) {
+						perms = permissions.Info(input.user, "alias", cmd);
+						irc.say(input.context, "The alias string for " + cmd + " is: " + alias);
+						if (perms) irc.notice(input.from, perms);
+					} else irc.say(input.context, "There is no such alias.");
 				} else {
 					irc.say(input.context, "[Help] Which alias do you want info about?");
 				}
@@ -249,9 +253,11 @@ listen({
 			case "info":
 				if (args[1]) {
 					var varName = "{" + args[1] + "}",
-						variable = varDB.getOne(varName);
+						variable = varDB.getOne(varName), perms;
 					if (variable) {
+						perms = permissions.Info(input.user, "variable", args[1]);
 						irc.say(input.context, "Variable " +varName + " contains: \"" + variable + "\"");
+						if (perms) irc.notice(input.from, perms);
 					} else {
 						irc.say(input.context, "There is no such variable.");
 					}

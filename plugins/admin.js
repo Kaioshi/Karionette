@@ -49,8 +49,8 @@ listen_admin({
 				else irc.say(input.context, permissions.Admin.Remove(input.user, args[1], args[2]));
 				break;
 			case "list":
-				if (args[1]) irc.say(input.context, permissions.Admin.List(input.user, args[1]));
-				else irc.say(input.context, permissions.Admin.List(input.user));
+				if (args[1]) irc.notice(input.from, permissions.Admin.List(input.user, args[1]));
+				else irc.notice(input.from, permissions.Admin.List(input.user));
 				break;
 			default:
 				irc.say(input.context, "[Help] Options are: add, remove, list");
