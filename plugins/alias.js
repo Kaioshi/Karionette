@@ -12,7 +12,7 @@ listen({
 		help: "Allows user defined 'commands' (Eg: The command yt becomes google site:youtube.com). Vars can be used- see var help for more information"
 	},
 	callback: function (input, match) {
-		var aKeys, aliasList, i,
+		var aKeys, aliasList, i, alias,
 			args = match[1].split(" "),
 			cmd = args[1],
 			aliasString = args.slice(2).join(" ");
@@ -22,32 +22,42 @@ listen({
 			case "add":
 				if (cmd && aliasString) {
 					cmd = cmd.toLowerCase();
-					var gotten = aliasDB.getOne(cmd);
-					if (gotten && !permissions.isOwner("alias", cmd, input.user)) {
+					alias = aliasDB.getOne(cmd);
+					if (alias && !permissions.isOwner("alias", cmd, input.user)) {
 						irc.say(input.context, "You need to own the "+cmd+" alias to overwrite it.");
 						return;
 					}
-					if (cmd !== "alias" && args[2] !== "alias") {
-						permissions.Owner.Add(input.user, "alias", cmd, ial.toMask(input.user));
-						aliasDB.saveOne(cmd, aliasString);
-						irc.say(input.context, "Added :)");
-					} else {
-						irc.say(input.context, "Naughty :(");
+					var cmdArr = [];
+					irc.help().forEach(function (entry) {
+						cmdArr.push(entry.root);
+					});
+					for (var i = 0; i <= cmdArr.length; i++) {
+						if (cmdArr[i] === cmd) {
+							irc.say(input.context, "The "+cmd+" command is taken by a plugin or core function. I declare shenanigans! SHENANIGANS!!#*&^! >:(");
+							return;
+						}
 					}
+					permissions.Owner.Add(input.user, "alias", cmd, ial.toMask(input.user));
+					aliasDB.saveOne(cmd, aliasString);
+					irc.say(input.context, "Added :)");
 				} else {
 					irc.say(input.context, "[Help] Syntax: alias add <alias name> <command> - Example: alias add mitchslap action mitchslaps {args1}");
 				}
 				break;
 			case "remove":
 				if (cmd) {
-					var gotten = aliasDB.getOne(cmd);
-					if (gotten && !permissions.isOwner("alias", cmd, input.user)) {
-						irc.say(input.context, "You need to own the "+cmd+" alias to remove it.");
-						return;
+					alias = aliasDB.getOne(cmd);
+					if (alias) { 
+						if (!permissions.isOwner("alias", cmd, input.user)) {
+							irc.say(input.context, "You need to own the "+cmd+" alias to remove it.");
+							return;
+						}
+						aliasDB.removeOne(cmd);
+						permissions.Delete(input.user, "alias", cmd);
+						irc.say(input.context, "Removed :)");
+					} else {
+						irc.say(input.context, "There is no such alias. o.O");
 					}
-					aliasDB.removeOne(cmd);
-					permissions.Delete(input.user, "alias", cmd);
-					irc.say(input.context, "Removed :)");
 				} else {
 					irc.say(input.context, "[Help] What should I remove?");
 				}
@@ -67,10 +77,9 @@ listen({
 				break;
 			case "info":
 				if (cmd) {
-					var alias = aliasDB.getOne(cmd), 
-						perms;
+					alias = aliasDB.getOne(cmd);
 					if (alias) {
-						perms = permissions.Info(input.user, "alias", cmd);
+						var perms = permissions.Info(input.user, "alias", cmd);
 						irc.say(input.context, "The alias string for " + cmd + " is: " + alias);
 						if (perms) irc.notice(input.from, perms);
 					} else irc.say(input.context, "There is no such alias.");
@@ -94,11 +103,11 @@ listen({
 	regex: regexFactory.startsWith("var"),
 	command: {
 		root: "var",
-		options: "write, remove, append, seppend, seprem, seprand, list",
-		help: "Allows {vars} to be used in aliases. Default vars are:{input.from}, {channel}, {randThing}."
+		options: "add, remove, append, seppend, seprem, seprand, list, info",
+		help: "Allows {vars} to be used in aliases. Default vars are: {me}, {from}, {channel}, {randThing}."
 	},
 	callback: function (input, match) {
-		var keys, list, i, gotten, varName,
+		var keys, list, i, variable, varName,
 			args = match[1].split(" "),
 			varString = args.slice(2).join(" ");
 		if (args[0]) {
@@ -108,8 +117,8 @@ listen({
 				if (args[1] && varString) {
 					args[1] = args[1].toLowerCase();
 					varName = "{" + args[1] + "}";
-					var gotten = varDB.getOne(varName);
-					if (gotten) {
+					variable = varDB.getOne(varName);
+					if (variable) {
 						var permission = true,
 							owners = permissions.List("variable", args[1], "owner");
 						if (owners && owners.length > 0) permission = permissions.isOwner("variable", args[1], input.user);
@@ -132,10 +141,10 @@ listen({
 			case "append":
 				if (args[1] && varString) {
 					varName = "{" + args[1] + "}";
-					gotten = varDB.getOne(varName);
-					if (gotten) {
+					variable = varDB.getOne(varName);
+					if (variable) {
 						if (permissions.Check("variable", args[1], input.user)) {
-							varDB.saveOne(varName, gotten + " " + varString);
+							varDB.saveOne(varName, variable + " " + varString);
 							irc.say(input.context, "Added o7");
 						} else {
 							irc.reply(input, "you don't have permission to do that.");
@@ -153,10 +162,10 @@ listen({
 				varString = args.slice(3).join(" ");
 				if (args[1] && args[2] && varString) {
 					varName = "{" + args[1] + "}";
-					gotten = varDB.getOne(varName);
-					if (gotten) {
+					variable = varDB.getOne(varName);
+					if (variable) {
 						if (permissions.Check("variable", args[1], input.user)) {
-							varDB.saveOne(varName, gotten + (args[2] === "," ? ", "
+							varDB.saveOne(varName, variable + (args[2] === "," ? ", "
 								: " " + args[2] + " ") + varString.trim());
 							irc.say(input.context, "Added o7");
 						} else {
@@ -174,11 +183,11 @@ listen({
 			case "seprem":
 				var varString = args.slice(3).join(" ");
 				if (args[1] && args[2] && varString) {
-					var varName = "{" + args[1] + "}",
-						gotten = varDB.getOne(varName);
-					if (gotten) {
+					varName = "{" + args[1] + "}";
+					variable = varDB.getOne(varName);
+					if (variable) {
 						if (permissions.Check("variable", args[1], input.user)) {
-							if (gotten === varString) {
+							if (variable === varString) {
 								if (permissions.isOwner("variable", args[1], input.user)) {
 									varDB.removeOne(varName);
 									permissions.Delete(input.user, "variable", args[1]);
@@ -187,7 +196,7 @@ listen({
 									irc.say(input.context, "This would remove the last entry, and thus the variable - you need to be an owner to do that.");
 								}
 							} else {
-								varDB.saveOne(varName, gotten.split((args[2] === "," ? ", " : " " + args[2] + " "))
+								varDB.saveOne(varName, variable.split((args[2] === "," ? ", " : " " + args[2] + " "))
 									.filter(function (element) {
 										return (element !== varString);
 									})
@@ -204,31 +213,12 @@ listen({
 					irc.say(input.context, "[Help] Syntax: var seprem <varname> <separator> <entry>, for example: var seprem anime_list | Boku no Pico");
 				}
 				break;
-			case "randstats":
-				if (args[1] && args[2] && args[3]) {
-					var varName = "{" + args[1] + "}",
-						gotten = varDB.getOne(varName);
-					if (gotten) {
-						var arr = gotten.split(" "+args[2]+" "),
-							stats = {},
-							max = args[3],
-							ret = [];
-						for (var i = 0; i <= max; i++) {
-							var entry = arr[Math.floor(Math.random() * arr.length)];
-							if (!stats[entry]) stats[entry] = 1;
-							stats[entry]++;
-						}
-						Object.keys(stats).some(function (item) { ret.push(item + ": "+stats[item]); });
-						irc.say(input.context, ret.join(", "));
-					} else irc.say(input.context, "There is no " + varName +" variable.");
-				} else irc.say(input.context, "[Help] Syntax: var randstats <varname> <separator> <max>");
-				break;
 			case "seprand":
 				if (args[1] && args[2]) {
-					var varName = "{" + args[1] + "}",
-						gotten = varDB.getOne(varName);
-					if (gotten) {
-						var arr = gotten.split(" "+args[2]+" ");
+					varName = "{" + args[1] + "}";
+					variable = varDB.getOne(varName);
+					if (variable) {
+						var arr = variable.split(" "+args[2]+" ");
 						irc.say(input.context, arr[Math.floor(Math.random() * arr.length)]);
 					} else {
 						irc.reply(input, "there is no " + varName + " variable.");
@@ -239,12 +229,18 @@ listen({
 				break;
 			case "remove":
 				if (args[1]) {
-					if (permissions.isOwner("variable", args[1], input.user)) {
-						varDB.removeOne("{"+args[1]+"}");
+					varName = "{"+args[1]+"}";
+					variable = varDB.getOne(varName);
+					if (variable) {
+						if (!permissions.isOwner("variable", args[1], input.user)) {
+							irc.reply(input, "you don't have permission to do that.");
+							return;
+						}
+						varDB.removeOne(varName);
 						permissions.Delete(input.user, "variable", args[1]);
 						irc.say(input.context, "Removed o7");
 					} else {
-						irc.reply(input, "you don't have permission to do that.");
+						irc.say(input.context, "There is no such variable. O.o;");
 					}
 				} else {
 					irc.say(input.context, "[Help] Syntax: var remove <variable>");
@@ -252,10 +248,10 @@ listen({
 				break;
 			case "info":
 				if (args[1]) {
-					var varName = "{" + args[1] + "}",
-						variable = varDB.getOne(varName), perms;
+					varName = "{" + args[1] + "}";
+					variable = varDB.getOne(varName)
 					if (variable) {
-						perms = permissions.Info(input.user, "variable", args[1]);
+						var perms = permissions.Info(input.user, "variable", args[1]);
 						irc.say(input.context, "Variable " +varName + " contains: \"" + variable + "\"");
 						if (perms) irc.notice(input.from, perms);
 					} else {
