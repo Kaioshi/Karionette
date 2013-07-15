@@ -127,10 +127,10 @@ listen_admin({
 			irc.reload();
 		}
 		gain = (lib.memUse(true)-before)/1024;
-		if (gain === 0) gain = "Gained NOTHING! HA! 8D";
+		if (gain === 0) gain = " - Gained NOTHING! HA! 8D";
 		else {
-			if (gain > 1024) gain = (gain/1024).toString().slice(0,3)+"Gained MiB.. ;~;";
-			else gain = gain.toString()+"Gained KiB. :D";
+			if (gain > 1024) gain = " - Gained "+(gain/1024).toString().slice(0,3)+" MiB.. ;~;";
+			else gain = " - Gained "+gain.toString()+" KiB. :D";
 		}
 		irc.say(input.context, "Reloaded "+(args && args[0] ? args[0] : "scripts")+gain);
 	}
