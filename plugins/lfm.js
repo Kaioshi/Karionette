@@ -135,7 +135,8 @@ listen({
 						});
 					});
 				} else {
-					logger.error(result.error);
+					irc.say(input.context, "No track found.");
+					return;
 				}
 			});
 			
