@@ -12,7 +12,7 @@ listen({
 		help: "Allows user defined 'commands' (Eg: The command yt becomes google site:youtube.com). Vars can be used- see var help for more information"
 	},
 	callback: function (input, match) {
-		var aKeys, aliasList, i, alias,
+		var aKeys, aliasList, i, alias, cmdArr, permission,
 			args = match[1].split(" "),
 			cmd = args[1],
 			aliasString = args.slice(2).join(" ");
@@ -27,11 +27,11 @@ listen({
 						irc.say(input.context, "You need to own the "+cmd+" alias to overwrite it.");
 						return;
 					}
-					var cmdArr = [];
+					cmdArr = [];
 					irc.help().forEach(function (entry) {
 						cmdArr.push(entry.root);
 					});
-					for (var i = 0; i <= cmdArr.length; i++) {
+					for (i = 0; i < cmdArr.length; i++) {
 						if (cmdArr[i] === cmd) {
 							irc.say(input.context, "The "+cmd+" command is taken by a plugin or core function. I declare shenanigans! SHENANIGANS!!#*&^! >:(");
 							return;
@@ -79,9 +79,9 @@ listen({
 				if (cmd) {
 					alias = aliasDB.getOne(cmd);
 					if (alias) {
-						var perms = permissions.Info(input.user, "alias", cmd);
+						permission = permissions.Info(input.user, "alias", cmd);
 						irc.say(input.context, "The alias string for " + cmd + " is: " + alias);
-						if (perms) irc.notice(input.from, perms);
+						if (permission) irc.notice(input.from, permission);
 					} else irc.say(input.context, "There is no such alias.");
 				} else {
 					irc.say(input.context, "[Help] Which alias do you want info about?");
@@ -107,8 +107,8 @@ listen({
 		help: "Allows {vars} to be used in aliases. Default vars are: {me}, {from}, {channel}, {randThing}."
 	},
 	callback: function (input, match) {
-		var keys, list, i, variable, varName,
-			args = match[1].split(" "),
+		var keys, list, i, variable, varName, permission, owners,
+			args = match[1].split(" "), arr,
 			varString = args.slice(2).join(" ");
 		if (args[0]) {
 			switch (args[0]) {
@@ -119,10 +119,13 @@ listen({
 					varName = "{" + args[1] + "}";
 					variable = varDB.getOne(varName);
 					if (variable) {
-						var permission = true,
-							owners = permissions.List("variable", args[1], "owner");
-						if (owners && owners.length > 0) permission = permissions.isOwner("variable", args[1], input.user);
-						else permission = permissions.Check("variable", args[1], input.user);
+						permission = true;
+						owners = permissions.List("variable", args[1], "owner");
+						if (owners && owners.length > 0) {
+							permission = permissions.isOwner("variable", args[1], input.user);
+						} else {
+							permission = permissions.Check("variable", args[1], input.user);
+						}
 						if (permission) {
 							varDB.saveOne(varName, varString);
 							irc.say(input.context, "Overwritten :S");
@@ -181,7 +184,7 @@ listen({
 				}
 				break;
 			case "seprem":
-				var varString = args.slice(3).join(" ");
+				varString = args.slice(3).join(" ");
 				if (args[1] && args[2] && varString) {
 					varName = "{" + args[1] + "}";
 					variable = varDB.getOne(varName);
@@ -218,7 +221,7 @@ listen({
 					varName = "{" + args[1] + "}";
 					variable = varDB.getOne(varName);
 					if (variable) {
-						var arr = variable.split(" "+args[2]+" ");
+						arr = variable.split(" "+args[2]+" ");
 						irc.say(input.context, arr[Math.floor(Math.random() * arr.length)]);
 					} else {
 						irc.reply(input, "there is no " + varName + " variable.");
@@ -251,9 +254,9 @@ listen({
 					varName = "{" + args[1] + "}";
 					variable = varDB.getOne(varName)
 					if (variable) {
-						var perms = permissions.Info(input.user, "variable", args[1]);
+						permission = permissions.Info(input.user, "variable", args[1]);
 						irc.say(input.context, "Variable " +varName + " contains: \"" + variable + "\"");
-						if (perms) irc.notice(input.from, perms);
+						if (permission) irc.notice(input.from, permission);
 					} else {
 						irc.say(input.context, "There is no such variable.");
 					}

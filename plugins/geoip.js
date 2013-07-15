@@ -11,7 +11,7 @@ listen({
 	},
 	callback: function (input, match) {
 		var args = match[1].split(" "),
-			target, resp = [], nick;
+			target, resp, nick;
 		if (args && args[0].length > 0) {
 			if (args[0].indexOf('.') > -1) {
 				if (args[0].match(/https?:\/\/[^ ]+/)) target = url.parse(args[0]).host;
@@ -40,6 +40,7 @@ listen({
 				}
 				body = JSON.parse(body);
 				if (body) {
+					resp = [];
 					if (body.country_name) resp.push(body.country_name);
 					if (body.city) resp.push(body.city);
 				}

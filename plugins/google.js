@@ -1,5 +1,6 @@
 ﻿// Returns first Google search result
 var ent = require("./lib/entities.js");
+
 listen({
 	plugin: "google",
 	handle: "google",
@@ -13,7 +14,7 @@ listen({
 		var result,
 			uri = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=1&q=' + match[1];
 		web.get(uri, function (error, response, body) {
-			var result = JSON.parse(body).responseData.results[0];
+			result = JSON.parse(body).responseData.results[0];
 			if (result && result.titleNoFormatting) {
 				irc.say(input.context, ent.decode(result.titleNoFormatting) + ' ~ ' + result.unescapedUrl, false);
 			} else {
@@ -34,8 +35,9 @@ listen({
 		syntax: "[Help] Syntax: " + config.command_prefix + "gi pantsu"
 	},
 	callback: function (input, match) {
+		var uri;
 		if (match[1]) {
-			var uri = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&safe=moderate&rsz=1&q="+match[1];
+			uri = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&safe=moderate&rsz=1&q="+match[1];
 			web.get(uri, function (error, response, body) {
 				if (error) {
 					irc.say(input.context, "Something has gone awry.");
@@ -66,9 +68,9 @@ listen({
 		syntax: "[Help] Syntax: " + config.command_prefix + "define <word>"
 	},
 	callback: function (input, match) {
+		var reg, rep, garbage, definition, uri;
 		if (match[1]) {
-			var reg, rep, garbage, definition,
-				uri = "http://www.google.com/dictionary/json?callback=a&sl=en&tl=en&q=" + match[1];
+			uri = "http://www.google.com/dictionary/json?callback=a&sl=en&tl=en&q=" + match[1];
 			web.get(uri, function (error, response, body) {
 				if (error) {
 					irc.say(input.context, "Something has gone awry.");

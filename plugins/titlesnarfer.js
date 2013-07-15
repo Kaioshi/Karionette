@@ -9,11 +9,12 @@ listen({
 	handle: "titleSnarfer",
 	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :?.*((?:https?:\\/\\/)[^ ]+)"),
 	callback: function (input, match) {
+		var uri, title, reg, tmpwget, ext, allow;
 		if (input.data[0] === config.command_prefix) return;
-		var uri = url.parse(match[1]),
-			tmpwget = "",
-			ext = /.*\.([a-zA-Z0-9]+)$/.exec(uri.path),
-			allow = [ 'htm', 'html', 'asp', 'aspx', 'php', 'php3', 'php5' ];
+		uri = url.parse(match[1]);
+		tmpwget = "";
+		ext = /.*\.([a-zA-Z0-9]+)$/.exec(uri.path);
+		allow = [ 'htm', 'html', 'asp', 'aspx', 'php', 'php3', 'php5' ];
 		if (ext && !ext[0].match(/&|\?/)) {
 			if (!allow.some(function (item) { return (ext[1] === item); })) {
 				return;
@@ -22,8 +23,7 @@ listen({
 		tmpwget = "data/.tmp.wget."+Math.floor(Math.random()*8175).toString();
 		sys.exec("wget -q -O - "+uri.href.replace(/&/g, "\\&")+" | head -c 5000 | egrep \\<title?.*\\>\\(.*?\\) > "+tmpwget);
 		setTimeout(function () {
-			var title = fs.readFileSync(tmpwget).toString(),
-				reg;
+			title = fs.readFileSync(tmpwget).toString();
 			if (title) {
 				if (title.indexOf("</title>") > -1) {
 					reg = /(<title?.*>)(.*?)(<\/title>)/ig.exec(title);

@@ -36,10 +36,10 @@ listen({
 		help: "Passes along a message when the person in question next joins."
 	},
 	callback: function (input, match) {
-		var msgMatch = /^([^ ]+) (.+)$/.exec(match[1]);
+		var rev, msgMatch = /^([^ ]+) (.+)$/.exec(match[1]);
 		if (msgMatch && isUser(msgMatch[1])) {
 			if (ial.ison(input.context, msgMatch[1])) {
-				for (var rev = [], i = msgMatch[2].length; i >= 0; i--) rev.push(msgMatch[2][i]);
+				for (rev = [], i = msgMatch[2].length; i >= 0; i--) rev.push(msgMatch[2][i]);
 				irc.say(input.context, msgMatch[1] + ": "+rev.join(""));
 			} else {
 				messagesDB.saveOne(input.context + "@" + msgMatch[1] + ": " + "message from " + input.from + ": " + msgMatch[2]);
@@ -71,7 +71,7 @@ listen({
 	regex: regexFactory.onNick(),
 	callback: function (input, match) {
 		setTimeout(function () {
-			var i, userMessages, 
+			var i, userMessages,
 				channels = ial.Channels(match[3]);
 			channels.forEach(function (channel) {
 				userMessages = getMessages(channel, match[3]);

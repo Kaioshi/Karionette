@@ -9,7 +9,7 @@ listen({
 		help: "Allows you to edit permissions for any command, alias or variable."
 	},
 	callback: function (input, match) {
-		var args = match[1].split(" ");
+		var user, access, args = match[1].split(" ");
 		if (args && args.length > 0) {
 			switch (args[0]) {
 				case "allow":
@@ -60,10 +60,26 @@ listen({
 							break;
 					}
 					break;
+				case "admin":
+					switch (args[1]) {
+						case "add":
+							irc.say(input.context, permissions.Admin.Add(input.user, args[2], args[3]));
+							break;
+						case "remove":
+							irc.say(input.context, permissions.Admin.Remove(input.user, args[2], args[3]));
+							break;
+						case "list":
+							irc.say(input.context, permissions.Admin.List(input.user, args[2]));
+							break;
+						default:
+							irc.say(input.context, permissions.Syntax + " - " + permissions.Example);
+							break;
+					}
+					break;
 				case "check":
 					if (args[2]) {
-						var user = args[3] || input.user,
-							access = permissions.Check(args[1], args[2], user);
+						user = args[3] || input.user;
+						access = permissions.Check(args[1], args[2], user);
 						if (access) irc.say(input.context, "Allowed! :D");
 						else irc.say(input.context, "Denied! >:(");
 					} else {

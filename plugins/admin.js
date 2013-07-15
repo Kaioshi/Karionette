@@ -114,19 +114,20 @@ listen_admin({
 	handle: "reload",
 	regex: regexFactory.startsWith('reload'),
 	callback: function (input, match) {
+		var args, before, gain;
 		if (match[1]) {
-			var args = match[1].split(" ");
+			args = match[1].split(" ");
 			if (!fs.existsSync('plugins/'+args[0]+'.js')) {
 				irc.say(input.context, "There is no such plugin. o.o;");
 				return;
 			}
-			var before = lib.memUse(true), gain;
+			before = lib.memUse(true);
 			irc.reload(args[0]);
 		} else {
-			var before = lib.memUse(true), gain;
+			before = lib.memUse(true);
 			irc.reload();
 		}
-		var gain = (lib.memUse(true)-before)/1024;
+		gain = (lib.memUse(true)-before)/1024;
 		if (gain === 0) gain = " - Gained NOTHING! HA! 8D";
 		else {
 			if (gain > 1024) gain = " - Gained "+(gain/1024).toString().slice(0,3)+" MiB.. ;~;";

@@ -10,8 +10,7 @@ listen({
 	},
 	callback: function (input) {
 		irc.say(input.context, "I am " 
-			+ lib.duration(new Date("1 May 2013 18:40:00 GMT")) 
-			+ " old, but always sweet as sugar.");
+			+ lib.duration(new Date("1 May 2013 18:40:00 GMT"))	+ " old, but always sweet as sugar.");
 	}
 });
 

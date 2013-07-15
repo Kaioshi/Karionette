@@ -10,12 +10,12 @@ listen({
 		help: "[Help] Syntax: regexen <variable> <regex to run on it>"
 	},
 	callback: function (input, match) {
-		var args = match[1].split(" ");
+		var entry, regex, args = match[1].split(" ");
 		if (args && args[1]) {
-			var entry = varsDB.getOne("{"+args[0]+"}");
+			entry = varsDB.getOne("{"+args[0]+"}");
 			if (entry) {
-				var regex = new RegExp(args.slice(1).join(" ")),
-					entries = entry.split("|");
+				regex = new RegExp(args.slice(1).join(" "));
+				entries = entry.split("|");
 				entries.forEach(function (item) {
 					irc.say(input.context, regex.exec(item).join(" "));
 				});

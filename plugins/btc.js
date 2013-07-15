@@ -10,7 +10,6 @@ listen({
 	},
 	callback: function (input, match) {
 		var uri, args = match[1].split(" ");
-
 		if (args[0]) {
 			uri = 'https://data.mtgox.com/api/2/BTC' + args[0] + '/money/ticker';
 		} else {

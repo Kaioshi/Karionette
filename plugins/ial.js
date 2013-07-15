@@ -71,7 +71,8 @@ listen({
 	handle: "ialNick",
 	regex: regexFactory.onNick(),
 	callback: function (input, match) {
-		var oldnick = match[1],
+		var user,
+			oldnick = match[1],
 			address = match[2],
 			newnick = match[3];
 		// update our own nicks
@@ -88,10 +89,11 @@ listen({
 			ial.Remove(channel, oldnick);
 			ial.Add(channel, newnick, address);
 		});
-		var user = oldnick+"!"+address;
+		user = oldnick+"!"+address;
 		if (globals.admins[user] !== undefined) {
 			logger.debug("Removed cached admin " + user);
 			delete globals.admins[user];
 		}
 	}
 });
+

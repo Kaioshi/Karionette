@@ -15,7 +15,7 @@ function listIt(context, body) {
 	var i,
 		topArr = [],
 		result = JSON.parse(body);
-	for (i=0; i < 10; i+=1) {
+	for (i = 0; i < 10; i+=1) {
 		topArr.push((i+1) + ".) " + ent.decode(result[i].title));
 	}
 	irc.say(context, topArr.join(", "));
@@ -66,16 +66,6 @@ listen({
 				uri = "http://mal-api.com/anime/search?q=" + args.slice(1).join(" ");
 				doRes = linkIt;
 				break;
-			// case "-towatch":
-				// isGet =  false;
-				// boundName = malBindingsDB.getOne(input.from);
-				// if (boundName) {
-					// uri = "http://" + boundName[1] + ":" + boundName[2] + "@mal-api.com/animelist/anime";
-				// } else {
-					// uri = "http://:@mal-api.com/animelist/anime";
-					// irc.say(input.context, "[Help] You must bind a username and password to your nick first!");
-				// }
-				// break;
 			default:
 				uri = "http://mal-api.com/anime/search?q=" + match[1];
 				doRes = search;
