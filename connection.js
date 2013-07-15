@@ -14,7 +14,7 @@ module.exports = function (Eventpipe) {
 			ob: new Buffer(4096),
 			size: 0
 		};
-
+	
 	// Handles incoming data
 	function dataHandler(data) {
 		var regArr, ignores, i,
@@ -63,7 +63,7 @@ module.exports = function (Eventpipe) {
 		// Fire any events
 		Eventpipe.fire(input);
 	}
-
+	
 	// Utilise a Buffer on the data - this can also be used to catch data before it's handled
 	function dataBuffer(data) {
 		var newlineIdx;
@@ -82,7 +82,7 @@ module.exports = function (Eventpipe) {
 			buffer.size += data.length;
 		}
 	}
-
+	
 	// Send a message via the open socket
 	function send(data, silent) {
 		if (!data || data.length === 0) {
@@ -97,7 +97,7 @@ module.exports = function (Eventpipe) {
 			if (!silent) logger.sent(data);
 		});
 	}
-
+	
 	// Configure the socket appropriately
 	function configureSocket() {
 		socket.setNoDelay(true);
@@ -115,7 +115,7 @@ module.exports = function (Eventpipe) {
 		});
 		socket.on("data", dataBuffer);
 	}
-
+	
 	// Sanatise a string for use in IRC
 	function sanitise(string) {
 		if (!string) {
@@ -132,7 +132,7 @@ module.exports = function (Eventpipe) {
 		return string.replace(/\n/g, "\\n").replace(/\r/g, "\\r")
 			.replace(/[^\x02-\x03|\x16|\x20-\x7e]/g, "");
 	}
-
+	
 	return {
 		open: function (params) {
 			configureSocket();
@@ -225,3 +225,4 @@ module.exports = function (Eventpipe) {
 		}
 	}
 }
+

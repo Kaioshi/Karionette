@@ -14,12 +14,12 @@ module.exports = (function () {
 		aliasDB = new DB.Json({filename: "alias/alias"}),
 		varDB = new DB.Json({filename: "alias/vars"}),
 		randThings = new DB.List({filename: "randomThings"}).getAll();
-
+	
 	// Re-populate the keyCache
 	function setHandles() {
 		keyCache = Object.keys(listeners);
 	}
-
+	
 	// Create the supplant object for alias vars
 	function makeVars(match, context, from) {
 		var i, args, newMatch;
@@ -57,7 +57,7 @@ module.exports = (function () {
 	function evaluateAlias(aliasString, aliasVars) {
 		return lib.supplant(aliasString, aliasVars);
 	}
-
+	
 	// Check if the data contains an aliased command
 	function transformAlias(input) {
 		var i, toTransform, aliasMatch, aliasVars,
@@ -76,7 +76,7 @@ module.exports = (function () {
 		}
 		return input.raw;
 	}
-
+	
 	// Check if the data fires a plugin, and then do so
 	function fireEvent(input) {
 		transformAlias(input);

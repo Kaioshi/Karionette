@@ -50,6 +50,7 @@ listen({
 		}
 	}
 });
+
 // Listen for join
 listen({
 	plugin: "tell",
