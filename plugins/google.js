@@ -68,7 +68,7 @@ listen({
 		syntax: "[Help] Syntax: " + config.command_prefix + "define <word>"
 	},
 	callback: function (input, match) {
-		var definition, uri;
+		var definition, uri, meaning, related;
 		if (match[1]) {
 			uri = "http://www.google.com/dictionary/json?callback=a&sl=en&tl=en&q=" + match[1];
 			web.get(uri, function (error, response, body) {
@@ -77,18 +77,38 @@ listen({
 					logger.error("[google-define] error looking up " + match[1] + " -> " + error);
 					return;
 				}
-				body = JSON.parse(/^a\((\{.*\})[^ ]+\)/.exec(body)[1].replace(/\\\x[0-9a-f]{2}/g, ""));
+				body = JSON.parse(body.slice(2, -10).replace(/\\\x[0-9a-f]{2}/g, ""));
 				if (!body.primaries) {
-					irc.say(input.context, "No result. :<");
+					irc.say(input.context, "I couldn't find "+body.query+". :<");
 					return;
 				}
+				related = [];
+				meaning = [];
 				body = body.primaries[0];
-				if (body.entries) {
-					if (body.entries[1]) definition = body.entries[1].terms[0].text;
-					else definition = body.entries[0].terms[0].text;
-				}
-				if (body.terms) irc.say(input.context, match[1] + " - \""+body.terms[0].text+"\" - " + definition, false);
-				else irc.say(input.context, match[1] + " - "+definition);
+				body.entries.forEach(function (entry) {
+					if (entry.type === 'related') {
+						entry.terms.forEach(function (item) {
+							if (item.text !== match[1]) {
+								// make sure there are no duplicate entries -.- wtf google
+								if (!related.some(function (element) { return (element === item.text); })) {
+									related.push(item.text);
+								}
+							}
+						});
+					}
+					else if (entry.type === 'meaning') {
+						entry.terms.forEach(function (item) {
+							meaning.push(item.text);
+						});
+					}
+				});
+				definition = meaning.join("; ");
+				if (related.length > 0) definition = "["+related.join(", ")+"] - "+definition;
+				if (body.terms) {
+					if (related.length > 0)	definition = match[1]+" - \""+body.terms[0].text+"\" "+definition;
+					else definition = match[1]+" - \""+body.terms[0].text+"\" - "+definition;
+				} else definition = match[1]+" - "+definition;
+				irc.say(input.context, definition, false);
 			});
 		} else {
 			irc.say(input.context, this.command.syntax);
