@@ -68,7 +68,7 @@ listen({
 		syntax: "[Help] Syntax: " + config.command_prefix + "define <word>"
 	},
 	callback: function (input, match) {
-		var reg, rep, garbage, definition, uri;
+		var definition, uri;
 		if (match[1]) {
 			uri = "http://www.google.com/dictionary/json?callback=a&sl=en&tl=en&q=" + match[1];
 			web.get(uri, function (error, response, body) {
@@ -77,18 +77,7 @@ listen({
 					logger.error("[google-define] error looking up " + match[1] + " -> " + error);
 					return;
 				}
-				garbage = [ '\\\\x3c', '\\\\x27', '\\\\x3e', '\\\\x26', '\\\\x22', '\\\\xA0', '\\\\xA3', '\\\\xA2', '\\\\xA9', '\\\\xA5' ],
-				reg = /^a\((\{.*\})[^ ]+\)/.exec(body);
-				garbage.some(function (item) {
-					rep = new RegExp(item, "g");
-					reg[1] = reg[1].replace(rep, String.fromCharCode(parseInt(item.substr(3), 16)));
-				});
-				try { 
-					body = JSON.parse(reg[1]); 
-				} catch (err) {
-					logger.error("[google-define] more garbage found in body - "+err);
-					return;
-				}
+				body = JSON.parse(/^a\((\{.*\})[^ ]+\)/.exec(body)[1].replace(/\\\x[0-9a-f]{2}/g, ""));
 				if (!body.primaries) {
 					irc.say(input.context, "No result. :<");
 					return;
