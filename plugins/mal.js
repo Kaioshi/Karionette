@@ -57,7 +57,7 @@ function googleIt(context, type, term) {
 						eps = ", "+result.chapters+" chapters";
 						if (result.volumes) eps = eps+" over "+result.volumes+" volumes";
 					}
-					
+					if (result.synopsis.length > 750) result.synopsis = result.synopsis.slice(0, 750)+"...";
 					resp = result.title+" ("+result.members_score+eps+runtime+status+") ["+result.genres.join(", ")+"] ~ "
 						+url+" ~ "+result.synopsis;
 					irc.say(context, ent.decode(resp), false);
