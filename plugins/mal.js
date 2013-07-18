@@ -11,7 +11,7 @@ function listIt(context, body) {
 	irc.say(context, topArr.join(", "));
 }
 
-function googleIt(context, type, term) {
+function googleIt(context, full, type, term) {
 	var result, reg, id, url, resp, start, end, eps, runtime, status, garbage,
 		uri = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=1&q=site:myanimelist.net/"+type+"/ "+term;
 	web.get(uri, function (error, response, body) {
@@ -23,6 +23,10 @@ function googleIt(context, type, term) {
 			if (id) {
 				uri = "http://mal-api.com/"+type+"/"+id;
 				url = "http://myanimelist.net/"+type+"/"+id;
+				if (!full) {
+					irc.say(context, ent.decode(result.titleNoFormatting.replace(" - MyAnimeList.net", ""))+" ~ "+url);
+					return;
+				}
 				web.get(uri, function (error, response, body) {
 					if (error) {
 						irc.say(context, "Something has gone awry.");
@@ -33,7 +37,7 @@ function googleIt(context, type, term) {
 					status = "";
 					eps = "";
 					runtime = "";
-					garbage = [ "\\r", "\\n", "\\<br\\>", "\\[Written by MAL Rewrite\\]", "\\(Source: ANN\\)" ];
+					garbage = [ "\\r", "\\n", "\\<br\\>", "\\[Written by MAL Rewrite\\]", "\\(Source: ANN\\)", "\\(Source: NIS America\\)" ];
 					garbage.forEach(function (trash) {
 						reg = new RegExp(trash, "gi");
 						result.synopsis = result.synopsis.replace(reg, "");
@@ -57,10 +61,9 @@ function googleIt(context, type, term) {
 						eps = ", "+result.chapters+" chapters";
 						if (result.volumes) eps = eps+" over "+result.volumes+" volumes";
 					}
-					if (result.synopsis.length > 720) result.synopsis = result.synopsis.slice(0, 720)+"..."; // magic number!
-					resp = result.title+" ("+result.members_score+eps+runtime+status+") ["+result.genres.join(", ")+"] ~ "
-						+url+" ~ "+result.synopsis;
+					resp = result.title+" ("+result.members_score+eps+runtime+status+") ["+result.genres.join(", ")+"] ~ "+url;
 					irc.say(context, ent.decode(resp), false);
+					irc.say(context, ent.decode(result.synopsis), false, 1);
 				});
 			} else {
 				logger.warn("[mal-googleIt] couldn't get ID out of "+result.unescapedUrl);
@@ -79,8 +82,8 @@ listen({
 	regex: regexFactory.startsWith("mal"),
 	command: {
 		root: "mal",
-		options: "-top, -pop",
-		help: "Allows you to search MyAnimeList (anime). Optional commands can be executed by prepending a dash. -top is Top Anime, -pop is Popular anime"
+		options: "-top, -pop -s(ynopsis) <anime>",
+		help: "Allows you to search MyAnimeList (anime). Optional commands can be executed by prepending a dash. -s(ynopsis) <anime>, -top is Top Anime, -pop is Popular anime"
 	},
 	callback: function (input, match) {
 		var result, uri, doRes, boundName,
@@ -95,12 +98,15 @@ listen({
 				uri = "http://mal-api.com/anime/popular";
 				doRes = listIt;
 				break;
+			case "-synopsis":
+			case "-s":
+				googleIt(input.context, true, "anime", args.slice(1).join(" "));
+				return;
 			case "-l":
-				irc.reply(input, config.command_prefix+"mal -l has been retired, just do "+config.command_prefix+"mal <anime>");
-				googleIt(input.context, "anime", args.slice(1).join(" "));
+				googleIt(input.context, false, "anime", args.slice(1).join(" "));
 				return;
 			default:
-				googleIt(input.context, "anime", args.join(" "));
+				googleIt(input.context, false, "anime", args.join(" "));
 				return;
 		}
 		web.get(uri, function (error, response, body) {
@@ -116,19 +122,23 @@ listen({
 	regex: regexFactory.startsWith("mml"),
 	command: {
 		root: "mml",
-		help: "Allows you to search MyAnimeList (manga). -l retrieves a link"
+		options: "-s(ynopsis)",
+		help: "Allows you to search MyAnimeList (manga). -s(ynopsis) <manga title>"
 	},
 	callback: function (input, match) {
 		var result, uri, doRes
 			args = match[1].split(" ");
 		
 		switch (args[0]) {
+			case "-synopsis":
+			case "-s":
+				googleIt(input.context, true, "manga", args.slice(1).join(" "));
+				return;
 			case "-l":
-				irc.reply(input, config.command_prefix+"mml -l has been retired, just use "+config.command_prefix+"mml <manga> instead.");
-				googleIt(input.context, "manga", args.slice(1).join(" "));
+				googleIt(input.context, false, "manga", args.slice(1).join(" "));
 				return;
 			default:
-				googleIt(input.context, "manga", args.join(" "));
+				googleIt(input.context, false, "manga", args.join(" "));
 				return;
 		}
 		
