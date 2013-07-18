@@ -1,16 +1,6 @@
 ﻿var malBindingsDB = new DB.Json({filename: "mal"}),
 	ent = require("./lib/entities.js");
 
-function search(context, body) {
-	var result = JSON.parse(body)[0];
-	if (result) {
-		result.synopsis = result.synopsis.replace(/\n/g, "").replace(/<br>/g, "");
-		irc.say(context, "(" + result.members_score + ") " + ent.decode(result.title) + " ~ " + ent.decode(result.synopsis));
-	} else {
-		irc.say(context, "Pantsu.");
-	}
-}
-
 function listIt(context, body) {
 	var i,
 		topArr = [],
@@ -21,13 +11,65 @@ function listIt(context, body) {
 	irc.say(context, topArr.join(", "));
 }
 
-function linkIt(context, body) {
-	var result = JSON.parse(body)[0];
-	if (result) {
-		irc.say(context, ent.decode(result.title) + " ~ " + "http://myanimelist.net/anime/" + result.id);
-	} else {
-		irc.say(context, "Pantsu.", false);
-	}
+function googleIt(context, type, term) {
+	var result, reg, id, url, resp, start, end, eps, runtime, status, garbage,
+		uri = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=1&q=site:myanimelist.net/"+type+"/ "+term;
+	web.get(uri, function (error, response, body) {
+		result = JSON.parse(body).responseData.results[0];
+		if (result && result.titleNoFormatting) {
+			url = result.unescapedUrl;
+			reg = new RegExp("^http?:\\/\\/[^ ]+\\/(anime|manga)\\/([0-9]+)");
+			id = reg.exec(url)[2];
+			if (id) {
+				uri = "http://mal-api.com/"+type+"/"+id;
+				url = "http://myanimelist.net/"+type+"/"+id;
+				web.get(uri, function (error, response, body) {
+					if (error) {
+						irc.say(context, "Something has gone awry.");
+						logger.error("[mal-googleIt("+[context, type, term].join(", ")+")] hit error in mal-api fetch: "+error);
+						return;
+					}
+					result = JSON.parse(body);
+					status = "";
+					eps = "";
+					runtime = "";
+					garbage = [ "\\r", "\\n", "\\<br\\>", "\\[Written by MAL Rewrite\\]", "\\(Source: ANN\\)" ];
+					garbage.forEach(function (trash) {
+						reg = new RegExp(trash, "gi");
+						result.synopsis = result.synopsis.replace(reg, "");
+					});
+					if (result.start_date) {
+						start = result.start_date.split(" ")[0];
+						start = start.split("-");
+						start = start[2]+"/"+start[1]+"/"+start[0];
+					}
+					if (result.end_date) {
+						end = result.end_date.split(" ")[0];
+						end = end.split("-");
+						end = end[2]+"/"+end[1]+"/"+end[0];
+					}
+					if (start) runtime = ", "+start;
+					if (end) runtime = runtime+"-"+end;
+					else if (runtime) runtime = runtime+"-??";
+					if (result.status) status = ", "+result.status;
+					if (result.episodes) eps = ", "+result.episodes+" episodes";
+					else if (result.chapters) {
+						eps = ", "+result.chapters+" chapters";
+						if (result.volumes) eps = eps+" over "+result.volumes+" volumes";
+					}
+					
+					resp = result.title+" ("+result.members_score+eps+runtime+status+") ["+result.genres.join(", ")+"] ~ "
+						+url+" ~ "+result.synopsis;
+					irc.say(context, ent.decode(resp), false);
+				});
+			} else {
+				logger.warn("[mal-googleIt] couldn't get ID out of "+result.unescapedUrl);
+				irc.say(context, ".... Pantsu.");
+			}
+		} else {
+			irc.action(context, "can't find it. :<");
+		}
+	});
 }
 
 // MyAnimeList anime API
@@ -37,23 +79,14 @@ listen({
 	regex: regexFactory.startsWith("mal"),
 	command: {
 		root: "mal",
-		options: "-bind, -top, -pop, -l",
-		help: "Allows you to search MyAnimeList (anime). Optional commands can be executed by prepending a dash. -bind binds your nick to your account (requires mal username and password in that order), -top is Top Anime, -pop is Popular anime, and -l is to just retrieve a link"
+		options: "-top, -pop",
+		help: "Allows you to search MyAnimeList (anime). Optional commands can be executed by prepending a dash. -top is Top Anime, -pop is Popular anime"
 	},
 	callback: function (input, match) {
-		var result, uri, doRes, boundName, toPost,
-			isGet = true;
+		var result, uri, doRes, boundName,
 			args = match[1].split(" ");
 		
 		switch (args[0]) {
-			case "-bind":
-				if (args[1] && args[2]) {
-					malBindingsDB.saveOne(input.from, "[" + args[1] + "," + args[2] + "]");
-					irc.say(input.context, "At your service :)");
-				} else {
-					irc.say(input.context, "What am I binding?");
-				}
-				break;
 			case "-top":
 				uri = "http://mal-api.com/anime/top";
 				doRes = listIt;
@@ -63,23 +96,16 @@ listen({
 				doRes = listIt;
 				break;
 			case "-l":
-				uri = "http://mal-api.com/anime/search?q=" + args.slice(1).join(" ");
-				doRes = linkIt;
-				break;
+				irc.reply(input, config.command_prefix+"mal -l has been retired, just do "+config.command_prefix+"mal <anime>");
+				googleIt(input.context, "anime", args.slice(1).join(" "));
+				return;
 			default:
-				uri = "http://mal-api.com/anime/search?q=" + match[1];
-				doRes = search;
-				break;
+				googleIt(input.context, "anime", args.join(" "));
+				return;
 		}
-		if (isGet) {
-			web.get(uri, function (error, response, body) {
-				doRes(input.context, body);
-			});
-		} else {
-			web.post(uri, toPost, function () {
-			
-			});
-		}
+		web.get(uri, function (error, response, body) {
+			doRes(input.context, body);
+		});
 	}
 });
 
@@ -90,7 +116,6 @@ listen({
 	regex: regexFactory.startsWith("mml"),
 	command: {
 		root: "mml",
-		options: "-l",
 		help: "Allows you to search MyAnimeList (manga). -l retrieves a link"
 	},
 	callback: function (input, match) {
@@ -99,13 +124,12 @@ listen({
 		
 		switch (args[0]) {
 			case "-l":
-				uri = "http://mal-api.com/manga/search?q=" + args.slice(1).join(" ");
-				doRes = linkIt;
-				break;
+				irc.reply(input, config.command_prefix+"mml -l has been retired, just use "+config.command_prefix+"mml <manga> instead.");
+				googleIt(input.context, "manga", args.slice(1).join(" "));
+				return;
 			default:
-				uri = "http://mal-api.com/manga/search?q=" + match[1];
-				doRes = search;
-				break;
+				googleIt(input.context, "manga", args.join(" "));
+				return;
 		}
 		
 		web.get(uri, function (error, response, body) {
