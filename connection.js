@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * CONNECTION: This module handles connection to the IRC server,
  * 			   as well as sending and receiving data from it.
  */
@@ -163,7 +163,7 @@ module.exports = function (Eventpipe) {
 		part: function (channel) {
 			send("PART :" + sanitise(channel));
 		},
-		say: function (context, message, sanitiseMessage) {
+		say: function (context, message, sanitiseMessage, maxmsgs) {
 			var privmsg, max, maxMessages;
 			if (context && message) {
 				context = sanitise(context); // Avoid sanitising more than once
@@ -173,7 +173,7 @@ module.exports = function (Eventpipe) {
 				} else {
 					max = 473 - privmsg.length; // yay magic numbers - haven't joined a channel yet.
 				}
-				maxMessages = 3;
+				maxMessages = (maxmsgs < 3 ? maxmsgs : 3);
 				if (sanitiseMessage !== false) {
 					message = sanitise(message);
 				}
