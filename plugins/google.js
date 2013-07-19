@@ -69,7 +69,7 @@ listen({
 			+config.command_prefix+"currency 1 USD to AUD - Currency codes: http://en.wikipedia.org/wiki/ISO_4217#Active_codes"
 	},
 	callback: function (input, match) {
-		var uri, reg = /^([0-9]+) ([A-Za-z]+) to ([A-Za-z]+)$/.exec(match[1]);
+		var uri, reg = /^([0-9\.?]+) ([A-Za-z]+) to ([A-Za-z]+)$/.exec(match[1]);
 		if (reg) {
 			uri = "http://www.google.com/ig/calculator?hl=en&q="+reg[1]+reg[2]+"=?"+reg[3];
 			web.get(uri, function (error, response, body) {
