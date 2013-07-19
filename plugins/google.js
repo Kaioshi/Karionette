@@ -69,28 +69,40 @@ listen({
 			+config.command_prefix+"convert 1 USD to AUD - Currency codes: http://en.wikipedia.org/wiki/ISO_4217#Active_codes"
 	},
 	callback: function (input, match) {
-		var uri, garbage, tmp,
+		var uri, garbage, tmp, errsponse,
 			reg = /^([0-9\.?]+) ([A-Za-z ]+) (to|into) ([A-Za-z ]+)$/.exec(match[1]);
 		if (reg) {
 			uri = "http://www.google.com/ig/calculator?hl=en&q="+reg[1]+reg[2]+"=?"+reg[4];
 			web.get(uri, function (error, response, body) {
-				reg = /^\{lhs: \"(.*)\",rhs: \"(.*)\",error: \"(.*)\",icc: (.*)\}$/.exec(body);
-				if (!reg || reg[3]) {
-					irc.say(input.context, "YOU'RE DOIN' IT WRONG! >:(");
-					setTimeout(function () {
-						irc.action(input.context, "needs real units.");
-					}, 1700);
-				} else {
-					// sigh. more google hex codes
-					if (reg[2].indexOf("\\x26") > -1) reg[2] = reg[2].replace(/\\x26/g, "");
-					if (reg[2].indexOf("#215;") > -1) reg[2] = reg[2].replace(/#215;/g, "x");
-					if (reg[2].indexOf("\\x3csup\\x3e") > -1) {
-						tmp = reg[2].slice(reg[2].indexOf("\\x3csup\\x3e"));
-						tmp = /^\\x3csup\\x3e(.*)\\x3c\/sup\\x3e/.exec(tmp);
-						reg[2] = reg[2].replace(tmp[0], "^"+tmp[1]);
-					}
-					irc.say(input.context, reg[1]+" = "+ent.decode(reg[2]));
+				reg = /\{(.*): .*,(.*): .*,(.*): .*,(.*): .*\}$/.exec(body);
+				if (reg[0].indexOf("\\x26") > -1) reg[0] = reg[0].replace(/\\x26/g, "");
+				if (reg[0].indexOf("#215;") > -1) reg[0] = reg[0].replace(/#215;/g, "x");
+				if (reg[0].indexOf("\\x3csup\\x3e") > -1) {
+					tmp = reg[0].slice(reg[0].indexOf("\\x3csup\\x3e"));
+					tmp = /^\\x3csup\\x3e(.*)\\x3c\/sup\\x3e/.exec(tmp);
+					reg[0] = reg[0].replace(tmp[0], "^"+tmp[1]);
 				}
+				reg.slice(1).forEach(function (item) {
+					reg[0] = reg[0].replace(item, "\""+item+"\"");
+				});
+				body = JSON.parse(reg[0]);
+				if (body.error.length > 0) {
+					errsponse = [
+						"O.o",
+						"-.-",
+						"yer doin' it wrong.",
+						"nope",
+						"try again!",
+						"need real units -.-",
+						"wat",
+						"try harder. >:(",
+						"look up the unit codes!",
+						"hurr imaginary units"
+					];
+					irc.say(input.context, errsponse[Math.floor(Math.random()*errsponse.length)]);
+					return;
+				}
+				irc.say(input.context, body.lhs+" is equal to "+body.rhs, false);
 			});
 		} else {
 			irc.say(input.context, this.command.syntax);
