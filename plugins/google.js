@@ -1,6 +1,5 @@
 ﻿// Returns first Google search result
-var ent = require("./lib/entities.js"),
-	punycode = require('punycode');
+var ent = require("./lib/entities.js");
 
 listen({
 	plugin: "google",
