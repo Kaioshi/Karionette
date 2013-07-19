@@ -1,5 +1,6 @@
 ﻿// Returns first Google search result
-var ent = require("./lib/entities.js");
+var ent = require("./lib/entities.js"),
+	punycode = require('punycode');
 
 listen({
 	plugin: "google",
@@ -69,9 +70,10 @@ listen({
 			+config.command_prefix+"convert 1 USD to AUD - Currency codes: http://en.wikipedia.org/wiki/ISO_4217#Active_codes"
 	},
 	callback: function (input, match) {
-		var uri, reg = /^([0-9\.?]+) ([A-Za-z]+) to ([A-Za-z]+)$/.exec(match[1]);
+		var uri, garbage, tmp,
+			reg = /^([0-9\.?]+) ([A-Za-z ]+) (to|into) ([A-Za-z ]+)$/.exec(match[1]);
 		if (reg) {
-			uri = "http://www.google.com/ig/calculator?hl=en&q="+reg[1]+reg[2]+"=?"+reg[3];
+			uri = "http://www.google.com/ig/calculator?hl=en&q="+reg[1]+reg[2]+"=?"+reg[4];
 			web.get(uri, function (error, response, body) {
 				reg = /^\{lhs: \"(.*)\",rhs: \"(.*)\",error: \"(.*)\",icc: (.*)\}$/.exec(body);
 				if (!reg || reg[3]) {
@@ -80,7 +82,15 @@ listen({
 						irc.action(input.context, "needs real units.");
 					}, 1700);
 				} else {
-					irc.say(input.context, reg[1]+" = "+reg[2]);
+					// sigh. more google hex codes
+					if (reg[2].indexOf("\\x26") > -1) reg[2] = reg[2].replace(/\\x26/g, "");
+					if (reg[2].indexOf("#215;") > -1) reg[2] = reg[2].replace(/#215;/g, "x");
+					if (reg[2].indexOf("\\x3csup\\x3e") > -1) {
+						tmp = reg[2].slice(reg[2].indexOf("\\x3csup\\x3e"));
+						tmp = /^\\x3csup\\x3e(.*)\\x3c\/sup\\x3e/.exec(tmp);
+						reg[2] = reg[2].replace(tmp[0], "^"+tmp[1]);
+					}
+					irc.say(input.context, reg[1]+" = "+ent.decode(reg[2]));
 				}
 			});
 		} else {
