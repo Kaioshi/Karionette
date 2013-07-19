@@ -59,6 +59,38 @@ listen({
 
 listen({
 	plugin: "google",
+	handle: "currency",
+	regex: regexFactory.startsWith("currency"),
+	command: {
+		root: "currency",
+		options: "1 <currency> to <currency>",
+		help: "Google's currency conversion",
+		syntax: "[Help] Syntax: "+config.command_prefix+"currency N <currency> to <currency> - Example: "
+			+config.command_prefix+"currency 1 USD to AUD - Currency codes: http://en.wikipedia.org/wiki/ISO_4217#Active_codes"
+	},
+	callback: function (input, match) {
+		var uri, reg = /^([0-9]+) ([A-Za-z]+) to ([A-Za-z]+)$/.exec(match[1]);
+		if (reg) {
+			uri = "http://www.google.com/ig/calculator?hl=en&q="+reg[1]+reg[2]+"=?"+reg[3];
+			web.get(uri, function (error, response, body) {
+				reg = /^\{lhs: \"(.*)\",rhs: \"(.*)\",error: \"(.*)\",icc: (.*)\}$/.exec(body);
+				if (!reg || reg[3]) {
+					irc.say(input.context, "YOU'RE DOIN' IT WRONG! >:(");
+					setTimeout(function () {
+						irc.action(input.context, "needs real currencies.");
+					}, 1700);
+				} else {
+					irc.say(input.context, reg[1]+" = "+reg[2]);
+				}
+			});
+		} else {
+			irc.say(input.context, this.command.syntax);
+		}
+	}
+});
+
+listen({
+	plugin: "google",
 	handle: "define",
 	regex: regexFactory.startsWith(["define", "dict"]),
 	command: {
