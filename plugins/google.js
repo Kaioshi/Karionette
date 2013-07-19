@@ -59,14 +59,14 @@ listen({
 
 listen({
 	plugin: "google",
-	handle: "currency",
-	regex: regexFactory.startsWith("currency"),
+	handle: "convert",
+	regex: regexFactory.startsWith("convert"),
 	command: {
-		root: "currency",
-		options: "1 <currency> to <currency>",
-		help: "Google's currency conversion",
-		syntax: "[Help] Syntax: "+config.command_prefix+"currency N <currency> to <currency> - Example: "
-			+config.command_prefix+"currency 1 USD to AUD - Currency codes: http://en.wikipedia.org/wiki/ISO_4217#Active_codes"
+		root: "convert",
+		options: "N <unit> to <unit>",
+		help: "Google's conversion thing!",
+		syntax: "[Help] Syntax: "+config.command_prefix+"convert N <unit> to <unit> - Example: "
+			+config.command_prefix+"convert 1 USD to AUD - Currency codes: http://en.wikipedia.org/wiki/ISO_4217#Active_codes"
 	},
 	callback: function (input, match) {
 		var uri, reg = /^([0-9\.?]+) ([A-Za-z]+) to ([A-Za-z]+)$/.exec(match[1]);
@@ -77,7 +77,7 @@ listen({
 				if (!reg || reg[3]) {
 					irc.say(input.context, "YOU'RE DOIN' IT WRONG! >:(");
 					setTimeout(function () {
-						irc.action(input.context, "needs real currencies.");
+						irc.action(input.context, "needs real units.");
 					}, 1700);
 				} else {
 					irc.say(input.context, reg[1]+" = "+reg[2]);
