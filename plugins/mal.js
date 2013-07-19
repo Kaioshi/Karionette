@@ -37,11 +37,14 @@ function googleIt(context, full, type, term) {
 					status = "";
 					eps = "";
 					runtime = "";
-					garbage = [ "\\r", "\\n", "\\<br\\>", "\\[Written by MAL Rewrite\\]", "\\(Source: ANN\\)", "\\(Source: NIS America\\)" ];
+					garbage = [ "\\r", "\\n", "\\<br\\>", "\\[Written by MAL Rewrite\\]" ];
 					garbage.forEach(function (trash) {
 						reg = new RegExp(trash, "gi");
 						result.synopsis = result.synopsis.replace(reg, "");
 					});
+					if (result.synopsis.indexOf("(Source:") > -1) {
+						result.synopsis = result.synopsis.slice(0, result.synopsis.indexOf("(Source:")-1);
+					}
 					if (result.start_date) {
 						start = result.start_date.split(" ")[0];
 						start = start.split("-");
