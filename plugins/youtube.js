@@ -10,7 +10,7 @@ listen({
 	},
 	callback: function (input, match) {
 		var link, title, rating, views, date,
-			uri = "https://gdata.youtube.com/feeds/api/videos?q="+match[1]+"&orderby=viewCount&max-results=1&v=2&alt=json";
+			uri = "https://gdata.youtube.com/feeds/api/videos?q="+match[1]+"&max-results=1&v=2&alt=json";
 		
 		function zero(n) {
 			return (n > 9 ? n : "0"+n);
@@ -18,7 +18,7 @@ listen({
 		
 		web.get(uri, function (error, response, body) {
 			body = JSON.parse(body).feed;
-			if (body["openSearch$totalResults"]["$t"] === 0) {
+			if (body["openSearch$totalResults"]["$t"] === 0 || !body.entry) {
 				irc.say(input.context, match[1]+" is not a thing on youtube. :<");
 				return;
 			}
