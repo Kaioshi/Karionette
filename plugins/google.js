@@ -89,6 +89,7 @@ listen({
 				if (body.error.length > 0) {
 					errsponse = [
 						"O.o",
+						"o_O",
 						"-.-",
 						"yer doin' it wrong.",
 						"nope",
