@@ -56,16 +56,19 @@ listen({
 		
 		sys.exec("wget -q -O - "+uri.href.replace(/&/g, "\\&")+" | head -c "+length+" | grep -E -io \\<title?.*\\>\\(.*?\\)\\(\\<\\/title\\>\\)? > "+tmpwget);
 		setTimeout(function () {
-			title = fs.readFileSync(tmpwget).toString();
-			if (title) {
+			if (fs.lstatSync(tmpwget).size > 0) {
+				title = fs.readFileSync(tmpwget).toString();
 				if (title.indexOf("</title>") > -1) {
 					reg = /(<title?.*>)(.*?)(<\/title>)/ig.exec(title);
-				} else { // imgur is weird.
+				} else {
 					reg = /(<title?.*>)(.*)/ig.exec(title);
 				}
 				reg[2] = ent.decode(reg[2].trim());
-				if (reg && reg[2].length > 0) irc.say(input.context, reg[2] + " ~ " + uri.host);
-				else logger.debug("No title found in the first "+length+" bytes of "+uri.href);
+				if (reg && reg[2].length > 0) {
+					irc.say(input.context, reg[2] + " ~ " + uri.host);
+				} else {
+					logger.debug("No title found in the first "+length+" bytes of "+uri.href);
+				}
 				reg = null;
 				title = null;
 			}
