@@ -28,7 +28,7 @@ listen({
 			date = zero(date.getDate())+"/"+zero(date.getMonth()+1)+"/"+date.getYear().toString().slice(1);
 			rating = body.entry[0]["gd$rating"].average.toString().slice(0,3);
 			views = body.entry[0]["yt$statistics"].viewCount;
-			irc.say(input.context, title+" ~ ["+rating+"/5] "+date+", "+views+" views ~ "+link);
+			irc.say(input.context, title+" ~ ["+rating+"/5] "+date+", "+views+" views ~ "+link, false);
 		});
 	}
 });

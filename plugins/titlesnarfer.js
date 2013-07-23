@@ -28,7 +28,7 @@ listen({
 				rating = body["gd$rating"].average.toString().slice(0,3);
 				date = new Date(body["media$group"]["yt$uploaded"]["$t"]);
 				date = zero(date.getDate())+"/"+zero(date.getMonth()+1)+"/"+date.getYear().toString().slice(1);
-				irc.say(input.context, body.title["$t"]+" ~ ["+rating+"/5] "+date+", "+body["yt$statistics"].viewCount+" views ~ "+host.replace("www.",""));
+				irc.say(input.context, body.title["$t"]+" ~ ["+rating+"/5] "+date+", "+body["yt$statistics"].viewCount+" views ~ "+host.replace("www.",""), false);
 			});
 		}
 		
