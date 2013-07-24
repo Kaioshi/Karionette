@@ -23,6 +23,10 @@ listen({
 	callback: function (input, match) {
 		var i, quote, quotes, tmp, first, matches, time,
 			args = match[1].split(" ");
+		if (input.context[0] !== "#") {
+			irc.say(input.context, "You can only use this in a channel for now, sorry.");
+			return;
+		}
 		switch (args[0]) {
 			case "add":
 				if (!args[1]) { irc.say(input.context, this.command.syntax); return }
