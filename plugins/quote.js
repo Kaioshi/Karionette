@@ -51,20 +51,24 @@ listen({
 			case "remove":
 				if (!args[1]) { irc.say(input.context, this.command.syntax); return }
 				quotes = quoteDB.getOne(input.context);
-				quote = args.slice(1).join(" ");
-				for (i = 0; i < quotes.length; i++) {
-					if (quotes[i].quote === quote) {
-						tmp = [];
-						quotes.forEach(function (entry) {
-							if (entry.quote !== quote) tmp.push(entry);
-						});
-						if (tmp.length === 0) quoteDB.removeOne(input.context);
-						else quoteDB.saveOne(input.context, tmp);
-						irc.say(input.context, "Removed o7");
-						return;
+				if (quotes) {
+					quote = args.slice(1).join(" ");
+					for (i = 0; i < quotes.length; i++) {
+						if (quotes[i].quote === quote) {
+							tmp = [];
+							quotes.forEach(function (entry) {
+								if (entry.quote !== quote) tmp.push(entry);
+							});
+							if (tmp.length === 0) quoteDB.removeOne(input.context);
+							else quoteDB.saveOne(input.context, tmp);
+							irc.say(input.context, "Removed o7");
+							return;
+						}
 					}
+					irc.say(input.context, "Couldn't find it. :\\");
+				} else {
+					irc.say(input.context, "There aren't any quotes for "+input.context+" ~ add some!");
 				}
-				irc.say(input.context, "Couldn't find it. :\\");
 				break;
 			case "find":
 				if (!args[1]) { irc.say(input.context, this.command.syntax); return }
@@ -81,7 +85,7 @@ listen({
 					time = makeTime(first.date);
 					irc.say(input.context, (matches > 1 ? "("+matches+" matches) " : "")+"Quote added by "+first.from.split("!")[0]+" on "+time+": "+first.quote);
 				} else {
-					irc.say(input.context, "There are no quotes for "+input.context+" ~ add some!");
+					irc.say(input.context, "There aren't any quotes for "+input.context+" ~ add some!");
 				}
 				break;
 			case "random":
@@ -90,7 +94,22 @@ listen({
 					quote = quotes[Math.floor(Math.random()*quotes.length)];
 					irc.say(input.context, "Quote added by "+quote.from.split("!")[0]+" on "+makeTime(quote.date)+": "+quote.quote);
 				} else {
-					irc.say(input.context, "There are no quotes for "+input.context+" ~ add some!");
+					irc.say(input.context, "There aren't any quotes for "+input.context+" ~ add some!");
+				}
+				break;
+			case "stats":
+				quotes = quoteDB.getOne(input.context);
+				if (quotes) {
+					tmp = [];
+					quotes.forEach(function (entry) {
+						entry = entry.from.split("!")[0];
+						if (!tmp.some(function (item) { return (entry === item); })) {
+							tmp.push(entry);
+						}
+					});
+					irc.say(input.context, "There are "+quotes.length+" quotes for "+input.context+", added by "+tmp.length+" "+(tmp.length > 1 ? "people." : "person."));
+				} else {
+					irc.say(input.context, "There aren't any quotes for "+input.context+" ~ add some!");
 				}
 				break;
 			default:
