@@ -1,5 +1,6 @@
 // http://mangafox.me/rss/fairy_tail.xml
 var mangaDB = new DB.Json({filename: "manga"}),
+	ent = require('./lib/entities.js'),
 	sys = require('sys'),
 	fs = require('fs');
 
@@ -24,7 +25,7 @@ function checkManga(manga, context) {
 			title = /<title>(.*)<\/title>/.exec(stdout)[1];
 			if (entry.announce.length > 0) {
 				entry.announce.forEach(function (target) {
-					irc.say(target, "New release! "+title+" was released "+lib.duration(new Date(date))+" ago.");
+					irc.say(target, "New release! "+ent.decode(title)+" was released "+lib.duration(new Date(date))+" ago.");
 				});
 			}
 			entry.date = date;
