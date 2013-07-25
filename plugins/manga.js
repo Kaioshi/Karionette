@@ -25,7 +25,8 @@ function checkManga(manga, context) {
 			title = /<title>(.*)<\/title>/.exec(stdout)[1];
 			if (entry.announce.length > 0) {
 				entry.announce.forEach(function (target) {
-					irc.say(target, "New release! "+ent.decode(title)+" was released "+lib.duration(new Date(date))+" ago.");
+					irc.say(target, "New release! "+ent.decode(title)+" was released "+
+						lib.duration(new Date(new Date(date).valueOf()-18000000))+" ago.");
 				});
 			}
 			entry.date = date;
@@ -33,7 +34,6 @@ function checkManga(manga, context) {
 			mangaDB.saveOne(manga, entry);
 		} else {
 			if (context) irc.say(context, "No update for "+manga+" :<");
-			logger.debug("No update for "+manga);
 		}
 	});
 }
