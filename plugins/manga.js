@@ -13,7 +13,7 @@ function checkAll() {
 timers.Add(600000, checkAll);
 
 function checkManga(manga, context) {
-	var date, title,
+	var date, title, huzzah,
 		entry = mangaDB.getOne(manga);
 	if (!entry) {
 		logger.debug("[manga] check("+[manga, context].join(", ")+") called, manga doesn't exist");
@@ -25,8 +25,10 @@ function checkManga(manga, context) {
 			title = /<title>(.*)<\/title>/.exec(stdout)[1];
 			if (entry.announce.length > 0) {
 				entry.announce.forEach(function (target) {
-					irc.say(target, "New release! "+ent.decode(title)+" was released "+
-						lib.duration(new Date(new Date(date).valueOf()-18000000))+" ago.");
+					huzzah = "New release! "+ent.decode(title)+
+						" was released "+lib.duration(new Date(new Date(date).valueOf()-18000000))+" ago.";
+					if (target[0] === "#") irc.say(target, huzzah);
+					else irc.notice(target, huzzah);
 				});
 			}
 			entry.date = date;
