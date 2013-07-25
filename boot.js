@@ -11,6 +11,7 @@ require("./lib/funcs.js");
 require("./lib/logger.js");
 require("./lib/ial.js");
 require("./lib/permissions.js");
+require("./lib/timers.js");
 require("./config.js");
 
 var DB = require("./lib/fileDB.js"),
@@ -21,6 +22,14 @@ var DB = require("./lib/fileDB.js"),
 	Plugin = require("./plugin.js"),
 	repl = require('repl');
 lib.memProf("loading requires");
+
+function memClean() {
+	lib.memProf("Running GC");
+	global.gc();
+	lib.memProf("Running GC");
+}
+
+timers.Add(10000, memClean);
 
 function createSandbox() {
 	return {
@@ -33,6 +42,7 @@ function createSandbox() {
 		DB: DB,
 		lib: lib,
 		ial: ial,
+		timers: timers,
 		require: require,
 		regexFactory: regexFactory,
 		listen: Eventpipe.bind,

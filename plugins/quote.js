@@ -17,7 +17,7 @@ listen({
 	command: {
 		root: "quote",
 		options: "add, remove, find, random",
-		help: "<mitch_> should I into quotes",
+		help: "Quote added by mitch- on 24/07/13: <mitch_> should I into quotes",
 		syntax: "[Help] Syntax: "+config.command_prefix+"quote <add/remove> <mitch_> huurrr memes - quote find <search term> - quote random"
 	},
 	callback: function (input, match) {
