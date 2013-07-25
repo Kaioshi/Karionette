@@ -13,26 +13,25 @@ function checkAll() {
 timers.Add(600000, checkAll);
 
 function checkManga(manga, context) {
-	var date, title, huzzah,
+	var huzzah,
 		entry = mangaDB.getOne(manga);
 	if (!entry) {
 		logger.debug("[manga] check("+[manga, context].join(", ")+") called, manga doesn't exist");
 		return;
 	}
-	sys.exec("curl -# "+entry.url+" | head -n 20 | tail -n 4 | grep -v -E \"(<link>|<description>)\"", function (error, stdout, stderr) {
-		date = /<pubDate>(.*)<\/pubDate>/.exec(stdout)[1];
-		if (date !== entry.date) {
-			title = /<title>(.*)<\/title>/.exec(stdout)[1];
+	sys.exec("curl -# "+entry.url+
+		" | grep -E -o \"<title>.*</title>\" | grep -E -o \">.*<\" | grep -E -o \"[^<>]*\" | grep -v \"Manga Fox\" | sort | tail -n 1", 
+		function (error, stdout, stderr) {
+		stdout = stdout.slice(0,-1); // stdout always has a \n
+		if (stdout !== entry.title) {
 			if (entry.announce.length > 0) {
 				entry.announce.forEach(function (target) {
-					huzzah = "New release! "+ent.decode(title)+
-						" was released "+lib.duration(new Date(new Date(date).valueOf()-18000000))+" ago.";
+					huzzah = "New release! "+ent.decode(stdout)+" is out. \\o/";
 					if (target[0] === "#") irc.say(target, huzzah);
 					else irc.notice(target, huzzah);
 				});
 			}
-			entry.date = date;
-			entry.title = title;
+			entry.title = stdout;
 			mangaDB.saveOne(manga, entry);
 		} else {
 			if (context) irc.say(context, "No update for "+manga+" :<");
