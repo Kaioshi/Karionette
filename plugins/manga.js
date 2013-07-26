@@ -4,37 +4,44 @@ var mangaDB = new DB.Json({filename: "manga"}),
 	sys = require('sys'),
 	fs = require('fs');
 
-function checkAll() {
+function checkAllManga() {
 	Object.keys(mangaDB.getAll()).forEach(function (manga) {
 		checkManga(manga);
 	});
 }
 
-timers.Add(600000, checkAll);
+timers.Add(600000, checkAllManga);
 
 function checkManga(manga, context) {
-	var huzzah,
+	var huzzah, title, link,
 		entry = mangaDB.getOne(manga);
 	if (!entry) {
 		logger.debug("[manga] check("+[manga, context].join(", ")+") called, manga doesn't exist");
 		return;
 	}
-	sys.exec("curl -# "+entry.url+
-		" | grep -E -o \"<title>.*</title>\" | grep -E -o \">.*<\" | grep -E -o \"[^<>]*\" | grep -v \"Manga Fox\" | head -n 2", 
-		function (error, stdout, stderr) {
-		stdout = stdout.split("\n")[1];
-		if (stdout !== entry.title) {
+	sys.exec("curl -# "+entry.url+" | head -n 18 | tail -n 2", function (error, stdout, stderr) {
+		stdout = stdout.split("\n");
+		title = /<title>(.*)<\/title>/i.exec(stdout[0])[1];
+		if (title !== entry.title) {
+			link = /<link>(.*)<\/link>/i.exec(stdout[1])[1];
 			if (entry.announce.length > 0) {
 				entry.announce.forEach(function (target) {
-					huzzah = "New release! "+ent.decode(stdout)+" is out. \\o/";
+					huzzah = "New release! "+ent.decode(title)+" is out \\o/ ~ "+link;
 					if (target[0] === "#") irc.say(target, huzzah);
 					else irc.notice(target, huzzah);
 				});
 			}
-			entry.title = stdout;
+			entry.title = title;
+			entry.link = link;
 			mangaDB.saveOne(manga, entry);
 		} else {
-			if (context) irc.say(context, "No update for "+manga+" ~ Latest: "+entry.title);
+			if (context) {
+				if (!entry.link) {
+					entry.link = /<link>(.*)<\/link>/i.exec(stdout[1])[1];
+					mangaDB.saveOne(manga, entry);
+				}
+				irc.say(context, "No update for "+manga+"; Latest: "+entry.title+" ~ "+entry.link);
+			}
 		}
 	});
 }
@@ -175,8 +182,11 @@ listen({
 				break;
 			case "check":
 				manga = args.slice(1).join(" ");
-				if (!manga) { irc.say(input.context, this.command.syntax); return; }
-				checkManga(manga, input.context);
+				if (manga === "all") checkAllManga();
+				else {
+					if (!manga) { irc.say(input.context, this.command.syntax); return; }
+					checkManga(manga, input.context);
+				}
 				break;
 			case "list":
 				list = Object.keys(mangaDB.getAll());
