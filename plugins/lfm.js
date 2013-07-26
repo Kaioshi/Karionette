@@ -144,7 +144,7 @@ listen({
 					uri = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&username="+user+"&api_key="+config.api.lfm+"&artist="+song.artist+"&track="+song.track+"&format=json";
 					web.get(uri, function (error, response, body) {
 						result = JSON.parse(body);
-						song.userplays = result.track.userplaycount;
+						song.userplays = (result.track.userplaycount ? " - User Plays: "+result.track.userplaycount : "");
 						song.playcount = result.track.playcount;
 						song.listeners = result.track.listeners;
 						song.duration = dura(result.track.duration);
@@ -163,7 +163,7 @@ listen({
 							} else {
 								song.tags.push("No tags found");
 							}
-							irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+"\" ["+song.tags.join(", ")+"] ("+song.duration+") ~ "+song.date+" - User Plays: "+song.userplays+" - Total Plays: "+song.playcount+" - Current Listeners: "+song.listeners);
+							irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+"\" ["+song.tags.join(", ")+"] ("+song.duration+") ~ "+song.date+song.userplays+" - Total Plays: "+song.playcount+" - Current Listeners: "+song.listeners);
 						});
 					});
 				} else {
