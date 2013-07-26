@@ -8,7 +8,7 @@ listen({
 	handle: "titleSnarfer",
 	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :?.*((?:https?:\\/\\/)[^ ]+)"),
 	callback: function (input, match) {
-		var uri, title, reg, ext, allow, length = 5000;
+		var uri, title, reg, ext, allow, length = 10000;
 		
 		function zero(n) {
 			return (n > 9 ? n : "0"+n);
