@@ -34,7 +34,7 @@ function checkManga(manga, context) {
 			entry.title = stdout;
 			mangaDB.saveOne(manga, entry);
 		} else {
-			if (context) irc.say(context, "No update for "+manga+" :<");
+			if (context) irc.say(context, "No update for "+manga+" ~ Latest: "+entry.title);
 		}
 	});
 }
