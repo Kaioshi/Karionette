@@ -20,9 +20,9 @@ function checkManga(manga, context) {
 		return;
 	}
 	sys.exec("curl -# "+entry.url+
-		" | grep -E -o \"<title>.*</title>\" | grep -E -o \">.*<\" | grep -E -o \"[^<>]*\" | grep -v \"Manga Fox\" | sort | tail -n 1", 
+		" | grep -E -o \"<title>.*</title>\" | grep -E -o \">.*<\" | grep -E -o \"[^<>]*\" | grep -v \"Manga Fox\" | head -n 2", 
 		function (error, stdout, stderr) {
-		stdout = stdout.slice(0,-1); // stdout always has a \n
+		stdout = stdout.split("\n")[1];
 		if (stdout !== entry.title) {
 			if (entry.announce.length > 0) {
 				entry.announce.forEach(function (target) {
