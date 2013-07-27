@@ -141,7 +141,7 @@ listen({
 							return;
 						}
 						if (feed.announce.some(function (entry) { return (entry === reg[1]); })) {
-							if (reg[1][0] !== '#' && reg[1] !== input.from && !ial.isAdmin(input.user)) {
+							if (reg[1][0] !== '#' && reg[1] !== input.from && !permissions.isAdmin(input.user)) {
 								irc.say(input.context, "You need to be an admin to remove people other than yourself.");
 								return;
 							}
