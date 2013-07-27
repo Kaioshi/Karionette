@@ -13,7 +13,7 @@ function checkAllManga() {
 timers.Add(600000, checkAllManga);
 
 function checkManga(manga, context) {
-	var huzzah, title, link,
+	var huzzah, title, link, last, messages, sent = false,
 		entry = mangaDB.getOne(manga);
 	if (!entry) {
 		logger.debug("[manga] check("+[manga, context].join(", ")+") called, manga doesn't exist");
@@ -21,14 +21,35 @@ function checkManga(manga, context) {
 	}
 	sys.exec("curl -# "+entry.url+" | head -n 18 | tail -n 2", function (error, stdout, stderr) {
 		stdout = stdout.split("\n");
-		title = /<title>(.*)<\/title>/i.exec(stdout[0])[1];
+		title = /<title>(.*)<\/title>/i.exec(stdout[0]);
+		if (!title) return; // mangafox hasn't responded appropriately. let's just wait.
+		title = title[1];
 		if (title !== entry.title) {
 			link = /<link>(.*)<\/link>/i.exec(stdout[1])[1];
 			if (entry.announce.length > 0) {
 				entry.announce.forEach(function (target) {
 					huzzah = "New release! "+ent.decode(title)+" is out \\o/ ~ "+link;
-					if (target[0] === "#") irc.say(target, huzzah);
-					else irc.notice(target, huzzah);
+					if (target[0] === "#") {
+						irc.say(target, huzzah);
+						last = target;
+					} else {
+						ial.Channels().forEach(function (chan) {
+							ial.Nicks(chan).forEach(function (nick) {
+								if (nick === target) {
+									irc.notice(nick, huzzah);
+									sent = true;
+								}
+							});
+						});
+						if (!sent && last) {
+							// will have to assume this person goes to one of the announce channels.
+							messages = fs.readFileSync("data/messages.txt").toString().split("\n");
+							huzzah = last+"@"+target+": "+huzzah;
+							if (!messages.some(function (line) { return (huzzah === line); })) {
+								fs.appendFile("data/messages.txt", "\n"+huzzah);
+							}
+						}
+					}
 				});
 			}
 			entry.title = title;
@@ -94,7 +115,7 @@ listen({
 						} else {
 							// need to be an admin to add someone who isn't you
 							if (reg[1] !== input.from) {
-								if (ial.isAdmin(input.user)) {
+								if (permissions.isAdmin(input.user)) {
 									irc.say(input.context, "Adding "+reg[1]+" to "+reg[2]+"'s announce list, since you're an admin.");
 									feed.announce.push(reg[1]);
 									mangaDB.saveOne(reg[2], feed);
