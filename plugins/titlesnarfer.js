@@ -53,7 +53,7 @@ listen({
 		sys.exec("wget -q -O- "+uri.href.replace(/&/g, "\\&")+" | head -c "+length+
 			" | tr \'\\n\' \' \' | grep -E -io \"<title?.*>(.*?)<\/title>\" | grep -E -o \">(.*)<\"",
 		function (error, stdout, stderr) {
-			title = stdout.slice(1,-2).trim();
+			title = ent.decode(stdout.slice(1,-2).trim());
 			if (title.slice(-8) === " - Imgur") title = title.slice(0,-8);
 			if (title) {
 				irc.say(input.context, title+" ~ "+uri.host);
