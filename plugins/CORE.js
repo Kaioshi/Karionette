@@ -45,32 +45,34 @@ listen({
 listen({
 	plugin: "CORE",
 	handle: "ctcp",
-	regex: /^:[^ ]+ PRIVMSG [^ ]+ :\x01(VERSION|PING|PING .*|TIME)\x01$/i,
+	regex: /^:[^ ]+ PRIVMSG [^ ]+ :\x01(VERSION|PING .*|TIME)\x01$/i,
 	callback: function (input, match) {
-		var fun, ctcp;
-		if (match[1].match(/VERSION/i)) {
-			fun = [ 
-				"Now with 90% more butts!",
-				"All dem bot butts",
-				"This one time, at band camp..",
-				"Secretly loves fish fingers and custard",
-				"Dun dun dunnnn",
-				"N-Nya..",
-				"Pantsu?",
-				"PANTSU!",
-				"Needs more Pantsu." ];
-			irc.raw("NOTICE "+input.context+" :\x01VERSION Karionette ~ \x02"+fun[Math.floor(Math.random()*fun.length)]+
-				"\x02 ~ https://github.com/Kaioshi/Karionette.git [based on Marionette by Deide @ EsperNet]\x01");
-			return;
-		}
-		if (match[1].match(/TIME/i)) {
-			irc.raw("NOTICE "+input.context+" :\x01TIME "+new Date()+"\x01");
-			return;
-		}
-		ctcp = match[1].split(" ");
-		if (ctcp[0].match(/PING/i)) {
-			if (!ctcp[1]) ctcp[1] = new Date().valueOf();
-			irc.raw("NOTICE "+input.context+" :\x01PING "+ctcp.slice(1).join(" ")+"\x01");
+		var fun, 
+			ctcp = match[1].split(" ");
+		switch (ctcp[0].toUpperCase()) {
+			case "VERSION":
+				fun = [
+					"Now with 90% more butts!",
+					"All dem bot butts",
+					"This one time, at band camp..",
+					"Secretly loves fish fingers and custard",
+					"Dun dun dunnnn",
+					"N-Nya..",
+					"Pantsu?",
+					"PANTSU!",
+					"Needs more Pantsu."
+				];
+				irc.raw("NOTICE "+input.context+" :\x01VERSION Karionette ~ \x02"+fun[Math.floor(Math.random()*fun.length)]+
+					"\x02 ~ https://github.com/Kaioshi/Karionette.git [based on Marionette by Deide @ EsperNet]\x01");
+				break;
+			case "TIME":
+				irc.raw("NOTICE "+input.context+" :\x01TIME "+new Date()+"\x01");
+				break;
+			case "PING":
+				irc.raw("NOTICE "+input.context+" :\x01PING "+ctcp.slice(1).join(" ")+"\x01");
+				break;
+			default:
+				break; // should never happen
 		}
 	}
 });
