@@ -45,7 +45,7 @@ listen({
 listen({
 	plugin: "CORE",
 	handle: "ctcp",
-	regex: /^:[^ ]+ PRIVMSG [^ ]+ :\x01(VERSION|PING .*|TIME)\x01$/i,
+	regex: /^:[^ ]+ PRIVMSG [^ ]+ :\x01(VERSION|PING|PING .*|TIME)\x01$/i,
 	callback: function (input, match) {
 		var fun, ctcp;
 		if (match[1].match(/VERSION/i)) {
@@ -69,6 +69,7 @@ listen({
 		}
 		ctcp = match[1].split(" ");
 		if (ctcp[0].match(/PING/i)) {
+			if (!ctcp[1]) ctcp[1] = new Date().valueOf();
 			irc.raw("NOTICE "+input.context+" :\x01PING "+ctcp.slice(1).join(" ")+"\x01");
 		}
 	}
