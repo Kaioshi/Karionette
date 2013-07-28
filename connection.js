@@ -164,12 +164,12 @@ module.exports = function (Eventpipe) {
 			send("PART :" + sanitise(channel));
 		},
 		say: function (context, message, sanitiseMessage, maxmsgs) {
-			var privmsg, max, maxMessages;
+			var privmsg, max, maxMessages, i;
 			if (context && message) {
 				context = sanitise(context); // Avoid sanitising more than once
 				privmsg = "PRIVMSG " + context + " :";
 				if (irc_config.address) {
-					max = 510 - (irc_config.nick.length+irc_config.address.length+3+privmsg.length);
+					max = 508 - (irc_config.nick.length+irc_config.address.length+3+privmsg.length);
 				} else {
 					max = 473 - privmsg.length; // yay magic numbers - haven't joined a channel yet.
 				}
@@ -179,8 +179,8 @@ module.exports = function (Eventpipe) {
 				}
 				if (Eventpipe.isInAlias === false) {
 					while (message && (maxMessages -= 1) >= 0) {
-						var i = 0,
-							tempMsg = message.slice(0, max);
+						i = 0;
+						tempMsg = message.slice(0, max);
 						if (message.length > tempMsg.length) {
 							max = max-3;
 							while (message[max - i] !== " ") {
@@ -196,12 +196,22 @@ module.exports = function (Eventpipe) {
 				}
 			}
 		},
-		reply: function (input, message) {
-			this.say(input.context, input.from + ": " + message);
+		reply: function (input, message, sanitiseReply) {
+			if (input && message) {
+				if (sanitiseReply !== false) {
+					this.say(input.context, input.from + ": " + message);
+				} else {
+					this.say(input.context, input.from + ": " + message, false);
+				}
+			}
 		},
-		action: function (channel, action) {
+		action: function (channel, action, sanitiseAction) {
 			if (channel && action) {
-				send("PRIVMSG " + sanitise(channel) + " :\x01ACTION " + sanitise(action) + "\x01");
+				if (sanitiseAction !== false) {
+					this.say(channel, "\x01ACTION "+sanitise(action)+"\x01", false);
+				} else {
+					this.say(channel, "\x01ACTION "+action+"\x01", false);
+				}
 			}
 		},
 		notice: function (target, notice) {

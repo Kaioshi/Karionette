@@ -110,6 +110,20 @@ listen({
 
 listen({
 	plugin: "CORE",
+	handle: "actionuni",
+	regex: regexFactory.startsWith("actionuni"),
+	command: {
+		root: "action",
+		options: "{What you want me to do}",
+		help: "Makes me do something. Der!"
+	},
+	callback: function (input, match) {
+		irc.action(input.context, match[1], false);
+	}
+});
+
+listen({
+	plugin: "CORE",
 	handle: "notice",
 	regex: regexFactory.startsWith("notice"),
 	command: {
