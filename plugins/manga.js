@@ -12,23 +12,33 @@ function checkAllManga() {
 
 timers.Add(600000, checkAllManga);
 
-function checkManga(manga, context) {
-	var huzzah, title, link, last, messages, sent = false,
+function checkManga(manga, context, first) {
+	var huzzah, title, link, last, messages, date,
+		sent = false,
+		strip = (!first ? " | head -n 18 | tail -n 2" : " | head -n 20 | tail -n 4"),
 		entry = mangaDB.getOne(manga);
 	if (!entry) {
 		logger.debug("[manga] check("+[manga, context].join(", ")+") called, manga doesn't exist");
 		return;
 	}
-	sys.exec("curl -# "+entry.url+" | head -n 18 | tail -n 2", function (error, stdout, stderr) {
+	sys.exec("curl -# "+entry.url+strip, function (error, stdout, stderr) {
 		stdout = stdout.split("\n");
 		title = /<title>(.*)<\/title>/i.exec(stdout[0]);
-		if (!title) return; // mangafox hasn't responded appropriately. let's just wait.
+		if (!title) {
+			logger.debug("No response from "+entry.url);
+			return; // mangafox hasn't responded appropriately. let's just wait.
+		}
 		title = title[1];
 		if (title !== entry.title) {
 			link = /<link>(.*)<\/link>/i.exec(stdout[1])[1];
 			if (entry.announce.length > 0) {
 				entry.announce.forEach(function (target) {
-					huzzah = "New release! "+ent.decode(title)+" is out \\o/ ~ "+link;
+					if (first) {
+						date = /<pubDate>(.*)<\/pubDate>/i.exec(stdout[3])[1];
+						huzzah = ent.decode(title)+" was released on "+date+" ~ "+link;
+					} else {
+						huzzah = "New release! "+ent.decode(title)+" is out \\o/ ~ "+link;
+					}
 					if (target[0] === "#") {
 						irc.say(target, huzzah);
 						last = target;
@@ -187,7 +197,7 @@ listen({
 				}
 				mangaDB.saveOne(reg[1], { url: reg[2], addedBy: input.from, announce: [ input.context ]});
 				setTimeout(function () {
-					checkManga(reg[1], input.context);
+					checkManga(reg[1], input.context, true);
 				}, 1000); // let the db get updated.
 				irc.say(input.context, "Added "+reg[1]+" to the manga watch list.");
 				break;
