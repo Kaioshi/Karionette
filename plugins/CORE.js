@@ -45,7 +45,7 @@ listen({
 listen({
 	plugin: "CORE",
 	handle: "ctcp",
-	regex: /^:[^ ]+ PRIVMSG [^ ]+ :\x01(VERSION|PING .*)\x01$/i,
+	regex: /^:[^ ]+ PRIVMSG [^ ]+ :\x01(VERSION|PING .*|TIME)\x01$/i,
 	callback: function (input, match) {
 		var fun, ctcp;
 		if (match[1].match(/VERSION/i)) {
@@ -61,6 +61,10 @@ listen({
 				"Needs more Pantsu." ];
 			irc.raw("NOTICE "+input.context+" :\x01VERSION Karionette ~ \x02"+fun[Math.floor(Math.random()*fun.length)]+
 				"\x02 ~ https://github.com/Kaioshi/Karionette.git [based on Marionette by Deide @ EsperNet]\x01");
+			return;
+		}
+		if (match[1].match(/TIME/i)) {
+			irc.raw("NOTICE "+input.context+" :\x01TIME "+new Date()+"\x01");
 			return;
 		}
 		ctcp = match[1].split(" ");
