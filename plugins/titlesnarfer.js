@@ -17,24 +17,26 @@ listen({
 		function youtubeIt(id, host) {
 			var uri = "https://gdata.youtube.com/feeds/api/videos/"+id+"?v=2&alt=json";
 			web.get(uri, function (error, response, body) {
-				var rating, date;
+				var date, rating = " ~ ";
 				if (error) {
 					logger.error("[titlesnarfer[youtubeIt("+id+")]] error: "+error);
 					irc.say(input.context, "Something has gone awry.");
 					return;
 				}
 				body = JSON.parse(body).entry;
-				rating = body["gd$rating"].average.toString().slice(0,3);
+				if (body["gd$rating"] && body["gd$rating"].average) {
+					rating = rating+"["+body["gd$rating"].average.toString().slice(0,3)+"/5] ~ ";
+				}
 				date = new Date(body["media$group"]["yt$uploaded"]["$t"]);
 				date = zero(date.getDate())+"/"+zero(date.getMonth()+1)+"/"+date.getYear().toString().slice(1);
-				irc.say(input.context, body.title["$t"]+" ~ ["+rating+"/5] "+date+", "+body["yt$statistics"].viewCount+" views ~ "+host.replace("www.",""), false);
+				irc.say(input.context, body.title["$t"]+rating+date+", "+body["yt$statistics"].viewCount+" views ~ "+host.replace("www.",""), false);
 			});
 		}
 		
 		if (input.data[0] === config.command_prefix) return;
 		uri = url.parse(match[1]);
-		if (uri.host.indexOf("youtube.com") > -1 && uri.path.indexOf("watch?v=") > -1) {
-			youtubeIt(/^\/watch\?v=([^ &]+)/i.exec(uri.path)[1], uri.host);
+		if (uri.host.indexOf("youtube.com") > -1 && uri.path.indexOf("v=") > -1) {
+			youtubeIt(/v=([^ &]+)/i.exec(uri.path)[1], uri.host);
 			return;
 		}
 		if (uri.host.indexOf("youtu.be") > -1 && uri.path.length > 1) {
@@ -56,7 +58,7 @@ listen({
 			title = ent.decode(stdout.slice(1,-2).trim());
 			if (title.slice(-8) === " - Imgur") title = title.slice(0,-8);
 			if (title) {
-				irc.say(input.context, title+" ~ "+uri.host);
+				irc.say(input.context, title+" ~ "+uri.host, false);
 			} else {
 				logger.debug("Couldn't find title in first "+length+" bytes of "+uri.href);
 			}
