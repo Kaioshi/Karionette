@@ -45,7 +45,7 @@ function checkManga(manga, context, first) {
 					} else {
 						ial.Channels().forEach(function (chan) {
 							ial.Nicks(chan).forEach(function (nick) {
-								if (nick === target) {
+								if (nick === target && !sent) {
 									irc.notice(nick, huzzah);
 									sent = true;
 								}
