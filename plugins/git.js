@@ -13,12 +13,9 @@ listen({
 		var reg;
 		if (match[1] === "pull" && permissions.isAdmin(input.user)) {
 			sys.exec("git pull", function (error, stdout, stderr) {
-				globals.lastStdout = stdout;
 				if (stdout === "Already up-to-date.\n") irc.say(input.context, stdout.slice(0,-1));
 				else {
 					reg = /\n ([0-9]+) files changed, ([0-9]+) insertions\(\+\), ([0-9]+) deletions\(\-\)\n/.exec(stdout);
-					globals.lastReg = reg;
-					console.log(reg);
 					irc.say(input.context, reg[1]+" files changed; "+reg[2]+" insertions, "+reg[3]+" deletions.");
 				}
 			});
