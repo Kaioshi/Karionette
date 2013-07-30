@@ -219,6 +219,10 @@ listen({
 					irc.say(input.context, "Already checking "+reg[1]+" every "+reg[2]+reg[3]+".");
 					return;
 				}
+				if (feed.freq < 600000) {
+					irc.say(input.context, "I wont check more often than once every 10 minutes.");
+					return;
+				}
 				mangaDB.saveOne(reg[1], feed);
 				irc.say(input.context, "Will now check for "+reg[1]+" updates every "+reg[2]+reg[3]+".");
 				timers.Remove(tmp, checkManga, reg[1]);
