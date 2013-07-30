@@ -14,6 +14,7 @@ listen({
 		if (match[1] === "pull" && permissions.isAdmin(input.user)) {
 			sys.exec("git pull", function (error, stdout, stderr) {
 				reg = /^ ([0-9]+) files changed, ([0-9]+) insertions(+), ([0-9]+) deletions(-)$/.exec(stdout);
+				globals.lastReg = reg;
 				console.log(reg);
 			});
 		} else {
