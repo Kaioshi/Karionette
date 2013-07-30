@@ -53,12 +53,14 @@ function checkManga(manga, context, first) {
 					} else {
 						sent = false;
 						ial.Channels().forEach(function (chan) {
-							ial.Nicks(chan).forEach(function (nick) {
-								if (nick === target && !sent) {
-									irc.notice(nick, huzzah);
-									sent = true;
-								}
-							});
+							if (!sent) {
+								ial.Nicks(chan).forEach(function (nick) {
+									if (!sent && nick === target) {
+										irc.notice(nick, huzzah);
+										sent = true;
+									}
+								});
+							}
 						});
 						if (!sent && last) {
 							// will have to assume this person goes to one of the announce channels.
@@ -238,7 +240,7 @@ listen({
 					url: reg[2],
 					addedBy: input.from,
 					announce: [ input.context ],
-					freq: 600000 
+					freq: 600000
 				});
 				setTimeout(function () {
 					checkManga(reg[1], input.context, true);
