@@ -3,7 +3,7 @@ var sys = require('sys');
 listen({
 	plugin: "git",
 	handle: "git",
-	regex: regexFatory.startsWith("git"),
+	regex: regexFactory.startsWith("git"),
 	command: {
 		root: "git",
 		options: "pull",
