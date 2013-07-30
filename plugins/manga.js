@@ -8,11 +8,6 @@ function addTimers() {
 	var entry;
 	Object.keys(mangaDB.getAll()).forEach(function (manga) {
 		entry = mangaDB.getOne(manga);
-		if (!entry.freq) {
-			// old version didn't have freq set by default
-			entry.freq = 600000;
-			mangaDB.saveOne(manga, entry);
-		}
 		timers.Add(entry.freq, checkManga, manga);
 		entry = null;
 	});
