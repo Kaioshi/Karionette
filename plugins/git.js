@@ -19,6 +19,7 @@ listen({
 					reg = /\n ([0-9]+) files changed, ([0-9]+) insertions\(\+\), ([0-9]+) deletions\(\-\)\n/.exec(stdout);
 					globals.lastReg = reg;
 					console.log(reg);
+					irc.say(input.context, reg[1]+" files changed; "+reg[2]+" insertions, "+reg[3]+" deletions.");
 				}
 			});
 		} else {
