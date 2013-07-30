@@ -14,9 +14,12 @@ listen({
 		if (match[1] === "pull" && permissions.isAdmin(input.user)) {
 			sys.exec("git pull", function (error, stdout, stderr) {
 				globals.lastStdout = stdout;
-				reg = /^ ([0-9]+) files changed, ([0-9]+) insertions\(\+\), ([0-9]+) deletions\(\-\)$/.exec(stdout);
-				globals.lastReg = reg;
-				console.log(reg);
+				if (stdout === "Already up-to-date.\n") irc.say(input.context, stdout.slice(0,-1));
+				else {
+					reg = /^ ([0-9]+) files changed, ([0-9]+) insertions\(\+\), ([0-9]+) deletions\(\-\)/.exec(stdout);
+					globals.lastReg = reg;
+					console.log(reg);
+				}
 			});
 		} else {
 			irc.say(input.context, "There is only one option. "+config.command_prefix+"git pull");
