@@ -4,18 +4,33 @@ var mangaDB = new DB.Json({filename: "manga"}),
 	sys = require('sys'),
 	fs = require('fs');
 
+function addTimers() {
+	var entry;
+	Object.keys(mangaDB.getAll()).forEach(function (manga) {
+		entry = mangaDB.getOne(manga);
+		if (!entry.freq) {
+			// old version didn't have freq set by default
+			entry.freq = 600000;
+			mangaDB.saveOne(manga, entry);
+		}
+		timers.Add(entry.freq, checkManga, manga);
+		entry = null;
+	});
+}
+
 function checkAllManga() {
 	Object.keys(mangaDB.getAll()).forEach(function (manga) {
 		checkManga(manga);
 	});
 }
 
-timers.Add(600000, checkAllManga);
+addTimers();
 
 function checkManga(manga, context, first) {
 	var huzzah, title, link, last, messages, date, sent,
 		strip = (!first ? " | head -n 18 | tail -n 2" : " | head -n 20 | tail -n 4"),
 		entry = mangaDB.getOne(manga);
+	logger.debug("checkManga("+Array.prototype.slice.call(arguments).join(", ")+") called");
 	if (!entry) {
 		logger.debug("[manga] check("+[manga, context].join(", ")+") called, manga doesn't exist");
 		return;
@@ -88,7 +103,7 @@ listen({
 			"mw <add/remove/check/list/announce> - Example: "+config.command_prefix+"mw check Noblesse"
 	},
 	callback: function (input, match) {
-		var feed, reg, list, manga,
+		var feed, reg, list, manga, tmp,
 			args = match[1].split(" ");
 		switch (args[0]) {
 			case "announce":
@@ -183,6 +198,32 @@ listen({
 						break;
 				}
 				break;
+			case "update":
+				reg = /(.*) every ([0-9]+) ?(m|minutes|h|hour|hours)/i.exec(args.slice(1).join(" "));
+				globals.lastReg = reg;
+				if (!reg) {
+					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
+						"mw update <manga title> every <Nm/Nh> - Example: "+config.command_prefix+
+						"mw update Naruto every 30m");
+					return;
+				}
+				feed = mangaDB.getOne(reg[1]);
+				if (!feed) {
+					irc.say(input.context, "Couldn't find \""+reg[1]+"\" in the manga watch list. Pantsu.");
+					return;
+				}
+				tmp = feed.freq;
+				if (reg[3].match(/m|minutes/)) feed.freq = parseInt(reg[2])*60000;
+				else feed.freq = parseInt(reg[2])*3600000;
+				if (tmp === feed.freq) {
+					irc.say(input.context, "Already checking "+reg[1]+" every "+reg[2]+reg[3]+".");
+					return;
+				}
+				mangaDB.saveOne(reg[1], feed);
+				irc.say(input.context, "Will now check for "+reg[1]+" updates every "+reg[2]+reg[3]+".");
+				timers.Remove(tmp, checkManga, reg[1]);
+				timers.Add(feed.freq, checkManga, reg[1]);
+				break;
 			case "add":
 				reg = /^(.*) (https?:\/\/mangafox.me\/rss\/[^ \.]+\.xml)$/i.exec(args.slice(1).join(" "));
 				if (!reg) {
@@ -195,7 +236,12 @@ listen({
 					irc.say(input.context, reg[1]+" is already in the manga watch list.");
 					return;
 				}
-				mangaDB.saveOne(reg[1], { url: reg[2], addedBy: input.from, announce: [ input.context ]});
+				mangaDB.saveOne(reg[1], {
+					url: reg[2],
+					addedBy: input.from,
+					announce: [ input.context ],
+					freq: 600000 
+				});
 				setTimeout(function () {
 					checkManga(reg[1], input.context, true);
 				}, 1000); // let the db get updated.
