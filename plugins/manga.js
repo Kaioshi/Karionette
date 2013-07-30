@@ -13,8 +13,7 @@ function checkAllManga() {
 timers.Add(600000, checkAllManga);
 
 function checkManga(manga, context, first) {
-	var huzzah, title, link, last, messages, date,
-		sent = false,
+	var huzzah, title, link, last, messages, date, sent,
 		strip = (!first ? " | head -n 18 | tail -n 2" : " | head -n 20 | tail -n 4"),
 		entry = mangaDB.getOne(manga);
 	if (!entry) {
@@ -43,6 +42,7 @@ function checkManga(manga, context, first) {
 						irc.say(target, huzzah);
 						last = target;
 					} else {
+						sent = false;
 						ial.Channels().forEach(function (chan) {
 							ial.Nicks(chan).forEach(function (nick) {
 								if (nick === target && !sent) {
