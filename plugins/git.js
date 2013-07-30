@@ -16,7 +16,7 @@ listen({
 				if (stdout === "Already up-to-date.\n") irc.say(input.context, stdout.slice(0,-1));
 				else {
 					reg = /\n ([0-9]+) files changed, ([0-9]+) insertions\(\+\), ([0-9]+) deletions\(\-\)\n/.exec(stdout);
-					irc.say(input.context, reg[1]+" files changed; "+reg[2]+" insertions, "+reg[3]+" deletions.");
+					irc.say(input.context, reg[1]+" file(s) changed; "+reg[2]+" insertions, "+reg[3]+" deletions.");
 				}
 			});
 		} else {
@@ -24,3 +24,4 @@ listen({
 		}
 	}
 });
+
