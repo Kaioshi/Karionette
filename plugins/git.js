@@ -16,7 +16,7 @@ listen({
 				globals.lastStdout = stdout;
 				if (stdout === "Already up-to-date.\n") irc.say(input.context, stdout.slice(0,-1));
 				else {
-					reg = /^ ([0-9]+) files changed, ([0-9]+) insertions\(\+\), ([0-9]+) deletions\(\-\)/.exec(stdout);
+					reg = /\n ([0-9]+) files changed, ([0-9]+) insertions\(\+\), ([0-9]+) deletions\(\-\)\n/.exec(stdout);
 					globals.lastReg = reg;
 					console.log(reg);
 				}
