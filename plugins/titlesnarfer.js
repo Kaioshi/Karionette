@@ -3,6 +3,10 @@ var ent = require("./lib/entities.js"),
 	sys = require("sys"),
 	url = require("url");
 
+function zero(n) {
+	return (n > 9 ? n : "0"+n);
+}
+
 listen({
 	plugin: "titleSnarfer",
 	handle: "titleSnarfer",
@@ -10,8 +14,19 @@ listen({
 	callback: function (input, match) {
 		var uri, title, reg, ext, allow, length = 10000;
 		
-		function zero(n) {
-			return (n > 9 ? n : "0"+n);
+		function sayTitle(uri, length, imgur) {
+			sys.exec("wget -q -O- "+uri.href.replace(/&/g, "\\&")+" | head -c "+length+
+				" | tr \'\\n\' \' \' | grep -E -io \"<title?.*>(.*?)<\/title>\" | grep -E -o \">(.*)<\"",
+			function (error, stdout, stderr) {
+				title = ent.decode(stdout.slice(1,-2).trim());
+				if (title) {
+					if (title.slice(-8) === " - Imgur") title = title.slice(0,-8);
+					if (imgur) { // I know there are a lot of imgur corner cases, but it's really common.
+						if (title === "imgur: the simple image sharer") return; // deal with it
+					}
+					irc.say(input.context, title+" ~ "+uri.host, false);
+				}
+			});
 		}
 		
 		function youtubeIt(id, host) {
@@ -43,6 +58,12 @@ listen({
 			youtubeIt(/^\/([^ &]+)/.exec(uri.path)[1], uri.host);
 			return;
 		}
+		if (uri.host === "i.imgur.com" && uri.href.slice(-4).match(/\.jpg|\.png|\.gif/i)) {
+			uri.path = uri.path.slice(0,-4);
+			uri.href = uri.href.slice(0,-4);
+			sayTitle(uri, length, true);
+			return;
+		}
 		ext = /.*\.([a-zA-Z0-9]+)$/.exec(uri.path);
 		allow = [ 'htm', 'html', 'asp', 'aspx', 'php', 'php3', 'php5' ];
 		if (ext && !ext[0].match(/&|\?/)) {
@@ -52,17 +73,7 @@ listen({
 		}
 		// ton of garbage in the first 15000 characters. o_O
 		if (uri.host.indexOf("kotaku") > -1) length = 20000;
-		sys.exec("wget -q -O- "+uri.href.replace(/&/g, "\\&")+" | head -c "+length+
-			" | tr \'\\n\' \' \' | grep -E -io \"<title?.*>(.*?)<\/title>\" | grep -E -o \">(.*)<\"",
-		function (error, stdout, stderr) {
-			title = ent.decode(stdout.slice(1,-2).trim());
-			if (title.slice(-8) === " - Imgur") title = title.slice(0,-8);
-			if (title) {
-				irc.say(input.context, title+" ~ "+uri.host, false);
-			} else {
-				logger.debug("Couldn't find title in first "+length+" bytes of "+uri.href);
-			}
-		});
+		sayTitle(uri, length);
 	}
 });
 
