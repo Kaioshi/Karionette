@@ -7,12 +7,12 @@ globals = {
 	memProf: { "loading requires": process.memoryUsage().rss }
 };
 
+require("./config.js");
 require("./lib/funcs.js");
 require("./lib/logger.js");
 require("./lib/ial.js");
 require("./lib/permissions.js");
 require("./lib/timers.js");
-require("./config.js");
 
 var DB = require("./lib/fileDB.js"),
 	web = require("./lib/web.js"),
