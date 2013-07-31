@@ -92,7 +92,14 @@ listen({
 				break;
 			case "search":
 				if (args[1]) {
-					permissions.Search(args[1]);
+					access = permissions.Search(args[1]).slice(0, 3); // only the first 3 hits
+					if (access.length > 0) {
+						access.forEach(function (entry) {
+							irc.say(input.context, entry[0]+" "+entry[1]+": "+permissions.Info(input.user, entry[0], entry[1]));
+						});
+					} else {
+						irc.say(input.context, "No permissions found matching "+args[1]);
+					}
 				} else {
 					irc.say(input.context, "[Help] Syntax: permissions search <name>");
 				}
