@@ -120,7 +120,6 @@ listen({
 			}
 		} else {
 			user = lfmBindingsDB.getOne(input.from);
-			if (!user) user = input.from;
 		}
 		
 		if (user) {
