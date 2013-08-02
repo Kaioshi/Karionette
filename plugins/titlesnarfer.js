@@ -18,14 +18,18 @@ listen({
 			sys.exec("wget -q -O- "+uri.href.replace(/&/g, "\\&")+" | head -c "+length+
 				" | tr \'\\n\' \' \' | grep -E -io \"<title?.*>(.*?)<\/title>\" | grep -E -o \">(.*)<\"",
 			function (error, stdout, stderr) {
-				title = ent.decode(stdout.slice(1,-2).trim());
-				if (title) {
-					if (title.slice(-8) === " - Imgur") title = title.slice(0,-8);
-					if (imgur) { // I know there are a lot of imgur corner cases, but it's really common.
-						if (title === "imgur: the simple image sharer") return; // deal with it
-					}
-					irc.say(input.context, title+" ~ "+uri.host, false);
+				title = stdout.slice(1,-2);
+				if (!title) return;
+				if (title.toLowerCase().indexOf(uri.host) > -1) {
+					reg = new RegExp(" "+uri.host+" ?", "ig");
+					title = title.replace(reg, "");
 				}
+				title = ent.decode(title.trim());
+				if (title.slice(-8) === " - Imgur") title = title.slice(0,-8);
+				if (imgur) { // I know there are a lot of imgur corner cases, but it's really common.
+					if (title === "imgur: the simple image sharer") return; // deal with it
+				}
+				irc.say(input.context, title+" ~ "+uri.host, false);
 			});
 		}
 		
