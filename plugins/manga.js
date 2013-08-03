@@ -14,8 +14,12 @@ function addTimers() {
 }
 
 function checkAllManga() {
+	var time = 0; // lets give it a gap between each request.
 	Object.keys(mangaDB.getAll()).forEach(function (manga) {
-		checkManga(manga);
+		setTimeout(function () {
+			checkManga(manga);
+		}, time);
+		time += 1000;
 	});
 }
 
