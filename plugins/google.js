@@ -1,6 +1,27 @@
 ﻿// Returns first Google search result
 var ent = require("./lib/entities.js");
 
+function stripHtml(text) {
+	var i,
+		inside = false,
+		tmp = "",
+		ret = "";
+	text = text.replace(/\n/g, "");
+	text = text.trim();
+	text.split(" ").forEach(function (entry) {
+		if (entry.length > 0) tmp = tmp+entry+" ";
+	});
+	text = tmp;
+	for (i = 0; i < text.length; i++) {
+		if (text[i] === "<") inside = true;
+		if (text[i] === ">") inside = false;
+		else if (!inside) {
+			ret += text[i];
+		}
+	}
+	return ent.decode(ret);
+}
+
 listen({
 	plugin: "google",
 	handle: "google",
@@ -131,7 +152,11 @@ listen({
 					logger.error("[google-define] error looking up " + match[1] + " -> " + error);
 					return;
 				}
-				body = JSON.parse(body.slice(2, -10).replace(/\\\x[0-9a-f]{2}/g, ""));
+				body = JSON.parse(
+					stripHtml(body.slice(2, -10)
+					.replace(/\\x3c/g, "<")
+					.replace(/\\x3e/g, ">")
+					.replace(/\\x27/g, "'")));
 				if (!body.primaries) {
 					irc.say(input.context, "I couldn't find "+body.query+". :<");
 					return;
