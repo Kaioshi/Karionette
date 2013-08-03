@@ -96,7 +96,8 @@ listen({
 				}
 				// assume we've gone ;lfm -top <artist name>
 				artist = args.slice(1).join(" ");
-				uri = "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptracks&artist="+artist+"&api_key="+config.api.lfm+"&limit=5&format=json";
+				uri = "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptracks&artist="+artist+
+					"&api_key="+config.api.lfm+"&limit=5&format=json";
 				web.get(uri, function (error, response, body) {
 					result = JSON.parse(body);
 					if (result.error) {
@@ -121,57 +122,61 @@ listen({
 		} else {
 			user = lfmBindingsDB.getOne(input.from);
 		}
-		
-		if (user) {
-			uri = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=" + user + "&api_key=" + config.api.lfm + "&format=json";
+		if (!user) {
+			irc.say(input.context, "You're not bound! See ;help lfm");
+			return;
+		}
+		uri = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="+user+
+			"&api_key="+config.api.lfm+"&format=json";
+		web.get(uri, function (error, response, body) {
+			result = JSON.parse(body);
+			if (result.error || !result.recenttracks.track) {
+				irc.say(input.context, "No track found.");
+				return;
+			}
+			song = {};
+			song.artist = result.recenttracks.track[tn].artist["#text"];
+			song.track = result.recenttracks.track[tn].name;
+			song.tense = " listened to ";
+			if (result.recenttracks.track[tn].date)	{
+				then = new Date(parseInt(result.recenttracks.track[tn].date.uts)*1000);
+				now = new Date().valueOf();
+				song.date = timeAgo(then, now);
+			}
+			else if (result.recenttracks.track[tn]['@attr'] && result.recenttracks.track[tn]['@attr'].nowplaying) {
+				song.date = "right now";
+				song.tense = " is listening to ";
+			}
+			uri = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&username="+user+
+				"&api_key="+config.api.lfm+"&artist="+song.artist+"&track="+song.track+"&format=json";
 			web.get(uri, function (error, response, body) {
 				result = JSON.parse(body);
-				if (!result.error && result.recenttracks.track) {
-					song = {};
-					song.artist = result.recenttracks.track[tn].artist["#text"];
-					song.track = result.recenttracks.track[tn].name;
-					song.tense = " listened to ";
-					if (result.recenttracks.track[tn].date)	{
-						then = new Date(parseInt(result.recenttracks.track[tn].date.uts)*1000);
-						now = new Date().valueOf();
-						song.date = timeAgo(then, now);
+				song.userplays = (result.track.userplaycount ? " - User Plays: "+result.track.userplaycount : "");
+				song.playcount = result.track.playcount;
+				song.listeners = result.track.listeners;
+				song.duration = dura(result.track.duration);
+				uri = "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptags&artist="+song.artist+
+					"&api_key="+config.api.lfm+"&format=json";
+				web.get(uri, function (error, response, body) {
+					result = JSON.parse(body);
+					song.tags = [];
+					if (Array.isArray(result.toptags.tag)) {
+						keys = Object.keys(result.toptags.tag);
+						max = (keys.length < 3 ? keys.length : 3);
+						for (i = 0; i < max; i++) {
+							song.tags.push(result.toptags.tag[i].name);
+						}
+					} else if (result.toptags.tag.name) {
+						song.tags.push(result.toptags.tag.name);
+					} else {
+						song.tags.push("No tags found");
 					}
-					else if (result.recenttracks.track[tn]['@attr'] && result.recenttracks.track[tn]['@attr'].nowplaying) {
-						song.date = "right now";
-						song.tense = " is listening to ";
-					}
-					uri = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&username="+user+"&api_key="+config.api.lfm+"&artist="+song.artist+"&track="+song.track+"&format=json";
-					web.get(uri, function (error, response, body) {
-						result = JSON.parse(body);
-						song.userplays = (result.track.userplaycount ? " - User Plays: "+result.track.userplaycount : "");
-						song.playcount = result.track.playcount;
-						song.listeners = result.track.listeners;
-						song.duration = dura(result.track.duration);
-						uri = "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptags&artist="+song.artist+"&api_key="+config.api.lfm+"&format=json";
-						web.get(uri, function (error, response, body) {
-							result = JSON.parse(body);
-							song.tags = [];
-							if (Array.isArray(result.toptags.tag)) {
-								keys = Object.keys(result.toptags.tag);
-								max = (keys.length < 3 ? keys.length : 3);
-								for (i = 0; i < max; i++) {
-									song.tags.push(result.toptags.tag[i].name);
-								}
-							} else if (result.toptags.tag.name) {
-								song.tags.push(result.toptags.tag.name);
-							} else {
-								song.tags.push("No tags found");
-							}
-							irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+"\" ["+song.tags.join(", ")+"] ("+song.duration+") ~ "+song.date+song.userplays+" - Total Plays: "+song.playcount+" - Current Listeners: "+song.listeners);
-						});
-					});
-				} else {
-					irc.say(input.context, "No track found.");
-				}
+					irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+
+						"\" ["+song.tags.join(", ")+"] ("+song.duration+") ~ "+song.date+song.userplays+
+						" - Total Plays: "+song.playcount+" - Current Listeners: "+song.listeners);
+				});
 			});
-		} else {
-			irc.say(input.context, "You're not bound! See ;help lfm");
-		}
+		});
 	}
 });
 
