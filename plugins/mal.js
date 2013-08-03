@@ -18,7 +18,12 @@ function googleIt(context, full, type, term) {
 		result = JSON.parse(body).responseData.results[0];
 		if (result && result.titleNoFormatting) {
 			url = result.unescapedUrl;
-			reg = new RegExp("^http?:\\/\\/[^ ]+\\/(anime|manga)\\/([0-9]+)");
+			if (url.indexOf(".php?") > -1) {
+				reg = new RegExp("^https?:\\/\\/[^ ]+\\/(anime|manga)\\.php\\?id=([0-9]+)");
+			} else {
+				reg = new RegExp("^https?:\\/\\/[^ ]+\\/(anime|manga)\\/([0-9]+)");
+			}
+			
 			id = reg.exec(url)[2];
 			if (id) {
 				uri = "http://mal-api.com/"+type+"/"+id;
