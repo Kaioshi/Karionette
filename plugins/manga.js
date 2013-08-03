@@ -37,7 +37,7 @@ function checkManga(manga, context, first) {
 			logger.debug("No response from "+entry.url);
 			return; // mangafox hasn't responded appropriately. let's just wait.
 		}
-		title = title[1];
+		title = ent.decode(title[1]);
 		if (title === entry.title) {
 			if (context) {
 				if (!entry.link) {
@@ -55,9 +55,9 @@ function checkManga(manga, context, first) {
 		entry.announce.forEach(function (target) {
 			if (first) {
 				date = /<pubDate>(.*)<\/pubDate>/i.exec(stdout[3])[1];
-				huzzah = ent.decode(title)+" was released on "+date+" ~ "+entry.link;
+				huzzah = entry.title+" was released on "+date+" ~ "+entry.link;
 			} else {
-				huzzah = "New release! "+ent.decode(title)+" is out \\o/ ~ "+entry.link;
+				huzzah = "New release! "+entry.title+" is out \\o/ ~ "+entry.link;
 			}
 			if (target[0] === "#") {
 				irc.say(target, huzzah);
