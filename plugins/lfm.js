@@ -1,4 +1,5 @@
-﻿var lfmBindingsDB = new DB.Json({filename: "lfm"});
+﻿var ent = require('./lib/entities.js'),
+	lfmBindingsDB = new DB.Json({filename: "lfm"});
 
 // Last.fm
 listen({
@@ -7,12 +8,12 @@ listen({
 	regex: regexFactory.startsWith("lfm"),
 	command: {
 		root: "lfm",
-		options: "-bind -prev -top",
+		options: "-bind -prev -top -artist",
 		help: "Get's your last played track. Use -bind to bind your nick to your lfm account, allowing you to not have to supply an account name. Else just supply your account name."
 	},
 	callback: function (input, match) {
-		var uri, user, i, method, artist, track,
-			result, keys, ret, song, then, now,
+		var uri, user, i, method, artist, track, formed, summary,
+			result, keys, ret, song, then, now, tags, from,
 			args = match[1].split(" "),
 			max, tn = 0;
 		
@@ -29,6 +30,27 @@ listen({
 			ret.push((secs > 9 ? secs : "0"+secs));
 			return ret.join(":");
 			
+		}
+		
+		function stripHtml(text) {
+			var i,
+				inside = false,
+				tmp = "",
+				ret = "";
+			text = text.replace(/\n/g, "");
+			text = text.trim();
+			text.split(" ").forEach(function (entry) {
+				if (entry.length > 0) tmp = tmp+entry+" ";
+			});
+			text = tmp;
+			for (i = 0; i < text.length; i++) {
+				if (text[i] === "<") inside = true;
+				if (text[i] === ">") inside = false;
+				else if (!inside) {
+					ret += text[i];
+				}
+			}
+			return ent.decode(ret);
 		}
 		
 		function timeAgo(then, now) {
@@ -57,6 +79,39 @@ listen({
 		
 		if (args[0]) {
 			switch (args[0]) {
+			case "-a":
+			case "-artist":
+				if (!args[1]) {
+					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
+						"lfm -a <artist> - Example: "+config.command_prefix+
+						"lfm -a Rebecca Black");
+					return;
+				}
+				uri = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist="+args.slice(1).join(" ")+
+					"&api_key="+config.api.lfm+"&format=json";
+				web.get(uri, function (error, response, body) {
+					result = JSON.parse(body);
+					if (result.error) {
+						irc.say(input.context, result.message+" (Code: "+result.error+"). Pantsu.");
+						return;
+					}
+					formed = (result.artist.bio.yearformed ? ", formed in "+result.artist.bio.yearformed : "");
+					from = (result.artist.bio.placeformed ? ", from "+result.artist.bio.placeformed : "");
+					tags = [];
+					if (result.artist.tags.tag) {
+						result.artist.tags.tag.forEach(function (tag) {
+							tags.push(tag.name);
+						});
+					}
+					tags = (tags.length > 0 ? " ~ ["+tags.join(", ")+"]" : "");
+					irc.say(input.context,"Artist: "+result.artist.name+formed+from+tags+
+						" ~ Total Plays: "+result.artist.stats.playcount+
+						", Listeners: "+result.artist.stats.listeners);
+					summary = stripHtml(result.artist.bio.summary);
+					summary = (summary.length > 0 ? summary : "There was no artist summary. Did you spell it correctly?");
+					irc.say(input.context, summary, true, 1);
+				});
+				return;
 			case "-bind":
 				if (args[1]) {
 					lfmBindingsDB.saveOne(input.from, args[1]);
@@ -65,7 +120,6 @@ listen({
 					irc.say(input.context, "What am I binding?");
 				}
 				return;
-				break;
 			case "-top":
 				if (!args[1]) {
 					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"lfm -top <artists/tracks>");
