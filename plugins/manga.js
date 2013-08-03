@@ -5,11 +5,12 @@ var mangaDB = new DB.Json({filename: "manga"}),
 	fs = require('fs');
 
 function addTimers() {
-	var entry;
+	var entry, time = 0; // deviate by +1s per entry so none trigger at the same time.
 	Object.keys(mangaDB.getAll()).forEach(function (manga) {
 		entry = mangaDB.getOne(manga);
-		timers.Add(entry.freq, checkManga, manga);
+		timers.Add(entry.freq+time, checkManga, manga);
 		entry = null;
+		time += 1000;
 	});
 }
 
