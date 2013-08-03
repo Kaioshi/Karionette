@@ -30,10 +30,13 @@ listen({
 		switch (args[0]) {
 			case "add":
 				if (!args[1]) { irc.say(input.context, this.command.syntax); return; }
-				quote = { quote: args.slice(1).join(" "), from: input.user, date: new Date() };
+				quote = {};
 				quotes = quoteDB.getOne(input.context);
-				if (!quotes) quotes = [];
-				else { // make sure there are no duplicates
+				if (!quotes) {
+					quotes = [];
+					quote.num = 1;
+				} else { // make sure there are no duplicates
+					quote.num = quotes.length+1;
 					for (i = 0; i < quotes.length; i++) {
 						if (quotes[i].quote === quote.quote) {
 							if (quotes[i].from !== quote.from) {
@@ -48,6 +51,9 @@ listen({
 						}
 					}
 				}
+				quote.quote = args.slice(1).join(" ");
+				quote.from = input.user;
+				quote.date = new Date();
 				quotes.push(quote);
 				quoteDB.saveOne(input.context, quotes);
 				irc.say(input.context, "Added o7");
