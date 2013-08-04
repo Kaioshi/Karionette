@@ -30,7 +30,7 @@ function checkManga(manga, context, first) {
 	var huzzah, title, link, last, messages, date, sent,
 		strip = (!first ? " | head -n 18 | tail -n 2" : " | head -n 20 | tail -n 4"),
 		entry = mangaDB.getOne(manga);
-	logger.debug("checkManga("+[manga, context, first].join(", ")+") called");
+	//logger.debug("checkManga("+[manga, context, first].join(", ")+") called");
 	if (!entry) {
 		logger.debug("[manga] check("+[manga, context].join(", ")+") called, manga doesn't exist");
 		return;
