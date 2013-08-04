@@ -24,7 +24,7 @@ module.exports = (function () {
 	function makeVars(match, context, from) {
 		var i, args, newMatch;
 		var nicks = (context[0] === "#" ? ial.Active(context) : []),
-			nicks = (nicks.length > 0 ? nicks : [ "someone", "The Lawd Jasus", "your dad", "mitch_" ]),
+			nicks = (nicks.length > 0 ? nicks : [ "someone", "The Lawd Jasus", "your dad", "mitch_", "Asuna" ]),
 			av = lib.mix(varDB.getAll(), {
 					"{me}": irc_config.nick,
 					"{from}": from,
@@ -70,7 +70,10 @@ module.exports = (function () {
 				if (aliasMatch[1]) {
 					input.raw = input.raw.slice(0, -(aliasMatch[1].length) - 1);
 				}
-				input.raw = input.raw.replace(new RegExp("("+irc_config.command_prefix+"|"+irc_config.nickname.join("[:,-]? |")+"[:,-]? )"+aliasKeys[i],"i"),irc_config.command_prefix + toTransform);
+				input.raw = input.raw.replace(
+					new RegExp("("+irc_config.command_prefix+"|"
+						+irc_config.nickname.join("[:,-]? |")+"[:,-]? )"+aliasKeys[i],"i")
+						,irc_config.command_prefix + toTransform);
 				return input.raw;
 			}
 		}
@@ -81,9 +84,10 @@ module.exports = (function () {
 	function fireEvent(input) {
 		transformAlias(input);
 		keyCache.forEach(function (element) {
-			var match = listeners[element].regex.exec(input.raw);
+			var permission,
+				match = listeners[element].regex.exec(input.raw);
 			if (match) {
-				var permission = true;
+				permission = true;
 				if (listeners[element].plugin && input.user) {
 					permission = permissions.Check("plugin", listeners[element].plugin, input.user);
 				}

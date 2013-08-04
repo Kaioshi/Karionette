@@ -17,7 +17,7 @@ module.exports = function (Eventpipe) {
 	
 	// Handles incoming data
 	function dataHandler(data) {
-		var regArr, ignores, i,
+		var regArr, ignores, i, matches,
 			input = {
 				raw: data,
 				from: "",
@@ -48,7 +48,7 @@ module.exports = function (Eventpipe) {
 				}
 				regArr = /^;([^ ]+)/.exec(input.data);
 				if (regArr) {
-					var matches = permissions.Search(regArr[1]);
+					matches = permissions.Search(regArr[1]);
 					if (matches.length > 0) {
 						for (i = 0; i < matches.length; i++) {
 							if (!permissions.Check(matches[i][0], matches[i][1], input.user)) {
@@ -165,35 +165,34 @@ module.exports = function (Eventpipe) {
 		},
 		say: function (context, message, sanitiseMessage, maxmsgs) {
 			var privmsg, max, maxMessages, i;
-			if (context && message) {
-				context = sanitise(context); // Avoid sanitising more than once
-				privmsg = "PRIVMSG " + context + " :";
-				if (irc_config.address) {
-					max = 508 - (irc_config.nick.length+irc_config.address.length+3+privmsg.length);
-				} else {
-					max = 473 - privmsg.length; // yay magic numbers - haven't joined a channel yet.
-				}
-				maxMessages = (maxmsgs < 3 ? maxmsgs : 3);
-				if (sanitiseMessage !== false) {
-					message = sanitise(message);
-				}
-				if (Eventpipe.isInAlias === false) {
-					while (message && (maxMessages -= 1) >= 0) {
-						i = 0;
-						tempMsg = message.slice(0, max);
-						if (message.length > tempMsg.length) {
-							max = max-3;
-							while (message[max - i] !== " ") {
-								i += 1;
-							}
-							tempMsg = message.slice(0, (max - i)) + " ..";
+			if (!context || !message) return;
+			context = sanitise(context); // Avoid sanitising more than once
+			privmsg = "PRIVMSG " + context + " :";
+			if (irc_config.address) {
+				max = 508 - (irc_config.nick.length+irc_config.address.length+3+privmsg.length);
+			} else {
+				max = 473 - privmsg.length; // yay magic numbers - haven't joined a channel yet.
+			}
+			maxMessages = (maxmsgs < 3 ? maxmsgs : 3);
+			if (sanitiseMessage !== false) {
+				message = sanitise(message);
+			}
+			if (Eventpipe.isInAlias === false) {
+				while (message && (maxMessages -= 1) >= 0) {
+					i = 0;
+					tempMsg = message.slice(0, max);
+					if (message.length > tempMsg.length) {
+						max = max-3;
+						while (message[max - i] !== " ") {
+							i += 1;
 						}
-						send(privmsg + tempMsg.trim());
-						message = message.slice(max - i);
+						tempMsg = message.slice(0, (max - i)) + " ..";
 					}
-				} else {
-					Eventpipe.addEventlet(message);
+					send(privmsg + tempMsg.trim());
+					message = message.slice(max - i);
 				}
+			} else {
+				Eventpipe.addEventlet(message);
 			}
 		},
 		reply: function (input, message, sanitiseReply) {
