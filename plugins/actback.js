@@ -71,6 +71,10 @@ listen({
 	callback: function (input, match) {
 		var entry, reg, verb,
 			args = match[1].split(" ");
+		if (!permissions.isAdmin(input.user)) {
+			irc.say(input.context, "Admins only.");
+			return;
+		}
 		switch (args[0]) {
 			case "add":
 				switch (args[1]) {
@@ -81,7 +85,7 @@ listen({
 							irc.say(input.context, "I'm already familiar with that one.");
 							return;
 						}
-						reg = /^([a-z]+) ([a-z]+)s ([a-z]+)ed ([a-z]+)ing$/.exec(entry);
+						reg = /^([a-z]+) ([a-z]+)s ([a-z]+) ([a-z]+)ing$/.exec(entry);
 						if (!reg) {
 							irc.say(input.context, "The format has to be just how it is in [Help] Syntax, in the same order and errythang.");
 							irc.say(input.context, this.command.syntax);
