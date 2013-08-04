@@ -50,19 +50,24 @@ listen({
 		help: "Displays the last known time {person} was seen, and what they last said."
 	},
 	callback: function (input, match) {
-		var last, time, seenString, user,
+		var user, chan, target, seen,
 			args = match[1].split(" ");
-		args[0] = args[0].replace("?", "");
-		
-		resolveChan(input.context);
-		user = chanser.DB.getOne(args[0].toLowerCase());
-		if (user) {
-			irc.say(input.context, args[0] + " was last seen " 
-				+ lib.duration(new Date(user.last.seen))
-				+ " ago ~ " + user.last.message);
+		if (args[0][0] === "#" && args[1]) {
+			chan = args[0];
+			target = args[1].replace("?", "");
 		} else {
-			irc.say(input.context, "I don't recognise that Pokemon");
+			chan = input.context;
+			target = args[0].replace("?", "");
 		}
+		resolveChan(chan);
+		user = chanser.DB.getOne(target.toLowerCase());
+		if (!user) {
+			irc.say(input.context, "I don't recognise that Pokermon.");
+			return;
+		}
+		seen = (chan !== input.context ? target+" was last seen in "+chan+" " : target+" was last seen ");
+		seen = seen+lib.duration(new Date(user.last.seen))+" ago ~ "+user.last.message;
+		irc.say(input.context, seen, false);
 	}
 });
 
