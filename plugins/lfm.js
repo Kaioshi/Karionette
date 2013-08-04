@@ -33,24 +33,13 @@ listen({
 		}
 		
 		function stripHtml(text) {
-			var i,
-				inside = false,
-				tmp = "",
-				ret = "";
-			text = text.replace(/\n/g, "");
+			var ret = "";
+			text = text.replace(/\n/g, "").replace(/<[^<]+?>/g, "");
 			text = text.trim();
 			text.split(" ").forEach(function (entry) {
-				if (entry.length > 0) tmp = tmp+entry+" ";
+				if (entry.length > 0) ret = ret+entry+" ";
 			});
-			text = tmp;
-			for (i = 0; i < text.length; i++) {
-				if (text[i] === "<") inside = true;
-				if (text[i] === ">") inside = false;
-				else if (!inside) {
-					ret += text[i];
-				}
-			}
-			return ent.decode(ret);
+			return ent.decode(ret.slice(0,-1));
 		}
 		
 		function timeAgo(then, now) {
