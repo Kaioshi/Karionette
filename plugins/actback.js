@@ -1,5 +1,25 @@
-﻿var randDB = new DB.List({filename: "randomThings"}),
+﻿var verblist,
+	fs = require("fs"),
+	randDB = new DB.List({filename: "randomThings"}),
+	verblist = fs.readFileSync("data/actback/verbs.txt").toString().split("\n"),
 	repliesDB = new DB.Json({filename: "actback/replies"});
+
+function getRandVerb() {
+	var line = verblist[Math.floor(Math.random()*verblist.length)].split(" ");
+	return { base: line[0], s: line[1], ed: line[2], ing: line[3] };
+}
+
+function getVerb(verb) {
+	var line;
+	for (var i = 0; i < verblist.length; i++) {
+		line = verblist[i].split(" ");
+		for (var k = 0; k < line.length; k++) {
+			if (line[k] === verb) {
+				return { base: line[0], s: line[1], ed: line[2], ing: line[3] };
+			}
+		}
+	}
+}
 
 function isObj(string) {
 	var nonObjs = [
@@ -38,25 +58,50 @@ listen({
 	callback: function (input, match) {
 		var randThings = randDB.getAll(),
 			randReplies = repliesDB.getAll(),
-			randReply,
+			rverb = getRandVerb(),
+			randReply, tmp,
 			args = match[0].split(" "),
-			verb = args[1],
-			singVerb = verb,
+			verb = args[1], adv = "",
+			verbs, verbed, verbing,
 			obj = transformObj(args, 2),
 			rNum = Math.floor(Math.random() * 100),
 			randThing = randThings[Math.floor(Math.random() * randThings.length)],
 			method = (rNum > 50 ? "say" : "action"),
 			delay;
-
-		if (verb.slice(-2) === "ly") { verb += " " + args[2]; }
-		if (verb[verb.length - 1] === "s") { singVerb = verb.slice(0, -1); }
-
+		
+		if (verb.slice(-2) === "ly") { // breaking this for now
+			adv = args[1]+" ";
+			verb = args[2];
+		}
+		
+		tmp = getVerb(verb);
+		if (tmp) {
+			// real
+			logger.debug("verb found - "+verb);
+			verbs = tmp["s"];
+			verbed = tmp["ed"];
+			verbing = tmp["ing"];
+			verb = tmp["base"];
+			tmp = null;
+		} else {
+			// future: fire function that tries to add verb to verbs.txt via google define
+			if (verb.slice(-1) === "s") verb = verb.slice(0,-1);
+			verbs = verb+"s";
+			verbed = verb+"ed";
+			verbing = verb+"ing";
+		}
 		var suppVars = {
 			"{from}": input.from,
 			"{context}": input.context,
 			"{randThing}": randThing,
-			"{verb}": verb,
-			"{singVerb}": singVerb,
+			"{verb}": adv+verb,
+			"{verbs}": adv+verbs,
+			"{verbed}": adv+verbed,
+			"{verbing}": adv+verbing,
+			"{randVerb}": rverb["base"],
+			"{randVerbs}": rverb["s"],
+			"{randVerbed}": rverb["ed"],
+			"{randVerbing}": rverb["ing"],
 			"{obj}": obj
 		};
 		
