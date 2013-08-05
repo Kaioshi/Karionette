@@ -161,13 +161,13 @@ listen({
 			"{obj}": obj
 		};
 		
-		if (!randReplies[verb] && !randReplies.alts[verb]) {
+		if (!randReplies[verbs] && !randReplies.alts[verbs]) {
 			randReply = randReplies.defa[method][Math.floor(Math.random() * randReplies.defa[method].length)];
 		} else {
-			if (randReplies.alts[verb]) {
-				verb = randReplies.alts[verb];
+			if (randReplies.alts[verbs]) {
+				verb = randReplies.alts[verbs];
 			}
-			randReply = randReplies[verb][method][Math.floor(Math.random() * randReplies[verb][method].length)];
+			randReply = randReplies[verbs][method][Math.floor(Math.random() * randReplies[verbs][method].length)];
 		}
 		randReply = lib.supplant(randReply, suppVars);
 		delay = (randReply.length/5)/1.5*500;
