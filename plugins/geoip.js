@@ -13,10 +13,14 @@ listen({
 		var args = match[1].split(" "),
 			uri, target, resp, nick, area;
 		if (args && args[0].length > 0) {
-			if (args[0].indexOf('.') > -1) {
+			if (args[0].match(/\.|\:/)) {
 				if (args[0].match(/https?:\/\/[^ ]+/)) target = url.parse(args[0]).host;
 				else target = args[0];
 			} else {
+				if (input.context[0] !== "#") {
+					irc.say(input.context, "You need to give me a hostname in queries.");
+					return;
+				}
 				target = ial.User(args[0], input.context);
 				if (target.address) {
 					nick = target.nick;
