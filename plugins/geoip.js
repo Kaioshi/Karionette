@@ -11,7 +11,7 @@ listen({
 	},
 	callback: function (input, match) {
 		var args = match[1].split(" "),
-			target, resp, nick;
+			uri, target, resp, nick, area;
 		if (args && args[0].length > 0) {
 			if (args[0].indexOf('.') > -1) {
 				if (args[0].match(/https?:\/\/[^ ]+/)) target = url.parse(args[0]).host;
@@ -27,25 +27,31 @@ listen({
 					return;
 				}
 			}
-			if (target.indexOf(":") > -1) {
-				// freegeoip fails on IPv6 :(
-				irc.say(input.context, "Sorry, the service used for ;geoip fails on IPv6.");
-				return;
-			}
-			web.get("http://freegeoip.net/json/"+target, function (error, response, body) {
+			uri = "http://smart-ip.net/geoip-json/"+target;
+			web.get(uri, function (error, response, body) {
 				if (error) {
 					logger.error("[GeoIP] Error - "+error);
 					irc.say(input.context, "Something has gone awry.");
 					return;
 				}
 				body = JSON.parse(body);
-				if (body) {
-					resp = [];
-					if (body.country_name) resp.push(body.country_name);
-					if (body.city) resp.push(body.city);
+				if (!body) {
+					irc.say(input.context, "GeoIP service didn't reply. :<");
+					return;
 				}
+				if (body.error) {
+					irc.say(input.context, body.error);
+					return;
+				}
+				target = [ (nick ? nick : target) ];
+				resp = [];
+				if (body.host) target.push("("+body.host+")");
+				if (body.countryName) resp.push(body.countryName);
+				if (body.city) area = body.city;
+				if (body.region) area += " "+body.region;
+				if (area) resp.push(area);
 				if (resp.length > 0) {
-					irc.say(input.context, (nick ? nick: target) + " is in "+resp.join(", "));
+					irc.say(input.context, target.join(" ")+" is in "+resp.join(", "));
 				} else {
 					irc.say(input.context, "Ninja detected.");
 				}
