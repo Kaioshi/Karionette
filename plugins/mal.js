@@ -11,6 +11,16 @@ function listIt(context, body) {
 	irc.say(context, topArr.join(", "));
 }
 
+function stripHtml(text) {
+	var ret = "";
+	text = text.replace(/\n/g, "").replace(/<[^<]+?>/g, "");
+	text = text.trim();
+	text.split(" ").forEach(function (entry) {
+		if (entry.length > 0) ret = ret+entry+" ";
+	});
+	return ent.decode(ret.slice(0,-1));
+}
+
 function googleIt(context, full, type, term) {
 	var result, reg, id, url, resp, start, end, eps, runtime, status, garbage,
 		uri = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=1&q=site:myanimelist.net/"+type+"/ "+term;
@@ -42,11 +52,12 @@ function googleIt(context, full, type, term) {
 					status = "";
 					eps = "";
 					runtime = "";
-					garbage = [ "\\r", "\\n", "\\<br\\>", "\\[Written by MAL Rewrite\\]" ];
+					garbage = [ "\\r", "\\n", "\\[Written by MAL Rewrite\\]" ];
 					garbage.forEach(function (trash) {
 						reg = new RegExp(trash, "gi");
-						result.synopsis = result.synopsis.replace(reg, "");
+						result.synopsis = result.synopsis.replace(reg, " ");
 					});
+					result.synopsis = stripHtml(result.synopsis);
 					if (result.synopsis.indexOf("(Source:") > -1) {
 						result.synopsis = result.synopsis.slice(0, result.synopsis.indexOf("(Source:")-1);
 					}
