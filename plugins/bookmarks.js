@@ -61,7 +61,7 @@ function parseRemArgs(context, from, line) {
 listen({
 	plugin: "bookmarks",
 	handle: "bookmarks",
-	regex: regexFactory.startsWith(["bookmarks", "bookmark", "bm", "bk", "link"]),
+	regex: regexFactory.startsWith(["bookmarks", "bookmark", "bm", "link"]),
 	command: {
 		root: "bookmark",
 		options: "-add, -remove, -list, -find",
@@ -231,13 +231,14 @@ listen({
 			default:
 				match[1] = match[1].toLowerCase();
 				target = getTarget(input.context, input.from, match[1]);
+				handle = getHandle(input.context, input.from, match[1]);
 				bookmarks = bookmarkDB.getOne(target);
 				if (!bookmarks) {
 					irc.say(input.context, target+" has no bookmarks.");
 					return;
 				}
 				bookmarks.forEach(function (entry) {
-					if (entry.handle === match[1]) result = entry;
+					if (entry.handle === handle) result = entry;
 				});
 				if (result) irc.say(input.context, result.handle+" ~ "+result.link);
 				else irc.say(input.context, target+" has no such bookmark.");
