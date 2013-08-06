@@ -26,9 +26,9 @@ function getTarget(context, from, line) {
 	if (line[0] === "-") {
 		line = line.split(" ");
 		switch (line[0].toLowerCase()) {
-			case "-g":
-			case "-global":
-				return "global";
+			case "-c":
+			case "-channel":
+				return context.toLowerCase();
 			case "-u":
 			case "-user":
 				return from.toLowerCase();
@@ -36,7 +36,7 @@ function getTarget(context, from, line) {
 				return; // bad switch
 		}
 	}
-	return context.toLowerCase();
+	return "global";
 }
 
 function parseAddArgs(context, from, line) {
@@ -67,21 +67,21 @@ listen({
 		options: "-add, -remove, -list, -find",
 		help: "Allows you to store links for later retrieval.",
 		syntax: {
-			def: "[Help] Syntax: "+config.command_prefix+"bookmark [-a(dd) / -r(emove) / -l(ist) / -f(ind)] [<handle>] [<url>]",
+			def: "[Help] Syntax: "+config.command_prefix+"bookmark [-a(dd) / -r(emove) / -l(ist) / -f(ind) / -h(elp)] [<handle>] [<url>]",
 			add: "[Help] Syntax: "+config.command_prefix+
-				"bookmark -add [-g(lobal)|-u(ser)] <bookmark handle> <http://url.here.pantsu.org> - Example: "+config.command_prefix+
-				"bookmark -a -g wat http://i.minus.com/iPFeOpHpfLc4I.gif - default store location is the context (channel/query)",
+				"bookmark -add [-c(hannel)|-u(ser)] <bookmark handle> <http://url.here.pantsu.org> - Example: "+config.command_prefix+
+				"bookmark -a -c wat http://i.minus.com/iPFeOpHpfLc4I.gif - default store location is global (channel/query)",
 			remove: "[Help] Syntax: "+config.command_prefix+
-				"bookmark -remove [-g(lobal)|-u(ser)] <bookmark handle|url> - Example: "+config.command_prefix+
+				"bookmark -remove [-c(hannel)|-u(ser)] <bookmark handle|url> - Example: "+config.command_prefix+
 				"bookmark -remove http://some.dodgy.url.org/pantsu.jpeg - "+config.command_prefix+
-				"bookmark -r -g slashdot",
+				"bookmark -r -c slashdot",
 			list: "[Help] Syntax: "+config.command_prefix+
-				"bookmark -list [-g(lobal)|-u(ser)] <handle> - Example: "+config.command_prefix+
-				"bookmark -list -global - "+config.command_prefix+
+				"bookmark -list [-c(hannel)|-u(ser)] <handle> - Example: "+config.command_prefix+
+				"bookmark -list -channel - "+config.command_prefix+
 				"bookmark -l (current context)",
 			find: "[Help] Syntax: "+config.command_prefix+
-				"bookmark -find [-g(lobal)|-u(ser)] <string> - Example: "+config.command_prefix+
-				"bookmark -f -g pantsu - "+config.command_prefix+
+				"bookmark -find [-c(hannel)|-u(ser)] <string> - Example: "+config.command_prefix+
+				"bookmark -f -c pantsu - "+config.command_prefix+
 				"bookmark -find imgur.com",
 			help: "[Help] Syntax: "+config.command_prefix+
 				"bookmark -help <add/remove/list/find> - Example: "+config.command_prefix+
@@ -160,10 +160,10 @@ listen({
 				break;
 			case "-l":
 			case "-list":
-				if (args[1] && args[1][0] === "-" && args[1].match(/-g|-global|-u|-user/)) {
-					target = (args[1].match(/-g|-global/i) ? "global" : input.from);
+				if (args[1] && args[1][0] === "-" && args[1].match(/-c|-channel|-u|-user/)) {
+					target = (args[1].match(/-c|-channel/i) ? input.context : input.from);
 				} else {
-					target = input.context;
+					target = "global";
 				}
 				target = target.toLowerCase();
 				bookmarks = bookmarkDB.getOne(target);
@@ -190,7 +190,15 @@ listen({
 				args = args.slice(1).join(" ");
 				target = getTarget(input.context, input.from, args);
 				handle = getHandle(input.context, input.from, args);
+				if (!target || !handle) {
+					irc.say(input.context, this.command.syntax.def);
+					return;
+				}
 				bookmarks = bookmarkDB.getOne(target);
+				if (!bookmarks) {
+					irc.say(input.context, target+" has no bookmarks.");
+					return;
+				}
 				keys = [];
 				bookmarks.forEach(function (entry) {
 					if (entry.handle.indexOf(handle) > -1) {
@@ -232,6 +240,10 @@ listen({
 				match[1] = match[1].toLowerCase();
 				target = getTarget(input.context, input.from, match[1]);
 				handle = getHandle(input.context, input.from, match[1]);
+				if (!target || !handle) {
+					irc.say(input.context, this.command.syntax.def);
+					return;
+				}
 				bookmarks = bookmarkDB.getOne(target);
 				if (!bookmarks) {
 					irc.say(input.context, target+" has no bookmarks.");
