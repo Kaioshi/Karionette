@@ -12,7 +12,7 @@ function listIt(context, body) {
 }
 
 function googleIt(context, full, type, term) {
-	var result, reg, id, url, resp, start, end, eps, runtime, status, garbage,
+	var result, reg, id, url, resp, start, end, eps, runtime, status,
 		uri = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=1&q=site:myanimelist.net/"+type+"/ "+term;
 	web.get(uri, function (error, response, body) {
 		result = JSON.parse(body).responseData.results[0];
@@ -42,11 +42,7 @@ function googleIt(context, full, type, term) {
 					status = "";
 					eps = "";
 					runtime = "";
-					garbage = [ "\\r", "\\n", "\\[Written by MAL Rewrite\\]" ];
-					garbage.forEach(function (trash) {
-						reg = new RegExp(trash, "gi");
-						result.synopsis = result.synopsis.replace(reg, " ");
-					});
+					result.synopsis = result.synopsis.replace(/\r/g, " ").replace("[Written by MAL Rewrite]", "");
 					result.synopsis = ent.decode(lib.stripHtml(result.synopsis));
 					if (result.synopsis.indexOf("(Source:") > -1) {
 						result.synopsis = result.synopsis.slice(0, result.synopsis.indexOf("(Source:")-1);
