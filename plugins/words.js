@@ -24,7 +24,7 @@ listen({
 						irc.say(input.context, entry.base+" - "+entry.s+" - "+entry.ed+" - "+entry.ing);
 						break;
 					case "get":
-						entry = words.verb.get(args[1]);
+						entry = words.verb.get(args[2]);
 						if (!entry) irc.say(input.context, "I don't know it.");
 						else irc.say(input.context, entry.base+" - "+entry.s+" - "+entry.ed+" - "+entry.ing);
 						break;
