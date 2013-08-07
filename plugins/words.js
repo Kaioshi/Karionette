@@ -1,3 +1,4 @@
+// word motherflipper!
 listen({
 	plugin: "words",
 	handle: "word",
@@ -6,8 +7,8 @@ listen({
 		root: "word",
 		help: "verb add, remove, get, count",
 		syntax: "[Help] Syntax: "+config.command_prefix+
-			"word verb add <verb + variations> - Example: "+config.command_prefix+
-			"word verb add mitch mitches mitched mitching"
+			"word verb add/remove/get/count/random - Example: "+config.command_prefix+
+			"word verb add mitch mitches mitched mitching - word verb remove mitch"
 	},
 	callback: function (input, match) {
 		var entry, reg, verb,
