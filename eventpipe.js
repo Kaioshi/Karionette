@@ -85,10 +85,10 @@ module.exports = (function () {
 	
 	// Check if the data fires a plugin, and then do so
 	function fireEvent(input) {
+		var permission, match;
 		transformAlias(input);
 		keyCache.forEach(function (element) {
-			var permission,
-				match = listeners[element].regex.exec(input.raw);
+			match = listeners[element].regex.exec(input.raw);
 			if (match) {
 				permission = true;
 				if (listeners[element].plugin && input.user) {
@@ -141,10 +141,9 @@ module.exports = (function () {
 		},
 		purgeOne: function (plugin) {
 			// delete any listeners belonging to plugin
-			var keys = Object.keys(listeners),
-				cmds = [];
-			keys.forEach(function (listener) {
-				if (listeners[listener].plugin.toLowerCase() === plugin.toLowerCase()) {
+			plugin = plugin.toLowerCase();
+			Object.keys(listeners).forEach(function (listener) {
+				if (listeners[listener].plugin.toLowerCase() === plugin) {
 					delete listeners[listener];
 				}
 			});
