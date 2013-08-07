@@ -32,16 +32,6 @@ listen({
 			
 		}
 		
-		function stripHtml(text) {
-			var ret = "";
-			text = text.replace(/\n/g, "").replace(/<[^<]+?>/g, "");
-			text = text.trim();
-			text.split(" ").forEach(function (entry) {
-				if (entry.length > 0) ret = ret+entry+" ";
-			});
-			return ent.decode(ret.slice(0,-1));
-		}
-		
 		function timeAgo(then, now) {
 			var dura = now - then,
 				secs = Math.floor(dura/1000),
@@ -96,7 +86,7 @@ listen({
 					irc.say(input.context,"Artist: "+result.artist.name+formed+from+tags+
 						" ~ Total Plays: "+result.artist.stats.playcount+
 						", Listeners: "+result.artist.stats.listeners);
-					summary = stripHtml(result.artist.bio.summary);
+					summary = ent.decode(lib.stripHtml(result.artist.bio.summary));
 					summary = (summary.length > 0 ? summary : "There was no artist summary. Did you spell it correctly?");
 					irc.say(input.context, summary, true, 1);
 				});

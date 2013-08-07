@@ -215,7 +215,7 @@ listen({
 				} else {
 					if (keys.length <= 3) { // not too spammy, show them all in full
 						keys.forEach(function (entry) {
-							irc.say(input.context, entry.handle+" [matched by "+entry.match+"] ~ "+entry.link);
+							irc.say(input.context, entry.handle+" ["+entry.match+" match] ~ "+entry.link);
 						});
 					} else {
 						result = [];

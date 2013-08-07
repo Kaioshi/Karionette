@@ -1,16 +1,6 @@
 ﻿// Returns first Google search result
 var ent = require("./lib/entities.js");
 
-function stripHtml(text) {
-	var ret = "";
-	text = text.replace(/\n/g, "").replace(/<[^<]+?>/g, "");
-	text = text.trim();
-	text.split(" ").forEach(function (entry) {
-		if (entry.length > 0) ret = ret+entry+" ";
-	});
-	return ent.decode(ret.slice(0,-1));
-}
-
 listen({
 	plugin: "google",
 	handle: "google",
@@ -142,10 +132,10 @@ listen({
 					return;
 				}
 				body = JSON.parse(
-					stripHtml(body.slice(2, -10)
+					ent.decode(lib.stripHtml(body.slice(2, -10)
 					.replace(/\\x3c/g, "<")
 					.replace(/\\x3e/g, ">")
-					.replace(/\\x27/g, "'")));
+					.replace(/\\x27/g, "'"))));
 				if (!body.primaries) {
 					irc.say(input.context, "I couldn't find "+body.query+". :<");
 					return;
