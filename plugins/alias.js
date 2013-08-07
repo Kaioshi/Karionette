@@ -1,6 +1,6 @@
 ﻿var aliasDB = new DB.Json({filename: "alias/alias"}),
 	varDB = new DB.Json({filename: "alias/vars"});
-// todo: add randVerb
+
 // Handles Alias interface
 listen({
 	plugin: "alias",

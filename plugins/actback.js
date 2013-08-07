@@ -1,29 +1,5 @@
-﻿var verblist,
-	fs = require("fs"),
-	randDB = new DB.List({filename: "randomThings"}),
-	verblist,
+﻿var randDB = new DB.List({filename: "randomThings"}),
 	repliesDB = new DB.Json({filename: "actback/replies"});
-
-function readVerblist() {
-	verblist = fs.readFileSync("data/actback/verbs.txt").toString().split("\n");
-}
-
-function getRandVerb() {
-	var line = verblist[Math.floor(Math.random()*verblist.length)].split(" ");
-	return { base: line[0], s: line[1], ed: line[2], ing: line[3] };
-}
-
-function getVerb(verb) {
-	var line;
-	for (var i = 0; i < verblist.length; i++) {
-		line = verblist[i].split(" ");
-		for (var k = 0; k < line.length; k++) {
-			if (line[k] === verb) {
-				return { base: line[0], s: line[1], ed: line[2], ing: line[3] };
-			}
-		}
-	}
-}
 
 function isObj(string) {
 	var nonObjs = [
@@ -55,58 +31,6 @@ function transformObj(args, num) {
 	return args[num];
 }
 
-readVerblist();
-
-listen({
-	plugin: "actback",
-	handle: "word",
-	regex: regexFactory.startsWith("word"),
-	command: {
-		root: "word",
-		help: "add/get",
-		syntax: "[Help] Syntax: "+config.command_prefix+
-			"word add verb <verb + variations> - Example: "+config.command_prefix+
-			"word add verb wank wanks wanked wanking"
-	},
-	callback: function (input, match) {
-		var entry, reg, verb,
-			args = match[1].split(" ");
-		if (!permissions.isAdmin(input.user)) {
-			irc.say(input.context, "Admins only.");
-			return;
-		}
-		switch (args[0]) {
-			case "add":
-				switch (args[1]) {
-					case "verb":
-						verb = args[2].toLowerCase();
-						entry = args.slice(2).join(" ").toLowerCase();
-						if (getVerb(verb)) {
-							irc.say(input.context, "I'm already familiar with that one.");
-							return;
-						}
-						reg = /^([a-z]+) ([a-z]+)s ([a-z]+) ([a-z]+)ing$/.exec(entry);
-						if (!reg) {
-							irc.say(input.context, "The format has to be just how it is in [Help] Syntax, in the same order and errythang.");
-							irc.say(input.context, this.command.syntax);
-							return;
-						}
-						fs.appendFileSync("data/actback/verbs.txt", entry+"\n");
-						irc.say(input.context, "Added. o7");
-						readVerblist(); // refresh
-						break;
-					default:
-						irc.say(input.context, "I'm only doing verbs at the moment.");
-						break;
-				}
-				break;
-			default:
-				irc.say(input.context, this.command.syntax);
-				break;
-		}
-	}
-});
-
 listen({
 	plugin: "actback",
 	handle: "actback",
@@ -114,7 +38,7 @@ listen({
 	callback: function (input, match) {
 		var randThings = randDB.getAll(),
 			randReplies = repliesDB.getAll(),
-			rverb = getRandVerb(),
+			rverb = words.verb.random(),
 			randReply, tmp,
 			args = match[0].split(" "),
 			verb = args[1], adv = "",
@@ -130,7 +54,7 @@ listen({
 			verb = args[2];
 		}
 		
-		tmp = getVerb(verb);
+		tmp = words.verb.get(verb);
 		if (tmp) {
 			// real
 			logger.debug("verb found - "+verb);

@@ -13,6 +13,7 @@ require("./lib/logger.js");
 require("./lib/ial.js");
 require("./lib/permissions.js");
 require("./lib/timers.js");
+require("./lib/words.js");
 
 var DB = require("./lib/fileDB.js"),
 	web = require("./lib/web.js"),
@@ -47,6 +48,7 @@ function createSandbox() {
 		regexFactory: regexFactory,
 		listen: Eventpipe.bind,
 		logger: logger,
+		words: words,
 		permissions: permissions,
 		globals: globals
 	};

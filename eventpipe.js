@@ -22,8 +22,9 @@ module.exports = (function () {
 	
 	// Create the supplant object for alias vars
 	function makeVars(match, context, from) {
-		var i, args, newMatch;
-		var nicks = (context[0] === "#" ? ial.Active(context) : []),
+		var i, args, newMatch,
+			randVerb = words.verb.random(),
+			nicks = (context[0] === "#" ? ial.Active(context) : []),
 			nicks = (nicks.length > 0 ? nicks : [ "someone", "The Lawd Jasus", "your dad", "mitch_", "Asuna" ]),
 			av = lib.mix(varDB.getAll(), {
 					"{me}": irc_config.nick,
@@ -31,6 +32,10 @@ module.exports = (function () {
 					"{channel}": context,
 					"{randThing}": randThings[Math.floor(Math.random() * randThings.length)],
 					"{randNick}": nicks[Math.floor(Math.random() * nicks.length)],
+					"{randVerb}": randVerb.base,
+					"{randVerbs}": randVerb.s,
+					"{randVerbed}": randVerb.ed,
+					"{randVerbing}": randVerb.ing,
 					"{args1}": "",
 					"{args2}": "",
 					"{args3}": "",
