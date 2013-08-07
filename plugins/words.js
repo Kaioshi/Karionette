@@ -25,7 +25,8 @@ listen({
 						break;
 					case "get":
 						entry = words.verb.get(args[1]);
-						irc.say(input.context, entry.base+" - "+entry.s+" - "+entry.ed+" - "+entry.ing);
+						if (!entry) irc.say(input.context, "I don't know it.");
+						else irc.say(input.context, entry.base+" - "+entry.s+" - "+entry.ed+" - "+entry.ing);
 						break;
 					case "remove":
 						if (!permissions.isAdmin(input.user)) {
