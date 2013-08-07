@@ -19,11 +19,9 @@ module.exports = (function () {
 	function setHandles() {
 		keyCache = Object.keys(listeners);
 	}
-	
 	// Create the supplant object for alias vars
 	function makeVars(match, context, from) {
 		var i, args, newMatch,
-			randVerb = words.verb.random(),
 			nicks = (context[0] === "#" ? ial.Active(context) : []),
 			nicks = (nicks.length > 0 ? nicks : [ "someone", "The Lawd Jasus", "your dad", "mitch_", "Asuna" ]),
 			av = lib.mix(varDB.getAll(), {
@@ -32,10 +30,10 @@ module.exports = (function () {
 					"{channel}": context,
 					"{randThing}": randThings[Math.floor(Math.random() * randThings.length)],
 					"{randNick}": nicks[Math.floor(Math.random() * nicks.length)],
-					"{randVerb}": randVerb.base,
-					"{randVerbs}": randVerb.s,
-					"{randVerbed}": randVerb.ed,
-					"{randVerbing}": randVerb.ing,
+					"{randVerb}": words.verb.random().base,
+					"{randVerbs}": words.verb.random().s,
+					"{randVerbed}": words.verb.random().ed,
+					"{randVerbing}": words.verb.random().ing,
 					"{args1}": "",
 					"{args2}": "",
 					"{args3}": "",

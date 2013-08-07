@@ -38,7 +38,6 @@ listen({
 	callback: function (input, match) {
 		var randThings = randDB.getAll(),
 			randReplies = repliesDB.getAll(),
-			rverb = words.verb.random(),
 			randReply, tmp,
 			args = match[0].split(" "),
 			verb = args[1], adv = "",
@@ -57,7 +56,6 @@ listen({
 		tmp = words.verb.get(verb);
 		if (tmp) {
 			// real
-			logger.debug("verb found - "+verb);
 			verbs = tmp["s"];
 			verbed = tmp["ed"];
 			verbing = tmp["ing"];
@@ -65,6 +63,7 @@ listen({
 			tmp = null;
 		} else {
 			// future: fire function that tries to add verb to verbs.txt via google define
+			logger.debug("not found - "+verb);
 			if (verb.slice(-1) === "s") verb = verb.slice(0,-1);
 			verbs = verb+"s";
 			verbed = verb+"ed";
@@ -78,10 +77,10 @@ listen({
 			"{verbs}": adv+verbs,
 			"{verbed}": adv+verbed,
 			"{verbing}": adv+verbing,
-			"{randVerb}": rverb["base"],
-			"{randVerbs}": rverb["s"],
-			"{randVerbed}": rverb["ed"],
-			"{randVerbing}": rverb["ing"],
+			"{randVerb}": words.verb.random().base,
+			"{randVerbs}": words.verb.random().s,
+			"{randVerbed}": words.verb.random().ed,
+			"{randVerbing}": words.verb.random().ing,
 			"{obj}": obj
 		};
 		
