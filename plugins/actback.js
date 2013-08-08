@@ -38,7 +38,7 @@ listen({
 	callback: function (input, match) {
 		var randThings = randDB.getAll(),
 			randReplies = repliesDB.getAll(),
-			randReply, tmp,
+			randReply, tmp, suppVars,
 			args = match[0].split(" "),
 			verb = args[1], adv = "",
 			verbs, verbed, verbing,
@@ -48,11 +48,10 @@ listen({
 			method = (rNum > 50 ? "say" : "action"),
 			delay;
 		
-		if (verb.slice(-2) === "ly") { // breaking this for now
+		if (verb.slice(-2) === "ly") {
 			adv = args[1]+" ";
 			verb = args[2];
 		}
-		
 		tmp = words.verb.get(verb);
 		if (tmp) {
 			// real
@@ -63,13 +62,14 @@ listen({
 			tmp = null;
 		} else {
 			// future: fire function that tries to add verb to verbs.txt via google define
-			logger.debug("not found - "+verb);
-			if (verb.slice(-1) === "s") verb = verb.slice(0,-1);
+			if (verb.slice(-2) === "es") verb = verb.slice(0,-2);
+			else if (verb.slice(-1) === "s") verb = verb.slice(0,-1);
 			verbs = verb+"s";
 			verbed = verb+"ed";
 			verbing = verb+"ing";
+			words.lookup("verb", verb);
 		}
-		var suppVars = {
+		suppVars = {
 			"{from}": input.from,
 			"{context}": input.context,
 			"{randThing}": randThing,
@@ -83,12 +83,11 @@ listen({
 			"{randVerbing}": words.verb.random().ing,
 			"{obj}": obj
 		};
-		
 		if (!randReplies[verbs] && !randReplies.alts[verbs]) {
 			randReply = randReplies.defa[method][Math.floor(Math.random() * randReplies.defa[method].length)];
 		} else {
 			if (randReplies.alts[verbs]) {
-				verb = randReplies.alts[verbs];
+				verbs = randReplies.alts[verbs];
 			}
 			randReply = randReplies[verbs][method][Math.floor(Math.random() * randReplies[verbs][method].length)];
 		}
