@@ -127,37 +127,35 @@ listen({
 		var definition, uri, meaning, related;
 		
 		function addWord(base, result) {
-			var i, k, j, n, primary, entry, term, label,
-				s, ed, ing;
-			for (i = 0; i < result.primaries.length; i++) {
-				primary = result.primaries[i];
-				// only doing verbs atm
+			var s, ed, ing;
+			
+			result.primaries.forEach(function (primary) {
 				if (primary.terms[0].labels[0].text === "Verb") {
-					for (k = 0; k < primary.entries.length; k++) {
-						entry = primary.entries[k];
+					primary.entries.forEach(function (entry) {
 						if (entry.type === "related") {
-							for (j = 0; j < entry.terms.length; j++) {
-								term = entry.terms[j];
+							entry.terms.forEach(function (term) {
 								if (term.labels) {
-									for (n = 0; n < term.labels.length; n++) {
-										label = term.labels[n];
-										if (label.text === "past participle") {
-											ed = term.text;
-										} else {
-											if (label.text === "3rd person singular present") {
+									term.labels.forEach(function (label) {
+										switch (label.text) {
+											case "past participle":
+												ed = term.text;
+												break;
+											case "3rd person singular present":
 												s = term.text;
-											}
-											else if (label.text === "present participle") {
+												break;
+											case "present participle":
 												ing = term.text;
-											}
+												break;
+											default:
+												break;
 										}
-									}
+									});
 								}
-							}
+							});
 						}
-					}
+					});
 				}
-			}
+			});
 			if (s && ed && ing) {
 				result = words.verb.add([base, s, ed, ing].join(" "));
 				if (result === "Added o7") {
