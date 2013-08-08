@@ -8,6 +8,7 @@
 //     ~reload - reload scripts
 
 var adminDB = new DB.List({filename: 'admins'}),
+	autojoinDB = new DB.List({filename: 'autojoin'}),
 	fs = require('fs');
 
 // Admin Only
