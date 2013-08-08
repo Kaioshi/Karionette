@@ -62,7 +62,7 @@ listen({
 			tmp = null;
 		} else {
 			// future: fire function that tries to add verb to verbs.txt via google define
-			if (verb.slice(-2) === "es") verb = verb.slice(0,-2);
+			if (verb.slice(-3) === "hes") verb = verb.slice(0,-2); // "touches" vs. "acquires"
 			else if (verb.slice(-1) === "s") verb = verb.slice(0,-1);
 			verbs = verb+"s";
 			verbed = verb+"ed";
