@@ -119,58 +119,98 @@ listen({
 		root: "define",
 		options: "{Word to define}",
 		help: "Google search's define: keyword.",
-		syntax: "[Help] Syntax: " + config.command_prefix + "define <word>"
+		syntax: "[Help] Syntax: "+config.command_prefix+
+			"define <word> - this uses google's define: keyword you're probably familiar "+
+			"with - and so it is just as limited as that."
 	},
 	callback: function (input, match) {
 		var definition, uri, meaning, related;
-		if (match[1]) {
-			uri = "http://www.google.com/dictionary/json?callback=a&sl=en&tl=en&q=" + match[1];
-			web.get(uri, function (error, response, body) {
-				if (error) {
-					irc.say(input.context, "Something has gone awry.");
-					logger.error("[google-define] error looking up " + match[1] + " -> " + error);
-					return;
-				}
-				body = JSON.parse(
-					ent.decode(lib.stripHtml(body.slice(2, -10)
-					.replace(/\\x3c/g, "<")
-					.replace(/\\x3e/g, ">")
-					.replace(/\\x27/g, "'"))));
-				if (!body.primaries) {
-					irc.say(input.context, "I couldn't find "+body.query+". :<");
-					return;
-				}
-				related = [];
-				meaning = [];
-				body = body.primaries[0];
-				body.entries.forEach(function (entry) {
-					if (entry.type === 'related') {
-						entry.terms.forEach(function (item) {
-							if (item.text !== match[1]) {
-								// make sure there are no duplicate entries -.- wtf google
-								if (!related.some(function (element) { return (element === item.text); })) {
-									related.push(item.text);
+		
+		function addWord(base, result) {
+			var i, k, j, n, primary, entry, term, label,
+				s, ed, ing;
+			for (i = 0; i < result.primaries.length; i++) {
+				primary = result.primaries[i];
+				// only doing verbs atm
+				if (primary.terms[0].labels[0].text === "Verb") {
+					for (k = 0; k < primary.entries.length; k++) {
+						entry = primary.entries[k];
+						if (entry.type === "related") {
+							for (j = 0; j < entry.terms.length; j++) {
+								term = entry.terms[j];
+								if (term.labels) {
+									for (n = 0; n < term.labels.length; n++) {
+										label = term.labels[n];
+										if (label.text === "past participle") {
+											ed = term.text;
+										} else {
+											if (label.text === "3rd person singular present") {
+												s = term.text;
+											}
+											else if (label.text === "present participle") {
+												ing = term.text;
+											}
+										}
+									}
 								}
 							}
-						});
+						}
 					}
-					else if (entry.type === 'meaning') {
-						entry.terms.forEach(function (item) {
-							meaning.push(item.text);
-						});
-					}
-				});
-				definition = meaning.join("; ");
-				if (related.length > 0) definition = "["+related.join(", ")+"] - "+definition;
-				if (body.terms) {
-					if (related.length > 0)	definition = match[1]+" - \""+body.terms[0].text+"\" "+definition;
-					else definition = match[1]+" - \""+body.terms[0].text+"\" - "+definition;
-				} else definition = match[1]+" - "+definition;
-				irc.say(input.context, definition, false);
-			});
-		} else {
-			irc.say(input.context, this.command.syntax);
+				}
+			}
+			if (s && ed && ing) {
+				result = words.verb.add([base, s, ed, ing].join(" "));
+				if (result === "Added o7") {
+					irc.notice(input.from, "I've added "+base+" to my verb list, thanks!");
+				}
+			}
 		}
+		
+		if (!match[1]) {
+			irc.say(input.context, this.command.syntax);
+			return;
+		}
+		uri = "http://www.google.com/dictionary/json?callback=a&sl=en&tl=en&q=" + match[1];
+		web.get(uri, function (error, response, body) {
+			if (error) {
+				irc.say(input.context, "Something has gone awry.");
+				logger.error("[google-define] error looking up " + match[1] + " -> " + error);
+				return;
+			}
+			body = JSON.parse(ent.decode(lib.stripHtml(body.slice(2, -10)
+				.replace(/\\x3c/g, "<").replace(/\\x3e/g, ">").replace(/\\x27/g, "'"))));
+			if (!body.primaries) {
+				irc.say(input.context, "I couldn't find "+body.query+". :<");
+				return;
+			}
+			related = [];
+			meaning = [];
+			addWord(match[1].toLowerCase(), body);
+			body = body.primaries[0];
+			body.entries.forEach(function (entry) {
+				if (entry.type === 'related') {
+					entry.terms.forEach(function (item) {
+						if (item.text !== match[1]) {
+							if (!related.some(function (element) { return (element === item.text); })) {
+								related.push(item.text);
+							}
+						}
+					});
+				}
+				else if (entry.type === 'meaning') {
+					entry.terms.forEach(function (item) {
+						meaning.push(item.text);
+					});
+				}
+			});
+			definition = meaning.join("; ");
+			if (related.length > 0) definition = "["+related.join(", ")+"] - "+definition;
+			if (body.terms) {
+				if (related.length > 0)	definition = match[1]+" - \""+body.terms[0].text+"\" "+definition;
+				else definition = match[1]+" - \""+body.terms[0].text+"\" - "+definition;
+			} else definition = match[1]+" - "+definition;
+			irc.say(input.context, definition, false, 2);
+		});
 	}
 });
 
