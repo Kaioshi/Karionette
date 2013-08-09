@@ -31,6 +31,10 @@ function transformObj(args, num) {
 	return args[num];
 }
 
+function chance(n) {
+	return (Math.floor(Math.random()*100) > (n? n : 50));
+}
+
 listen({
 	plugin: "actback",
 	handle: "actback",
@@ -42,11 +46,30 @@ listen({
 			args = match[0].split(" "),
 			verb = args[1], adv = "",
 			verbs, verbed, verbing,
+			radv = (chance() ? words.adverb.random() : ""),
+			randVerb = words.verb.random().base,
+			randVerbs = words.verb.random().s,
+			randVerbed = words.verb.random().ed,
+			randVerbing = words.verb.random().ing,
 			obj = transformObj(args, 2),
 			rNum = Math.floor(Math.random() * 100),
 			randThing = randThings[Math.floor(Math.random() * randThings.length)],
 			method = (rNum > 50 ? "say" : "action"),
 			delay;
+		
+		if (radv) {
+			if (chance(70)) {
+				randVerb = radv+" "+randVerb;
+				randVerbs = radv+" "+randVerbs;
+				randVerbed = radv+" "+randVerbed;
+				randVerbing = radv+" "+randVerbing;
+			} else {
+				randVerb = randVerb+" "+radv;
+				randVerbs = randVerbs+" "+radv;
+				randVerbed = randVerbed+" "+radv;
+				randVerbing = randVerbing+" "+radv;
+			}
+		}
 		
 		if (verb.slice(-2) === "ly") {
 			adv = args[1]+" ";
@@ -77,10 +100,11 @@ listen({
 			"{verbs}": adv+verbs,
 			"{verbed}": adv+verbed,
 			"{verbing}": adv+verbing,
-			"{randVerb}": words.verb.random().base,
-			"{randVerbs}": words.verb.random().s,
-			"{randVerbed}": words.verb.random().ed,
-			"{randVerbing}": words.verb.random().ing,
+			"{adverb}": words.adverb.random(),
+			"{randVerb}": randVerb,
+			"{randVerbs}": randVerbs,
+			"{randVerbed}": randVerbed,
+			"{randVerbing}": randVerbing,
 			"{obj}": obj
 		};
 		if (!randReplies[verbs] && !randReplies.alts[verbs]) {

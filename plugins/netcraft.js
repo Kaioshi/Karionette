@@ -3,7 +3,9 @@ listen({
 	handle: "netcraft",
 	regex: regexFactory.startsWith("netcraft"),
 	command: {
-	
+		root: "netcraft",
+		help: "Net Crafts",
+		syntax: "[Help] Syntax: "+config.command_prefix+"netcraft http://some.site.org"
 	},
 	callback: function (input, match) {
 		var uri, reg, resp;

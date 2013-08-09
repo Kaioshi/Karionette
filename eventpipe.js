@@ -34,6 +34,7 @@ module.exports = (function () {
 					"{randVerbs}": words.verb.random().s,
 					"{randVerbed}": words.verb.random().ed,
 					"{randVerbing}": words.verb.random().ing,
+					"{adverb}": words.adverb.random(),
 					"{args1}": "",
 					"{args2}": "",
 					"{args3}": "",

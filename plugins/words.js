@@ -14,6 +14,18 @@ listen({
 		var entry, reg, verb,
 			args = match[1].split(" ");
 		switch (args[0]) {
+			case "adverb":
+				switch (args[1].toLowerCase()) {
+					case "get":
+						irc.say(input.context, words.adverb.get(args[1]));
+						break;
+					case "random":
+						irc.say(input.context, words.adverb.random());
+						break;
+					default:
+						break;
+				}
+				break;
 			case "verb":
 				switch (args[1].toLowerCase()) {
 					case "count":
