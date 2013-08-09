@@ -72,6 +72,7 @@ listen({
 		}
 		
 		if (verb.slice(-2) === "ly") {
+			words.lookup("adverb", args[1].toLowerCase());
 			adv = args[1]+" ";
 			verb = args[2];
 		}
@@ -90,7 +91,7 @@ listen({
 			verbs = verb+"s";
 			verbed = verb+"ed";
 			verbing = verb+"ing";
-			words.lookup("verb", verb);
+			words.lookup("verb", verb.toLowerCase());
 		}
 		suppVars = {
 			"{from}": input.from,
