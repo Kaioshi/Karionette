@@ -58,17 +58,10 @@ listen({
 			delay;
 		
 		if (radv) {
-			if (chance(70)) {
-				randVerb = radv+" "+randVerb;
-				randVerbs = radv+" "+randVerbs;
-				randVerbed = radv+" "+randVerbed;
-				randVerbing = radv+" "+randVerbing;
-			} else {
-				randVerb = randVerb+" "+radv;
-				randVerbs = randVerbs+" "+radv;
-				randVerbed = randVerbed+" "+radv;
-				randVerbing = randVerbing+" "+radv;
-			}
+			randVerb = radv+" "+randVerb;
+			randVerbs = radv+" "+randVerbs;
+			randVerbed = radv+" "+randVerbed;
+			randVerbing = radv+" "+randVerbing;
 		}
 		
 		if (verb.slice(-2) === "ly") {
