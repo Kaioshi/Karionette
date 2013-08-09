@@ -16,8 +16,25 @@ listen({
 		switch (args[0]) {
 			case "adverb":
 				switch (args[1].toLowerCase()) {
+					case "add":
+						if (!permissions.isAdmin(input.user)) {
+							irc.say(input.context, "Admins only sucka.");
+							return;
+						}
+						irc.say(input.context, words.adverb.add(args[2].toLowerCase()));
+						break;
+					case "remove":
+						if (!permissions.isAdmin(input.user)) {
+							irc.say(input.context, "Admins only sucka.");
+							return;
+						}
+						irc.say(input.context, words.adverb.remove(args[2].toLowerCase()));
+						break;
+					case "count":
+						irc.say(input.context, "I know of "+words.adverb.list.length+" adverbs.");
+						break;
 					case "get":
-						irc.say(input.context, words.adverb.get(args[1]));
+						irc.say(input.context, words.adverb.get(args[2]));
 						break;
 					case "random":
 						irc.say(input.context, words.adverb.random());

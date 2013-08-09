@@ -124,45 +124,7 @@ listen({
 			"with - and so it is just as limited as that."
 	},
 	callback: function (input, match) {
-		var definition, uri, meaning, related;
-		
-		function addWord(base, result) {
-			var s, ed, ing;
-			
-			result.primaries.forEach(function (primary) {
-				if (primary.terms[0].labels[0].text === "Verb") {
-					primary.entries.forEach(function (entry) {
-						if (entry.type === "related") {
-							entry.terms.forEach(function (term) {
-								if (term.labels) {
-									term.labels.forEach(function (label) {
-										switch (label.text) {
-											case "past participle":
-												ed = term.text;
-												break;
-											case "3rd person singular present":
-												s = term.text;
-												break;
-											case "present participle":
-												ing = term.text;
-												break;
-											default:
-												break;
-										}
-									});
-								}
-							});
-						}
-					});
-				}
-			});
-			if (s && ed && ing) {
-				result = words.verb.add([base, s, ed, ing].join(" "));
-				if (result === "Added o7") {
-					irc.notice(input.from, "I've added "+base+" to my verb list, thanks!");
-				}
-			}
-		}
+		var definition, uri, meaning, related, type;
 		
 		if (!match[1]) {
 			irc.say(input.context, this.command.syntax);
@@ -183,9 +145,9 @@ listen({
 			}
 			related = [];
 			meaning = [];
-			addWord(match[1].toLowerCase(), body);
-			body = body.primaries[0];
-			body.entries.forEach(function (entry) {
+			type = body.primaries[0].terms[0].labels[0].text.toLowerCase();
+			if (type.match(/verb|adverb/)) words.addWord(match[1].toLowerCase(), body, type);
+			body.primaries[0].entries.forEach(function (entry) {
 				if (entry.type === 'related') {
 					entry.terms.forEach(function (item) {
 						if (item.text !== match[1]) {
@@ -201,6 +163,7 @@ listen({
 					});
 				}
 			});
+			body = body.primaries[0];
 			definition = meaning.join("; ");
 			if (related.length > 0) definition = "["+related.join(", ")+"] - "+definition;
 			if (body.terms) {
