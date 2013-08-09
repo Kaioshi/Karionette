@@ -7,44 +7,46 @@ listen({
 		root: "word",
 		help: "verb add, remove, get, count",
 		syntax: "[Help] Syntax: "+config.command_prefix+
-			"word verb add/remove/get/count/random - Example: "+config.command_prefix+
-			"word verb add mitch mitches mitched mitching - word verb remove mitch"
+			"word verb/adverb/noun/adjective add/remove/get/count/random [word] - Example: "+config.command_prefix+
+			"word noun add apple - "+config.command_prefix+
+			"word adjective remove overconfident"
 	},
 	callback: function (input, match) {
 		var entry, reg, verb,
-			args = match[1].split(" ");
+			args = match[1].toLowerCase().split(" ");
+		if (args[0].match(/^adjective$|^adverb$|^noun$/)) {
+			switch (args[1]) {
+				case "random":
+					irc.say(input.context, words[args[0]].random());
+					break;
+				case "count":
+					irc.say(input.context, "I know of "+words[args[0]].list.length+" "+args[0]+"s.");
+					break;
+				case "get":
+					irc.say(input.context, words[args[0]].get(args[2]));
+					break;
+				case "add":
+					if (!permissions.isAdmin(input.user)) {
+						irc.say(input.context, "Admins only sucka.");
+						return;
+					}
+					irc.say(input.context, words[args[0]].add(args[2]));
+					break;
+				case "remove":
+					if (!permissions.isAdmin(input.user)) {
+						irc.say(input.context, "Admins only sucka!");
+						return;
+					}
+					irc.say(input.context, words[args[0]].remove(args[2]));
+					break;
+				default:
+					break; // never happens
+			}
+			return;
+		}
 		switch (args[0]) {
-			case "adverb":
-				switch (args[1].toLowerCase()) {
-					case "add":
-						if (!permissions.isAdmin(input.user)) {
-							irc.say(input.context, "Admins only sucka.");
-							return;
-						}
-						irc.say(input.context, words.adverb.add(args[2].toLowerCase()));
-						break;
-					case "remove":
-						if (!permissions.isAdmin(input.user)) {
-							irc.say(input.context, "Admins only sucka.");
-							return;
-						}
-						irc.say(input.context, words.adverb.remove(args[2].toLowerCase()));
-						break;
-					case "count":
-						irc.say(input.context, "I know of "+words.adverb.list.length+" adverbs.");
-						break;
-					case "get":
-						irc.say(input.context, words.adverb.get(args[2]));
-						break;
-					case "random":
-						irc.say(input.context, words.adverb.random());
-						break;
-					default:
-						break;
-				}
-				break;
 			case "verb":
-				switch (args[1].toLowerCase()) {
+				switch (args[1]) {
 					case "count":
 						irc.say(input.context, "I know of "+words.verb.list.length+" verbs.");
 						break;
@@ -79,7 +81,7 @@ listen({
 						irc.say(input.context, words.verb.change(args.slice(2).join(" ")));
 						break;
 					default:
-						irc.say(input.context, "I'm only doing verbs at the moment.");
+						irc.say(input.context, this.command.syntax);
 						break;
 				}
 				break;

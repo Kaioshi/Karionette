@@ -95,6 +95,8 @@ listen({
 			"{verbed}": adv+verbed,
 			"{verbing}": adv+verbing,
 			"{adverb}": words.adverb.random(),
+			"{adjective}": words.adjective.random(),
+			"{noun}": words.noun.random(),
 			"{randVerb}": randVerb,
 			"{randVerbs}": randVerbs,
 			"{randVerbed}": randVerbed,
