@@ -42,6 +42,13 @@ listen({
 						}
 						irc.say(input.context, words.verb.add(args.slice(2).join(" ")));
 						break;
+					case "correct":
+						if (!permissions.isAdmin(input.user)) {
+							irc.say(input.context, "Admins only.");
+							return;
+						}
+						irc.say(input.context, words.verb.change(args.slice(2).join(" ")));
+						break;
 					default:
 						irc.say(input.context, "I'm only doing verbs at the moment.");
 						break;
