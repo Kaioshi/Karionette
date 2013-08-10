@@ -75,7 +75,7 @@ listen({
 				}, rDelay(2000));
 				break;
 			case "gf":
-				if (!lib.chance(20)) return;
+				if (!lib.chance(80)) return;
 				setTimeout(function () {
 					irc.say(input.context, lib.randSelect([
 						"mitch_: GURLFRIENNN",
@@ -86,7 +86,7 @@ listen({
 				break;
 			case ">":
 			case ">implying":
-				if (!lib.chance(30)) return;
+				if (!lib.chance(70)) return;
 				setTimeout(function () {
 					irc.say(input.context, lib.randSelect([
 						"mitch_: nou",
@@ -123,7 +123,7 @@ listen({
 					}, rDelay());
 				} else {
 					if (match[1][0] === "\x02") {
-						if (!lib.chance(30)) return;
+						if (!lib.chance(70)) return;
 						setTimeout(function () {
 							irc.say(input.context, lib.randSelect([
 								"\x02so cool",
