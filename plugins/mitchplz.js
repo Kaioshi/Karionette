@@ -9,8 +9,32 @@ function rDelay(n) {
 }
 
 function chance(n) {
-	if (Math.floor(Math.random()*100) >= n) return true;
+	return (Math.floor(Math.random()*100) <= (n ? n : 50));
 }
+
+listen({
+	plugin: "mitchplz",
+	handle: "mitchnickplz",
+	regex: /^:mitch_offline![^ ]+ NICK :mitch_$/i,
+	callback: function (input, match) {
+		if (!chance(40)) return;
+		irc.say(randSelect(ial.Channels("mitch_")), randSelect([
+			">mitch_",
+			"wb",
+			"sleep well?",
+			"WASSUP MITCHES",
+			"So you're the mitch that told the bitch that I'm a mitch, well listen bitch it takes a mitch to know a mitch, bitch.",
+			"mitches be like \""+randSelect([ "lel", ">implying", "nou", "ALL CAPS" ])+"\"",
+			"run!",
+			"ohay mitch",
+			"o/ mitch_",
+			"sup",
+			"mitchplz",
+			"o7",
+			"-.-"
+		]));
+	}
+});
 
 listen({
 	plugin: "mitchplz",
