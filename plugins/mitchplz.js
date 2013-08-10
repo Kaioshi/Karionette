@@ -1,15 +1,8 @@
 // Mitchu harrassment 2013
-
-function randSelect(yarr) {
-	return yarr[Math.floor(Math.random()*yarr.length)];
-}
+// this was ranma's idea.
 
 function rDelay(n) {
 	return Math.floor(Math.random() * (n ? n : 5000));
-}
-
-function chance(n) {
-	return (Math.floor(Math.random()*100) <= (n ? n : 50));
 }
 
 listen({
@@ -17,22 +10,24 @@ listen({
 	handle: "mitchnickplz",
 	regex: /^:mitch_offline![^ ]+ NICK :mitch_$/i,
 	callback: function (input, match) {
-		if (!chance(40)) return;
-		irc.say(randSelect(ial.Channels("mitch_")), randSelect([
-			">mitch_",
-			"wb",
-			"sleep well?",
-			"WASSUP MITCHES",
-			"So you're the mitch that told the bitch that I'm a mitch, well listen bitch it takes a mitch to know a mitch, bitch.",
-			"mitches be like \""+randSelect([ "lel", ">implying", "nou", "ALL CAPS" ])+"\"",
-			"run!",
-			"ohay mitch",
-			"o/ mitch_",
-			"sup",
-			"mitchplz",
-			"o7",
-			"-.-"
-		]));
+		if (!lib.chance(40)) return;
+		setTimeout(function () {
+			irc.say(lib.randSelect(ial.Channels("mitch_")), lib.randSelect([
+				">mitch_",
+				"wb",
+				"sleep well?",
+				"WASSUP MITCHES",
+				"So you're the mitch that told the bitch that I'm a mitch, well listen bitch it takes a mitch to know a mitch, bitch.",
+				"mitches be like \""+lib.randSelect([ "lel", ">implying", "nou", "ALL CAPS" ])+"\"",
+				"run!",
+				"ohay mitch",
+				"o/ mitch_",
+				"sup",
+				"mitchplz",
+				"o7",
+				"-.-"
+			]));
+		}, rDelay());
 	}
 });
 
@@ -45,7 +40,7 @@ listen({
 		switch (args[0]) {
 			case ">lel":
 			case "lel":
-				if (!chance(50)) return;
+				if (!lib.chance(50)) return;
 				targets = [
 					"backside",
 					"forehead",
@@ -55,22 +50,22 @@ listen({
 					"butt"
 				];
 				setTimeout(function () {
-					irc.action(input.context, randSelect([
+					irc.action(input.context, lib.randSelect([
 						"draws a better moustache over mitch_'s upper lip fluff",
 						"flips mitch_",
 						"kicks mitch_ in the ball",
-						"tattoos \"lel\" on mitch_'s "+randSelect(targets),
+						"tattoos \"lel\" on mitch_'s "+lib.randSelect(targets),
 						"bitchslaps mitch_",
 						"mitchslaps mitch_",
-						"lels mitch_'s "+randSelect(targets)
+						"lels mitch_'s "+lib.randSelect(targets)
 					]));
 				}, rDelay(7000));
 				break;
 			case ":>":
 			case ":<":
-				if (!chance(50)) return;
+				if (!lib.chance(50)) return;
 				setTimeout(function () {
-					irc.say(input.context, randSelect([
+					irc.say(input.context, lib.randSelect([
 						"mitch_: there there.",
 						":>",
 						">:)",
@@ -80,9 +75,9 @@ listen({
 				}, rDelay(2000));
 				break;
 			case "gf":
-				if (!chance(20)) return;
+				if (!lib.chance(20)) return;
 				setTimeout(function () {
-					irc.say(input.context, randSelect([
+					irc.say(input.context, lib.randSelect([
 						"mitch_: GURLFRIENNN",
 						"mitch_: ohaay",
 						"GURLFRIENNN"
@@ -91,9 +86,9 @@ listen({
 				break;
 			case ">":
 			case ">implying":
-				if (!chance(30)) return;
+				if (!lib.chance(30)) return;
 				setTimeout(function () {
-					irc.say(input.context, randSelect([
+					irc.say(input.context, lib.randSelect([
 						"mitch_: nou",
 						"lel >mitch_",
 						"mitch_: you're so cool!",
@@ -109,7 +104,7 @@ listen({
 			default:
 				if (match[1].length >= 10 && match[1].toUpperCase() === match[1]) {
 					setTimeout(function () {
-						irc.say(input.context, randSelect([
+						irc.say(input.context, lib.randSelect([
 							"so angry",
 							":O",
 							"mitch_: Keiran? is that you?",
@@ -128,9 +123,9 @@ listen({
 					}, rDelay());
 				} else {
 					if (match[1][0] === "\x02") {
-						if (!chance(30)) return;
+						if (!lib.chance(30)) return;
 						setTimeout(function () {
-							irc.say(input.context, randSelect([
+							irc.say(input.context, lib.randSelect([
 								"\x02so cool",
 								"\x02so bold",
 								"\x02so\x02 cool",
