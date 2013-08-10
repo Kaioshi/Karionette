@@ -1,10 +1,6 @@
 // Mitchu harrassment 2013
 // this was ranma's idea.
 
-function rDelay(n) {
-	return Math.floor(Math.random() * (n ? n : 5000));
-}
-
 listen({
 	plugin: "mitchplz",
 	handle: "mitchnickplz",
@@ -27,7 +23,7 @@ listen({
 				"o7",
 				"-.-"
 			]));
-		}, rDelay());
+		}, lib.randNum(3000, 7000));
 	}
 });
 
@@ -59,7 +55,7 @@ listen({
 						"mitchslaps mitch_",
 						"lels mitch_'s "+lib.randSelect(targets)
 					]));
-				}, rDelay(7000));
+				}, lib.randNum(2000, 7000));
 				break;
 			case ":>":
 			case ":<":
@@ -72,7 +68,7 @@ listen({
 						":<<",
 						"mitch_: it'll be ok."
 					]));
-				}, rDelay(2000));
+				}, lib.randNum(800, 2000));
 				break;
 			case "gf":
 				if (!lib.chance(80)) return;
@@ -82,7 +78,7 @@ listen({
 						"mitch_: ohaay",
 						"GURLFRIENNN"
 					]));
-				}, rDelay());
+				}, lib.randNum(1200, 5000));
 				break;
 			case ">":
 			case ">implying":
@@ -99,7 +95,7 @@ listen({
 						"mitch_: starr fappin' across the universe",
 						"mitch_: >hurr"
 					]));
-				}, rDelay());
+				}, lib.randNum(2500, 5000));
 				break;
 			default:
 				if (match[1].length >= 10 && match[1].toUpperCase() === match[1]) {
@@ -120,9 +116,9 @@ listen({
 							"mitch_: touch it",
 							"some of us are trying to SLEEP"
 						]));
-					}, rDelay());
+					}, lib.randNum(3000, 5000));
 				} else {
-					if (match[1][0] === "\x02") {
+					if (match[1].indexOf("\x02") > -1) {
 						if (!lib.chance(70)) return;
 						setTimeout(function () {
 							irc.say(input.context, lib.randSelect([
@@ -136,7 +132,7 @@ listen({
 								"this was \x02never\x02 funny",
 								">\x02mitch_"
 							]));
-						}, rDelay());
+						}, lib.randNum(2000, 5000));
 					}
 				}
 				break;

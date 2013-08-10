@@ -31,15 +31,6 @@ function transformObj(args, num) {
 	return args[num];
 }
 
-function rDelay(min, max) {
-	var n = -1;
-	if (min > max) return max;
-	while (n < min) {
-		n = Math.floor(Math.random()*max);
-	}
-	return n;
-}
-
 listen({
 	plugin: "actback",
 	handle: "actback",
@@ -117,6 +108,6 @@ listen({
 		randReply = lib.supplant(randReply, suppVars);
 		setTimeout(function () {
 			irc[method](input.context, randReply);
-		}, rDelay(3000,10000));
+		}, lib.randNum(3000,10000));
 	}
 });

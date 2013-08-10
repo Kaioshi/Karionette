@@ -24,7 +24,7 @@ listen({
 		if (nickArr[0]) {
 			currentNick = nickArr[0];
 		} else {
-			currentNick = config.nickname[0] + (Math.floor(Math.random() * 100));
+			currentNick = config.nickname[0] + lib.randNum(100);
 		}
 		// 433 is nick taken
 		setTimeout(function () {
