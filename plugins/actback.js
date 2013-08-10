@@ -31,8 +31,13 @@ function transformObj(args, num) {
 	return args[num];
 }
 
-function chance(n) {
-	return (Math.floor(Math.random()*100) > (n? n : 50));
+function rDelay(min, max) {
+	var n = -1;
+	if (min > max) return max;
+	while (n < min) {
+		n = Math.floor(Math.random()*max);
+	}
+	return n;
 }
 
 listen({
@@ -46,16 +51,14 @@ listen({
 			args = match[0].split(" "),
 			verb = args[1], adv = "",
 			verbs, verbed, verbing,
-			radv = (chance() ? words.adverb.random() : ""),
+			radv = (lib.chance() ? words.adverb.random() : ""),
 			randVerb = words.verb.random().base,
 			randVerbs = words.verb.random().s,
 			randVerbed = words.verb.random().ed,
 			randVerbing = words.verb.random().ing,
 			obj = transformObj(args, 2),
-			rNum = Math.floor(Math.random() * 100),
-			randThing = randThings[Math.floor(Math.random() * randThings.length)],
-			method = (rNum > 50 ? "say" : "action"),
-			delay;
+			randThing = lib.randSelect(randThings),
+			method = (lib.chance(50) ? "say" : "action");
 		
 		if (radv) {
 			randVerb = radv+" "+randVerb;
@@ -104,17 +107,16 @@ listen({
 			"{obj}": obj
 		};
 		if (!randReplies[verbs] && !randReplies.alts[verbs]) {
-			randReply = randReplies.defa[method][Math.floor(Math.random() * randReplies.defa[method].length)];
+			randReply = lib.randSelect(randReplies.defa[method]);
 		} else {
 			if (randReplies.alts[verbs]) {
 				verbs = randReplies.alts[verbs];
 			}
-			randReply = randReplies[verbs][method][Math.floor(Math.random() * randReplies[verbs][method].length)];
+			randReply = lib.randSelect(randReplies[verbs][method]);
 		}
 		randReply = lib.supplant(randReply, suppVars);
-		delay = (randReply.length/5)/1.5*500;
 		setTimeout(function () {
 			irc[method](input.context, randReply);
-		}, delay);
+		}, rDelay(3000,10000));
 	}
 });

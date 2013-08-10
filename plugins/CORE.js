@@ -47,22 +47,19 @@ listen({
 	handle: "ctcp",
 	regex: /^:[^ ]+ PRIVMSG [^ ]+ :\x01(VERSION|PING .*|TIME)\x01$/i,
 	callback: function (input, match) {
-		var fun, 
-			ctcp = match[1].split(" ");
+		var ctcp = match[1].split(" ");
 		switch (ctcp[0].toUpperCase()) {
 			case "VERSION":
-				fun = [
-					"Now with 90% more butts!",
-					"All dem bot butts",
-					"This one time, at band camp..",
-					"Secretly loves fish fingers and custard",
-					"Dun dun dunnnn",
-					"N-Nya..",
-					"Pantsu?",
-					"PANTSU!",
-					"Needs more Pantsu."
-				];
-				irc.raw("NOTICE "+input.context+" :\x01VERSION Karionette ~ \x02"+fun[Math.floor(Math.random()*fun.length)]+
+				irc.raw("NOTICE "+input.context+" :\x01VERSION Karionette ~ \x02"+lib.randSelect([
+						"Now with 90% more butts!",
+						"All dem bot butts",
+						"This one time, at band camp..",
+						"Secretly loves fish fingers and custard",
+						"Dun dun dunnnn",
+						"N-Nya..",
+						"Pantsu?",
+						"PANTSU!",
+						"Needs more Pantsu."])+
 					"\x02 ~ https://github.com/Kaioshi/Karionette.git [based on Marionette by Deide @ EsperNet]\x01");
 				break;
 			case "TIME":

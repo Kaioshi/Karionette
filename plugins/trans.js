@@ -6,10 +6,14 @@ listen({
 	command: {
 		root: "trans",
 		options: "[-d dict] <word/term>",
-		help: "attempts to translate from language to language. Example: trans -d enfr pants - see http://www.wordreference.com/docs/api.aspx for a list of dictionaries."
+		help: "attempts to translate from language to language. Example: "+config.command_prefix+
+			"trans -d enfr pants - see http://www.wordreference.com/docs/api.aspx for a list of dictionaries.",
+		syntax: "[Help] Syntax: "+config.command_prefix+
+			"trans [-d dictionary] <word> - Example: "+config.command_prefix+
+			"trans -d enfr pants; the default dictionary is \"enja\" - english to japanese."
 	},
 	callback: function (input, match) {
-		var args, dict, term, uri, result, res, tr, keys, compound, comp;
+		var args, dict, term, uri, result, res, tr, compound, comp;
 		if (!config.api.wordreference) {
 			irc.say(input.context, "Sorry, the wordreference API key is missing from config.");
 			return;
@@ -35,9 +39,9 @@ listen({
 						if (res.Entries) tr = res.Entries["0"].FirstTranslation["term"];
 						else if (res.PrincipalTranslations) tr = res.PrincipalTranslations["0"].FirstTranslation["term"];
 						if (result.original && result.original.Compounds) {
-							keys = Object.keys(result.original.Compounds);
-							compound = keys[(Math.floor(Math.random() * keys.length))];
-							comp = result.original.Compounds[compound].OriginalTerm["term"] + " -> " + result.original.Compounds[compound].FirstTranslation["term"];
+							compound = lib.randSelect(Object.keys(result.original.Compounds));
+							comp = result.original.Compounds[compound].OriginalTerm["term"]+
+								" -> "+result.original.Compounds[compound].FirstTranslation["term"];
 							tr = tr + " ~~~ " + comp;
 						}
 						if (tr) irc.say(input.context, "("+dict.slice(0,2)+") "+term+" -> ("+dict.slice(2)+") "+tr, false);
@@ -48,7 +52,7 @@ listen({
 				}
 			});
 		} else {
-			irc.say(input.context, "[Help] Syntax: trans " + this.command.options);
+			irc.say(input.context, this.command.syntax);
 		}
 	}
 });

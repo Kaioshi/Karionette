@@ -154,7 +154,7 @@ listen({
 					irc.say(input.context, "There aren't any quotes for "+input.context+" ~ add some!");
 					return;
 				}
-				quote = quotes[Math.floor(Math.random()*quotes.length)];
+				quote = lib.randSelect(quotes);
 				irc.say(input.context, "Quote #"+quote.num+" added by "+quote.from.split("!")[0]+
 					" on "+makeTime(quote.date)+": "+quote.quote);
 				break;

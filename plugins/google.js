@@ -100,7 +100,7 @@ listen({
 						"look up the unit codes!",
 						"hurr imaginary units"
 					];
-					irc.say(input.context, errsponse[Math.floor(Math.random()*errsponse.length)]);
+					irc.say(input.context, lib.randSelect(errsponse));
 					return;
 				}
 				irc.say(input.context, body.lhs+" is equal to "+body.rhs, false);
