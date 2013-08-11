@@ -715,7 +715,6 @@ rose
 route
 rub
 rule
-run
 sack
 sail
 salt
@@ -986,3 +985,4 @@ pronouns
 rebate
 promo
 code
+computer

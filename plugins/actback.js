@@ -93,6 +93,7 @@ listen({
 			"{noun}": words.noun.random(),
 			"{pronoun}": words.pronoun.random(),
 			"{personalPronoun}": words.personalPronoun.random(),
+			"{possessivePronoun}": words.possessivePronoun.random(),
 			"{preposition}": words.preposition.random(),
 			"{randVerb}": randVerb,
 			"{randVerbs}": randVerbs,

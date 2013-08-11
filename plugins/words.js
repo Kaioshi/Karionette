@@ -3,13 +3,22 @@
 function tokenizeLine(line) {
 	var i,
 		ret = [], hit = false,
-		type = [ "noun", "verb", "adjective", "adverb", "preposition", "pronoun", "personalPronoun" ];
+		type = [
+			"noun", "verb", "adjective", "adverb", "preposition",
+			"pronoun", "possessivePronoun", "personalPronoun"
+		];
 	line = line.toLowerCase().split(" ");
 	line.forEach(function (word) {
 		type.forEach(function (type) {
 			if (words[type].get(word, true)) {
 				ret.push("{"+type+"}");
 				hit = true;
+			}
+			if (!hit && word.slice(-1) === "s") {
+				if (words[type].get(word.slice(0,-1), true)) {
+					ret.push("{"+type+"}");
+					hit = true;
+				}
 			}
 		});
 		if (!hit) ret.push(word);
