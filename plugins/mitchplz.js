@@ -21,7 +21,9 @@ listen({
 				"sup",
 				"mitchplz",
 				"o7",
-				"-.-"
+				"-.-",
+				"_hctim<",
+				"lel"
 			]));
 		}, lib.randNum(3000, 7000));
 	}
