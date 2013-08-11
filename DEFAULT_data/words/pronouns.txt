@@ -11,13 +11,9 @@ everybody
 everyone
 everything
 few
-her
-hers
 herself
 him
 himself
-his
-its
 itself
 many
 me
@@ -25,7 +21,6 @@ mine
 more
 most
 much
-my
 myself
 neither
 nobody
@@ -34,8 +29,6 @@ nothing
 one
 other
 others
-our
-ours
 ourselves
 several
 some
@@ -43,8 +36,6 @@ somebody
 someone
 something
 that
-their
-theirs
 them
 themselves
 these
@@ -60,7 +51,5 @@ whoever
 whom
 whomever
 whose
-your
-yours
 yourself
 yourselves

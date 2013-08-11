@@ -2,7 +2,11 @@ my
 your
 his
 her
+hers
 its
 our
+ours
 your
+yours
 their
+theirs
