@@ -146,7 +146,11 @@ listen({
 			related = [];
 			meaning = [];
 			type = body.primaries[0].terms[0].labels[0].text.toLowerCase();
-			if (type.match(/verb|adverb/)) words.addWord(match[1].toLowerCase(), body, type);
+			if (type.match(/^adverb$|^noun$|^adjective$/)) {
+				if (!words[type].get(match[1], true)) {
+					words[type].add(match[1]);
+				}
+			}
 			body.primaries[0].entries.forEach(function (entry) {
 				if (entry.type === 'related') {
 					entry.terms.forEach(function (item) {
@@ -167,9 +171,9 @@ listen({
 			definition = meaning.join("; ");
 			if (related.length > 0) definition = "["+related.join(", ")+"] - "+definition;
 			if (body.terms) {
-				if (related.length > 0)	definition = match[1]+" - \""+body.terms[0].text+"\" "+definition;
-				else definition = match[1]+" - \""+body.terms[0].text+"\" - "+definition;
-			} else definition = match[1]+" - "+definition;
+				if (related.length > 0)	definition = match[1]+" - \""+body.terms[0].text+"\" ("+type+"): "+definition;
+				else definition = match[1]+" - \""+body.terms[0].text+"\" ("+type+"): "+definition;
+			} else definition = match[1]+" ("+type+"): "+definition;
 			irc.say(input.context, definition, false, 2);
 		});
 	}

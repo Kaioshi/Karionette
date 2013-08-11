@@ -1,4 +1,23 @@
 // word motherflipper!
+
+function tokenizeLine(line) {
+	var i,
+		ret = [], hit = false,
+		type = [ "noun", "verb", "adjective", "adverb", "preposition", "pronoun", "personalPronoun" ];
+	line = line.toLowerCase().split(" ");
+	line.forEach(function (word) {
+		type.forEach(function (type) {
+			if (words[type].get(word, true)) {
+				ret.push("{"+type+"}");
+				hit = true;
+			}
+		});
+		if (!hit) ret.push(word);
+		hit = false;
+	});
+	return ret.join(" ");
+}
+
 listen({
 	plugin: "words",
 	handle: "word",
@@ -45,6 +64,9 @@ listen({
 			return;
 		}
 		switch (args[0]) {
+			case "analyze":
+				irc.say(input.context, tokenizeLine(args.slice(1).join(" ")));
+				break;
 			case "verb":
 				switch (args[1]) {
 					case "count":

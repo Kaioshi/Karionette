@@ -91,6 +91,9 @@ listen({
 			"{adverb}": words.adverb.random(),
 			"{adjective}": words.adjective.random(),
 			"{noun}": words.noun.random(),
+			"{pronoun}": words.pronoun.random(),
+			"{personalPronoun}": words.personalPronoun.random(),
+			"{preposition}": words.preposition.random(),
 			"{randVerb}": randVerb,
 			"{randVerbs}": randVerbs,
 			"{randVerbed}": randVerbed,
@@ -203,7 +206,7 @@ function questionReply() {
 listen({
 	plugin: "actback",
 	handle: "actbackquestion",
-	regex: regexFactory.startsWith(["do you", "would you", "should I", "should you", "will you", "will I"]),
+	regex: regexFactory.startsWith(["does", "do", "would", "should", "will", "can", "are", "what"]),
 	callback: function (input, match) {
 		setTimeout(function () {
 			irc.reply(input, questionReply());
