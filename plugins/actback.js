@@ -203,7 +203,7 @@ function questionReply() {
 listen({
 	plugin: "actback",
 	handle: "actbackquestion",
-	regex: regexFactory.startsWith(["do you", "would you", "should I", "will you", "will I"]),
+	regex: regexFactory.startsWith(["do you", "would you", "should I", "should you", "will you", "will I"]),
 	callback: function (input, match) {
 		setTimeout(function () {
 			irc.reply(input, questionReply());
