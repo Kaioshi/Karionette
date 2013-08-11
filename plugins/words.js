@@ -42,7 +42,9 @@ listen({
 	callback: function (input, match) {
 		var entry, reg, verb,
 			args = match[1].toLowerCase().split(" ");
-		if (args[0].match(/^adjective$|^adverb$|^noun$/)) {
+		if (args[0] === "personalpronoun") args[0] = "personalPronoun";     // ugliest hack
+		if (args[0] === "possessivepronoun") args[0] = "possessivePronoun"; // ever.
+		if (args[0].match(/^adjective$|^adverb$|^noun$|^pronoun$|^possessivePronoun$|^personalPronoun$/)) {
 			switch (args[1]) {
 				case "random":
 					irc.say(input.context, words[args[0]].random());
