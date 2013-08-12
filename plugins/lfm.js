@@ -185,7 +185,9 @@ listen({
 			web.get(uri, function (error, response, body) {
 				result = JSON.parse(body);
 				if (result.error) {
-					irc.say(input.context, result.message+" (Code: "+result.error+"). Pantsu.");
+					irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+"\" "+song.date);
+					irc.say(input.context, "lastfm couldn't find detailed track info - \""+result.message+
+						"\" (Code: "+result.error+"). Pantsu.");
 					return;
 				}
 				song.userplays = (result.track.userplaycount ? " - User Plays: "+result.track.userplaycount : "");
