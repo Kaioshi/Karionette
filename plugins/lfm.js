@@ -184,6 +184,10 @@ listen({
 				"&api_key="+config.api.lfm+"&artist="+song.artist+"&track="+song.track+"&format=json";
 			web.get(uri, function (error, response, body) {
 				result = JSON.parse(body);
+				if (result.error) {
+					irc.say(input.context, result.message+" (Code: "+result.error+"). Pantsu.");
+					return;
+				}
 				song.userplays = (result.track.userplaycount ? " - User Plays: "+result.track.userplaycount : "");
 				song.playcount = result.track.playcount;
 				song.listeners = result.track.listeners;
