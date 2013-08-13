@@ -199,14 +199,17 @@ listen({
 				web.get(uri, function (error, response, body) {
 					result = JSON.parse(body);
 					song.tags = [];
-					if (Array.isArray(result.toptags.tag)) {
-						keys = Object.keys(result.toptags.tag);
-						max = (keys.length < 3 ? keys.length : 3);
-						for (i = 0; i < max; i++) {
-							song.tags.push(result.toptags.tag[i].name);
+					if (result.toptags.tag) {
+						if (Array.isArray(result.toptags.tag)) {
+							keys = Object.keys(result.toptags.tag);
+							max = (keys.length < 3 ? keys.length : 3);
+							for (i = 0; i < max; i++) {
+							
+								song.tags.push(result.toptags.tag[i].name);
+							}
+						} else if (result.toptags.tag.name) {
+							song.tags.push(result.toptags.tag.name);
 						}
-					} else if (result.toptags.tag.name) {
-						song.tags.push(result.toptags.tag.name);
 					} else {
 						song.tags.push("No tags found");
 					}
