@@ -57,7 +57,9 @@ listen({
 	callback: function (input, match) {
 		if (match[1] === config.nick) return;
 		ial.Channels(match[1]).forEach(function (channel) {
-			ial.Remove(channel, match[1]);
+			setTimeout(function () {
+				ial.Remove(channel, match[1]);
+			}, 200); // grace period so other plugins have time to fondle the entry if needed
 		});
 		if (globals.admins[match[1]+"!"+match[2]] !== undefined) {
 			logger.debug("Removed cached admin " + match[1]+"!"+match[2]);

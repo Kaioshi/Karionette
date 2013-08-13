@@ -6,6 +6,7 @@ var chanser = {
 
 // Handle channel transition and cleanup
 function resolveChan(channel) {
+	channel = channel.toLowerCase();
 	if (chanser.channel !== channel) {
 		chanser.channel = channel;
 		if (chanser.DB) {
@@ -35,7 +36,107 @@ listen({
 		resolveChan(input.context);
 		user = chanser.DB.getOne(from) || {};
 		user.last = { message: data, seen: date };
+		if (user.left) delete user.left;
 		chanser.DB.saveOne(from, user);
+	}
+});
+
+listen({ // remove Quit entries if we've seen 'em join.
+	plugin: "user",
+	handle: "seenJoin",
+	regex: regexFactory.onJoin(),
+	callback: function (input, match) {
+		var user,
+			nick = match[1].toLowerCase();
+		resolveChan(match[3]);
+		user = chanser.DB.getOne(nick);
+		if (user && user.left) {
+			delete user.left;
+			chanser.DB.saveOne(nick, user);
+		}
+	}
+});
+
+listen({
+	plugin: "user",
+	handle: "seenPart",
+	regex: regexFactory.onPart(),
+	callback: function (input, match) {
+		var user,
+			nick = match[1].toLowerCase();
+		
+		resolveChan(match[3]);
+		user = chanser.DB.getOne(nick);
+		if (user) {
+			user.left = {
+				type: "parted",
+				date: new Date(),
+				user: match[1]+" ("+match[2]+")",
+				msg: (match[4] ? " ~ "+match[4] : "")
+			};
+			chanser.DB.saveOne(nick, user);
+		}
+	}
+});
+
+listen({
+	plugin: "user",
+	handle: "seenNick",
+	regex: regexFactory.onNick(),
+	callback: function (input, match) {
+		var user,
+			oldnick = match[1].toLowerCase(),
+			newnick = match[3].toLowerCase();
+		ial.Channels(match[3]).forEach(function (channel) {
+			resolveChan(channel);
+			user = chanser.DB.getOne(newnick);
+			if (user && user.left) {
+				delete user.left;
+				chanser.DB.saveOne(newnick, user);
+			}
+			user = chanser.DB.getOne(oldnick);
+			if (user) {
+				user.left = {
+					type: "nick changed",
+					date: new Date(),
+					user: match[1]+" ("+match[2]+")",
+					msg: " ~ "+match[1]+" -> "+match[3]
+				};
+				chanser.DB.saveOne(oldnick, user);
+			}
+		});
+	}
+});
+
+listen({
+	plugin: "user",
+	handle: "seenQuit",
+	regex: regexFactory.onQuit(),
+	callback: function (input, match) {
+		var user,
+			nick = match[1].toLowerCase();
+		
+		function neatenQuit(quitmsg) {
+			if (quitmsg.slice(0,6) === "Quit: ") {
+				quitmsg = quitmsg.slice(6);
+			}
+			if (quitmsg.length > 0) return " ~ "+quitmsg;
+			return "";
+		}
+		
+		ial.Channels(match[1]).forEach(function (channel) {
+			resolveChan(channel);
+			user = chanser.DB.getOne(nick);
+			if (user) { // don't bother recording quit time if they don't talk
+				user.left = {
+					type: "quit",
+					date: new Date(),
+					user: match[1]+" ("+match[2]+")",
+					msg: neatenQuit(match[3])
+				};
+				chanser.DB.saveOne(nick, user);
+			}
+		});
 	}
 });
 
@@ -65,7 +166,11 @@ listen({
 			irc.say(input.context, "I don't recognise that Pokermon.");
 			return;
 		}
-		seen = (chan !== input.context ? target+" was last seen in "+chan+" " : target+" was last seen ");
+		if (user.left) {
+			irc.say(input.context, user.left.user+" "+user.left.type+
+				" "+lib.duration(new Date(user.left.date))+" ago"+user.left.msg, false);
+		}
+		seen = (chan !== input.context ? target+" was last seen talking in "+chan+" " : target+" was last seen talking ");
 		seen = seen+lib.duration(new Date(user.last.seen))+" ago ~ "+user.last.message;
 		irc.say(input.context, seen, false);
 	}
