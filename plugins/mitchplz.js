@@ -1,5 +1,14 @@
 // Mitchu harrassment 2013
 // this was ranma's idea.
+function timeOfDay() {
+	var time = parseInt(new Date().toTimeString().slice(0,2));
+	if (time >= 06 && time <= 11) return "morning";
+	if (time >= 11 && time <= 14) return "day";
+	if (time >= 14 && time <= 17) return "afternoon";
+	if (time >= 17 && time <= 12) return "evening";
+	if (time >= 0 && time <= 06) return "evening";
+	return "SOME TIME OF THE DAY";
+}
 
 listen({
 	plugin: "mitchplz",
@@ -13,15 +22,17 @@ listen({
 				"wb",
 				"sleep well?",
 				"WASSUP MITCHES",
-				"So you're the mitch that told the bitch that I'm a mitch, well listen bitch it takes a mitch to know a mitch, bitch.",
-				"mitches be like \""+lib.randSelect([ "lel", ">implying", "nou", "ALL CAPS" ])+"\"",
+				"So you're the mitch_ that told the bitch that I'm a mitch, well listen mitch_ it takes a mitch to know a mitch, bitch_.",
+				"mitches be like \""+lib.randSelect([ "lel", ">implying", "nou", "ALL CAPS", "<\x02meme\x02>" ])+"\"",
 				"run!",
 				"ohay mitch",
 				"o/ mitch_",
+				"/o\\ mitch_",
+				"moitch",
 				"sup",
 				"mitchplz",
 				"o7",
-				"-.-",
+				"good "+timeOfDay()+" "+lib.randSelect([ "Mitchel", "moitch_", "mitch_", "Sir Mitchalot", "mitches" ]),
 				"_hctim<",
 				"lel"
 			]));
@@ -130,8 +141,12 @@ listen({
 								"\x02so\x02 bold",
 								"\x02look I can bold!",
 								"\x02pay attention to me",
+								"\x02pay attention to me\x02! ;~;",
+								"\x02meeeeeee\x02 ;~;",
 								"I feel \x02important\x02!",
 								"this was \x02never\x02 funny",
+								"mitches be \x02trippin\x02'",
+								">mitch\x02plz\x02_",
 								">\x02mitch_"
 							]));
 						}, lib.randNum(2000, 5000));
