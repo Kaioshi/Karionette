@@ -49,6 +49,19 @@ listen({ // remove Quit entries if we've seen 'em join.
 		var user,
 			nick = match[1].toLowerCase();
 		resolveChan(match[3]);
+		if (match[1] === config.nick) { // remove stale entries
+			setTimeout(function () {
+				Object.keys(ial.Channel(match[3]).users).forEach(function (entry) {
+					entry = entry.toLowerCase();
+					user = chanser.DB.getOne(entry);
+					if (user && user.left) {
+						delete user.left;
+						chanser.DB.saveOne(entry, user);
+						user = null;
+					}
+				});
+			}, 200); // give ial time to update
+		}
 		user = chanser.DB.getOne(nick);
 		if (user && user.left) {
 			delete user.left;
