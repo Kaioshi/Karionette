@@ -173,6 +173,10 @@ listen({
 			chan = input.context;
 			target = args[0].replace("?", "");
 		}
+		if (target.toLowerCase() === config.nick.toLowerCase()) {
+			irc.say(input.context, "I'm right here, baaaka.");
+			return;
+		}
 		resolveChan(chan);
 		user = chanser.DB.getOne(target.toLowerCase());
 		if (!user) {
