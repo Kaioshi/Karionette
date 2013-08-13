@@ -60,7 +60,7 @@ listen({ // remove Quit entries if we've seen 'em join.
 						user = null;
 					}
 				});
-			}, 200); // give ial time to update
+			}, 5000); // give ial time to update
 		}
 		user = chanser.DB.getOne(nick);
 		if (user && user.left) {
