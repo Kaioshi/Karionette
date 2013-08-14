@@ -35,7 +35,7 @@ listen({
 		ial.addActive(input.context, input.from, input.data, date.getTime(), input.user);
 		resolveChan(input.context);
 		user = chanser.DB.getOne(from) || {};
-		user.last = { message: data, seen: date };
+		user.last = { nick: input.from, message: data, seen: date };
 		if (user.left) delete user.left;
 		chanser.DB.saveOne(from, user);
 	}
@@ -187,6 +187,7 @@ listen({
 			irc.say(input.context, user.left.user+" "+user.left.type+
 				" "+lib.duration(new Date(user.left.date))+" ago"+user.left.msg, false);
 		}
+		target = user.last.nick || target;
 		seen = (chan !== input.context ? target+" was last seen talking in "+chan+" " : target+" was last seen talking ");
 		seen = seen+lib.duration(new Date(user.last.seen))+" ago ~ "+user.last.message;
 		irc.say(input.context, seen, false);
