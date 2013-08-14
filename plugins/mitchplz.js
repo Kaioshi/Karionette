@@ -10,6 +10,32 @@ function timeOfDay() {
 	return "SOME TIME OF THE DAY";
 }
 
+function mitch() {
+	return lib.randSelect([
+		"mitch_",
+		">mitch_",
+		"moitch",
+		"moitch_",
+		"mitches",
+		"mitch",
+		"mitchelle",
+		"Mitchy mitch",
+		"Sir Mitchalot",
+		"MITCHES",
+		"meetch",
+		"bitch_",
+		"Mitchel",
+		"mitchplz"
+	]);
+}
+
+function genericReply() {
+	return lib.randSelect([
+		mitch()+" "+words.verb.random().s+" the "+words.noun.random(),
+		">"+mitch()
+	]);
+}
+
 listen({
 	plugin: "mitchplz",
 	handle: "mitchnickplz",
@@ -19,24 +45,26 @@ listen({
 		setTimeout(function () {
 			irc.say(lib.randSelect(ial.Channels("mitch_")), lib.randSelect([
 				">mitch_",
+				">"+mitch(),
 				"wb",
+				"wb "+mitch(),
 				"sleep well?",
 				"WASSUP MITCHES",
 				"So you're the mitch_ that told the bitch that I'm a mitch, well listen mitch_ it takes a mitch to know a mitch, bitch_.",
 				"mitches be like \""+lib.randSelect([ "lel", ">implying", "nou", "ALL CAPS", "<\x02meme\x02>" ])+"\"",
 				"run!",
-				"ohay mitch",
-				"o/ mitch_",
-				"/o\\ mitch_",
-				"moitch",
+				"ohay "+mitch(),
+				"o/ "+mitch(),
+				"/o\\ "+mitch(),
 				"sup",
 				"mitchplz",
 				"o7",
-				"good "+timeOfDay()+" "+lib.randSelect([ "Mitchel", "moitch_", "mitch_", "Sir Mitchalot", "mitches" ]),
+				"good "+timeOfDay()+" "+mitch(),
 				"_hctim<",
-				"lel"
+				"lel",
+				genericReply()
 			]));
-		}, lib.randNum(3000, 7000));
+		}, lib.randNum(1000, 7000));
 	}
 });
 
@@ -53,24 +81,38 @@ listen({
 				targets = [
 					"backside",
 					"forehead",
-					"entire face",
+					"face",
 					"left buttock",
 					"right buttock",
-					"butt"
+					"butt",
+					"_"
 				];
 				setTimeout(function () {
 					irc.action(input.context, lib.randSelect([
-						"draws a better moustache over mitch_'s upper lip fluff",
-						"flips mitch_",
+						"draws a better moustache over "+mitch()+"'s upper lip fluff",
+						"flips "+mitch(),
 						"kicks mitch_ in the ball",
 						"tattoos \"lel\" on mitch_'s "+lib.randSelect(targets),
-						"bitchslaps mitch_",
-						"mitchslaps mitch_",
+						"bitchslaps "+mitch(),
+						"mitchslaps "+mitch(),
 						"lels mitch_'s "+lib.randSelect(targets)
 					]));
 				}, lib.randNum(2000, 7000));
 				break;
 			case ":>":
+				if (!lib.chance(50)) return;
+				setTimeout(function () {
+					irc.say(input.context, lib.randSelect([
+						":D",
+						":-D",
+						"D-:",
+						"mitches be like \":>\"",
+						":<",
+						">:D",
+						genericReply()
+					]));
+				}, lib.randNum(800, 2000));
+				break;
 			case ":<":
 				if (!lib.chance(50)) return;
 				setTimeout(function () {
@@ -106,7 +148,8 @@ listen({
 						">mitch_",
 						">mitchplz",
 						"mitch_: starr fappin' across the universe",
-						"mitch_: >hurr"
+						"mitch_: >hurr",
+						genericReply()
 					]));
 				}, lib.randNum(2500, 5000));
 				break;
@@ -147,7 +190,8 @@ listen({
 								"this was \x02never\x02 funny",
 								"mitches be \x02trippin\x02'",
 								">mitch\x02plz\x02_",
-								">\x02mitch_"
+								">\x02mitch_",
+								">\x02"+mitch()
 							]));
 						}, lib.randNum(2000, 5000));
 					}
