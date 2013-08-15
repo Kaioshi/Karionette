@@ -32,7 +32,7 @@ function transformObj(args, num) {
 }
 
 function questionReply(question) {
-
+	question = question.toLowerCase();
 	var what = [
 		"Probably something like {randThing}",
 		"Err... 42?",
