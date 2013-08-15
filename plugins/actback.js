@@ -41,7 +41,9 @@ function questionReply(question) {
 		"It's... um... hmm... It's dead.",
 		"A BROODING COCKATRICE",
 		"You think I'm going to tell you that? Ha!",
-		"Ooooo ho ho ho ho. That knowledge is not befitting of a lowly peasant like you."
+		"Something dirty like a bmotion bot",
+		"Ooooo ho ho ho ho. That knowledge is not befitting of a lowly peasant like you.",
+		"Holy Bullfango Batman, I didn't think you'd have the guts to ask that!"
 	], where = [
 		"In Asuna's box",
 		"On the film set of ranma's home made porno",
@@ -49,7 +51,9 @@ function questionReply(question) {
 		"Better ask Asuna as she was playing with it in her bedroom last",
 		"In my hear :)",
 		"Over the rainbow, obviously",
-		"In the matrix"
+		"In the matrix",
+		"Near the Great Pyramid; X marks the spot!",
+		"In the gypsy camp I spent the summer running around naked in"
 	], when = [
 		"In the dead of the night, when mitch_ is fapping to tohou",
 		"WHEN I GET AROUND TO IT, GOSH!",
@@ -59,7 +63,8 @@ function questionReply(question) {
 		"Probably some time tonight",
 		"Tomorrow, maybe? When I'm in the bath",
 		"Next week, during my period",
-		"What is time, anyway?"
+		"What is time, anyway?",
+		"Whenever you're ready :) Be gentle"
 	], why = [
 		"How should I know? Do I look like your therapist?",
 		"Asuna made me",
@@ -67,14 +72,18 @@ function questionReply(question) {
 		"The chocobos wark'd really loudly at me",
 		"I swallowed it by accident",
 		"Probably because you're an idiot",
-		"Y-Yeah Asuna why?",
-		"I was feeling horny... and Asuna was just standing there!"
+		"Y-Yeah Asuna, why?",
+		"I was feeling horny... and Asuna was just standing there!",
+		"Because it had to be done.",
+		"Because everyone loves kneesocks, obviously",
+		"Hee hee :3",
+		"There's probably a good explanation, but I'm too busy slaving over a hot stove for all these lazy bastards"
 	], yn = [
 		"yep", "yep.", "yep!",
 		"yes", "yes.", "yes!",
 		"yeah", "yeah.", "yeah!",
 		"yea", "yea.", "yea!",
-		"of course", "of course.", "of course!",
+		"why of course", "of course.", "of course!",
 		"without fail",
 		"beyond a doubt", "beyond a shadow of a doubt",
 		"by all means",
