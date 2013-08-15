@@ -37,16 +37,29 @@ function questionReply(question) {
 		"Probably something like {randThing}",
 		"Err... 42?",
 		"I think the answer is probably lost at sea",
-		"The real question is 'what is {randThing} doing in Asuna's box?', fool."
+		"The real question is 'what is {randThing} doing in Asuna's box?', fool.",
+		"It's... um... hmm... It's dead.",
+		"A BROODING COCKATRICE",
+		"You think I'm going to tell you that? Ha!",
+		"Ooooo ho ho ho ho. That knowledge is not befitting of a lowly peasant like you."
 	], where = [
 		"In Asuna's box",
 		"On the film set of ranma's home made porno",
 		"Probably with my dog",
-		"Better ask Asuna as she was playing with it in her bedroom last"
+		"Better ask Asuna as she was playing with it in her bedroom last",
+		"In my hear :)",
+		"Over the rainbow, obviously",
+		"In the matrix"
 	], when = [
 		"In the dead of the night, when mitch_ is fapping to tohou",
 		"WHEN I GET AROUND TO IT, GOSH!",
-		"Asa dayo"
+		"Asa dayo",
+		"On my birthday",
+		"When hell freezes over, maybe -_-",
+		"Probably some time tonight",
+		"Tomorrow, maybe? When I'm in the bath",
+		"Next week, during my period",
+		"What is time, anyway?"
 	], why = [
 		"How should I know? Do I look like your therapist?",
 		"Asuna made me",
@@ -54,7 +67,8 @@ function questionReply(question) {
 		"The chocobos wark'd really loudly at me",
 		"I swallowed it by accident",
 		"Probably because you're an idiot",
-		"Y-Yeah Asuna why?"
+		"Y-Yeah Asuna why?",
+		"I was feeling horny... and Asuna was just standing there!"
 	], yn = [
 		"yep", "yep.", "yep!",
 		"yes", "yes.", "yes!",
@@ -235,11 +249,11 @@ listen({
 listen({
 	plugin: "actback",
 	handle: "actbackquestion",
-	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :(?:(?:"
+	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :(?:(?:(?:"
 			+ regexFactory.matchAny(config.nickname)
 			+ "[,:]\\s)(\\w+).+)|(?:(\\w+).+)"
 			+ regexFactory.matchAny(config.nickname)
-			+ "\\?$", "i"),
+			+ "\\?)$", "i"),
 	callback: function (input, match) {
 		var m = match[1] || match[2];
 		setTimeout(function () {
