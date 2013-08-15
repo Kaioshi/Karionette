@@ -89,7 +89,7 @@ listen({
 		},
 	},
 	callback: function (input, match) {
-		var bookmarks, i, keys, overwrite, dupes, url, removed, result,
+		var bookmarks, i, keys, overwrite, dupes, url, removed, result, reg,
 			handle, target,
 			args = match[1].split(" ");
 		switch (args[0].toLowerCase()) {
@@ -237,6 +237,8 @@ listen({
 				else irc.say(input.context, this.command.syntax[args[1]]);
 				break;
 			default:
+				reg = /(.*)@(.*)/.exec(match[1]);
+				if (reg) match[1] = match[1].split("@")[0].trim();
 				match[1] = match[1].toLowerCase();
 				target = getTarget(input.context, input.from, match[1]);
 				handle = getHandle(input.context, input.from, match[1]);
@@ -252,8 +254,12 @@ listen({
 				bookmarks.forEach(function (entry) {
 					if (entry.handle === handle) result = entry;
 				});
-				if (result) irc.say(input.context, result.handle+" ~ "+result.link);
-				else irc.say(input.context, target+" has no such bookmark.");
+				if (result) {
+					if (reg) result.handle = reg[2]+": "+result.handle;
+					irc.say(input.context, result.handle+" ~ "+result.link);
+				} else {
+					irc.say(input.context, target+" has no such bookmark.");
+				}
 				break;
 		}
 	}
