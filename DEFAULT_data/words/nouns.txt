@@ -430,7 +430,7 @@ hour
 house
 houses
 humor
-hydrant 	I
+hydrant
 ice
 icicle
 idea
