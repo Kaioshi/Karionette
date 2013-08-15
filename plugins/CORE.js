@@ -87,6 +87,9 @@ listen({
 				for (i in channels) {
 					irc.join(channels[i]);
 				}
+				setTimeout(function () {
+					lib.events.emit("autojoinFinished");
+				}, 3000); // wait for the joins to finish
 			}, 2000); // wait 2 seconds for a cloak to apply
 		}
 	}
