@@ -241,8 +241,9 @@ listen({
 			+ regexFactory.matchAny(config.nickname)
 			+ "\\?$", "i"),
 	callback: function (input, match) {
+		var m = match[1] || match[2];
 		setTimeout(function () {
-			irc.reply(input, questionReply(match[1] || match[2]));
+			irc.reply(input, questionReply(m));
 		}, lib.randNum(1000, 5000));
 	}
 });
