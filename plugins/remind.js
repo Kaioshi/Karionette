@@ -51,6 +51,7 @@ function removeReminder(reminder) {
 		if (reminders[i] === reminder) {
 			reminders.splice(i,1);
 			reminder = null;
+			fs.writeFileSync("data/reminders.txt", reminders.join("\n"));
 			return;
 		}
 	}
