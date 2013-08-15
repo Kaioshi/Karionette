@@ -207,7 +207,7 @@ function questionReply() {
 listen({
 	plugin: "actback",
 	handle: "actbackquestion",
-	regex: /^Mari[,:] (\w+).+ ?$/i,
+	regex: new RegExp("^" + regexFactory.matchAny(config.nickname) + "[,:] (\w+).+ ?$" "i"),
 	callback: function (input, match) {
 		setTimeout(function () {
 			irc.reply(input, questionReply());
