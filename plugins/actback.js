@@ -214,8 +214,7 @@ listen({
 			+ regexFactory.matchAny(config.nickname)
 			+ "[,:]\\s)?(\\w+).+"
 			+ regexFactory.matchAny(config.nickname)
-			+ "?\\?$"
-		, "i");
+			+ "?\\?$", "i"),
 	callback: function (input, match) {
 		setTimeout(function () {
 			irc.reply(input, questionReply());
