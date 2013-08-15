@@ -43,7 +43,8 @@ function questionReply(question) {
 		"You think I'm going to tell you that? Ha!",
 		"Something dirty like a bmotion bot",
 		"Ooooo ho ho ho ho. That knowledge is not befitting of a lowly peasant like you.",
-		"Holy Bullfango Batman, I didn't think you'd have the guts to ask that!"
+		"Holy Bullfango Batman, I didn't think you'd have the guts to ask that!",
+		"Go ask your parents, little boy"
 	], where = [
 		"In Asuna's box",
 		"On the film set of ranma's home made porno",
@@ -53,7 +54,8 @@ function questionReply(question) {
 		"Over the rainbow, obviously",
 		"In the matrix",
 		"Near the Great Pyramid; X marks the spot!",
-		"In the gypsy camp I spent the summer running around naked in"
+		"In the gypsy camp I spent the summer running around naked in",
+		"Unda da sea~"
 	], when = [
 		"In the dead of the night, when mitch_ is fapping to tohou",
 		"WHEN I GET AROUND TO IT, GOSH!",
@@ -262,7 +264,7 @@ listen({
 			+ regexFactory.matchAny(config.nickname)
 			+ "[,:]\\s)(\\w+).+)|(?:(\\w+).+)"
 			+ regexFactory.matchAny(config.nickname)
-			+ "\\?)$", "i"),
+			+ ")\\?$", "i"),
 	callback: function (input, match) {
 		var m = match[1] || match[2];
 		setTimeout(function () {
