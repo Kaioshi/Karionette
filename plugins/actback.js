@@ -210,7 +210,12 @@ listen({
 listen({
 	plugin: "actback",
 	handle: "actbackquestion",
-	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :"+regexFactory.matchAny(config.nickname)+"[,:] (.*)\\?$","i"),
+	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :(?:"
+			+ regexFactory.matchAny(config.nickname)
+			+ "[,:]\\s)?(\\w+).+"
+			+ regexFactory.matchAny(config.nickname)
+			+ "?\\?$"
+		, "i");
 	callback: function (input, match) {
 		setTimeout(function () {
 			irc.reply(input, questionReply());
