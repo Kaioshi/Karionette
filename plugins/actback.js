@@ -212,7 +212,6 @@ listen({
 	handle: "actbackquestion",
 	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :"+regexFactory.matchAny(config.nickname)+"[,:] (.*)\\?$","i"),
 	callback: function (input, match) {
-		console.log("HIT!");
 		setTimeout(function () {
 			irc.reply(input, questionReply());
 		}, lib.randNum(1000, 5000));
