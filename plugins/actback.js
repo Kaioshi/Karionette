@@ -207,7 +207,7 @@ function questionReply() {
 listen({
 	plugin: "actback",
 	handle: "actbackquestion",
-	regex: regexFactory.startsWith(["does", "do", "would", "should", "will", "can", "are", "what", "is"]),
+	regex: /^Mari[,:] (\w+).+ ?$/i,
 	callback: function (input, match) {
 		setTimeout(function () {
 			irc.reply(input, questionReply());
