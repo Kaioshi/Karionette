@@ -31,92 +31,116 @@ function transformObj(args, num) {
 	return args[num];
 }
 
-function questionReply() {
-	if (lib.chance(50)) { // yes and maybe
-		if (lib.chance(50)) { // yes
-			return lib.randSelect([
-				"yep", "yep.", "yep!",
-				"yes", "yes.", "yes!",
-				"yeah", "yeah.", "yeah!",
-				"yea", "yea.", "yea!",
-				"of course", "of course.", "of course!",
-				"without fail",
-				"beyond a doubt", "beyond a shadow of a doubt",
-				"by all means",
-				"definitely", "definitely.", "definitely!",
-				"affirmative",
-				"undoubtedly",
-				"naturally",
-				"I believe the answer is yes.",
-				"my magic 8-ball and I both agree that the answer is almost certainly without a doubt most likely yes.",
-				"yerp", "yERP", "YERP",
-				"absolutely", "absolutely.", "absolutely!",
-				"unquestionably yes",
-				"YESSSS",
-				"ahuh", "ahuh.", "ahuh!",
-				"mhm",
-				"mmm oh yeah"
-			]);
-		}
-		// maybe
-		return lib.randSelect([
-			"maybe", "maybe?", "maybe!..", ".. maybe?",
-			"mebbe", "mebbe!", "mebbe?",
-			"possibly", "possibly!", "possibly?",
-			"perhaps", "perhaps.", "perhaps!",
-			"conceivably", "conceivably.",
-			"uncertainly", "uncertainly.", "uncertainly!",
-			"the odds are heavily in favour of maybe",
-			"it is within the realm of possibility",
-			"god willing", "jebus permitting", "JAYSUS PERMITTING",
-			"if it were at all possible, perhaps perchance",
-			"my magic 8-ball and I both agree that the answer is probably maybe. maybe.",
-			"may be.",
-			"maybe. maybe? may bee! A BEE OH GOD, RUN! RUN FOR YOUR LIVES"
-		]);
-	}
-	// no and hurr
-	if (lib.chance(70)) { // no
-		return lib.randSelect([
-			"no", "no.", "no!",
-			"absolutely not",
-			"ABSOLUTELY NOT!",
-			"absolutely not.",
-			"nope", "nope.", "nope!",
-			"nah", "nah.", "nah!",
-			"nuh", "nuh.", "nuh!",
-			"all signs point to NUH.",
-			"NOPENOPENOPENOPENOPE",
-			"no. No. NO. NONONONONONONO",
-			"Nope. NOPE. NOPENOPENOPENOPE",
-			"NOOOOOOO",
-			"NO", "NO.", "NO!",
-			"Heck no.", "Heck NO", "HECK NO!",
-			"not this time",
-			"perhaps another time.",
-			"I'm in a season of " + lib.randSelect(["no", "NO", "NO!", "NOPE", "NOPE!", "NUH UH"]),
-			"Thanks, but no thanks.",
-			"Not possible",
-			"unpossible.",
-			"in another life.",
-			"I cry, but decline.",
-			"N to the O.",
-			"if only"
-		]);
-	}
-	// hurr
-	return lib.randSelect([
+function questionReply(question) {
+
+	var what = [
+		"Probably something like {randThing}",
+		"Err... 42?",
+		"I think the answer is probably lost at sea",
+		"The real question is 'what is {randThing} doing in Asuna's box?', fool."
+		break;
+	], where = [
+		"In Asuna's box",
+		"On the film set of ranma's home made porno",
+		"Probably with my dog",
+		"Better ask Asuna as she was playing with it in her bedroom last"
+		break;
+	], when = [
+		"In the dead of the night, when mitch_ is fapping to tohou",
+		"WHEN I GET AROUND TO IT, GOSH!",
+		"Asa dayo"
+		break;
+	], why = [
+		"How should I know? Do I look like your therapist?",
+		"Asuna made me",
+		"... ranma did it!",
+		"The chocobos wark'd really loudly at me",
+		"I swallowed it by accident",
+		"Probably because you're an idiot",
+		"Y-Yeah Asuna why?"
+		break;
+	], yn = [
+		"yep", "yep.", "yep!",
+		"yes", "yes.", "yes!",
+		"yeah", "yeah.", "yeah!",
+		"yea", "yea.", "yea!",
+		"of course", "of course.", "of course!",
+		"without fail",
+		"beyond a doubt", "beyond a shadow of a doubt",
+		"by all means",
+		"definitely", "definitely.", "definitely!",
+		"affirmative",
+		"undoubtedly",
+		"naturally",
+		"I believe the answer is yes.",
+		"my magic 8-ball and I both agree that the answer is almost certainly without a doubt most likely yes.",
+		"yerp", "yERP", "YERP",
+		"absolutely", "absolutely.", "absolutely!",
+		"unquestionably yes",
+		"YESSSS",
+		"ahuh", "ahuh.", "ahuh!",
+		"mhm",
+		"mmm oh yeah",
+		"maybe", "maybe?", "maybe!..", ".. maybe?",
+		"mebbe", "mebbe!", "mebbe?",
+		"possibly", "possibly!", "possibly?",
+		"perhaps", "perhaps.", "perhaps!",
+		"conceivably", "conceivably.",
+		"uncertainly", "uncertainly.", "uncertainly!",
+		"the odds are heavily in favour of maybe",
+		"it is within the realm of possibility",
+		"god willing", "jebus permitting", "JAYSUS PERMITTING",
+		"if it were at all possible, perhaps perchance",
+		"my magic 8-ball and I both agree that the answer is probably maybe. maybe.",
+		"may be.",
+		"maybe. maybe? may bee! A BEE OH GOD, RUN! RUN FOR YOUR LIVES",
+		"no", "no.", "no!",
+		"absolutely not",
+		"ABSOLUTELY NOT!",
+		"absolutely not.",
+		"nope", "nope.", "nope!",
+		"nah", "nah.", "nah!",
+		"nuh", "nuh.", "nuh!",
+		"all signs point to NUH.",
+		"NOPENOPENOPENOPENOPE",
+		"no. No. NO. NONONONONONONO",
+		"Nope. NOPE. NOPENOPENOPENOPE",
+		"NOOOOOOO",
+		"NO", "NO.", "NO!",
+		"Heck no.", "Heck NO", "HECK NO!",
+		"not this time",
+		"perhaps another time.",
+		"I'm in a season of " + lib.randSelect(["no", "NO", "NO!", "NOPE", "NOPE!", "NUH UH"]),
+		"Thanks, but no thanks.",
+		"Not possible",
+		"unpossible.",
+		"in another life.",
+		"I cry, but decline.",
+		"N to the O.",
+		"if only",
 		"hurrr.", "-.-", "balls", "o_o", ".________.",
 		"hi!", "hello.", "an butt?",
 		"if you would you could you should you into mitch_?",
 		"I like your shoes",
 		"you got a purdy mouth",
 		"what do you think?",
-		"I put the question to you!",
-		"c'mon now.", "c'mon man.", "O_O",
-		";~;", "o_O", "O_o", "...", ". . .", "wtf", "D:", ":D", ":>", ">:(",
-		"here, take this and apply generously to your <bleep> twice a day until that clears up.. or it falls off."
-	]);
+		";~;", "o_O", "O_o", "...", ". . .", "wtf", "D:", ":D", ":>", ">:("
+	];
+	
+	switch (question) {
+	case "what":
+		return lib.randSelect(what);
+	case "where":
+		return lib.randSelect(where);
+	case "when":
+		return lib.randSelect(when);
+	case "why":
+	case "do":
+	case "is":
+	default:
+		return lib.randSelect(yn);
+		break;
+	}
 }
 
 listen({
@@ -210,14 +234,14 @@ listen({
 listen({
 	plugin: "actback",
 	handle: "actbackquestion",
-	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :(?:"
+	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :(?:(?:"
 			+ regexFactory.matchAny(config.nickname)
-			+ "[,:]\\s)?(\\w+).+"
+			+ "[,:]\\s)(\\w+).+)|(?:(\\w+).+)"
 			+ regexFactory.matchAny(config.nickname)
-			+ "?\\?$", "i"),
+			+ "\\?$", "i"),
 	callback: function (input, match) {
 		setTimeout(function () {
-			irc.reply(input, questionReply());
+			irc.reply(input, questionReply(match[1] || match[2]));
 		}, lib.randNum(1000, 5000));
 	}
 });
