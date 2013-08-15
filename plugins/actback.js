@@ -38,18 +38,15 @@ function questionReply(question) {
 		"Err... 42?",
 		"I think the answer is probably lost at sea",
 		"The real question is 'what is {randThing} doing in Asuna's box?', fool."
-		break;
 	], where = [
 		"In Asuna's box",
 		"On the film set of ranma's home made porno",
 		"Probably with my dog",
 		"Better ask Asuna as she was playing with it in her bedroom last"
-		break;
 	], when = [
 		"In the dead of the night, when mitch_ is fapping to tohou",
 		"WHEN I GET AROUND TO IT, GOSH!",
 		"Asa dayo"
-		break;
 	], why = [
 		"How should I know? Do I look like your therapist?",
 		"Asuna made me",
@@ -58,7 +55,6 @@ function questionReply(question) {
 		"I swallowed it by accident",
 		"Probably because you're an idiot",
 		"Y-Yeah Asuna why?"
-		break;
 	], yn = [
 		"yep", "yep.", "yep!",
 		"yes", "yes.", "yes!",
@@ -126,14 +122,17 @@ function questionReply(question) {
 		"what do you think?",
 		";~;", "o_O", "O_o", "...", ". . .", "wtf", "D:", ":D", ":>", ">:("
 	];
-	
+
 	switch (question) {
 	case "what":
 		return lib.randSelect(what);
+		break;
 	case "where":
 		return lib.randSelect(where);
+		break;
 	case "when":
 		return lib.randSelect(when);
+		break;
 	case "why":
 	case "do":
 	case "is":
