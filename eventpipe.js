@@ -105,7 +105,7 @@ module.exports = (function () {
 					try {
 						listeners[element].callback(input, match);
 					} catch (err) {
-						logger.error("Caught error in listener " + element + ": " + err);
+						logger.error("Caught error in listener " + element + ": " + err + err.stack);
 					}
 					if (listeners[element].once) {
 						delete listeners[element];

@@ -89,7 +89,7 @@ listen({
 			time = transformTime(timeUnits, time);
 			what = rMatch[4];
 		} else {
-			rMatch = (/^me (to|that) (.*) in (\d*) (seconds?|minutes?|hours?)$/i).exec(match[1]);
+			rMatch = (/^me (to|that) (.*) in (\d*) (seconds?|minutes?|hours?)[.!?]?$/i).exec(match[1]);
 			if (!rMatch) {
 				irc.say(input.context, "Wrong syntax ~ ;remind " + this.command.options);
 				return;
