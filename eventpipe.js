@@ -11,9 +11,9 @@ module.exports = (function () {
 		aliasEventlets = [],
 		isInAlias = false,
 		maxEventFire = 10,
-		aliasDB = new DB.Json({filename: "alias/alias"}),
-		varDB = new DB.Json({filename: "alias/vars"}),
-		randThings = new DB.List({filename: "randomThings"}).getAll();
+		aliasDB = new DB.Json({filename: "alias/alias", queue: true}),
+		varDB = new DB.Json({filename: "alias/vars", queue: true}),
+		randThings = new DB.List({filename: "randomThings", queue: true}).getAll();
 	
 	// Re-populate the keyCache
 	function setHandles() {
