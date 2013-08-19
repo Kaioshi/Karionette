@@ -24,6 +24,10 @@ function isObj(string) {
 	});
 }
 
+function getWpm(line) {
+	return Math.floor((line.length/5.0)*1750);
+}
+
 function transformObj(args, num) {
 	while (isObj(args[num])) {
 		num += 1;
@@ -34,10 +38,10 @@ function transformObj(args, num) {
 function questionReply(question) {
 	question = question.toLowerCase();
 	var what = [
-		"Probably something like {randThing}",
+//		"Probably something like {randThing}",
 		"Err... 42?",
 		"I think the answer is probably lost at sea",
-		"The real question is 'what is {randThing} doing in Asuna's box?', fool.",
+		"The real question is 'what is a "+words.noun.random()+" doing in Asuna's box?', fool.",
 		"It's... um... hmm... It's dead.",
 		"A BROODING COCKATRICE",
 		"You think I'm going to tell you that? Ha!",
@@ -147,7 +151,7 @@ function questionReply(question) {
 		"what do you think?",
 		";~;", "o_O", "O_o", "...", ". . .", "wtf", "D:", ":D", ":>", ">:("
 	];
-
+	
 	switch (question) {
 	case "what":
 		return lib.randSelect(what);
@@ -177,6 +181,10 @@ listen({
 		var randReply, tmp, suppVars,
 			randThings = randDB.getAll(),
 			randReplies = repliesDB.getAll(),
+			nicks = (input.context[0] === "#" ?
+				ial.Active(input.context).filter(function (nick) { return (nick !== input.from); })
+				: []),
+			nicks = (nicks.length > 0 ? nicks : [ "someone", "The Lawd Jasus", "your dad", "mitch_", "Asuna" ]),
 			args = match[0].split(" "),
 			verb = args[1], adv = "",
 			verbs, verbed, verbing,
@@ -188,14 +196,14 @@ listen({
 			obj = transformObj(args, 2),
 			randThing = lib.randSelect(randThings),
 			method = (lib.chance(50) ? "say" : "action");
-
+		
 		if (radv) {
 			randVerb = radv + " " + randVerb;
 			randVerbs = radv + " " + randVerbs;
 			randVerbed = radv + " " + randVerbed;
 			randVerbing = radv + " " + randVerbing;
 		}
-
+		
 		if (verb.slice(-2) === "ly") {
 			words.lookup("adverb", args[1].toLowerCase());
 			adv = args[1] + " ";
@@ -225,6 +233,7 @@ listen({
 			"{from}": input.from,
 			"{context}": input.context,
 			"{randThing}": randThing,
+			"{randNick}": lib.randSelect(nicks),
 			"{verb}": adv + verb,
 			"{verbs}": adv + verbs,
 			"{verbed}": adv + verbed,
@@ -253,7 +262,7 @@ listen({
 		randReply = lib.supplant(randReply, suppVars);
 		setTimeout(function () {
 			irc[method](input.context, randReply);
-		}, lib.randNum(3000, 10000));
+		}, getWpm(randReply));
 	}
 });
 
@@ -266,9 +275,11 @@ listen({
 			+ regexFactory.matchAny(config.nickname)
 			+ ")\\?$", "i"),
 	callback: function (input, match) {
-		var m = match[1] || match[2];
+		var m = match[1] || match[2],
+			rep = questionReply(m);
+		
 		setTimeout(function () {
-			irc.reply(input, questionReply(m));
-		}, lib.randNum(1000, 5000));
+			irc.reply(input, rep);
+		}, getWpm(rep));
 	}
 });
