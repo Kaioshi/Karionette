@@ -13,7 +13,7 @@ function resolveChan(channel) {
 			chanser.DB.unload(true);
 			delete chanser.DB;
 		}
-		chanser.DB = new DB.Json({filename: "users/" + channel, queue: false});
+		chanser.DB = new DB.Json({filename: "users/" + channel, queue: true});
 	}
 }
 // Check if ACTION
