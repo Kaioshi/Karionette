@@ -184,7 +184,7 @@ listen({
 			return;
 		}
 		if (user.left) {
-			irc.say(input.context, user.left.user+" "+user.left.type+
+			irc.say(input.context, user.left.user+" "+(chan !== input.context ? user.left.type+" "+chan : user.left.type)+
 				" "+lib.duration(new Date(user.left.date))+" ago"+user.left.msg, false);
 		}
 		target = user.last.nick || target;
