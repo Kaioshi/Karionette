@@ -68,7 +68,7 @@ IRC.reload = function (plugin) {
 };
 
 process.on('uncaughtException', function (err) {
-	logger.error("Uncaught Exception: " + err + err.stack);
+	logger.error("Uncaught Exception: " + err, err);
 });
 
 Plugin.loadAll(createSandbox());

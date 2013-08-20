@@ -29,7 +29,7 @@ module.exports = (function () {
 							vm.runInContext("(function() {" + current + "}())", context, scripts[i]);
 							lib.memProf("loading plugin "+scripts[i]);
 						} catch (err) {
-							logger.error("Error in plugin " + scripts[i] + ": " + err);
+							logger.error("Error in plugin " + scripts[i] + ": " + err, err);
 						}
 					}
 				}
@@ -50,7 +50,7 @@ module.exports = (function () {
 						vm.runInContext("(function() {"+script+"}())", context, plugin);
 						lib.memProf("loading plugin "+plugin);
 					} catch (err) {
-						logger.error("Error in plugin " + plugin + ": " + err);
+						logger.error("Error in plugin " + plugin + ": " + err, err);
 					}
 				}
 				script = null;
