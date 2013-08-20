@@ -12,29 +12,9 @@ listen({
 	handle: "titleSnarfer",
 	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :?.*((?:https?:\\/\\/)[^ ]+)"),
 	callback: function (input, match) {
-		var uri, title, reg, ext, allow; //length = 10000;
+		var uri, title, reg, ext, allow, length = 10000;
 		
-		function sayTitle(uri, imgur) {
-			web.get(uri, function (error, response, body) {
-				var reg, title = /<title.*?>(.*?)<\/title>/i.exec(body.replace(/\r|\n/g, ""));
-				if (title) {
-					title = ent.decode(title[1].trim());
-					if (title.toLowerCase().indexOf(uri.host) > -1) {
-						reg = new RegExp(" "+uri.host+" ?", "ig");
-						title = title.replace(reg, "");
-					} else if (imgur) {
-						if (title === "imgur: the simple image sharer") return; // you can flip off with your default title
-						if (title.slice(-8) === " - Imgur") title = title.slice(0,-8);
-					}
-					irc.say(input.context, title+" ~ "+uri.host, false);
-				} else {
-					logger.error("No title found in body of "+uri.href+", grabbed body for inspection, Cap'n.");
-					globals.lastBody = body;
-				}
-			});
-		}
-		
-/*		function sayTitle2(uri, length, imgur) {
+		function sayTitle(uri, length, imgur) {
 			sys.exec("wget -q -O- "+uri.href.replace(/&/g, "\\&")+" | head -c "+length+
 				" | tr \'\\n\' \' \' | grep -E -io \"<title?.*>(.*?)<\/title>\" | grep -E -o \">(.*)<\"",
 			function (error, stdout, stderr) {
@@ -51,7 +31,7 @@ listen({
 				}
 				irc.say(input.context, title+" ~ "+uri.host, false);
 			});
-		} */
+		}
 		
 		function youtubeIt(id, host) {
 			var uri = "https://gdata.youtube.com/feeds/api/videos/"+id+"?v=2&alt=json";
@@ -85,8 +65,7 @@ listen({
 		if (uri.host === "i.imgur.com" && uri.href.slice(-4).match(/\.jpg|\.png|\.gif/i)) {
 			uri.path = uri.path.slice(0,-4);
 			uri.href = uri.href.slice(0,-4);
-			sayTitle(uri, true);
-			//sayTitle2(uri, length, true);
+			sayTitle(uri, length, true);
 			return;
 		}
 		ext = /.*\.([a-zA-Z0-9]+)$/.exec(uri.path);
@@ -97,9 +76,8 @@ listen({
 			}
 		}
 		// ton of garbage in the first 15000 characters. o_O
-//		if (uri.host.indexOf("kotaku") > -1) length = 20000;
-		sayTitle(uri);
-//		sayTitle2(uri, length);
+		if (uri.host.indexOf("kotaku") > -1) length = 20000;
+		sayTitle(uri, length);
 	}
 });
 
