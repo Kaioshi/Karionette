@@ -20,7 +20,7 @@ function loadReminders() {
 		if (err.code === "ENOENT") {
 			fs.writeFileSync("data/reminders.txt", "");
 		} else {
-			logger.error("reminders plugin - loadReminders(): "+err);
+			logger.error("reminders plugin - loadReminders(): "+err, err);
 		}
 		return;
 	}

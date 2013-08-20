@@ -19,6 +19,7 @@ listen({
 						if (args[1]) { 
 							if (args[1] === "clear") {
 								globals.lastError = "";
+								if (globals.lastErrstack) delete globals.lastErrstack;
 								irc.say(input.context, "Last error cleared.");
 								break;
 							}
@@ -26,6 +27,7 @@ listen({
 							break;
 						}
 						irc.say(input.context, "The last recorded error was: "+globals.lastError);
+						if (globals.lastErrstack) irc.say(input.context, "There's also a recorded error stack - type globals.lastErrstack in the console.");
 						break;
 					}
 					irc.say(input.context, "There haven't been any errors.");
