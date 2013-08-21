@@ -279,7 +279,7 @@ listen({
 			rep = questionReply(m);
 		
 		setTimeout(function () {
-			irc.say(input, rep);
+			irc.say(input.context, rep);
 		}, getWpm(rep));
 	}
 });

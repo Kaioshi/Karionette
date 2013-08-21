@@ -95,10 +95,10 @@ module.exports = (function () {
 
 	// Check if the data fires a plugin, and then do so
 	function fireEvent(input) {
-		var permission, match;
+		var permission;
 		if (input.from) transformAlias(input);
 		keyCache.forEach(function (element) {
-			match = listeners[element].regex.exec(input.raw);
+			var match = listeners[element].regex.exec(input.raw);
 			if (match) {
 				permission = true;
 				if (listeners[element].plugin && input.user) {
@@ -119,6 +119,7 @@ module.exports = (function () {
 				}
 			}
 		});
+		permission = null;
 	}
 
 	return {
