@@ -96,7 +96,7 @@ module.exports = (function () {
 	// Check if the data fires a plugin, and then do so
 	function fireEvent(input) {
 		var permission, match;
-		transformAlias(input);
+		if (input.from) transformAlias(input);
 		keyCache.forEach(function (element) {
 			match = listeners[element].regex.exec(input.raw);
 			if (match) {
