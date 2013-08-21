@@ -25,7 +25,7 @@ function isObj(string) {
 }
 
 function getWpm(line) {
-	return Math.floor((line.length/5.0)*1750);
+	return Math.floor((line.length/5.0)*1000);
 }
 
 function transformObj(args, num) {
