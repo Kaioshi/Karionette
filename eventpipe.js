@@ -87,6 +87,7 @@ module.exports = (function () {
 						+ irc_config.nickname.join("[:,-]? |") + "[:,-]? )" + aliasKeys[i], "i"),
 					irc_config.command_prefix + toTransform
 				);
+				aliasMatch = null; toTransform = null; aliasVars = null; aliasKeys = null;
 				return input.raw;
 			}
 		}
@@ -96,7 +97,7 @@ module.exports = (function () {
 	// Check if the data fires a plugin, and then do so
 	function fireEvent(input) {
 		var permission;
-		if (input.from) transformAlias(input);
+		if (input.data.search(/(;|Mari[,:-])/) === 0) { transformAlias(input); }
 		keyCache.forEach(function (element) {
 			var match = listeners[element].regex.exec(input.raw);
 			if (match) {
