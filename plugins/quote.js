@@ -16,9 +16,9 @@ listen({
 	regex: regexFactory.startsWith("quote"),
 	command: {
 		root: "quote",
-		options: "add, remove, find, get, random",
+		options: "add, remove, find, get, random, stats",
 		help: "Quote added by mitchplz on 24/07/13: <mitch_> should I into quotes",
-		syntax: "[Help] Syntax: "+config.command_prefix+"quote <add/remove> <mitch_> huurrr memes - quote find <search term> - quote random"
+		syntax: "[Help] Syntax: "+config.command_prefix+"quote <add/remove/find/get/random/stats> <mitch_> huurrr memes - quote find <search term> - quote random"
 	},
 	callback: function (input, match) {
 		var i, k, quote, quotes, tmp, first, matches, time,
