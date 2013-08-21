@@ -18,7 +18,10 @@ listen({
 		root: "quote",
 		options: "add, remove, find, get, random, stats",
 		help: "Quote added by mitchplz on 24/07/13: <mitch_> should I into quotes",
-		syntax: "[Help] Syntax: "+config.command_prefix+"quote <add/remove/find/get/random/stats> <mitch_> huurrr memes - quote find <search term> - quote random"
+		syntax: "[Help] Syntax: "+config.command_prefix+
+			"quote <add/remove/find/get/random/stats> - Example: "+config.command_prefix+
+			"quote find <search term> - "+config.command_prefix+
+			"quote add <Mari> mitches be like, \">implying\""
 	},
 	callback: function (input, match) {
 		var i, k, quote, quotes, tmp, first, matches, time,
