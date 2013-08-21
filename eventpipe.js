@@ -97,7 +97,7 @@ module.exports = (function () {
 	// Check if the data fires a plugin, and then do so
 	function fireEvent(input) {
 		var permission;
-		if (input.data.search(/(;|Mari[,:-])/) === 0) { transformAlias(input); }
+		if (input.data.search(RegExp("(;|" + irc_config.nick + "[,:-])", "i")) === 0) { transformAlias(input); }
 		keyCache.forEach(function (element) {
 			var match = listeners[element].regex.exec(input.raw);
 			if (match) {
