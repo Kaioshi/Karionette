@@ -16,7 +16,7 @@ listen({
 		
 		function sayTitle(uri, length, imgur) {
 			sys.exec("wget -q -O- "+uri.href.replace(/&/g, "\\&")+" | head -c "+length+
-				" | tr \'\\n\' \' \' | grep -E -io \"<title?.*>(.*?)<\/title>\" | grep -E -o \">(.*)<\"",
+				" | tr '\\n' ' ' | grep -E -io \"<title?[^>]+>([^<]+)<\/title>\" | grep -E -o \">(.*)<\" | head -n 1",
 			function (error, stdout, stderr) {
 				title = stdout.slice(1,-2);
 				if (!title) return;
