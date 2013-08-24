@@ -217,7 +217,7 @@ cmdChek:	for (i = 0; i < cmdArr.length; i += 1) {
 listen({
 	plugin: "CORE",
 	handle: "memstats",
-	regex: regexFactory.startsWith("memstats"),
+	regex: regexFactory.startsWith(["memstats", "memuse"]),
 	command: {
 		root: "memstats",
 		help: "Shows memory usage."
