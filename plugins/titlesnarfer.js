@@ -36,7 +36,9 @@ listen({
 		function youtubeIt(id, host) {
 			var uri = "https://gdata.youtube.com/feeds/api/videos/"+id+"?v=2&alt=json";
 			web.get(uri, function (error, response, body) {
-				var date, rating = " ~ ";
+				var date,
+					views = "",
+					rating = " ~ ";
 				if (error) {
 					logger.error("[titlesnarfer[youtubeIt("+id+")]] error: "+error);
 					irc.say(input.context, "Something has gone awry.");
@@ -46,9 +48,12 @@ listen({
 				if (body["gd$rating"] && body["gd$rating"].average) {
 					rating = rating+"["+body["gd$rating"].average.toString().slice(0,3)+"/5] ~ ";
 				}
+				if (body["yt$statistics"] && body["yt$statistics"].viewCount) {
+					views = ", "+body["yt$statistics"].viewCount+" views";
+				}
 				date = new Date(body["media$group"]["yt$uploaded"]["$t"]);
 				date = zero(date.getDate())+"/"+zero(date.getMonth()+1)+"/"+date.getYear().toString().slice(1);
-				irc.say(input.context, body.title["$t"]+rating+date+", "+body["yt$statistics"].viewCount+" views ~ "+host.replace("www.",""), false);
+				irc.say(input.context, body.title["$t"]+rating+date+views+" ~ "+host.replace("www.",""), false);
 			});
 		}
 		
