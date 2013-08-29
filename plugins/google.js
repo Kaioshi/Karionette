@@ -44,8 +44,9 @@ listen({
 					logger.error("[google-images] error looking up " + match[1] + " -> " + error);
 					return;
 				}
-				body = JSON.parse(body).responseData.results;
-				if (body && body[0]) {
+				body = JSON.parse(body);
+				if (body && body.responseData && body.responseData.results && body.responseData.results[0]) {
+					body = body.responseData.results;
 					irc.say(input.context, ent.decode(body[0].titleNoFormatting) + " (" + body[0].width + "x" + body[0].height + "): " + body[0].url);
 				} else {
 					irc.say(input.context, "No image found. :<");
