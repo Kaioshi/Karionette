@@ -178,6 +178,9 @@ function questionReply(question) {
 	case "when":
 		return lib.randSelect(when);
 		break;
+	case "which":
+		return lib.randSelect(which);
+		break;
 	case "why":
 		return lib.randSelect(why);
 		break;
