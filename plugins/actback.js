@@ -49,6 +49,21 @@ function questionReply(question) {
 		"Ooooo ho ho ho ho. That knowledge is not befitting of a lowly peasant like you.",
 		"Holy Bullfango Batman, I didn't think you'd have the guts to ask that!",
 		"Go ask your parents, little boy"
+	], which = [
+		"The one that smells best",
+		"The one that doesn't involve you!",
+		"On the weekend, I'd usually choose the latter. But right now, I'm feeling kinky...",
+		"Whichever is dirtier",
+		"Whichever doesn't give me a rash",
+		"I pretty much have no opinion on that, but if I were to choose, I'd say Lunatrius' butt",
+		"The one with the more sordid connotations",
+		"Hako soup",
+		"My next door neighbour gave me the former, once. I couldn't walk straight for a week",
+		"If it involves Rule 63, that",
+		"For the last time, you are _NOT_ getting into my pants! (tonight)",
+		"Either... that's just how I swing. #yolo",
+		"Hahahahaha.... Wait, you're serious?",
+		"L to the E to the W to the D"
 	], where = [
 		"In Asuna's box",
 		"On the film set of ranma's home made porno",
@@ -83,6 +98,7 @@ function questionReply(question) {
 		"Because it had to be done.",
 		"Because everyone loves kneesocks, obviously",
 		"Hee hee :3",
+		"Because I'd secretly love to make out with Asuna",
 		"There's probably a good explanation, but I'm too busy slaving over a hot stove for all these lazy bastards"
 	], yn = [
 		"yep", "yep.", "yep!",
