@@ -98,9 +98,9 @@ listen({
 	regex: regexFactory.startsWith(["mangawatch", "mw"]),
 	command: {
 		root: "mangawatch",
-		options: "add, remove, check, list",
+		options: "add, remove, update, check, list",
 		syntax: "[Help] Syntax: "+config.command_prefix+
-			"mw <add/remove/check/list/announce> - Example: "+config.command_prefix+"mw check Noblesse"
+			"mw <add/remove/update/check/list/announce> - Example: "+config.command_prefix+"mw check Noblesse"
 	},
 	callback: function (input, match) {
 		var feed, reg, list, manga, tmp,
