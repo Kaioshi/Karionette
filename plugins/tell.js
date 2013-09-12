@@ -40,7 +40,7 @@ listen({
 		if (msgMatch && isUser(msgMatch[1])) {
 			if (ial.ison(input.context, msgMatch[1])) {
 				for (rev = [], i = msgMatch[2].length; i >= 0; i--) rev.push(msgMatch[2][i]);
-				irc.say(input.context, msgMatch[1] + ": "+rev.join(""));
+				irc.say(input.context, msgMatch[1] + ": "+rev.join(""), false);
 			} else {
 				messagesDB.saveOne(input.context + "@" + msgMatch[1] + ": " + "message from " + input.from + ": " + msgMatch[2]);
 				irc.say(input.context, "I'll tell them when they get back.");
@@ -59,7 +59,7 @@ listen({
 	callback: function (input, match) {
 		var i, userMessages = getMessages(match[3], match[1]);
 		for (i = 0; i < userMessages.length; i += 1) {
-			irc.say(match[3], match[1] + ", " + userMessages[i]);
+			irc.say(match[3], match[1] + ", " + userMessages[i], false);
 		}
 	}
 });
@@ -76,7 +76,7 @@ listen({
 			channels.forEach(function (channel) {
 				userMessages = getMessages(channel, match[3]);
 				for (i = 0; i < userMessages.length; i++) {
-					irc.say(channel, match[3] + ", " + userMessages[i]);
+					irc.say(channel, match[3] + ", " + userMessages[i], false);
 				}
 			});
 		}, 3000); // <- making sure IAL is updated first
