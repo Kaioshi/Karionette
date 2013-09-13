@@ -75,6 +75,25 @@ listen({
 	callback: function (input, match) {
 		var targets, args = match[1].split(" ");
 		switch (args[0]) {
+			case ">kek":
+			case "kek":
+				if (!lib.chance(50)) return;
+				setTimeout(function () {
+					irc.action(input.context, lib.randSelect([
+						"kekekekes all over "+mitch(),
+						"keks "+mitch()+" in the balls",
+						"rides a My Little Pony named Kek into "+mitch(),
+						"flips "+mitch(),
+						"gives "+mitch()+" \"the snip\" for the benefit of mankind",
+						"confiscates mitch's K and E keys.",
+						"slaps "+mitch(),
+						"yawns in mitch_'s face",
+						"lubes up ranma",
+						"slowly eats a banana.",
+						"mitches all day"
+					]));
+				}, lib.randNum(2000, 7000));
+				break;
 			case ">lel":
 			case "lel":
 				if (!lib.chance(50)) return;
