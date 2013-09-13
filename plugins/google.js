@@ -139,7 +139,8 @@ listen({
 				return;
 			}
 			body = JSON.parse(ent.decode(lib.stripHtml(body.slice(2, -10)
-				.replace(/\\x3c/g, "<").replace(/\\x3e/g, ">").replace(/\\x27/g, "'"))));
+				.replace(/\\x3c/g, "<").replace(/\\x3e/g, ">")
+				.replace(/\\x27/g, "'").replace(/\\x26amp;/g, "&"))));
 			if (!body.primaries) {
 				irc.say(input.context, "I couldn't find "+body.query+". :<");
 				return;
