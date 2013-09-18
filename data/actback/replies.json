@@ -1,0 +1,171 @@
+{
+	"gives": {
+		"say": [
+			"All your {obj}s are belong to me >:]",
+			"{obj}? What do you want me to do with this? {randVerb} it? :|",
+			"OMFFFG I LOVE IT",
+			"{from}, .. do you have the receipt for this?",
+			"A-Are you trying to get into my pants? D:",
+			"Woohoo! {obj}! Just what I always wanted!",
+			"{obj} {obj} {obj} {obj} {obj} {obj} {obj} {obj}",
+			"Sugoku oishii~",
+			"KAWAII!",
+			"mitches loove {obj}",
+			"Are you sure {obj} won't attract mitches?",
+			"Are you sure {obj} won't attract bees?"
+		],
+		"action": [
+			"fondly pets her {obj} and gives {from} {randThing} in return",
+			"fuses {obj} with {randThing}, taking over the world with it!",
+			"chucks {obj} in a pot and makes soup from it",
+			"loves {from} for their silliness",
+			"plays with her {obj} in front of {from}",
+			"licks it timidly",
+			"thanks {from} with {randThing}"
+		]
+	},
+	"steals": {
+		"say": [
+			"Hey! That's not for you :(",
+			"I think you'll find that's mine",
+			"You can't have that. How about {randThing} instead?",
+			"Thief! {from} is a thief! Get them!",
+			"MY {obj}! NOOOOOOOOOOOOOOO!"
+		],
+		"action": [
+			"steals {randThing} from {from}",
+			"gives {from} a good thrashing for their thievery",
+			"chops {from}'s hands off"
+		]
+	},
+	"humps": {
+		"say": [
+			"s.. stranger danger!",
+			"I.. I need an adult",
+			"Eeew! Go {verb} yourself, hentai-{from}!",
+			"Kyyaaa! Go {randVerb} yourself, hentai-{from}!",
+			"Excuuuuuuuuuuuse ME! I am not a substitute for your hand!",
+			"Excuuuuuuuuuuuse ME! I am not a substitute for your hand! Except on tuesdays.",
+			"{from}-sama, do you love me?",
+			"you're doin' it wrong :|",
+			"Baka! Hentai! Sukebe! Aho! >///<"
+		],
+		"action": [
+			"4th-dimension summons a comically large hammer and murders {from} with it.",
+			"tries to casually bring up Keiran's poop fetish during.",
+			"scrobbles {from}",
+			"does her limp-fish move",
+			"has a headache ;<",
+			"\"donates\" {from} to charity",
+			"slinks out of the woods covered in blood after hiding {from}'s body.",
+			"runs away from {from}, crying her eyes out",
+			"knees {from} in the jingle bells",
+			"brandishes a knife towards {from}",
+			"reports {from} to the authorities",
+			"O-Ookii",
+			"uses giga drill breaker on {from}'s behind",
+			"{randVerbs} {from} in the butt",
+			"exterminates {from} with {randNick}",
+			"exterminates {from} with {randThing}"
+		]
+	},
+	"hugs": {
+		"say": [
+			"Hold me tight!",
+			"too tight! too tight!!",
+			"can't breathe X(",
+			"You can hug me, just don't touch my buttocks like that",
+			"{from}-sama, do you love me?",
+			"HEY! Hey. Where do you think you're touching, {from}?",
+			"y-you can l-lower your hands, if you want to",
+			"dawww.",
+			"halp",
+			"save my innocence, {randNick} ;~;",
+			"Wow, this was definitely worth {randThing}"
+		],
+		"action": [
+			"warmly cuddles {from}",
+			"brandishes a buster sword towards {from}",
+			"purrs",
+			"twerks it",
+			"{randVerbs}",
+			"includes Asuna",
+			"includes {randNick}",
+			"{randVerbs} Asuna",
+			"squeezes {from}'s behind",
+			"{randVerbs} {from}'s behind",
+			"vibrates all over {from}"
+		]
+	},
+	"defa": {
+		"say": [
+			"Oh {from}-san >///< Do it again!",
+			"Why don't you go {verb} yourself, you weirdo :(",
+			"B-Baka {from}",
+			"... I hear Asuna likes to {randVerb} herself. :S",
+			"mitch_, stop {randVerbing}! You'll go blind~",
+			"When {verbing}, use {randThing}",
+			"I once {verbed} {randThing}. It was incredible ;)",
+			"{verb}age in the form of {randThing}",
+			"No no no no, don't funk with my heart",
+			"Why would you do this? I only had 1 month left to pay off {randThing}",
+			"Why would you do this? I only had 1 month left to {randVerb} off {randThing}",
+			"Oooh, I love being {verbed}. Do it again, but this time, use {randThing}",
+			"Oooh~ I love being {verbed}, Do it again, but this time {adverb}",
+			"I hate it when you {verb} me... :(",
+			"I love it when you {verb} me :D",
+			"I prefer when {randNick} {verbs} me..",
+			"Ny.. nyaa~",
+			"Wow, I didn't even know you could {verb}, {from}",
+			"{randNick}: help me! :<",
+			"Baka{from}, if you wanted to {verb} me, you could have just accidentally walked in on me while showering",
+			"Baka{from}, if you wanted to {verb} me, you could have just {adverb} walked in on me while {adverb} showering",
+			"DESU",
+			"You must quest for the Dragon's balls before you even THINK about {verbing} me",
+			"{verbing} will get you nowhere. Especially not while {randVerbing} {randThing}",
+			"I was living in Finland and abo.. screw this, DIEDIEDIE {from}!",
+			"I was living in Finland and about to fulfill my ultimate anime geek dream of living in Japan for good... That's when I first found {randThing}"
+		],
+		"action": [
+			"kicks {from} in the balls",
+			"{randVerbs} {from} in the balls",
+			"slaps {from} into oribt for {verbing} her",
+			"snickers",
+			"flips {from}",
+			"includes {randNick}",
+			"{verbs} {from} back with {randThing}",
+			"{verbs} {from} back with {randNick}",
+			"{verbs} {from}'s behind",
+			"{verbs} {from}'s behind with {randNick}",
+			"{verbed} a girl and liked it",
+			"{verbed} {randNick} and liked it",
+			"{randVerbed} a girl and liked it",
+			"chews on {from} seductively",
+			"wonders how {from} is able to {verb} her when she did a DocTheMedic-esque god-dodge",
+			"giggles timidly at {from}",
+			"giggles {adverb} at {from}",
+			"wiggles furiously at {from}",
+			"wiggles {adverb} in {from}'s face area",
+			"{adverb} fires {randThing} at {from}",
+			"{randVerbs} {randThing} in {from}'s general direction",
+			"mexican-waves the {verb} towards {randNick}",
+			"mexican-waves the {verb} towards Asuna"
+		]
+	},
+	"alts": {
+		"fucks": "humps",
+		"gropes": "humps",
+		"rapes": "humps",
+		"molests": "humps",
+		"sexes": "humps",
+		"shags": "humps",
+		"fondles": "humps",
+		"cuddles": "hugs",
+		"bearhugs": "hugs",
+		"glomps": "hugs",
+		"hands": "gives",
+		"gifts": "gives",
+		"takes": "steals",
+		"confiscates": "steals"
+	}
+}
