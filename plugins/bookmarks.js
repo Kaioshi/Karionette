@@ -64,7 +64,7 @@ listen({
 	regex: regexFactory.startsWith(["bookmarks", "bookmark", "bm", "link"]),
 	command: {
 		root: "bookmark",
-		options: "-add, -remove, -list, -find",
+		options: "-add, -remove, -list, -find - issue each command with no arguments for further help",
 		help: "Allows you to store links for later retrieval.",
 		syntax: {
 			def: "[Help] Syntax: "+config.command_prefix+"bookmark [-a(dd) / -r(emove) / -l(ist) / -f(ind) / -h(elp)] [<handle>] [<url>]",
@@ -90,7 +90,7 @@ listen({
 	},
 	callback: function (input, match) {
 		var bookmarks, i, keys, overwrite, dupes, url, removed, result, reg,
-			handle, target,
+			handle, target, matchedUrl, matchedHandle,
 			args = match[1].split(" ");
 		switch (args[0].toLowerCase()) {
 			case "-a":
@@ -200,13 +200,17 @@ listen({
 					return;
 				}
 				keys = [];
+				matchedHandle = [];
+				matchedUrl = [];
 				bookmarks.forEach(function (entry) {
 					if (entry.handle.indexOf(handle) > -1) {
 						entry.match = "handle";
+						matchedHandle.push(entry.handle);
 						keys.push(entry);
 					}
 					else if (entry.link.indexOf(handle) > -1) {
 						entry.match = "url";
+						matchedUrl.push(entry.handle);
 						keys.push(entry);
 					}
 				});
@@ -218,11 +222,12 @@ listen({
 							irc.say(input.context, entry.handle+" ["+entry.match+" match] ~ "+entry.link);
 						});
 					} else {
-						result = [];
-						keys.forEach(function (entry) {
-							result.push(entry.handle+" [matched by "+entry.match+"]");
-						});
-						irc.say(input.context, result.join(", "));
+						if (matchedHandle.length > 0) {
+							irc.say(input.context, "Matched by handle: "+matchedHandle.join(", "), false);
+						}
+						if (matchedUrl.length > 0) {
+							irc.say(input.context, "Matched by URL: "+matchedUrl.join(", "), false);
+						}
 					}
 				}
 				break;
