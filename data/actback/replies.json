@@ -12,7 +12,10 @@
 			"KAWAII!",
 			"mitches loove {obj}",
 			"Are you sure {obj} won't attract mitches?",
-			"Are you sure {obj} won't attract bees?"
+			"Are you sure {obj} won't attract bees?",
+			"It's soo {adjective}!!",
+			"How many {noun}s did you {randVerb} to get this?",
+			"Last time I had one of these, I woke up in Tokyo with {adjective} {noun} all over my face. Must have {randVerbed} hard the night before."
 		],
 		"action": [
 			"fondly pets her {obj} and gives {from} {randThing} in return",
@@ -30,27 +33,39 @@
 			"I think you'll find that's mine",
 			"You can't have that. How about {randThing} instead?",
 			"Thief! {from} is a thief! Get them!",
-			"MY {obj}! NOOOOOOOOOOOOOOO!"
+			"MY {obj}! NOOOOOOOOOOOOOOO!",
+			"P-Pantsu dorobou!",
+			"You can keep it. I've already used it to {randVerb} like a {noun}"
 		],
 		"action": [
 			"steals {randThing} from {from}",
 			"gives {from} a good thrashing for their thievery",
-			"chops {from}'s hands off"
+			"chops {from}'s hands off",
+			"gets sad kitty ears and wobbles her bottom lip at {from}",
+			"phones the popo",
+			"phones the {noun}"
 		]
 	},
 	"humps": {
 		"say": [
-			"s.. stranger danger!",
+			"S.. stranger danger!",
 			"I.. I need an adult",
+			"I.. I need hero. I'm holding out for a hero 'til the end of the night. He's gotta be strong and he's gotta be fast and he's gotta be fresh from the fight.",
 			"Eeew! Go {verb} yourself, hentai-{from}!",
 			"Kyyaaa! Go {randVerb} yourself, hentai-{from}!",
 			"Excuuuuuuuuuuuse ME! I am not a substitute for your hand!",
 			"Excuuuuuuuuuuuse ME! I am not a substitute for your hand! Except on tuesdays.",
+			"Excuuuuuuuuuuuse ME! I am not a substitute for your {noun}!",
 			"{from}-sama, do you love me?",
-			"you're doin' it wrong :|",
-			"Baka! Hentai! Sukebe! Aho! >///<"
+			"{from}-chan, daaaaaisuki~!",
+			"You're doin' it wrong :|",
+			"You're doin' it wrong! Lower! Go lower!",
+			"Baka! Hentai! Sukebei! Aho! >///<",
+			"I do love a good {randVerbing}",
+			"Just how big is your {noun}? It's {randVerbing} me {adverb}!"
 		],
 		"action": [
+			"fondles {from} excitedly, accidentally {randVerbing} in the process"
 			"4th-dimension summons a comically large hammer and murders {from} with it.",
 			"tries to casually bring up Keiran's poop fetish during.",
 			"scrobbles {from}",
@@ -97,6 +112,23 @@
 			"vibrates all over {from}"
 		]
 	},
+	"throws": {
+		"say": [
+			"Shower me! Shower me {adverb}!",
+			"You won't get away with this, {from}, mark my words",
+			"Wow, it's like {randThing}"
+			"Is it Christmas already? I haven't even {randVerbed} yet",
+			"You throw like a {noun}",
+			"Could you BE any more of a {noun}, {from}?",
+			"That could have really {randVerbed} me :( meanie"
+		],
+		"action": [
+			"flies through the air at mach 10 towards {randNick}",
+			"{randVerbs} violently is it hits her in the face",
+			"absorbs it and does a transformation sequence where mystical white {noun} {randVerbs} her private body parts, turning into {randThing}",
+			"{verb} it {adverb}"
+		]
+	},
 	"defa": {
 		"say": [
 			"Oh {from}-san >///< Do it again!",
@@ -124,7 +156,11 @@
 			"You must quest for the Dragon's balls before you even THINK about {verbing} me",
 			"{verbing} will get you nowhere. Especially not while {randVerbing} {randThing}",
 			"I was living in Finland and abo.. screw this, DIEDIEDIE {from}!",
-			"I was living in Finland and about to fulfill my ultimate anime geek dream of living in Japan for good... That's when I first found {randThing}"
+			"I was living in Finland and about to fulfill my ultimate anime geek dream of living in Japan for good... That's when I first found {randThing}",
+			"I was {randVerbing} in Finland and about to fulfill my {adjective} anime geek dream of {randVerbing} in Japan for {noun}... But {verbed} all over the Prime Minister's cake, so...",
+			"Well I'll be {randVerbing} like a {noun} for the rest of the night. Thank you.",
+			"I appreciate the sentiment. Would you like a {adjective} {noun} in return?",
+			"This is why I can't {randVerb} at night. You're always {verbing} me so {adverb}!"
 		],
 		"action": [
 			"kicks {from} in the balls",
@@ -143,13 +179,17 @@
 			"chews on {from} seductively",
 			"wonders how {from} is able to {verb} her when she did a DocTheMedic-esque god-dodge",
 			"giggles timidly at {from}",
+			"falls over and exposes her {noun} to {randNick}",
+			"falls over and exposes her pantsu to {from}",
+			"counters {from}'s {verbing} with a {adjective} {randVerb} to the face",
 			"giggles {adverb} at {from}",
 			"wiggles furiously at {from}",
 			"wiggles {adverb} in {from}'s face area",
 			"{adverb} fires {randThing} at {from}",
 			"{randVerbs} {randThing} in {from}'s general direction",
 			"mexican-waves the {verb} towards {randNick}",
-			"mexican-waves the {verb} towards Asuna"
+			"mexican-waves the {verb} towards Asuna",
+			"raids Asuna's stockpile of {noun} and {randVerbs} the night away with {from}"
 		]
 	},
 	"alts": {
@@ -163,9 +203,12 @@
 		"cuddles": "hugs",
 		"bearhugs": "hugs",
 		"glomps": "hugs",
+		"snuggles": "hugs",
 		"hands": "gives",
 		"gifts": "gives",
 		"takes": "steals",
-		"confiscates": "steals"
+		"confiscates": "steals",
+		"launches": "throws",
+		"chucks": "throws"
 	}
 }

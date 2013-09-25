@@ -69,7 +69,7 @@ function questionReply(question) {
 		"On the film set of ranma's home made porno",
 		"Probably with my dog",
 		"Better ask Asuna as she was playing with it in her bedroom last",
-		"In my hear :)",
+		"In my ear :)",
 		"Over the rainbow, obviously",
 		"In the matrix",
 		"Near the Great Pyramid; X marks the spot!",
