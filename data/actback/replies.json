@@ -65,7 +65,7 @@
 			"Just how big is your {noun}? It's {randVerbing} me {adverb}!"
 		],
 		"action": [
-			"fondles {from} excitedly, accidentally {randVerbing} in the process"
+			"fondles {from} excitedly, accidentally {randVerbing} in the process",
 			"4th-dimension summons a comically large hammer and murders {from} with it.",
 			"tries to casually bring up Keiran's poop fetish during.",
 			"scrobbles {from}",
@@ -116,7 +116,7 @@
 		"say": [
 			"Shower me! Shower me {adverb}!",
 			"You won't get away with this, {from}, mark my words",
-			"Wow, it's like {randThing}"
+			"Wow, it's like {randThing}",
 			"Is it Christmas already? I haven't even {randVerbed} yet",
 			"You throw like a {noun}",
 			"Could you BE any more of a {noun}, {from}?",
