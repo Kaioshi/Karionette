@@ -35,7 +35,7 @@
 			"Thief! {from} is a thief! Get them!",
 			"MY {obj}! NOOOOOOOOOOOOOOO!",
 			"P-Pantsu dorobou!",
-			"You can keep it. I've already used it to {randVerb} like a {noun}"
+			"You can keep it. I've already used it to {randVerb} like the {noun} I am"
 		],
 		"action": [
 			"steals {randThing} from {from}",
@@ -189,7 +189,8 @@
 			"{randVerbs} {randThing} in {from}'s general direction",
 			"mexican-waves the {verb} towards {randNick}",
 			"mexican-waves the {verb} towards Asuna",
-			"raids Asuna's stockpile of {noun} and {randVerbs} the night away with {from}"
+			"raids Asuna's stockpile of {noun} and {randVerbs} the night away with {from}",
+			"relases the bees towards {from} and giggles {adverb}"
 		]
 	},
 	"alts": {

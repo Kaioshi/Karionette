@@ -25,7 +25,7 @@ function isObj(string) {
 }
 
 function getWpm(line) {
-	return Math.floor((line.length/5.0)*1000);
+	return Math.floor((line.length / 5.0) * 1000);
 }
 
 function transformObj(args, num) {
@@ -41,7 +41,7 @@ function questionReply(question) {
 //		"Probably something like {randThing}",
 		"Err... 42?",
 		"I think the answer is probably lost at sea",
-		"The real question is 'what is a "+words.noun.random()+" doing in Asuna's box?', fool.",
+		"The real question is 'what is a " + words.noun.random() + " doing in Asuna's box?', fool.",
 		"It's... um... hmm... It's dead.",
 		"A BROODING COCKATRICE",
 		"You think I'm going to tell you that? Ha!",
@@ -100,6 +100,30 @@ function questionReply(question) {
 		"Hee hee :3",
 		"Because I'd secretly love to make out with Asuna",
 		"There's probably a good explanation, but I'm too busy slaving over a hot stove for all these lazy bastards"
+	], how = [
+		"Probably something to do with how the planets are aligned.",
+		"Probably something to do with how your balls are aligned tonight",
+		"Why don't you google it?",
+		"This: http://bit.ly/12UjlSQ",
+		"Something something cock fight.",
+		"Something something prescription drugs.",
+		"The best way to beat a bully is by showing them how much bigger your genitals are in comparison to theirs. Trust me.",
+		"The best way to beat a horny lolicon is to tell them you're actually their siste- no wait...",
+		"The best way to beat the last boss is by getting it tangled in all its own tentacles, then shoot for the neck (or anus)",
+		"The best way to beat a horny fujoshi is to... actually there's no way. They'll just project their current fantasy onto (and sometimes into) you, and before you know it, you'll be bound to a slender manequin with something hard poking into your behind",
+		"Easy. Use butter. Lots of butter.",
+		"Easy. Use your boyfriend. Twice in a row.",
+		"It's somewhat difficult. First you need lubricant, then you need to find a willing soul, then you need to make sure you practice safety. In the end, if you do it correctly, you'll 1UP.",
+		"He's dead, Jim",
+		"I don't know. I think it started when I met the necrophiliac elf girl.",
+		"I usually just pop it.",
+		"I can normally take it all. I don't know why I can't tonight.",
+		"I have nooooooooo bloody clue.",
+		"I use Asuna as a substitute.",
+		"Rum pum pum pum~",
+		"I just get really hot. So hot. Please don't take advantage of me.",
+		"I use latex.",
+		"When I can't find a suitable person, I turn to my 'massager'"
 	], yn = [
 		"yep", "yep.", "yep!",
 		"yes", "yes.", "yes!",
@@ -167,7 +191,7 @@ function questionReply(question) {
 		"what do you think?",
 		";~;", "o_O", "O_o", "...", ". . .", "wtf", "D:", ":D", ":>", ">:("
 	];
-	
+
 	switch (question) {
 	case "what":
 		return lib.randSelect(what);
@@ -183,6 +207,9 @@ function questionReply(question) {
 		break;
 	case "why":
 		return lib.randSelect(why);
+		break;
+	case "how":
+		return lib.randSelect(how);
 		break;
 	case "do":
 	case "is":
@@ -215,14 +242,14 @@ listen({
 			obj = transformObj(args, 2),
 			randThing = lib.randSelect(randThings),
 			method = (lib.chance(50) ? "say" : "action");
-		
+
 		if (radv) {
 			randVerb = radv + " " + randVerb;
 			randVerbs = radv + " " + randVerbs;
 			randVerbed = radv + " " + randVerbed;
 			randVerbing = radv + " " + randVerbing;
 		}
-		
+
 		if (verb.slice(-2) === "ly") {
 			words.lookup("adverb", args[1].toLowerCase());
 			adv = args[1] + " ";
@@ -296,7 +323,7 @@ listen({
 	callback: function (input, match) {
 		var m = match[1] || match[2],
 			rep = questionReply(m);
-		
+
 		setTimeout(function () {
 			irc.say(input.context, rep);
 		}, getWpm(rep));
