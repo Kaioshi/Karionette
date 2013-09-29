@@ -242,14 +242,14 @@ listen({
 			obj = transformObj(args, 2),
 			randThing = lib.randSelect(randThings),
 			method = (lib.chance(50) ? "say" : "action");
-
+		
 		if (radv) {
 			randVerb = radv + " " + randVerb;
 			randVerbs = radv + " " + randVerbs;
 			randVerbed = radv + " " + randVerbed;
 			randVerbing = radv + " " + randVerbing;
 		}
-
+		if (verb.indexOf("\"") > -1) verb = verb.replace(/\"/g, "");
 		if (verb.slice(-2) === "ly") {
 			words.lookup("adverb", args[1].toLowerCase());
 			adv = args[1] + " ";

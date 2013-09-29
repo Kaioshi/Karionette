@@ -131,7 +131,7 @@ listen({
 			irc.say(input.context, this.command.syntax);
 			return;
 		}
-		uri = "http://www.google.com/dictionary/json?callback=a&sl=en&tl=en&q=" + match[1];
+		uri = "http://www.google.com/dictionary/json?callback=a&sl=en&tl=en&q=" + match[1].replace(/\"/g, "");
 		web.get(uri, function (error, response, body) {
 			if (error) {
 				irc.say(input.context, "Something has gone awry.");
@@ -139,7 +139,7 @@ listen({
 				return;
 			}
 			body = JSON.parse(ent.decode(lib.stripHtml(body.slice(2, -10)
-				.replace(/\\x3c/g, "<").replace(/\\x3e/g, ">")
+				.replace(/\\x3c/g, "<").replace(/\\x3e/g, ">").replace(/\\x26quot;/g, "")
 				.replace(/\\x27/g, "'").replace(/\\x26amp;/g, "&"))));
 			if (!body.primaries) {
 				irc.say(input.context, "I couldn't find "+body.query+". :<");
