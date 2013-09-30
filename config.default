@@ -27,5 +27,8 @@ irc_config = {
 	logging_debug: true,      // show [DEBUG] messages
 	logging_chat: true,       // show [Chat] messages (privmsg, notice, etc.)
 	logging_serv: true,       // show [Serv] messages (motd, server stats, etc.)
-	logging_traffic: true     // show [Traf] messages (join/part/quit/mode/topic, etc)
+	logging_traffic: true,    // show [Traf] messages (join/part/quit/mode/topic, etc)
+	
+	// edit these to suit your environment - the names are used comically in replies.
+	local_whippingboys: [ "mitch_", "Asuna", "ranma" ]
 };

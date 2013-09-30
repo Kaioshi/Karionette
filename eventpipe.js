@@ -28,6 +28,7 @@ module.exports = (function () {
 		av = lib.mix(varDB.getAll(), {
 			"{me}": irc_config.nick,
 			"{from}": from,
+			"{whippingBoy}": lib.randSelect(irc_config.local_whippingboys),
 			"{channel}": context,
 			"{randThing}": lib.randSelect(randThings),
 			"{randNick}": lib.randSelect(nicks),
