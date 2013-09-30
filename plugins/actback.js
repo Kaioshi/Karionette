@@ -3,19 +3,19 @@
 
 function isObj(string) {
 	var nonObjs = [
+		config.nick,
+		config.nick+"'s",
 		"a",
 		"an",
 		"the",
 		"some",
 		"one",
 		"loads",
+		"lot",
 		"of",
-		"Mari",
-		"Marionette",
-		"Marionette's",
-		"Mari's",
 		"all",
 		"his",
+		"their",
 		"her"
 	];
 
