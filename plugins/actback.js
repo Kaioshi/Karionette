@@ -65,7 +65,7 @@ function questionReply(question) {
 		"Hahahahaha.... Wait, you're serious?",
 		"L to the E to the W to the D"
 	], where = [
-		"In Asuna's box",
+		"In "+lib.randSelect(config.local_whippingboys)+"'s box",
 		"On the film set of ranma's home made porno",
 		"Probably with my dog",
 		"Better ask "+lib.randSelect(config.local_whippingboys)+" as they were playing with it in their bedroom last",
@@ -88,13 +88,13 @@ function questionReply(question) {
 		"Whenever you're ready :) Be gentle"
 	], why = [
 		"How should I know? Do I look like your therapist?",
-		"Asuna made me",
+		lib.randSelect(config.local_whippingboys)+" made me",
 		"... "+lib.randSelect(config.local_whippingboys)+" did it!",
 		"The chocobos wark'd really loudly at me",
 		"I swallowed it by accident",
 		"Probably because you're an idiot",
 		"Y-Yeah "+lib.randSelect(config.local_whippingboys)+", why?",
-		"I was feeling horny... and Asuna was just standing there!",
+		"I was feeling horny... and "+lib.randSelect(config.local_whippingboys)+" was just standing there!",
 		"Because it had to be done.",
 		"Because everyone loves kneesocks, obviously",
 		"Hee hee :3",
@@ -280,6 +280,7 @@ listen({
 			"{context}": input.context,
 			"{randThing}": randThing,
 			"{randNick}": lib.randSelect(nicks),
+			"{whippingBoy}": lib.randSelect(config.local_whippingboys),
 			"{verb}": adv + verb,
 			"{verbs}": adv + verbs,
 			"{verbed}": adv + verbed,
