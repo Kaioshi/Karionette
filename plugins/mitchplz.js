@@ -75,6 +75,26 @@ listen({
 	callback: function (input, match) {
 		var targets, args = match[1].split(" ");
 		switch (args[0]) {
+			case ">inb4":
+			case "inb4":
+				if (!lib.chance(50)) return;
+				setTimeout(function () {
+					irc.say(input.context, lib.randSelect([
+						"inb4 "+mitch()+"'s balls drop~",
+						"inb4 <"+mitch()+"> "+lib.randSelect([ "kek", "lel", "inb5", ">implying", "ily Smithy" ]),
+						"in B4.. ha, sunk your battle ship!",
+						"inb4 it's a porno",
+						"so cool",
+						"how did you know?! WAS IT MAGIC? IS THIS REAL?!?!",
+						">inb4",
+						"inafter "+args.slice(1).join(" "),
+						"ranma: dat mitch -.-",
+						"Asuna: inb4 what?",
+						"mmm.. yeah just like that..",
+						"ranma: we're going to need more "+lib.randSelect([ "lube", "pineapples", "cucumbers", "mitches", "pantsu" ])
+					]));
+				}, lib.randNum(2000, 7000));
+				break;
 			case ">kek":
 			case "kek":
 				if (!lib.chance(50)) return;
