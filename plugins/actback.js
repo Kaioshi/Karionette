@@ -4,7 +4,7 @@
 function isObj(string) {
 	var nonObjs = [
 		config.nick,
-		config.nick+"'s",
+		config.nick + "'s",
 		"a",
 		"an",
 		"the",
@@ -41,14 +41,58 @@ function questionReply(question) {
 //		"Probably something like {randThing}",
 		"Err... 42?",
 		"I think the answer is probably lost at sea",
-		"The real question is 'what is a " + words.noun.random() + " doing in "+lib.randSelect(config.local_whippingboys)+"'s box?', fool.",
+		"The real question is 'what is a " + words.noun.random() + " doing in " + lib.randSelect(config.local_whippingboys) + "'s box?', fool.",
 		"It's... um... hmm... It's dead.",
 		"A BROODING COCKATRICE",
 		"You think I'm going to tell you that? Ha!",
 		"Something dirty like a bmotion bot",
 		"Ooooo ho ho ho ho. That knowledge is not befitting of a lowly peasant like you.",
 		"Holy Bullfango Batman, I didn't think you'd have the guts to ask that!",
-		"Go ask your parents, little boy"
+		"Go ask your parents, little boy",
+		"Lots of chocolate bunnies",
+		"Sell your soul to me and you may find out",
+		"Clannad :)",
+		"Nothing sexual",
+		"For the last time, I'm not telling you my three sizes :("
+	], who = [
+		lib.randSelect(config.local_whippingboys) + "'s cousin's friend-with-benefits",
+		"The pink Power Ranger",
+		"The candy man",
+		"Bill Nye the Science Guy!",
+		"Frankenstein's monster",
+		"The Joker",
+		"It was obviously Tony Stark's evil twin. Duh.",
+		"Sandra Bullock :D",
+		"Johnny Bravo uhuh huh",
+		"Kurt Cobain is the only one that ever did it for me *bites lip*",
+		"Morgan Freeman, I think. He was wearing a cloak and cowboy boots.",
+		"The talking meerkat from those commercials, simples",
+		"Homer Simpson",
+		"A fireman",
+		"A social worker from China.",
+		"The culprit? My fingers",
+		"Jackie Chan of course",
+		"Kevin Costner",
+		"Del Boy from Only Fools and Horses :]",
+		"Not sure, but I know they had an underscore at the end of their name",
+		"Someone with big boobs",
+		"A lorry driver from Tennessee",
+		"My waifu :)",
+		"Jo Brand",
+		"Ricky Gervais",
+		"The Germans!",
+		"The Spanish!",
+		"Probably Americans",
+		"Only the Japanese",
+		"I swear it was a living teapot. It talked to me!",
+		"Ayanami Rei",
+		"Buffy the Vampire Slayer",
+		"The blue chick from Farscape",
+		"It can only be Nagisa",
+		"There can only be one...",
+		"You'll probably call me crazy, but I swear it's the lizard men living on the moon, monitoring our thoughts",
+		"Aliens from outer space!",
+		"Biker Mice From Mars :D"
 	], which = [
 		"The one that smells best",
 		"The one that doesn't involve you!",
@@ -57,7 +101,7 @@ function questionReply(question) {
 		"Whichever doesn't give me a rash",
 		"I pretty much have no opinion on that, but if I were to choose, I'd say Lunatrius' butt",
 		"The one with the more sordid connotations",
-		lib.randSelect(config.local_whippingboys)+" soup",
+		lib.randSelect(config.local_whippingboys) + " soup",
 		"My next door neighbour gave me the former, once. I couldn't walk straight for a week",
 		"If it involves Rule 63, that",
 		"For the last time, you are _NOT_ getting into my pants! (tonight)",
@@ -65,10 +109,10 @@ function questionReply(question) {
 		"Hahahahaha.... Wait, you're serious?",
 		"L to the E to the W to the D"
 	], where = [
-		"In "+lib.randSelect(config.local_whippingboys)+"'s box",
+		"In " + lib.randSelect(config.local_whippingboys) + "'s box",
 		"On the film set of ranma's home made porno",
 		"Probably with my dog",
-		"Better ask "+lib.randSelect(config.local_whippingboys)+" as they were playing with it in their bedroom last",
+		"Better ask " + lib.randSelect(config.local_whippingboys) + " as they were playing with it in their bedroom last",
 		"In my ear :)",
 		"Over the rainbow, obviously",
 		"In the matrix",
@@ -76,7 +120,7 @@ function questionReply(question) {
 		"In the gypsy camp I spent the summer running around naked in",
 		"Unda da sea~"
 	], when = [
-		"In the dead of the night, when "+lib.randSelect(config.local_whippingboys)+" is fapping to tohou",
+		"In the dead of the night, when " + lib.randSelect(config.local_whippingboys) + " is fapping to tohou",
 		"WHEN I GET AROUND TO IT, GOSH!",
 		"Asa dayo",
 		"On my birthday",
@@ -88,18 +132,19 @@ function questionReply(question) {
 		"Whenever you're ready :) Be gentle"
 	], why = [
 		"How should I know? Do I look like your therapist?",
-		lib.randSelect(config.local_whippingboys)+" made me",
-		"... "+lib.randSelect(config.local_whippingboys)+" did it!",
+		lib.randSelect(config.local_whippingboys) + " made me",
+		"... " + lib.randSelect(config.local_whippingboys) + " did it!",
 		"The chocobos wark'd really loudly at me",
 		"I swallowed it by accident",
 		"Probably because you're an idiot",
-		"Y-Yeah "+lib.randSelect(config.local_whippingboys)+", why?",
-		"I was feeling horny... and "+lib.randSelect(config.local_whippingboys)+" was just standing there!",
+		"Y-Yeah " + lib.randSelect(config.local_whippingboys) + ", why?",
+		"I was feeling horny... and " + lib.randSelect(config.local_whippingboys) + " was just standing there!",
 		"Because it had to be done.",
 		"Because everyone loves kneesocks, obviously",
 		"Hee hee :3",
-		"Because I'd secretly love to make out with "+lib.randSelect(config.local_whippingboys),
-		"There's probably a good explanation, but I'm too busy slaving over a hot stove for all these lazy bastards"
+		"Because I'd secretly love to make out with " + lib.randSelect(config.local_whippingboys),
+		"There's probably a good explanation, but I'm too busy slaving over a hot stove for all these lazy bastards",
+		"Because that's what all the cool bots told me"
 	], how = [
 		"Probably something to do with how the planets are aligned.",
 		"Probably something to do with how your balls are aligned tonight",
@@ -119,11 +164,12 @@ function questionReply(question) {
 		"I usually just pop it.",
 		"I can normally take it all. I don't know why I can't tonight.",
 		"I have nooooooooo bloody clue.",
-		"I use "+lib.randSelect(config.local_whippingboys)+" as a substitute.",
+		"I use " + lib.randSelect(config.local_whippingboys) + " as a substitute.",
 		"Rum pum pum pum~",
 		"I just get really hot. So hot. Please don't take advantage of me.",
 		"I use latex.",
-		"When I can't find a suitable person, I turn to my 'massager'"
+		"When I can't find a suitable person, I turn to my 'massager'",
+		"S-So what if I have small ones..."
 	], yn = [
 		"yep", "yep.", "yep!",
 		"yes", "yes.", "yes!",
@@ -143,8 +189,7 @@ function questionReply(question) {
 		"absolutely", "absolutely.", "absolutely!",
 		"unquestionably yes",
 		"YESSSS",
-		"ahuh", "ahuh.", "ahuh!",
-		"mhm",
+		"ahuh", "ahuh.", "ahuh!", "mhm",
 		"mmm oh yeah",
 		"maybe", "maybe?", "maybe!..", ".. maybe?",
 		"mebbe", "mebbe!", "mebbe?",
@@ -156,7 +201,7 @@ function questionReply(question) {
 		"it is within the realm of possibility",
 		"god willing", "jebus permitting", "JAYSUS PERMITTING",
 		"if it were at all possible, perhaps perchance",
-		"my magic 8-ball and I both agree that the answer is probably maybe. maybe.",
+		"My magic 8-ball and I both agree that the answer is probably maybe. Maybe.",
 		"may be.",
 		"maybe. maybe? may bee! A BEE OH GOD, RUN! RUN FOR YOUR LIVES",
 		"no", "no.", "no!",
@@ -185,16 +230,20 @@ function questionReply(question) {
 		"if only",
 		"hurrr.", "-.-", "balls", "o_o", ".________.",
 		"hi!", "hello.", "an butt?",
-		"if you would you could you should you into "+lib.randSelect(config.local_whippingboys)+"?",
+		"If you would you could you should you into " + lib.randSelect(config.local_whippingboys) + "?",
 		"I like your shoes",
 		"you got a purdy mouth",
-		"what do you think?",
+		"What do you think?",
+		"If you asked me last year, I would have said definitely not, but since I experienced the wonders of battery operated 'tools', I have changed my mind",
 		";~;", "o_O", "O_o", "...", ". . .", "wtf", "D:", ":D", ":>", ">:("
 	];
 
 	switch (question) {
 	case "what":
 		return lib.randSelect(what);
+		break;
+	case "who":
+		return lib.randSelect(who);
 		break;
 	case "where":
 		return lib.randSelect(where);
@@ -228,8 +277,8 @@ listen({
 			randThings = randDB.getAll(),
 			randReplies = repliesDB.getAll(),
 			nicks = (input.context[0] === "#" ?
-				ial.Active(input.context).filter(function (nick) { return (nick !== input.from); })
-				: []),
+					ial.Active(input.context).filter(function (nick) { return (nick !== input.from); })
+					: []),
 			nicks = (nicks.length > 0 ? nicks : [ "someone", "The Lawd Jasus", "your dad", lib.randSelect(config.local_whippingboys) ]),
 			args = match[0].split(" "),
 			verb = args[1], adv = "",
@@ -242,7 +291,7 @@ listen({
 			obj = transformObj(args, 2),
 			randThing = lib.randSelect(randThings),
 			method = (lib.chance(50) ? "say" : "action");
-		
+
 		if (radv) {
 			randVerb = radv + " " + randVerb;
 			randVerbs = radv + " " + randVerbs;

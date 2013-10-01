@@ -153,14 +153,17 @@
 			"Baka{from}, if you wanted to {verb} me, you could have just accidentally walked in on me while showering",
 			"Baka{from}, if you wanted to {verb} me, you could have just \"accidentally\" walked in on me while {adverb} showering",
 			"DESU",
-			"You must quest for the Dragon's balls before you even THINK about {verbing} me",
+			"You must quest for the {noun}'s balls before you even THINK about {verbing} me",
 			"{verbing} will get you nowhere. Especially not while {randVerbing} {randThing}",
-			"I was living in Finland and abo.. screw this, DIEDIEDIE {from}!",
-			"I was living in Finland and about to fulfill my ultimate anime geek dream of living in Japan for good... That's when I first found {randThing}",
-			"I was {randVerbing} in Finland and about to fulfill my {adjective} anime geek dream of {randVerbing} in Japan for {noun}... But {verbed} all over the Prime Minister's cake, so...",
+			"{pronoun} was living in Finland and abo.. screw this, DIEDIEDIE {from}!",
+			"I was living in Finland and about to fulfill {randNick}'s ultimate anime geek dream of living in Japan for good... That's when I first found {pronoun} using {randThing} to {randVerb} {preposition} the {noun}",
+			"I was {randVerbing} in Finland and about to fulfill my {adjective} anime geek dream of {verbing} in Japan to earn {randNick}'s {noun}... But {from} {adverb} {verbed} all over the Prime Minister's cake before I got a chance, so...",
 			"Well I'll be {randVerbing} like a {noun} for the rest of the night. Thank you.",
 			"I appreciate the sentiment. Would you like a {adjective} {noun} in return?",
-			"This is why I can't {randVerb} at night. You're always {verbing} me so {adverb}!"
+			"This is why I can't {randVerb} at night. You're always {verbing} me so {adverb}!",
+			"I can't tell you how much I appreciate it when you {verb} me, but I wish you wouldn't do it in front of the whole channel >_<",
+			"That's entrapment! The last person to {verb} me ended up with {pronoun} {noun} {randVerbed} in the most painful fashion imaginable.",
+			"OBJECTION!"
 		],
 		"action": [
 			"kicks {from} in the balls",
@@ -190,7 +193,9 @@
 			"mexican-waves the {verb} towards {randNick}",
 			"mexican-waves the {verb} towards {whippingBoy}",
 			"raids {whippingBoy}'s stockpile of {noun} and {randVerbs} the night away with {from}",
-			"releases the bees towards {from} and giggles {adverb}"
+			"releases the bees towards {from} and giggles {adverb}",
+			"does a backflip and lands {preposition} {from}'s {noun}",
+			"retaliates by {verbing} {from}'s {noun}"
 		]
 	},
 	"alts": {
