@@ -176,7 +176,7 @@ listen({
 					keys.push(entry.handle);
 				});
 				if (keys.length > 0) {
-					irc.say(input.context, target+" bookmarks: "+keys.join(", "));
+					irc.say(input.context, target+" bookmarks: "+keys.sort().join(", "));
 				} else {
 					irc.say(input.context, target+"'s... bookmarks.. something has gone wrong! halp!");
 				}

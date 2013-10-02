@@ -35,7 +35,7 @@ listen({
 		root: "word",
 		help: "verb add, remove, get, count",
 		syntax: "[Help] Syntax: "+config.command_prefix+
-			"word verb/adverb/noun/adjective add/remove/get/count/random [word] - Example: "+config.command_prefix+
+			"word verb/adverb/noun/adjective/pronoun add/remove/get/count/random [word] - Example: "+config.command_prefix+
 			"word noun add apple - "+config.command_prefix+
 			"word adjective remove overconfident"
 	},
