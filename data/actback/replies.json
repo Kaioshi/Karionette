@@ -162,7 +162,7 @@
 			"I appreciate the sentiment. Would you like a {adjective} {noun} in return?",
 			"This is why I can't {randVerb} at night. You're always {verbing} me so {adverb}!",
 			"I can't tell you how much I appreciate it when you {verb} me, but I wish you wouldn't do it in front of the whole channel >_<",
-			"That's entrapment! The last person to {verb} me ended up with {pronoun} {noun} {randVerbed} in the most painful fashion imaginable.",
+			"That's entrapment! The last person to {verb} me ended up with {possessivePronoun} {noun} {randVerbed} in the most painful fashion imaginable.",
 			"OBJECTION!"
 		],
 		"action": [
