@@ -221,7 +221,8 @@ listen({
 					varName = "{" + args[1] + "}";
 					variable = varDB.getOne(varName);
 					if (variable) {
-						arr = variable.split(" "+args[2]+" ");
+						if (args[2] === ",") arr = variable.split(args[2]+" ");
+						else arr = variable.split(" "+args[2]+" ");
 						irc.say(input.context, lib.randSelect(arr));
 					} else {
 						irc.reply(input, "there is no " + varName + " variable.");
