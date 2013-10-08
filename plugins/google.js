@@ -71,11 +71,11 @@ listen({
 	},
 	callback: function (input, match) {
 		var uri, garbage, tmp, errsponse,
-			reg = /^([0-9\.?]+) ([A-Za-z ]+) (to|into) ([A-Za-z ]+)$/.exec(match[1]);
+			reg = /^(\-?[0-9\.?]+) ([A-Za-z ]+) (to|into) ([A-Za-z ]+)$/.exec(match[1]);
 		if (reg) {
 			uri = "http://www.google.com/ig/calculator?hl=en&q="+reg[1]+reg[2]+"=?"+reg[4];
 			web.get(uri, function (error, response, body) {
-				reg = /\{(.*): .*,(.*): .*,(.*): .*,(.*): .*\}$/.exec(body);
+				reg = /\{(.*): .*,(.*): .*,(.*): .*,(.*): .*\}$/.exec(body.replace(/\(|\)/g, ""));
 				if (reg[0].indexOf("\\x26") > -1) reg[0] = reg[0].replace(/\\x26/g, "");
 				if (reg[0].indexOf("#215;") > -1) reg[0] = reg[0].replace(/#215;/g, "x");
 				if (reg[0].indexOf("\\x3csup\\x3e") > -1) {
