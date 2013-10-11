@@ -17,7 +17,7 @@ listen({
 				regex = new RegExp(args.slice(1).join(" "));
 				entries = entry.split("|");
 				entries.forEach(function (item) {
-					irc.say(input.context, regex.exec(item).join(" "));
+					irc.say(input.context, regex.exec(item).join(" "), false);
 				});
 			} else irc.say(input.context, "No such variable.");
 		} else {
