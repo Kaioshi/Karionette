@@ -369,7 +369,7 @@ listen({
 			+ regexFactory.matchAny(config.nickname)
 			+ "[,:]\\s)(\\w+).+)|(?:(\\w+).+)"
 			+ regexFactory.matchAny(config.nickname)
-			+ ")\\?$", "i"),
+			+ ")!?\\?!?$", "i"),
 	callback: function (input, match) {
 		var m = match[1] || match[2],
 			rep = questionReply(m);
