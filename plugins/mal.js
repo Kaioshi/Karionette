@@ -22,7 +22,7 @@ function googleIt(context, full, type, term) {
 				irc.say(context, "Couldn't find \""+term+"\", here's what Google thought would be useful: "+result.unescapedUrl, false);
 				return;
 			} else if (url.indexOf(".php?") > -1) {
-				reg = new RegExp("^https?:\\/\\/[^ ]+\\/(anime|manga)\\.php\\?=([0-9]+)");
+				reg = new RegExp("^https?:\\/\\/[^ ]+\\/(anime|manga)\\.php\\?.*=([0-9]+)");
 			} else {
 				reg = new RegExp("^https?:\\/\\/[^ ]+\\/(anime|manga)\\/([0-9]+)");
 			}
