@@ -99,7 +99,7 @@ module.exports = (function () {
 	function fireEvent(input) {
 		var permission;
 		if (input.from) {
-			if (input.data.search(RegExp("(;|" + irc_config.nick + "[,:-])", "i")) === 0) {
+			if (input.data.search(RegExp("("+irc_config.command_prefix+"|" + irc_config.nick + "[,:-])", "i")) === 0) {
 				transformAlias(input);
 			}
 		}
