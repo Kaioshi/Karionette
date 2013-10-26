@@ -18,8 +18,11 @@ function googleIt(context, full, type, term) {
 		result = JSON.parse(body).responseData.results[0];
 		if (result && result.titleNoFormatting) {
 			url = result.unescapedUrl;
-			if (url.indexOf(".php?") > -1) {
-				reg = new RegExp("^https?:\\/\\/[^ ]+\\/(anime|manga)\\.php\\?id=([0-9]+)");
+			if (url.indexOf(".php?q=") > -1) {
+				irc.say(context, "Couldn't find \""+term+"\", here's what Google thought would be useful: "+result.unescapedUrl, false);
+				return;
+			} else if (url.indexOf(".php?") > -1) {
+				reg = new RegExp("^https?:\\/\\/[^ ]+\\/(anime|manga)\\.php\\?.*=([0-9]+)");
 			} else {
 				reg = new RegExp("^https?:\\/\\/[^ ]+\\/(anime|manga)\\/([0-9]+)");
 			}
@@ -29,7 +32,7 @@ function googleIt(context, full, type, term) {
 				uri = "http://mal-api.com/"+type+"/"+id;
 				url = "http://myanimelist.net/"+type+"/"+id;
 				if (!full) {
-					irc.say(context, ent.decode(result.titleNoFormatting.replace(" - MyAnimeList.net", ""))+" ~ "+url);
+					irc.say(context, ent.decode(result.titleNoFormatting.replace(" - MyAnimeList.net", ""))+" ~ "+url, false);
 					return;
 				}
 				web.get(uri, function (error, response, body) {
