@@ -10,7 +10,7 @@ function zero(n) {
 listen({
 	plugin: "titleSnarfer",
 	handle: "titleSnarfer",
-	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :?.*((?:https?:\\/\\/)[^ ]+)"),
+	regex: /^:[^!]+![^ ]+@[^ ]+ PRIVMSG #[^ ]+ :.*((?:https?:\/\/)[^ ]+)/i",
 	callback: function (input, match) {
 		var uri, title, reg, ext, allow, length = 10000;
 		
