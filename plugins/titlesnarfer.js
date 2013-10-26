@@ -4,16 +4,16 @@ var ent = require("./lib/entities.js"),
 	url = require("url");
 
 function zero(n) {
-	return (n > 9 ? n : "0"+n);
+	return (n > 9 ? n : "0" + n);
 }
 
 listen({
 	plugin: "titleSnarfer",
 	handle: "titleSnarfer",
-	regex: /^:[^!]+![^ ]+@[^ ]+ PRIVMSG #[^ ]+ :.*((?:https?:\/\/)[^ ]+)/i",
+	regex: /^:[^!]+![^ ]+@[^ ]+ PRIVMSG #[^ ]+ :.*((?:https?:\/\/)[^ ]+)/i,
 	callback: function (input, match) {
 		var uri, title, reg, ext, allow, length = 10000;
-		
+
 		function sayTitle(uri, length, imgur) {
 			sys.exec("wget -q -O- "+uri.href.replace(/&/g, "\\&")+" | head -c "+length+
 				" | tr '\\n' ' ' | grep -E -io \"<title?[^>]+>([^<]+)<\/title>\" | grep -E -o \">(.*)<\" | head -n 1",
