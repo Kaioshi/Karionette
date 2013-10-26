@@ -29,7 +29,7 @@ listen({
 				if (imgur) { // I know there are a lot of imgur corner cases, but it's really common.
 					if (title === "imgur: the simple image sharer") return; // deal with it
 				}
-				irc.say(input.context, title+" ~ "+uri.host.replace("www.", ""), false);
+				irc.say(input.context, title + " ~ " + uri.host.replace(/\s(www\.|privmsg|nick|join|part|pong|quit|user|notice)/gi, ""), false);
 			});
 		}
 		
