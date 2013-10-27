@@ -18,7 +18,7 @@ listen({
 			sys.exec("wget -q -O- "+uri.href.replace(/&/g, "\\&")+" | head -c "+length+
 				" | tr '\\n' ' ' | grep -E -io \"<title?[^>]+>([^<]+)<\/title>\" | grep -E -o \">(.*)<\" | head -n 1",
 			function (error, stdout, stderr) {
-				title = stdout.slice(1,-2);
+				title = stdout.slice(1,-2).replace(/\n|\t|\r/g, "");
 				if (!title) return;
 				if (title.toLowerCase().indexOf(uri.host) > -1) {
 					reg = new RegExp(" "+uri.host+" ?", "ig");
