@@ -8,23 +8,29 @@ function zero(n) {
 	return (n > 9 ? n : "0" + n);
 }
 
-function getUrl(nick, channel, url) {
-	var entry = urlDB.getOne(channel);
-	if (!entry) return "";
-	if (entry[url]) {
-		return "Old! " + (entry[url].nick === nick ? "you" : entry[url].nick) + " already linked this " + lib.duration(new Date(entry[url].date)) + " ago.";
-	}
+function recordUrl(nick, channel, url) {
+	var entry = urlDB.getOne(channel) || {};
+	if (!entry[nick]) entry[nick] = [];
+	entry[nick].push([ url, new Date() ]);
+	urlDB.saveOne(channel, entry);
 	entry = null;
 }
 
-function recordUrl(nick, channel, url) {
-	var entry = urlDB.getOne(channel);
-	if (!entry) entry = {};
-	if (!entry[url]) {
-		entry[url] = { nick: nick, date: new Date() };
-		urlDB.saveOne(channel, entry);
-	}
-	entry = null;
+function getUrl(nick, channel, url) {
+	var keys, i, k, ret = "",
+		entry = urlDB.getOne(channel);
+	if (!entry) return;
+	keys = Object.keys(entry);
+urlSearch:	for (i = 0; i < keys.length; i++) {
+				for (k = 0; k < entry[keys[i]].length; k++) {
+					if (entry[keys[i]][k][0] === url) {
+						ret = "Old! " + (keys[i] === nick ? "You" : keys[i]) + " linked this " + lib.duration(new Date(entry[keys[i]][k][1])) + " ago.";
+						break urlSearch;
+					}
+				}
+			}
+	entry = null, keys = null;
+	return ret;
 }
 
 listen({
@@ -80,8 +86,8 @@ listen({
 		}
 		
 		if (input.data[0] === config.command_prefix) return;
-		recordUrl(input.from, input.context, match[1]);
 		if (old) irc.say(input.context, old);
+		else recordUrl(input.from, input.context, match[1]);
 		uri = url.parse(match[1]);
 		if (uri.host.indexOf("youtube.com") > -1 && uri.path.indexOf("v=") > -1) {
 			youtubeIt(/v=([^ &]+)/i.exec(uri.path)[1], uri.host);
