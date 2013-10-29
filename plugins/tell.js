@@ -36,17 +36,25 @@ listen({
 		help: "Passes along a message when the person in question next joins."
 	},
 	callback: function (input, match) {
-		var rev, msgMatch = /^([^ ]+) (.+)$/.exec(match[1]);
+		var msgMatch = /^([^ ]+) (.+)$/.exec(match[1]);
 		if (msgMatch && isUser(msgMatch[1])) {
-			if (ial.ison(input.context, msgMatch[1])) {
-				for (rev = [], i = msgMatch[2].length; i >= 0; i--) rev.push(msgMatch[2][i]);
-				irc.say(input.context, msgMatch[1] + ": "+rev.join(""), false);
-			} else {
-				messagesDB.saveOne(input.context + "@" + msgMatch[1] + ": " + "message from " + input.from + ": " + msgMatch[2]);
-				irc.say(input.context, "I'll tell them when they get back.");
-			}
+			messagesDB.saveOne(input.context + "@" + msgMatch[1] + ": " + "message from " + input.from + ": " + msgMatch[2]);
+			irc.say(input.context, "I'll tell them when I see them next.");
 		} else {
 			irc.say(input.context, "[Help] tell [user] [some message]");
+		}
+	}
+});
+
+// Listen for next message
+listen({
+	plugin: "tell",
+	handle: "tell_msg",
+	regex: regexFactory.onMsg(),
+	callback: function (input, match) {
+		var i, userMessages = getMessages(match[3], match[1]);
+		for (i = 0; i < userMessages.length; i++) {
+			irc.say(match[3], match[1] + ", " + userMessages[i], false);
 		}
 	}
 });
