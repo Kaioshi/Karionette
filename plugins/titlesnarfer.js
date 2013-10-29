@@ -1,10 +1,30 @@
 // url title snarfer - THIS ONLY WORKS ON UNIX - must have wget, head and egrep installed.
 var ent = require("./lib/entities.js"),
 	sys = require("sys"),
-	url = require("url");
+	url = require("url"),
+	urlDB = new DB.Json({ filename: "urls" });
 
 function zero(n) {
 	return (n > 9 ? n : "0" + n);
+}
+
+function getUrl(nick, channel, url) {
+	var entry = urlDB.getOne(channel);
+	if (!entry) return "";
+	if (entry[url]) {
+		return "Old! " + (entry[url].nick === nick ? "you" : entry[url].nick) + " already linked this " + lib.duration(new Date(entry[url].date)) + " ago.";
+	}
+	entry = null;
+}
+
+function recordUrl(nick, channel, url) {
+	var entry = urlDB.getOne(channel);
+	if (!entry) entry = {};
+	if (!entry[url]) {
+		entry[url] = { nick: nick, date: new Date() };
+		urlDB.saveOne(channel, entry);
+	}
+	entry = null;
 }
 
 listen({
@@ -12,8 +32,10 @@ listen({
 	handle: "titleSnarfer",
 	regex: /^:[^!]+![^ ]+@[^ ]+ PRIVMSG #[^ ]+ :.*((?:https?:\/\/)[^ ]+)/i,
 	callback: function (input, match) {
-		var uri, title, reg, ext, allow, length = 10000;
-
+		var uri, title, reg, ext, allow,
+			old = getUrl(input.from, input.context, match[1]),
+			length = 10000;
+		
 		function sayTitle(uri, length, imgur) {
 			sys.exec("wget -q -O- "+uri.href.replace(/&/g, "\\&")+" | head -c "+length+
 				" | tr '\\n' ' ' | grep -E -io \"<title?[^>]+>([^<]+)<\/title>\" | grep -E -o \">(.*)<\" | head -n 1",
@@ -58,6 +80,8 @@ listen({
 		}
 		
 		if (input.data[0] === config.command_prefix) return;
+		recordUrl(input.from, input.context, match[1]);
+		if (old) irc.say(input.context, old);
 		uri = url.parse(match[1]);
 		if (uri.host.indexOf("youtube.com") > -1 && uri.path.indexOf("v=") > -1) {
 			youtubeIt(/v=([^ &]+)/i.exec(uri.path)[1], uri.host);
