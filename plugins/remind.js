@@ -2,9 +2,12 @@ var fs = require('fs'),
 	reminders = [];
 
 ﻿function transformTime(timeUnits, time) {
-	if (timeUnits.match("second")) { time = time * 1000; }
-	if (timeUnits.match("minute")) { time = time * 1000 * 60; }
-	if (timeUnits.match("hour")) { time = time * 1000 * 60 * 60; }
+	if (timeUnits.indexOf("second") > -1) { time = time * 1000; }
+	if (timeUnits.indexOf("minute") > -1) { time = time * 1000 * 60; }
+	if (timeUnits.indexOf("hour") > -1) { time = time * 1000 * 60 * 60; }
+	if (time === 0) {
+		time = 2000;
+	}
 	return time;
 }
 
