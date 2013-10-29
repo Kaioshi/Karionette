@@ -5,7 +5,7 @@ var fs = require('fs'),
 	if (timeUnits.indexOf("second") > -1) { time = time * 1000; }
 	if (timeUnits.indexOf("minute") > -1) { time = time * 1000 * 60; }
 	if (timeUnits.indexOf("hour") > -1) { time = time * 1000 * 60 * 60; }
-	if (time === 0) {
+	if (time < 2) {
 		time = 2000;
 	}
 	return time;
