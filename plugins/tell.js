@@ -37,6 +37,10 @@ listen({
 	},
 	callback: function (input, match) {
 		var msgMatch = /^([^ ]+) (.+)$/.exec(match[1]);
+		if (msgMatch[1].toLowerCase() === input.from.toLowerCase()) {
+			irc.say(input.context, "nou");
+			return;
+		}
 		if (msgMatch && isUser(msgMatch[1])) {
 			messagesDB.saveOne(input.context + "@" + msgMatch[1] + ": " + "message from " + input.from + ": " + msgMatch[2]);
 			irc.say(input.context, "I'll tell them when I see them next.");

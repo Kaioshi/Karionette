@@ -99,8 +99,12 @@ listen({
 			time = transformTime(timeUnits, time);
 			what = rMatch[2];
 		}
-		irc.say(input.context, "I will remind you! .. if you're here at the time, I mean!");
-		addReminder(time, input.from, input.context, "reminder ~ "+what);
+		if (time >= 1000) {
+			irc.say(input.context, "I will remind you! .. if you're here at the time, I mean!");
+			addReminder(time, input.from, input.context, "reminder ~ "+what);
+		} else {
+			irc.say(input.context, "nou");
+		}
 	}
 });
 
