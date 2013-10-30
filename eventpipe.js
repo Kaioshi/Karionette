@@ -2,18 +2,14 @@
  * EVENTPIPE: This module binds events to the listeners collection,
  *			  and fires the appropriate event(s) for received data.
  */
-var DB = require('./lib/fileDB.js'),
-	regexFactory = require('./lib/regexFactory');
-
 module.exports = (function () {
-	var keyCache,
+	var DB = require('./lib/fileDB.js'),
+		regexFactory = require('./lib/regexFactory'),
+		keyCache,
 		listeners = {},
-		aliasEventlets = [],
-		isInAlias = false,
-		maxEventFire = 10,
-		aliasDB = new DB.Json({filename: "alias/alias", queue: true}),
-		varDB = new DB.Json({filename: "alias/vars", queue: true}),
-		randThings = new DB.List({filename: "randomThings", queue: true}).getAll();
+		aliasDB = new DB.Json({filename: "alias/alias"}),
+		varDB = new DB.Json({filename: "alias/vars"}),
+		randThings = new DB.List({filename: "randomThings"}).getAll();
 
 	// Re-populate the keyCache
 	function setHandles() {
@@ -99,7 +95,11 @@ module.exports = (function () {
 	function fireEvent(input) {
 		var permission;
 		if (input.from) {
-			if (input.data.search(RegExp("("+irc_config.command_prefix+"|" + irc_config.nick + "[,:-])", "i")) === 0) {
+			if (input.data.search(RegExp("("
+					+ irc_config.command_prefix
+					+ "|"
+					+ irc_config.nick
+					+ "[,:-])", "i")) === 0) {
 				transformAlias(input);
 			}
 		}
@@ -181,10 +181,6 @@ module.exports = (function () {
 			}
 			return commands;
 		},
-		addEventlet: function (eventlet) {
-			aliasEventlets.push(eventlet);
-		},
-		isInAlias: isInAlias,
 		setHandles: setHandles
 	};
 }());
