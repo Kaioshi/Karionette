@@ -115,7 +115,7 @@ listen({
 listen({
 	plugin: "google",
 	handle: "define",
-	regex: regexFactory.startsWith(["define", "dict"]),
+	regex: regexFactory.startsWith("define"),
 	command: {
 		root: "define",
 		options: "{Word to define}",
