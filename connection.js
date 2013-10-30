@@ -177,22 +177,18 @@ module.exports = function (Eventpipe) {
 			if (sanitiseMessage !== false) {
 				message = sanitise(message);
 			}
-			if (Eventpipe.isInAlias === false) {
-				while (message && (maxMessages -= 1) >= 0) {
-					i = 0;
-					tempMsg = message.slice(0, max);
-					if (message.length > tempMsg.length) {
-						max = max-3;
-						while (message[max - i] !== " ") {
-							i += 1;
-						}
-						tempMsg = message.slice(0, (max - i)) + " ..";
+			while (message && (maxMessages -= 1) >= 0) {
+				i = 0;
+				tempMsg = message.slice(0, max);
+				if (message.length > tempMsg.length) {
+					max = max-3;
+					while (message[max - i] !== " ") {
+						i += 1;
 					}
-					send(privmsg + tempMsg.trim());
-					message = message.slice(max - i);
+					tempMsg = message.slice(0, (max - i)) + " ..";
 				}
-			} else {
-				Eventpipe.addEventlet(message);
+				send(privmsg + tempMsg.trim());
+				message = message.slice(max - i);
 			}
 		},
 		reply: function (input, message, sanitiseReply) {
