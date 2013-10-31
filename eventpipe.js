@@ -1,3 +1,4 @@
+"use strict";
 /*
  * EVENTPIPE: This module binds events to the listeners collection,
  *			  and fires the appropriate event(s) for received data.

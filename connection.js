@@ -1,4 +1,5 @@
-﻿/*
+﻿"use strict";
+/*
  * CONNECTION: This module handles connection to the IRC server,
  * 			   as well as sending and receiving data from it.
  */
@@ -164,7 +165,7 @@ module.exports = function (Eventpipe) {
 			send("PART :" + sanitise(channel));
 		},
 		say: function (context, message, sanitiseMessage, maxmsgs) {
-			var privmsg, max, maxMessages, i;
+			var privmsg, max, maxMessages, i, tempMsg;
 			if (!context || !message) return;
 			context = sanitise(context); // Avoid sanitising more than once
 			privmsg = "PRIVMSG " + context + " :";
@@ -229,5 +230,5 @@ module.exports = function (Eventpipe) {
 			return (ignoreDB.getAll().join(", ") || "Ignoring no one ;)");
 		}
 	}
-}
+};
 

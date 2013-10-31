@@ -1,4 +1,5 @@
-globals = {
+"use strict";
+global.globals = {
 	lastError: "",
 	lastWarning: "",
 	admins: { lastCheck: new Date().getTime() },
@@ -22,15 +23,16 @@ var DB = require("./lib/fileDB.js"),
 	Connection = require("./connection.js"),
 	Plugin = require("./plugin.js"),
 	repl = require('repl');
+
 lib.memProf("loading requires");
 
-function memClean() {
-	lib.memProf("Running GC");
-	global.gc();
-	lib.memProf("Running GC");
-}
+// function memClean() {
+	// lib.memProf("Running GC");
+	// global.gc();
+	// lib.memProf("Running GC");
+// }
 
-timers.Add(10000, memClean);
+// timers.Add(10000, memClean);
 
 function createSandbox() {
 	return {
@@ -82,4 +84,4 @@ IRC.open({
 	realname: irc_config.realname
 });
 
-repl.start({ prompt: '', ignoreUndefined: true });
+repl.start({ prompt: 'Marionette>> ', ignoreUndefined: true });
