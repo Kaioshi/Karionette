@@ -46,7 +46,7 @@ module.exports = function (Eventpipe) {
 						if (ial.maskMatch(input.user, ignores[i])) return;
 					}
 				}
-				regArr = /^;([^ ]+)/.exec(input.data);
+				regArr = new RegExp("^"+irc_config.command_prefix+"([^ ]+)").exec(input.data);
 				if (regArr) {
 					matches = permissions.Search(regArr[1]);
 					if (matches.length > 0) {
