@@ -22,7 +22,11 @@ var DB = require("./lib/fileDB.js"),
 	Eventpipe = require("./eventpipe.js"),
 	Connection = require("./connection.js"),
 	Plugin = require("./plugin.js"),
+	repl = {start: function () { console.log("BOOTING WITHOUT REPL. SUPPLY 'repl' COMMAND LINE ARGUMENT IF REQUIRED!"); }};
+	
+if (process.argv[3] === "repl") {
 	repl = require('repl');
+}
 
 lib.memProf("loading requires");
 
