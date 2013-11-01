@@ -30,13 +30,13 @@ if (process.argv[3] === "repl") {
 
 lib.memProf("loading requires");
 
-// function memClean() {
-	// lib.memProf("Running GC");
-	// global.gc();
-	// lib.memProf("Running GC");
-// }
+function memClean() {
+	lib.memProf("Running GC");
+	global.gc();
+	lib.memProf("Running GC");
+}
 
-// timers.Add(10000, memClean);
+timers.Add(10000, memClean);
 
 function createSandbox() {
 	return {
