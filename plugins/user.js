@@ -48,7 +48,7 @@ listen({
 			date = new Date(),
 			data = (isAction(input.data) ? "* " + input.from + input.data.slice(7, -1)
 				: "<" + input.from + "> " + input.data);
-		ial.addActive(input.context, input.from, input.data, date.getTime(), input.user);
+		ial.addActive(input.context, input.from, date.getTime(), input.user);
 		chanser.resolveChan(input.context);
 		user = chanser.DB.getOne(from) || {};
 		user.last = { nick: input.from, message: data, seen: date };
