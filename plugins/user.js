@@ -56,6 +56,9 @@ listen({
 			delete user.left;
 		}
 		chanser.DB.saveOne(from, user);
+		input = null;
+		from = null;
+		user = null;
 	}
 });
 

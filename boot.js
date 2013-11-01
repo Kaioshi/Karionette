@@ -24,7 +24,7 @@ var DB = require("./lib/fileDB.js"),
 	Plugin = require("./plugin.js"),
 	repl = {start: function () { console.log("BOOTING WITHOUT REPL. SUPPLY 'repl' COMMAND LINE ARGUMENT IF REQUIRED!"); }};
 	
-if (process.argv[3] === "repl") {
+if (process.argv[2] === "repl") {
 	repl = require('repl');
 }
 

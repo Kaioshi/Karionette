@@ -195,3 +195,16 @@ listen_admin({
 	}
 });
 
+listen_admin({
+	plugin: "CORE",
+	handle: "quit",
+	regex: regexFactory.startsWith("quit"),
+	command: {
+		root: "quit",
+		options: "[QUIT MESSAGE]",
+		help: "Quittin' Time!"
+	},
+	callback: function (input, match) {
+		irc.quit(match[1]);
+	}
+});

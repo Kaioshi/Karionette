@@ -5,7 +5,7 @@
  */
 module.exports = (function () {
 	var DB = require('./lib/fileDB.js'),
-		regexFactory = require('./lib/regexFactory'),
+		regexFactory = require('./lib/regexFactory.js'),
 		keyCache,
 		listeners = {},
 		aliasDB = new DB.Json({filename: "alias/alias"}),

@@ -10,7 +10,9 @@ var net = require("net"),
 	ignoreDB = new DB.List({filename: "ignore"});
 	
 module.exports = function (Eventpipe) {
-	var socket = new net.Socket(),
+	var connected = false,
+		connectInterval,
+		socket = new net.Socket(),
 		buffer = {
 			ob: new Buffer(4096),
 			size: 0
@@ -94,7 +96,7 @@ module.exports = function (Eventpipe) {
 			logger.error("Tried to send data > 510 chars in length: " + data);
 			return;
 		}
-		socket.write(data + '\r\n', 'utf8', function () {
+		socket.write(data + "\r\n", "utf8", function () {
 			if (!silent) logger.sent(data);
 		});
 	}
@@ -104,17 +106,52 @@ module.exports = function (Eventpipe) {
 		socket.setNoDelay(true);
 		socket.setEncoding("utf8");
 		// Connection TimeOut support
-		socket.setTimeout(240 * 1000, function () {
+		socket.setTimeout(240 * 1000, function socketTimeout() {
 			// If fails, error and close events trigger
+			logger.warn("Socket Timeout...");
 			send("VERSION");
+			socket.destroy();
 		});
-		socket.on("close", function () {
-			process.emit("closing");
-			setTimeout(function () {
-				process.exit();
-			}, 1000);
+		socket.on("close", function socketCloseEvent(hadError) {
+			if (!(hadError || connected)) {
+				process.emit("closing");
+				logger.warn("Socket closed. Exiting process...");
+				socket.end();
+				setTimeout(function () {
+					process.exit();
+				}, 1000);
+			} else {
+				logger.warn("Socket closed. Attempting to reconnect in 15 seconds...");
+				socket = new net.Socket();
+				connectInterval = setInterval(function () {
+					logger.warn("Attempting reconnect...");
+					openConnection({
+						server: irc_config.server,
+						port: irc_config.port,
+						nickname: irc_config.nickname[0],
+						username: irc_config.username,
+						realname: irc_config.realname
+					});
+				}, 15000);
+			}
+		});
+		socket.on("error", function socketErrorEvent(e) {
+			logger.error("Socket error!", e);
+			socket.destroy();
 		});
 		socket.on("data", dataBuffer);
+	}
+	
+	function openConnection(params) {
+		configureSocket();
+		socket.connect(params.port, params.server, function () {
+			send("NICK " + sanitise(params.nickname));
+			send("USER " + sanitise(params.username) + " localhost * " + sanitise(params.realname));
+			connected = true;
+			if (connectInterval) {
+				clearInterval(connectInterval)
+			}
+		});
 	}
 	
 	// Sanatise a string for use in IRC
@@ -135,15 +172,11 @@ module.exports = function (Eventpipe) {
 	}
 	
 	return {
-		open: function (params) {
-			configureSocket();
-			socket.connect(params.port, params.server, function () {
-				send("NICK " + sanitise(params.nickname));
-				send("USER " + sanitise(params.username) + " localhost * " + sanitise(params.realname));
-			});
-		},
-		quit: function () {
-			send("QUIT");
+		open: openConnection,
+		quit: function quitConnection(msg) {
+			connected = false;
+			msg = msg || irc_config.quit_msg;
+			send("QUIT :" + msg);
 		},
 		raw: function (stuff) {
 			send(stuff);

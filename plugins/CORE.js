@@ -78,7 +78,7 @@ listen({
 	plugin: "CORE",
 	handle: 'joinChannels',
 	regex: /^:[^ ]+ 376 [^ ]+ :.*$/,
-	once: true,
+	once: false,
 	callback: function () {
 		// 376 is the end of MOTD
 		if (autojoinDB.size() > 0) {

@@ -54,7 +54,7 @@
 			"Eeew! Go {verb} yourself, hentai-{from}!",
 			"Kyyaaa! Go {randVerb} yourself, hentai-{from}!",
 			"Excuuuuuuuuuuuse ME! I am not a substitute for your hand!",
-			"Excuuuuuuuuuuuse ME! I am not a substitute for your hand! Except on tuesdays.",
+			"Excuuuuuuuuuuuse ME! I am not a substitute for your hand! Except on Tuesdays.",
 			"Excuuuuuuuuuuuse ME! I am not a substitute for your {noun}!",
 			"{from}-sama, do you love me?",
 			"{from}-chan, daaaaaisuki~!",
@@ -62,6 +62,7 @@
 			"You're doin' it wrong! Lower! Go lower!",
 			"Baka! Hentai! Sukebei! Aho! >///<",
 			"I do love a good {randVerbing}",
+			"If you're happy and you know it, {randVerb} your {noun}",
 			"Just how big is your {noun}? It's {randVerbing} me {adverb}!"
 		],
 		"action": [
@@ -180,6 +181,7 @@
 			"{verbed} {randNick} and liked it",
 			"{randVerbed} a girl and liked it",
 			"chews on {from} seductively",
+			"{randVerbs} {preposition} {from} {adverb}",
 			"wonders how {from} is able to {verb} her when she did a DocTheMedic-esque god-dodge",
 			"giggles timidly at {from}",
 			"falls over and exposes her {noun} to {randNick}",

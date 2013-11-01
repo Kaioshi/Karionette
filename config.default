@@ -18,6 +18,7 @@ irc_config = {
 	},
 	
 	command_prefix: ';',
+	quit_msg: 'Ja ne~',
 	server: 'irc.esper.net',
 	port: 6667,
 	secret: 'HuHu74Kfj&',     // Pass to become admin
