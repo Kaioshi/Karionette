@@ -22,10 +22,36 @@ var DB = require("./lib/fileDB.js"),
 	Eventpipe = require("./eventpipe.js"),
 	Connection = require("./connection.js"),
 	Plugin = require("./plugin.js"),
-	repl = {start: function () { console.log("BOOTING WITHOUT REPL. SUPPLY 'repl' COMMAND LINE ARGUMENT IF REQUIRED!"); }};
-	
-if (process.argv[3] === "repl") {
-	repl = require('repl');
+	prompt = "",
+	gc = true,
+	gcInterval = 10000, // 10 sec
+	repl = (process.argv[2] !== "nocmd" ? require("repl") : null);
+
+switch (process.argv[2]) { // I'm aware you can't do more than one of these options at a time.
+	case "-h":             // I guess it needs to loop through the args looking for commands.
+	case "--help":         // I'll do that another time. Butts united!
+	case "help":
+		console.log("Command line options: " + process.argv[0] + " --expose-gc boot.js <command>");
+		console.log("  nocmd\t\t\tDisables interactive prompt.");
+		console.log("  prompt \"Mari> \"\tSets interactive prompt string.");
+		console.log("  nogc\t\t\tDisables forced garbage collection every 10 seconds.");
+		console.log("  gc-interval <seconds>\tSets how often we do a forced garbage collection.");
+		console.log("  help\t\t\tShows this help.");
+		process.exit();
+		break;
+	case "prompt":
+		if (process.argv[3]) prompt = process.argv[3];
+		break;
+	case "gc-interval":
+		if (process.argv[3] && process.argv[3].match(/[0-9]+/)) {
+			gcInterval = parseInt(process.argv[3])*1000;
+		}
+		break;
+	case "nogc":
+		gc = false;
+		break;
+	default:
+		break;
 }
 
 lib.memProf("loading requires");
@@ -36,7 +62,9 @@ function memClean() {
 	lib.memProf("Running GC");
 }
 
-timers.Add(10000, memClean);
+if (gc) {
+	timers.Add(gcInterval, memClean);
+}
 
 function createSandbox() {
 	return {
@@ -88,4 +116,6 @@ IRC.open({
 	realname: irc_config.realname
 });
 
-repl.start({ prompt: '', ignoreUndefined: true });
+if (repl) {
+	repl.start({ prompt: prompt, ignoreUndefined: true });
+}
