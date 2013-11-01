@@ -88,4 +88,4 @@ IRC.open({
 	realname: irc_config.realname
 });
 
-repl.start({ prompt: 'Marionette>> ', ignoreUndefined: true });
+repl.start({ prompt: '', ignoreUndefined: true });
