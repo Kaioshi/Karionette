@@ -55,15 +55,17 @@ listen({
 	handle: "ialQuit",
 	regex: regexFactory.onQuit(),
 	callback: function (input, match) {
+		var user;
 		if (match[1] === config.nick) return;
 		ial.Channels(match[1]).forEach(function (channel) {
 			setTimeout(function () {
 				ial.Remove(channel, match[1]);
 			}, 200); // grace period so other plugins have time to fondle the entry if needed
 		});
-		if (globals.admins[match[1]+"!"+match[2]] !== undefined) {
-			logger.debug("Removed cached admin " + match[1]+"!"+match[2]);
-			delete globals.admins[match[1]+"!"+match[2]];
+		user = match[1]+"!"+match[2];
+		if (globals.admins[user] !== undefined) {
+			logger.debug("Removed cached admin " + user);
+			delete globals.admins[user];
 		}
 	}
 });
@@ -88,8 +90,7 @@ listen({
 			}
 		}
 		ial.Channels(oldnick).forEach(function (channel) {
-			ial.Remove(channel, oldnick);
-			ial.Add(channel, newnick, address);
+			ial.updateUser(channel, oldnick, newnick, address);
 		});
 		user = oldnick+"!"+address;
 		if (globals.admins[user] !== undefined) {
