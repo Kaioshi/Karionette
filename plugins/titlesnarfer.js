@@ -43,22 +43,24 @@ listen({
 			length = 10000;
 		
 		function sayTitle(uri, length, imgur) {
-			sys.exec("wget -q -O- "+uri.href.replace(/&/g, "\\&")+" | head -c "+length+
-				" | tr '\\n' ' ' | grep -E -io \"<title?[^>]+>([^<]+)<\/title>\" | grep -E -o \">(.*)<\" | head -n 1",
-			function (error, stdout, stderr) {
-				title = stdout.slice(1,-2).replace(/\n|\t|\r/g, "");
-				if (!title) return;
+			web.get(uri.href, function (error, response, body) {
+				if (error) {
+					return;
+				}
+				reg = /<title?[^>]+>([^<]+)<\/title>/i.exec(body.replace(/\n|\t|\r/g, ""));
+				if (!reg || !reg[1]) return;
+				title = reg[1];
 				if (title.toLowerCase().indexOf(uri.host) > -1) {
 					reg = new RegExp(" "+uri.host+" ?", "ig");
 					title = title.replace(reg, "");
 				}
-				title = ent.decode(title.trim());
 				if (title.slice(-8) === " - Imgur") title = title.slice(0,-8);
 				if (imgur) { // I know there are a lot of imgur corner cases, but it's really common.
 					if (title === "imgur: the simple image sharer") return; // deal with it
 				}
-				irc.say(input.context, title + " ~ " + uri.host.replace("www.", ""), false);
-			});
+				
+				irc.say(input.context, ent.decode(title.trim()) + " ~ " + uri.host.replace("www.", ""), false);
+			}, length);
 		}
 		
 		function youtubeIt(id, host) {
