@@ -1,41 +1,129 @@
-﻿// Cache json DB object
-var chanser = (function () {
+var fs = require('fs'),
+	seen = {};
 
-	var DBCache = {};
+function loadSeen(channel) {
+	var filename = "data/users/"+channel+".txt";
+	if (fs.existsSync(filename)) {
+		seen[channel] = fs.readFileSync(filename).toString().split("\n");
+	} else {
+		seen[channel] = [];
+	}
+}
 
-	function setChannel(channel) {
-		var cachedDB, newDB;
-		channel = channel.toLowerCase();
-		if (this.channel !== channel) {
-			cachedDB = DBCache[channel];
-			this.channel = channel;
-			// if (this.DB) {
-				// this.DB.unload(true);
-				// delete this.DB;
-			// }
-			if (cachedDB) {
-				newDB = cachedDB;
-			} else {
-				newDB = new DB.Json({filename: "users/" + channel, queue: true});
-				DBCache[channel] = newDB;
-			}
-			this.DB = newDB;
-			cachedDB = null;
-			newDB = null;
+function saveAllSeen() {
+	logger.info("Saving seen DBs ...");
+	Object.keys(seen).forEach(function (channel) {
+		if (seen[channel] && seen[channel].length > 0 && seen[channel].altered) {
+			saveSeen(channel);
+			delete seen[channel].altered;
+		}
+	});
+}
+
+function saveSeen(channel) {
+	var filename = "data/users/"+channel+".txt";
+	if (seen[channel] && seen[channel].length > 0) {
+		try {
+			fs.writeFileSync(filename, seen[channel].join("\n"));
+			logger.info("Wrote seen data to "+filename);
+		} catch (err) {
+			logger.error("Problem writing seen data to "+filename, err);
 		}
 	}
+}
 
-	return {
-		channel: null,
-		DB: null,
-		resolveChan: setChannel
-	};
-}());
+function getSeen(nick, channel) {
+	var i, reg,
+		id = findUserIndex(nick, channel);
+	if (id === -1) {
+		logger.debug("Didn't find such a guy.");
+		return;
+	}
+	// convert to object we like and return
+	//globals.lastSeen = seen;
+	if (seen[channel][id].indexOf("left: ") > -1) {
+		reg = /^([^ ]+) ([0-9]+) message: \"(.*)\" left: ([0-9]+) user: \"(.*)\" type: \"(.*)\" message: \"(.*)\"$/.exec(seen[channel][id]);
+		return {
+			last: {
+				nick: reg[1],
+				seen: reg[2],
+				message: reg[3]
+			},
+			left: {
+				date: reg[4],
+				user: reg[5],
+				type: reg[6],
+				msg: reg[7]
+			}
+		};
+	} else {
+		reg = /^([^ ]+) ([0-9]+) message: \"(.*)\"$/.exec(seen[channel][id]);
+		return {
+			last: {
+				nick: reg[1],
+				seen: reg[2],
+				message: reg[3]
+			}
+		};
+	}
+}
+
+function findUserIndex(nick, channel) {
+	if (!seen[channel]) loadSeen(channel);
+	//globals.lastSeen = seen;
+	nick = nick.toLowerCase()+" ";
+	for (var i = 0; i < seen[channel].length; i++) {
+		if (seen[channel][i].slice(0,nick.length).toLowerCase() === nick) {
+			//console.log("Returning index "+i);
+			return i;
+		}
+	}
+	return -1;
+}
+
+function setLastMessage(nick, channel, message, date) {
+	var entry = nick+" "+date+" message: \""+message+"\"";
+		id = findUserIndex(nick, channel);
+	if (id === -1) {
+		seen[channel].push(entry);
+	} else {
+		seen[channel][id] = entry;
+	}
+	seen[channel].altered = true;
+}
+
+function setUserLeft(nick, address, channel, type, message) {
+	var leftid,
+		entry,
+		id = findUserIndex(nick, channel);
+	if (id === -1) return; // no messages from them so we don't care when they left~
+	entry = "left: "+new Date().valueOf()+" user: \""+nick+" ("+address+")\" type: \""+type+"\" message: \""+message+"\"";
+	leftid = seen[channel][id].indexOf("left: ");
+	if (leftid > -1) {
+		seen[channel][id] = seen[channel][id].slice(0, leftid)+entry;
+	} else {
+		seen[channel][id] = seen[channel][id]+" "+entry;
+	}
+	seen[channel].altered = true;
+}
+
+function removeUserLeft(nick, channel) {
+	var leftid,
+		id = findUserIndex(nick, channel);
+	if (id === -1) return;
+	leftid = seen[channel][id].indexOf("left: ");
+	if (leftid > -1) {
+		seen[channel][id] = seen[channel][id].slice(0, leftid-1);
+		seen[channel].altered = true;
+	}
+}
 
 // Check if ACTION
 function isAction(data) {
 	return (data.substring(0, 7) === "\u0001ACTION");
 }
+
+timers.Add(900000, saveAllSeen);
 
 // This plugin handles stuff that goes into data/users
 listen({
@@ -48,17 +136,8 @@ listen({
 			date = new Date(),
 			data = (isAction(input.data) ? "* " + input.from + input.data.slice(7, -1)
 				: "<" + input.from + "> " + input.data);
-		ial.addActive(input.context, input.from, date.getTime(), input.user);
-		chanser.resolveChan(input.context);
-		user = chanser.DB.getOne(from) || {};
-		user.last = { nick: input.from, message: data, seen: date };
-		if (user.left) {
-			delete user.left;
-		}
-		chanser.DB.saveOne(from, user);
-		input = null;
-		from = null;
-		user = null;
+		ial.addActive(input.context, input.from, date.valueOf(), input.user);
+		setLastMessage(input.from, input.context, data, date.valueOf());
 	}
 });
 
@@ -67,27 +146,8 @@ listen({ // remove Quit entries if we've seen 'em join.
 	handle: "seenJoin",
 	regex: regexFactory.onJoin(),
 	callback: function (input, match) {
-		var user,
-			nick = match[1].toLowerCase();
-		chanser.resolveChan(match[3]);
-		if (match[1] === config.nick) { // remove stale entries
-			setTimeout(function () {
-				Object.keys(ial.Channel(match[3]).users).forEach(function (entry) {
-					entry = entry.toLowerCase();
-					user = chanser.DB.getOne(entry);
-					if (user && user.left) {
-						delete user.left;
-						chanser.DB.saveOne(entry, user);
-						user = null;
-					}
-				});
-			}, 5000); // give ial time to update
-		}
-		user = chanser.DB.getOne(nick);
-		if (user && user.left) {
-			delete user.left;
-			chanser.DB.saveOne(nick, user);
-		}
+		if (match[1] === config.nick) loadSeen(match[3]);
+		removeUserLeft(match[1], match[3]);
 	}
 });
 
@@ -96,20 +156,7 @@ listen({
 	handle: "seenPart",
 	regex: regexFactory.onPart(),
 	callback: function (input, match) {
-		var user,
-			nick = match[1].toLowerCase();
-
-		chanser.resolveChan(match[3]);
-		user = chanser.DB.getOne(nick);
-		if (user) {
-			user.left = {
-				type: "parted",
-				date: new Date(),
-				user: match[1] + " (" + match[2] + ")",
-				msg: (match[4] ? " ~ " + match[4] : "")
-			};
-			chanser.DB.saveOne(nick, user);
-		}
+		setUserLeft(input.from, input.user, input.context, "parted", (match[4] ? " ~ " + match[4] : ""));
 	}
 });
 
@@ -118,26 +165,8 @@ listen({
 	handle: "seenNick",
 	regex: regexFactory.onNick(),
 	callback: function (input, match) {
-		var user,
-			oldnick = match[1].toLowerCase(),
-			newnick = match[3].toLowerCase();
 		ial.Channels(match[3]).forEach(function (channel) {
-			chanser.resolveChan(channel);
-			user = chanser.DB.getOne(newnick);
-			if (user && user.left) {
-				delete user.left;
-				chanser.DB.saveOne(newnick, user);
-			}
-			user = chanser.DB.getOne(oldnick);
-			if (user) {
-				user.left = {
-					type: "nick changed",
-					date: new Date(),
-					user: match[1] + " (" + match[2] + ")",
-					msg: " ~ " + match[1] + " -> " + match[3]
-				};
-				chanser.DB.saveOne(oldnick, user);
-			}
+			setUserLeft(match[1], match[2], channel, "nick changed", " ~ "+match[1]+" -> "+match[3]);
 		});
 	}
 });
@@ -147,9 +176,6 @@ listen({
 	handle: "seenQuit",
 	regex: regexFactory.onQuit(),
 	callback: function (input, match) {
-		var user,
-			nick = match[1].toLowerCase();
-
 		function neatenQuit(quitmsg) {
 			if (quitmsg.slice(0, 6) === "Quit: ") {
 				quitmsg = quitmsg.slice(6);
@@ -159,19 +185,9 @@ listen({
 			}
 			return "";
 		}
-
+		
 		ial.Channels(match[1]).forEach(function (channel) {
-			chanser.resolveChan(channel);
-			user = chanser.DB.getOne(nick);
-			if (user) { // don't bother recording quit time if they don't talk
-				user.left = {
-					type: "quit",
-					date: new Date(),
-					user: match[1] + " (" + match[2] + ")",
-					msg: neatenQuit(match[3])
-				};
-				chanser.DB.saveOne(nick, user);
-			}
+			setUserLeft(match[1], match[2], channel, "quit", neatenQuit(match[3]));
 		});
 	}
 });
@@ -200,8 +216,8 @@ listen({
 			irc.say(input.context, "I'm right here, baaaka.");
 			return;
 		}
-		chanser.resolveChan(chan);
-		user = chanser.DB.getOne(target.toLowerCase());
+		user = getSeen(target, chan);
+		//globals.lastUser = user;
 		if (!user) {
 			irc.say(input.context, "I don't recognise that Pokermon.");
 			return;
@@ -213,14 +229,19 @@ listen({
 							+ " "
 							+ chan : user.left.type)
 					+ " "
-					+ lib.duration(new Date(user.left.date))
+					+ lib.duration(new Date(parseInt(user.left.date)))
 							+ " ago"
 							+ user.left.msg, false);
 		}
 		target = user.last.nick || target;
 		seen = (chan !== input.context ? target + " was last seen talking in " + chan + " " : target + " was last seen talking ");
-		seen = seen + lib.duration(new Date(user.last.seen)) + " ago ~ " + user.last.message;
+		seen = seen + lib.duration(new Date(parseInt(user.last.seen))) + " ago ~ " + user.last.message;
 		irc.say(input.context, seen, false);
 	}
+});
+
+// Save Cache on Exit
+lib.events.on("closing", function () {
+	saveAllSeen();
 });
 

@@ -42,6 +42,18 @@ function googleIt(context, full, type, term) {
 						return;
 					}
 					result = JSON.parse(body);
+					if (result.error) {
+						logger.warn("MAL returned an error: "+result.error+" - "+result.details);
+						irc.say(context, "MAL's api seems to be broken again, try without -s .. "+lib.randSelect([
+							"What? It's not my fault! :< Don't hate!",
+							"Blame Deide.",
+							"ranma probably mitch_'s too much.",
+							"Freakin' MAL.",
+							"Get it together MAL!",
+							"Capn' would be sad."
+						]));
+						return;
+					}
 					status = "";
 					eps = "";
 					runtime = "";
