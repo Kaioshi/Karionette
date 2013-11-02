@@ -108,9 +108,9 @@ module.exports = function (Eventpipe) {
 		// Connection TimeOut support
 		socket.setTimeout(240 * 1000, function socketTimeout() {
 			// If fails, error and close events trigger
-			logger.warn("Socket Timeout...");
+			//logger.warn("Socket Timeout...");
 			send("VERSION");
-			socket.destroy();
+			//socket.destroy();
 		});
 		socket.on("close", function socketCloseEvent(hadError) {
 			if (!(hadError || connected)) {
