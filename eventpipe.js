@@ -17,52 +17,67 @@ module.exports = (function () {
 		keyCache = Object.keys(listeners);
 	}
 	// Create the supplant object for alias vars
-	function makeVars(match, context, from) {
-		var i, args, newMatch, av,
-			nicks = (context[0] === "#" ? ial.Active(context) : []);
-
-		nicks = (nicks.length > 0 ? nicks : [ "someone", "The Lawd Jasus", "your dad", "mitch_", "Asuna" ]);
-		av = lib.mix(varDB.getAll(), {
-			"{me}": irc_config.nick,
-			"{from}": from,
-			"{whippingBoy}": lib.randSelect(irc_config.local_whippingboys),
-			"{channel}": context,
-			"{randThing}": lib.randSelect(randThings),
-			"{randNick}": lib.randSelect(nicks),
-			"{verb}": words.verb.random().base,
-			"{verbs}": words.verb.random().s,
-			"{verbed}": words.verb.random().ed,
-			"{verbing}": words.verb.random().ing,
-			"{adverb}": words.adverb.random(),
-			"{adjective}": words.adjective.random(),
-			"{noun}": words.noun.random(),
-			"{pronoun}": words.pronoun.random(),
-			"{personalPronoun}": words.personalPronoun.random(),
-			"{possessivePronoun}": words.possessivePronoun.random(),
-			"{preposition}": words.preposition.random(),
-			"{args1}": "",
-			"{args2}": "",
-			"{args3}": "",
-			"{args*}": "",
-			"{args-1}": "",
-			"{args1*}": "",
-			"{args2*}": "",
-			"{args3*}": ""
-		}, false);
-
+	function makeVars(match, context, from, data) {
+		var reg, variable, nicks, newMatch, args, i,
+			ret = {};
+		while ((reg = /(\{[^\|\(\)\[\] ]+\})/.exec(data))) {
+			switch (reg[1]) {
+				case "{me}": ret[reg[1]] = irc_config.nick; break;
+				case "{from}": ret[reg[1]] = from; break;
+				case "{whippingBoy}": ret[reg[1]] = lib.randSelect(irc_config.local_whippingboys); break;
+				case "{channel}": ret[reg[1]] = context; break;
+				case "{randThing}": ret[reg[1]] = lib.randSelect(randThings); break;
+				case "{randNick}":
+					nicks = (context[0] === "#" ? ial.Active(context) : []);
+					nicks = nicks.filter(function (nick) { return (nick !== from); });
+					nicks = (nicks.length > 0 ? nicks : [ "someone", "The Lawd Jesus", "your dad", "Santa" ]);
+					ret[reg[1]] = lib.randSelect(nicks);
+					break;
+				case "{verb}": ret[reg[1]] = words.verb.random().base; break;
+				case "{verbs}": ret[reg[1]] = words.verb.random().s; break;
+				case "{verbed}": ret[reg[1]] = words.verb.random().ed; break;
+				case "{verbing}": ret[reg[1]] = words.verb.random().ing; break;
+				case "{adverb}": ret[reg[1]] = words.adverb.random(); break;
+				case "{adjective}": ret[reg[1]] = words.adjective.random(); break;
+				case "{noun}": ret[reg[1]] = words.noun.random(); break;
+				case "{pronoun}": ret[reg[1]] = words.pronoun.random(); break;
+				case "{personalPronoun}": ret[reg[1]] = words.personalPronoun.random(); break;
+				case "{possessivePronoun}": ret[reg[1]] = words.possessivePronoun.random(); break;
+				case "{preposition}": ret[reg[1]] = words.preposition.random(); break;
+				case "{args*}": ret[reg[1]] = ""; break;
+				case "{args1}": ret[reg[1]] = ""; break;
+				case "{args2}": ret[reg[1]] = ""; break;
+				case "{args3}": ret[reg[1]] = ""; break;
+				case "{args4}": ret[reg[1]] = ""; break;
+				//case "{args1*}": ret[reg[1]] = ""; break; // nevr
+				//case "{args2*}": ret[reg[1]] = ""; break; // been
+				//case "{args3*}": ret[reg[1]] = ""; break; // used
+				//case "{args4*}": ret[reg[1]] = ""; break; // once
+				//case "{args-1}": ret[reg[1]] = ""; break; // mang
+				default:
+					// must be a variable name, or jibberish.
+					variable = varDB.getOne(reg[1]);
+					if (variable) {
+						ret[reg[1]] = variable;
+					}
+					variable = null;
+					break;
+			}
+ 			data = data.slice(data.indexOf(reg[1])+reg[1].length);
+		}
 		if (match[1]) {
-			newMatch = lib.supplant(match[1], av);
+			newMatch = lib.supplant(match[1], ret);
 			args = newMatch.split(" ");
-			av["{args*}"] = newMatch;
-			av["{args-1}"] = args[args.length - 1];
-			for (i = 0; i < args.length; i += 1) {
-				av["{args" + (i + 1) + "*}"] = args.slice(i).join(" ");
-				av["{args" + (i + 1) + "}"] = args[i];
+			ret["{args*}"] = newMatch;
+			//ret["{args-1}"] = args[args.length-1]; I'll uncomment these if anyone ever wants them.
+			for (i = 0; i < args.length; i++) {
+				//ret["{args"+(i+1)+"*}"] = args.slice(i).join(" "); hasn't happened yet!
+				ret["{args"+(i+1)+"}"] = args[i];
 			}
 		}
-		return av;
+		return ret;
 	}
-
+	
 	// Evaluates alias strings
 	function evaluateAlias(aliasString, aliasVars) {
 		return lib.supplant(aliasString, aliasVars);
@@ -70,13 +85,14 @@ module.exports = (function () {
 
 	// Check if the data contains an aliased command
 	function transformAlias(input) {
-		var i, toTransform, aliasMatch, aliasVars,
+		var i, toTransform, aliasMatch, aliasVars, alias,
 			aliasKeys = aliasDB.getKeys();
 		for (i = 0; i < aliasKeys.length; i += 1) {
 			aliasMatch = regexFactory.startsWith(aliasKeys[i]).exec(input.raw);
 			if (aliasMatch) {
-				aliasVars = makeVars(aliasMatch, input.context, input.from);
-				toTransform = evaluateAlias(aliasDB.getOne(aliasKeys[i]), aliasVars);
+				alias = aliasDB.getOne(aliasKeys[i]);
+				aliasVars = makeVars(aliasMatch, input.context, input.from, alias+" "+input.data);
+				toTransform = evaluateAlias(alias, aliasVars);
 				if (aliasMatch[1]) {
 					input.raw = input.raw.slice(0, -(aliasMatch[1].length) - 1);
 				}
