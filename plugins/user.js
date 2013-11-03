@@ -40,41 +40,25 @@ function getSeen(nick, channel) {
 		return;
 	}
 	// convert to object we like and return
-	//globals.lastSeen = seen;
 	if (seen[channel][id].indexOf("left: ") > -1) {
 		reg = /^([^ ]+) ([0-9]+) message: \"(.*)\" left: ([0-9]+) user: \"(.*)\" type: \"(.*)\" message: \"(.*)\"$/.exec(seen[channel][id]);
 		return {
-			last: {
-				nick: reg[1],
-				seen: reg[2],
-				message: reg[3]
-			},
-			left: {
-				date: reg[4],
-				user: reg[5],
-				type: reg[6],
-				msg: reg[7]
-			}
+			last: {	nick: reg[1], seen: reg[2], message: reg[3] },
+			left: { date: reg[4], user: reg[5],	type: reg[6], msg: reg[7] }
 		};
 	} else {
 		reg = /^([^ ]+) ([0-9]+) message: \"(.*)\"$/.exec(seen[channel][id]);
 		return {
-			last: {
-				nick: reg[1],
-				seen: reg[2],
-				message: reg[3]
-			}
+			last: {	nick: reg[1], seen: reg[2], message: reg[3] }
 		};
 	}
 }
 
 function findUserIndex(nick, channel) {
 	if (!seen[channel]) loadSeen(channel);
-	//globals.lastSeen = seen;
 	nick = nick.toLowerCase()+" ";
 	for (var i = 0; i < seen[channel].length; i++) {
 		if (seen[channel][i].slice(0,nick.length).toLowerCase() === nick) {
-			//console.log("Returning index "+i);
 			return i;
 		}
 	}
@@ -133,11 +117,12 @@ listen({
 	callback: function (input) {
 		var user,
 			from = input.from.toLowerCase(),
-			date = new Date(),
+			date = new Date().valueOf(),
 			data = (isAction(input.data) ? "* " + input.from + input.data.slice(7, -1)
 				: "<" + input.from + "> " + input.data);
-		ial.addActive(input.context, input.from, date.valueOf(), input.user);
-		setLastMessage(input.from, input.context, data, date.valueOf());
+		ial.addActive(input.context, input.from, date, input.user);
+		setLastMessage(input.from, input.context, data, date);
+		data = null; date = null;
 	}
 });
 
@@ -156,7 +141,7 @@ listen({
 	handle: "seenPart",
 	regex: regexFactory.onPart(),
 	callback: function (input, match) {
-		setUserLeft(input.from, input.user, input.context, "parted", (match[4] ? " ~ " + match[4] : ""));
+		setUserLeft(match[1], match[2], match[3], "parted", (match[4] ? " ~ " + match[4] : ""));
 	}
 });
 
@@ -217,7 +202,6 @@ listen({
 			return;
 		}
 		user = getSeen(target, chan);
-		//globals.lastUser = user;
 		if (!user) {
 			irc.say(input.context, "I don't recognise that Pokermon.");
 			return;
