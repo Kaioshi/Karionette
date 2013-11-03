@@ -32,6 +32,7 @@ module.exports = (function () {
 					nicks = nicks.filter(function (nick) { return (nick !== from); });
 					nicks = (nicks.length > 0 ? nicks : [ "someone", "The Lawd Jesus", "your dad", "Santa" ]);
 					ret[reg[1]] = lib.randSelect(nicks);
+					nicks = null;
 					break;
 				case "{verb}": ret[reg[1]] = words.verb.random().base; break;
 				case "{verbs}": ret[reg[1]] = words.verb.random().s; break;
@@ -75,6 +76,7 @@ module.exports = (function () {
 				ret["{args"+(i+1)+"}"] = args[i];
 			}
 		}
+		reg = null; newMatch = null; args = null;
 		return ret;
 	}
 	
