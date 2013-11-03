@@ -83,7 +83,7 @@ module.exports = (function () {
 					ret["{args*}"] = newMatch;
 					//ret["{args-1}"] = args[args.length-1]; I'll uncomment these if anyone ever wants them.
 					for (i = 0; i < args.length; i++) {
-						ret["{args"+(i+1)+"*}"] = args.slice(i).join(" "); hasn't happened yet!
+						ret["{args"+(i+1)+"*}"] = args.slice(i).join(" ");
 						ret["{args"+(i+1)+"}"] = args[i];
 					}
 				}
