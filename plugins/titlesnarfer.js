@@ -92,11 +92,11 @@ listen({
 		else recordUrl(input.from, input.context, match[1]);
 		uri = url.parse(match[1]);
 		if (uri.host.indexOf("youtube.com") > -1 && uri.path.indexOf("v=") > -1) {
-			youtubeIt(/v=([^ &]+)/i.exec(uri.path)[1], uri.host);
+			youtubeIt(/v=([^ &\?]+)/i.exec(uri.path)[1], uri.host);
 			return;
 		}
 		if (uri.host.indexOf("youtu.be") > -1 && uri.path.length > 1) {
-			youtubeIt(/^\/([^ &]+)/.exec(uri.path)[1], uri.host);
+			youtubeIt(/^\/([^ &\?]+)/.exec(uri.path)[1], uri.host);
 			return;
 		}
 		if (uri.host === "i.imgur.com" && uri.href.slice(-4).match(/\.jpg|\.png|\.gif/i)) {
