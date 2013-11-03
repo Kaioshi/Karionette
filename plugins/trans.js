@@ -40,7 +40,7 @@ listen({
 						if (res.OtherSideEntries) {
 							tr = res.OtherSideEntries[0].OriginalTerm.term;
 							if (res.OtherSideEntries[0].OriginalTerm.sense) {
-								tr = tr + " ~~~~ " + res.OtherSideEntries[0].OriginalTerm.sense;
+								tr = tr + " ~~ " + res.OtherSideEntries[0].OriginalTerm.sense;
 							}
 							irc.say(input.context, "("+dict.slice(0,2)+") "+term+" -> ("+dict.slice(2)+") "+tr, false);
 						} else {
@@ -50,7 +50,7 @@ listen({
 								compound = lib.randSelect(Object.keys(result.original.Compounds));
 								comp = result.original.Compounds[compound].OriginalTerm["term"]+
 									" -> "+result.original.Compounds[compound].FirstTranslation["term"];
-								tr = tr + " ~~~ " + comp;
+								tr = tr + " ~~ " + comp;
 							}
 							if (tr) irc.say(input.context, "("+dict.slice(0,2)+") "+term+" -> ("+dict.slice(2)+") "+tr, false);
 							else irc.say(input.context, "Something has gone awry.");
@@ -59,6 +59,7 @@ listen({
 						irc.say(input.context, "No translation was found for "+term, false);
 					}
 				}
+				result = null; tr = null;
 			});
 		} else {
 			irc.say(input.context, this.command.syntax);
