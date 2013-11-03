@@ -9,6 +9,9 @@ function getOldSeen(nick, channel) {
 	if (entry) {
 		seenDB = null;
 		entry.last.seen = new Date(entry.last.seen).valueOf();
+		if (!entry.last.nick) {
+			entry.last.nick = /(\<|\* )([^> ]+)/.exec(entry.last.message)[2];
+		}
 		if (entry.left) entry.left.date = new Date(entry.left.date).valueOf();
 		convertSeen(entry, channel);
 		return entry;
