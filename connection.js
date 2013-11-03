@@ -177,6 +177,7 @@ module.exports = function (Eventpipe) {
 			connected = false;
 			msg = msg || irc_config.quit_msg;
 			send("QUIT :" + msg);
+			socket.end();
 		},
 		raw: function (stuff) {
 			send(stuff);

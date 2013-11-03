@@ -10,16 +10,6 @@ function loadSeen(channel) {
 	}
 }
 
-function saveAllSeen() {
-	logger.info("Saving seen DBs ...");
-	Object.keys(seen).forEach(function (channel) {
-		if (seen[channel] && seen[channel].length > 0 && seen[channel].altered) {
-			saveSeen(channel);
-			delete seen[channel].altered;
-		}
-	});
-}
-
 function saveSeen(channel) {
 	var filename = "data/users/"+channel+".txt";
 	if (seen[channel] && seen[channel].length > 0) {
@@ -30,6 +20,30 @@ function saveSeen(channel) {
 			logger.error("Problem writing seen data to "+filename, err);
 		}
 	}
+}
+
+function saveAllSeen() {
+	logger.info("Saving seen DBs ...");
+	Object.keys(seen).forEach(function (channel) {
+		if (seen[channel] && seen[channel].length > 0 && seen[channel].altered) {
+			saveSeen(channel);
+			delete seen[channel].altered;
+		}
+	});
+}
+
+function findUserIndex(nick, channel) {
+	var i;
+	if (!seen[channel]) loadSeen(channel);
+	//globals.lastSeen = seen;
+	nick = nick.toLowerCase()+" ";
+	for (i = 0; i < seen[channel].length; i++) {
+		if (seen[channel][i].slice(0,nick.length).toLowerCase() === nick) {
+			//console.log("Returning index "+i);
+			return i;
+		}
+	}
+	return -1;
 }
 
 function getSeen(nick, channel) {
@@ -56,33 +70,19 @@ function getSeen(nick, channel) {
 				msg: reg[7]
 			}
 		};
-	} else {
-		reg = /^([^ ]+) ([0-9]+) message: \"(.*)\"$/.exec(seen[channel][id]);
-		return {
-			last: {
-				nick: reg[1],
-				seen: reg[2],
-				message: reg[3]
-			}
-		};
 	}
-}
-
-function findUserIndex(nick, channel) {
-	if (!seen[channel]) loadSeen(channel);
-	//globals.lastSeen = seen;
-	nick = nick.toLowerCase()+" ";
-	for (var i = 0; i < seen[channel].length; i++) {
-		if (seen[channel][i].slice(0,nick.length).toLowerCase() === nick) {
-			//console.log("Returning index "+i);
-			return i;
+	reg = /^([^ ]+) ([0-9]+) message: \"(.*)\"$/.exec(seen[channel][id]);
+	return {
+		last: {
+			nick: reg[1],
+			seen: reg[2],
+			message: reg[3]
 		}
-	}
-	return -1;
+	};
 }
 
 function setLastMessage(nick, channel, message, date) {
-	var entry = nick+" "+date+" message: \""+message+"\"";
+	var entry = nick+" "+date+" message: \""+message+"\"",
 		id = findUserIndex(nick, channel);
 	if (id === -1) {
 		seen[channel].push(entry);
@@ -229,13 +229,13 @@ listen({
 							+ " "
 							+ chan : user.left.type)
 					+ " "
-					+ lib.duration(new Date(parseInt(user.left.date)))
+					+ lib.duration(new Date(parseInt(user.left.date, 10)))
 							+ " ago"
 							+ user.left.msg, false);
 		}
 		target = user.last.nick || target;
 		seen = (chan !== input.context ? target + " was last seen talking in " + chan + " " : target + " was last seen talking ");
-		seen = seen + lib.duration(new Date(parseInt(user.last.seen))) + " ago ~ " + user.last.message;
+		seen = seen + lib.duration(new Date(parseInt(user.last.seen, 10))) + " ago ~ " + user.last.message;
 		irc.say(input.context, seen, false);
 	}
 });
