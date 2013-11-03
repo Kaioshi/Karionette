@@ -11,7 +11,6 @@ function loadSeen(channel) {
 }
 
 function saveAllSeen() {
-	logger.info("Saving seen DBs ...");
 	Object.keys(seen).forEach(function (channel) {
 		if (seen[channel] && seen[channel].length > 0 && seen[channel].altered) {
 			saveSeen(channel);
