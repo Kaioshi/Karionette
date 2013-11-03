@@ -1,10 +1,10 @@
-# Marionette
+# Karionette
 Node.js IRC bot
 Original source: https://github.com/Deide/Marionette
 
 ## Dependencies & Install
 ```
-$ npm install request
+No dependencies!
 ```
 
 > * Copy "config.default" to "config.js" and edit appropriately.
