@@ -39,7 +39,9 @@ listen({
 					if (res) {
 						if (res.OtherSideEntries) {
 							tr = res.OtherSideEntries[0].OriginalTerm.term;
-							tr = tr + " ~~~~ " + res.OtherSideEntries[0].OriginalTerm.sense;
+							if (res.OtherSideEntries[0].OriginalTerm.sense) {
+								tr = tr + " ~~~~ " + res.OtherSideEntries[0].OriginalTerm.sense;
+							}
 							irc.say(input.context, "("+dict.slice(0,2)+") "+term+" -> ("+dict.slice(2)+") "+tr, false);
 						} else {
 							if (res.Entries) tr = res.Entries["0"].FirstTranslation["term"];
