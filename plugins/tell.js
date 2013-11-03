@@ -1,5 +1,6 @@
 ﻿// Tell someone something on join if saved message for them
-var messagesDB = new DB.List({filename: 'messages', queue: true});
+var messagesDB = new DB.List({filename: 'messages', queue: true}),
+	messages = messagesDB.getAll();
 
 function isUser(str) {
 	return str[0] !== "#";
@@ -7,22 +8,18 @@ function isUser(str) {
 
 function getMessages(room, user) {
 	var i,
+		altered = false,
 		userMessages = [],
-		messagesToRemove = [],
-		prefix = room + "@" + user + ": ",
-		messages = messagesDB.getAll();
+		prefix = room + "@" + user + ": ";
 	
 	for (i = 0; i < messages.length; i += 1) {
 		if (messages[i].toLowerCase().indexOf(prefix.toLowerCase()) === 0) {
-			messagesToRemove.push(messages[i]);
 			userMessages.push(messages[i].substr(prefix.length));
+			messages.splice(i,1);
+			altered = true;
 		}
 	}
-	
-	for (i = 0; i < messagesToRemove.length; i += 1) {
-		messagesDB.removeOne(messagesToRemove[i], true);
-	}
-	
+	if (altered) messagesDB.saveAll(messages);
 	return userMessages;
 }
 
@@ -42,7 +39,8 @@ listen({
 			return;
 		}
 		if (msgMatch && isUser(msgMatch[1])) {
-			messagesDB.saveOne(input.context + "@" + msgMatch[1] + ": " + "message from " + input.from + ": " + msgMatch[2]);
+			messages.push(input.context + "@" + msgMatch[1] + ": " + "message from " + input.from + ": " + msgMatch[2]);
+			messagesDB.saveAll(messages);
 			irc.say(input.context, "I'll tell them when I see them next.");
 		} else {
 			irc.say(input.context, "[Help] tell [user] [some message]");
@@ -91,7 +89,7 @@ listen({
 					irc.say(channel, match[3] + ", " + userMessages[i], false);
 				}
 			});
-		}, 3000); // <- making sure IAL is updated first
+		}, 500); // <- making sure IAL is updated first
 	}
 });
 
