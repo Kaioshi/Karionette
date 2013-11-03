@@ -5,7 +5,7 @@ function getOldSeen(nick, channel) {
 	var seenDB, entry;
 	if (!fs.existsSync("data/users/"+channel+".json")) return;
 	seenDB = new DB.Json({filename: "users/"+channel});
-	entry = seenDB.getOne(nick);
+	entry = seenDB.getOne(nick.toLowerCase());
 	if (entry) {
 		seenDB = null;
 		entry.last.seen = new Date(entry.last.seen).valueOf();
