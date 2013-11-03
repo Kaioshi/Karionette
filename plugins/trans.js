@@ -30,26 +30,36 @@ listen({
 			uri = "http://api.wordreference.com/0.8/"+config.api.wordreference+"/json/"+dict+"/"+term;
 			web.get(uri, function (error, response, body) {
 				result = JSON.parse(body);
+				//globals.lastRes = result;
 				if (result.Error) {
-					irc.say(input.context, result.Note.split('\n')[0]);
+					irc.say(input.context, result.Note.split('\n')[0], false);
 				} else {
 					if (result.term0) res = result.term0;
 					else if (result.term1) res = result.term1;
 					if (res) {
-						if (res.Entries) tr = res.Entries["0"].FirstTranslation["term"];
-						else if (res.PrincipalTranslations) tr = res.PrincipalTranslations["0"].FirstTranslation["term"];
-						if (result.original && result.original.Compounds) {
-							compound = lib.randSelect(Object.keys(result.original.Compounds));
-							comp = result.original.Compounds[compound].OriginalTerm["term"]+
-								" -> "+result.original.Compounds[compound].FirstTranslation["term"];
-							tr = tr + " ~~~ " + comp;
+						if (res.OtherSideEntries) {
+							tr = res.OtherSideEntries[0].OriginalTerm.term;
+							if (res.OtherSideEntries[0].OriginalTerm.sense) {
+								tr = tr + " ~~ " + res.OtherSideEntries[0].OriginalTerm.sense;
+							}
+							irc.say(input.context, "("+dict.slice(0,2)+") "+term+" -> ("+dict.slice(2)+") "+tr, false);
+						} else {
+							if (res.Entries) tr = res.Entries["0"].FirstTranslation["term"];
+							else if (res.PrincipalTranslations) tr = res.PrincipalTranslations["0"].FirstTranslation["term"];
+							if (result.original && result.original.Compounds) {
+								compound = lib.randSelect(Object.keys(result.original.Compounds));
+								comp = result.original.Compounds[compound].OriginalTerm["term"]+
+									" -> "+result.original.Compounds[compound].FirstTranslation["term"];
+								tr = tr + " ~~ " + comp;
+							}
+							if (tr) irc.say(input.context, "("+dict.slice(0,2)+") "+term+" -> ("+dict.slice(2)+") "+tr, false);
+							else irc.say(input.context, "Something has gone awry.");
 						}
-						if (tr) irc.say(input.context, "("+dict.slice(0,2)+") "+term+" -> ("+dict.slice(2)+") "+tr, false);
-						else irc.say(input.context, "Something has gone awry.");
 					} else {
-						irc.say(input.context, "No translation was found for "+term);
+						irc.say(input.context, "No translation was found for "+term, false);
 					}
 				}
+				result = null; tr = null;
 			});
 		} else {
 			irc.say(input.context, this.command.syntax);

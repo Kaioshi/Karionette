@@ -1,5 +1,5 @@
 ﻿// Tell someone something on join if saved message for them
-var messagesDB = new DB.List({filename: 'messages'});
+var messagesDB = new DB.List({filename: 'messages', queue: true});
 
 function isUser(str) {
 	return str[0] !== "#";
