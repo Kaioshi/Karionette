@@ -1,6 +1,6 @@
 # Karionette
 Node.js IRC bot
-Original source: https://github.com/Deide/Marionette
+Forked from: https://github.com/Deide/Marionette
 
 ## Dependencies & Install
 ```
