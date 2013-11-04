@@ -1,100 +1,82 @@
 // internal address list, updates itself whenever there is movement.
-
-/* this regex refuses to run for every WHO entry. doing a dirty hack in logger for now
-listen({
+evListen({
 	handle: "ialWho",
-	regex: new RegExp("^:[^ ]+ 352 [^ ]+ ([^ ]+) ([^ ]+) ([^ ]+) [^ ]+ ([^ ]+) [^ ]+ :0 (.*)$", "i"),
-	callback: function (input, match) {
-		var channel = match[1],
-			address = match[2]+"@"+match[3],
-			nick = match[4];
-		ial.Add(channel, nick, address);
+	event: "352",
+	callback: function (input) {
+		input.raw = input.raw.split(" ");
+		ial.Add(input.raw[3], input.raw[7], input.raw[4]+"@"+input.raw[5]);
 	}
 });
-*/
 
-listen({
-	plugin: "ial",
+evListen({
 	handle: "ialJoin",
-	regex: regexFactory.onJoin(),
-	callback: function (input, match) {
-		if (match[1] === config.nick) {
-			if (!config.address) config.address = match[2];
-			irc.raw("WHO "+match[3]);
+	event: "JOIN",
+	callback: function (input) {
+		if (input.nick === config.nick) {
+			if (!config.address) config.address = input.address;
+			irc.raw("WHO "+input.channel);
 		} else {
-			ial.Add(match[3], match[1], match[2]);
+			ial.Add(input.channel, input.nick, input.address);
 		}
 	}
 });
 
-listen({
-	plugin: "ial",
+evListen({
 	handle: "ialPart",
-	regex: regexFactory.onPart(),
-	callback: function (input, match) {
-		if (match[1] === config.nick) ial.Remove(match[3]);
-		else ial.Remove(match[3], match[1]);
+	event: "PART",
+	callback: function (input) {
+		if (input.nick === config.nick) ial.Remove(input.channel);
+		else ial.Remove(input.channel, input.nick);
 	}
 });
 
-listen({
-	plugin: "ial",
+evListen({
 	handle: "ialKick",
-	regex: regexFactory.onKick(),
-	callback: function (input, match) {
-		if (match[4] === config.nick) {
-			ial.Remove(match[3]);
-			return;
-		}
-		ial.Remove(match[3], match[4]);
+	event: "KICK",
+	callback: function (input) {
+		if (input.kicked === config.nick) ial.Remove(input.channel);
+		else ial.Remove(input.channel, input.kicked);
 	}
 });
 
-listen({
-	plugin: "ial",
+evListen({
 	handle: "ialQuit",
-	regex: regexFactory.onQuit(),
-	callback: function (input, match) {
+	event: "QUIT",
+	callback: function (input) {
 		var user;
-		if (match[1] === config.nick) return;
-		ial.Channels(match[1]).forEach(function (channel) {
+		if (input.nick === config.nick) return;
+		ial.Channels(input.nick).forEach(function (channel) {
 			setTimeout(function () {
-				ial.Remove(channel, match[1]);
-			}, 200); // grace period so other plugins have time to fondle the entry if needed
+				ial.Remove(channel, input.nick);
+			}, 200);
 		});
-		user = match[1]+"!"+match[2];
+		user = input.nick+"!"+input.address;
 		if (globals.admins[user] !== undefined) {
-			logger.debug("Removed cached admin " + user);
 			delete globals.admins[user];
 		}
+		user = null;
 	}
 });
 
-listen({
-	plugin: "ial",
+evListen({
 	handle: "ialNick",
-	regex: regexFactory.onNick(),
-	callback: function (input, match) {
-		var user,
-			oldnick = match[1],
-			address = match[2],
-			newnick = match[3];
-		// update our own nicks
-		if (config.nick === oldnick) {
-			config.nick = newnick;
-			if (!config.nickname.some(function (item) { return (item == newnick); })) {
+	event: "NICK",
+	callback: function (input) {
+		var user;
+		if (input.nick === config.nick) { // update our nicks
+			config.nick = input.newnick;
+			if (!config.nickname.some(function (item) { return (item === input.newnick); })) {
 				config.nickname = config.nickname.map(function (nick) {
-					if (nick == oldnick) return newnick;
+					if (nick === input.nick) return input.newnick;
 					return nick;
 				});
 			}
 		}
-		ial.Channels(oldnick).forEach(function (channel) {
-			ial.updateUser(channel, oldnick, newnick, address);
+		ial.Channels(input.nick).forEach(function (channel) {
+			ial.updateUser(channel, input.nick, input.newnick, input.address);
 		});
-		user = oldnick+"!"+address;
+		user = input.nick+"!"+input.address;
 		if (globals.admins[user] !== undefined) {
-			logger.debug("Removed cached admin " + user);
 			delete globals.admins[user];
 		}
 	}

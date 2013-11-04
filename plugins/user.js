@@ -88,6 +88,10 @@ function findUserIndex(nick, channel) {
 	var i;
 	if (!seen[channel]) loadSeen(channel);
 	//globals.lastSeen = seen;
+	if (!nick) {
+		logger.warn("findUserIndex("+[nick, channel].join(", ")+") called incorrectly.");
+		return;
+	}
 	nick = nick.toLowerCase()+" ";
 	for (i = 0; i < seen[channel].length; i++) {
 		if (seen[channel][i].slice(0,nick.length).toLowerCase() === nick) {
@@ -167,70 +171,66 @@ function isAction(data) {
 
 timers.Add(900000, saveAllSeen);
 
-// This plugin handles stuff that goes into data/users
-listen({
-	plugin: "user",
-	handle: "channelMsgListener",
-	regex: /^:[^!]+![^ ]+@[^ ]+ PRIVMSG #[^ ]+ :.*/i,
+evListen({
+	handle: "seenMsg",
+	event: "PRIVMSG",
 	callback: function (input) {
-		var user,
-			from = input.from.toLowerCase(),
-			date = new Date().valueOf(),
-			data = (isAction(input.data) ? "* " + input.from + input.data.slice(7, -1)
-				: "<" + input.from + "> " + input.data);
-		ial.addActive(input.context, input.from, date, input.user);
-		setLastMessage(input.from, input.context, data, date);
+		var date = new Date().valueOf(),
+			data = (isAction(input.message) ? "* "+input.nick+" "+input.message
+				: "<"+input.nick+"> "+input.message);
+		ial.addActive(input.channel, input.nick, date, input.address);
+		setLastMessage(input.nick, input.channel, data, date);
 		data = null; date = null;
 	}
 });
 
-listen({ // remove Quit entries if we've seen 'em join.
-	plugin: "user",
+evListen({
 	handle: "seenJoin",
-	regex: regexFactory.onJoin(),
-	callback: function (input, match) {
-		if (match[1] === config.nick) loadSeen(match[3]);
-		removeUserLeft(match[1], match[3]);
+	event: "JOIN",
+	callback: function (input) {
+		if (input.nick === config.nick) loadSeen(input.channel);
+		removeUserLeft(input.channel);
 	}
 });
 
-listen({
-	plugin: "user",
+evListen({
 	handle: "seenPart",
-	regex: regexFactory.onPart(),
-	callback: function (input, match) {
-		setUserLeft(match[1], match[2], match[3], "parted", (match[4] ? " ~ " + match[4] : ""));
+	event: "PART",
+	callback: function (input) {
+		setUserLeft(input.nick, input.address, input.channel, "parted", input.reason);
 	}
 });
 
-listen({
-	plugin: "user",
+evListen({
+	handle: "seenKick",
+	event: "KICK",
+	callback: function (input) {
+		setUserLeft(input.kicked, ial.User(input.kicked, input.channel).address,
+			input.channel, "was kicked",
+			" by "+input.nick+
+			(input.reason.toLowerCase() !== input.kicked.toLowerCase() ? " ("+input.reason+")" : ""));
+	}
+});
+
+evListen({
 	handle: "seenNick",
-	regex: regexFactory.onNick(),
-	callback: function (input, match) {
-		ial.Channels(match[3]).forEach(function (channel) {
-			setUserLeft(match[1], match[2], channel, "nick changed", " ~ "+match[1]+" -> "+match[3]);
+	event: "NICK",
+	callback: function (input) {
+		ial.Channels(input.nick).forEach(function (channel) {
+			setUserLeft(input.nick, input.address, channel, "nick changed", " ~ "+input.nick+" -> "+input.newnick);
 		});
 	}
 });
 
-listen({
-	plugin: "user",
+evListen({
 	handle: "seenQuit",
-	regex: regexFactory.onQuit(),
-	callback: function (input, match) {
-		function neatenQuit(quitmsg) {
-			if (quitmsg.slice(0, 6) === "Quit: ") {
-				quitmsg = quitmsg.slice(6);
-			}
-			if (quitmsg.length > 0) {
-				return " ~ " + quitmsg;
-			}
-			return "";
-		}
-		
-		ial.Channels(match[1]).forEach(function (channel) {
-			setUserLeft(match[1], match[2], channel, "quit", neatenQuit(match[3]));
+	event: "QUIT",
+	callback: function (input) {
+		ial.Channels(input.nick).forEach(function (channel) {
+			setUserLeft(input.nick, input.address, channel, "quit", (
+				input.reason.slice(0,6) === "Quit: " ? input.reason = input.reason.slice(6) :
+				(input.reason.length > 0 ? " ~ "+input.reason : "")
+			));
 		});
 	}
 });
