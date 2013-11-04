@@ -1,6 +1,59 @@
 var fs = require('fs'),
 	seen = {};
 
+function getOldSeen(nick, channel) {
+	var seenDB, entry;
+	if (!fs.existsSync("data/users/"+channel+".json")) return;
+	seenDB = new DB.Json({filename: "users/"+channel});
+	entry = seenDB.getOne(nick.toLowerCase());
+	if (entry) {
+		seenDB = null;
+		entry.last.seen = new Date(entry.last.seen).valueOf();
+		if (!entry.last.nick) {
+			entry.last.nick = /(\<|\* )([^> ]+)/.exec(entry.last.message)[2];
+		}
+		if (entry.left) entry.left.date = new Date(entry.left.date).valueOf();
+		convertSeen(entry, channel);
+		return entry;
+	}
+	entry = null; seenDB = null;
+}
+
+function convertSeen(entry, channel) {
+	var line;
+	
+	function quote(text) {
+		return "\""+text+"\"";
+	}
+	
+	if (!entry.left) {
+		line = [
+			entry.last.nick,
+			entry.last.seen,
+			"message:",
+			quote(entry.last.message)
+		].join(" ");
+	} else {
+		line = [
+			entry.last.nick,
+			entry.last.seen,
+			"message:",
+			quote(entry.last.message),
+			"left:",
+			entry.left.date,
+			"user:",
+			quote(entry.left.user),
+			"type:",
+			quote(entry.left.type),
+			"message:",
+			quote(entry.left.msg)
+		].join(" ");
+	}
+	seen[channel].push(line);
+	seen[channel].altered = true;
+	line = null;
+}
+
 function loadSeen(channel) {
 	var filename = "data/users/"+channel+".txt";
 	if (fs.existsSync(filename)) {
@@ -49,8 +102,8 @@ function getSeen(nick, channel) {
 	var i, reg,
 		id = findUserIndex(nick, channel);
 	if (id === -1) {
-		logger.debug("Didn't find such a guy.");
-		return;
+		logger.debug("Didn't find such a guy. Checking old DB.");
+		return getOldSeen(nick, channel);
 	}
 	// convert to object we like and return
 	if (seen[channel][id].indexOf("left: ") > -1) {

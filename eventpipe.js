@@ -61,11 +61,11 @@ module.exports = (function () {
 						case "{args2}": ret[reg[1]] = ""; break;
 						case "{args3}": ret[reg[1]] = ""; break;
 						case "{args4}": ret[reg[1]] = ""; break;
-						//case "{args1*}": ret[reg[1]] = ""; break; // nevr
-						//case "{args2*}": ret[reg[1]] = ""; break; // been
-						//case "{args3*}": ret[reg[1]] = ""; break; // used
-						//case "{args4*}": ret[reg[1]] = ""; break; // once
-						//case "{args-1}": ret[reg[1]] = ""; break; // mang
+						case "{args1*}": ret[reg[1]] = ""; break; // Apparently
+						case "{args2*}": ret[reg[1]] = ""; break; // these are
+						case "{args3*}": ret[reg[1]] = ""; break; // used by
+						case "{args4*}": ret[reg[1]] = ""; break; // one thing.
+						//case "{args-1}": ret[reg[1]] = ""; break; // but not this one.
 						default:
 							// must be a variable name, or jibberish.
 							variable = varDB.getOne(reg[1]);
@@ -83,7 +83,7 @@ module.exports = (function () {
 					ret["{args*}"] = newMatch;
 					//ret["{args-1}"] = args[args.length-1]; I'll uncomment these if anyone ever wants them.
 					for (i = 0; i < args.length; i++) {
-						//ret["{args"+(i+1)+"*}"] = args.slice(i).join(" "); hasn't happened yet!
+						ret["{args"+(i+1)+"*}"] = args.slice(i).join(" ");
 						ret["{args"+(i+1)+"}"] = args[i];
 					}
 				}
