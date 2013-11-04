@@ -1,7 +1,8 @@
 ﻿var randDB = new DB.List({filename: "randomThings"}),
 	repliesDB = new DB.Json({filename: "actback/replies"});
 
-function isObj(string) {
+var isObj = (function () {
+
 	var nonObjs = [
 		config.nick,
 		config.nick + "'s",
@@ -19,10 +20,13 @@ function isObj(string) {
 		"her"
 	];
 
-	return nonObjs.some(function (element) {
-		return (element.toUpperCase() === string.toUpperCase());
-	});
-}
+	return function innerIsObj(string) {
+
+		return nonObjs.some(function (element) {
+			return (element.toUpperCase() === string.toUpperCase());
+		});
+	};
+}());
 
 function getWpm(line) {
 	return Math.floor((line.length / 5.0) * 1000);
@@ -35,10 +39,10 @@ function transformObj(args, num) {
 	return args[num];
 }
 
-function questionReply(question) {
-	question = question.toLowerCase();
+var questionReply = (function () {
+
 	var what = [
-//		"Probably something like {randThing}",
+		//"Probably something like {randThing}",
 		"Err... 42?",
 		"I think the answer is probably lost at sea",
 		"The real question is 'what is a " + words.noun.random() + " doing in " + lib.randSelect(config.local_whippingboys) + "'s box?', fool.",
@@ -238,35 +242,39 @@ function questionReply(question) {
 		";~;", "o_O", "O_o", "...", ". . .", "wtf", "D:", ":D", ":>", ">:("
 	];
 
-	switch (question) {
-	case "what":
-		return lib.randSelect(what);
-		break;
-	case "who":
-		return lib.randSelect(who);
-		break;
-	case "where":
-		return lib.randSelect(where);
-		break;
-	case "when":
-		return lib.randSelect(when);
-		break;
-	case "which":
-		return lib.randSelect(which);
-		break;
-	case "why":
-		return lib.randSelect(why);
-		break;
-	case "how":
-		return lib.randSelect(how);
-		break;
-	case "do":
-	case "is":
-	default:
-		return lib.randSelect(yn);
-		break;
-	}
-}
+	return function questionReply(question) {
+		question = question.toLowerCase();
+
+		switch (question) {
+		case "what":
+			return lib.randSelect(what);
+			break;
+		case "who":
+			return lib.randSelect(who);
+			break;
+		case "where":
+			return lib.randSelect(where);
+			break;
+		case "when":
+			return lib.randSelect(when);
+			break;
+		case "which":
+			return lib.randSelect(which);
+			break;
+		case "why":
+			return lib.randSelect(why);
+			break;
+		case "how":
+			return lib.randSelect(how);
+			break;
+		case "do":
+		case "is":
+		default:
+			return lib.randSelect(yn);
+			break;
+		}
+	};
+}());
 
 listen({
 	plugin: "actback",
