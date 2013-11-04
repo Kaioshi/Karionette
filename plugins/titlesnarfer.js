@@ -43,13 +43,13 @@ listen({
 			length = 10000;
 		
 		function sayTitle(uri, length, imgur) {
-			web.get(uri.href, function (error, response, body) {
+			web.get(uri, function (error, response, body) {
 				if (error) {
 					return;
 				}
 				reg = /<title?[^>]+>([^<]+)<\/title>/i.exec(body.replace(/\n|\t|\r/g, ""));
 				if (!reg || !reg[1]) return;
-				title = reg[1];
+				title = reg[1].trim();
 				if (title.toLowerCase().indexOf(uri.host) > -1) {
 					reg = new RegExp(" "+uri.host+" ?", "ig");
 					title = title.replace(reg, "");
@@ -58,8 +58,8 @@ listen({
 				if (imgur) { // I know there are a lot of imgur corner cases, but it's really common.
 					if (title === "imgur: the simple image sharer") return; // deal with it
 				}
-				
 				irc.say(input.context, ent.decode(title.trim()) + " ~ " + uri.host.replace("www.", ""), false);
+				reg = null; title = null; body = null; response = null; error = null;
 			}, length);
 		}
 		
@@ -84,6 +84,7 @@ listen({
 				date = new Date(body["media$group"]["yt$uploaded"]["$t"]);
 				date = zero(date.getDate())+"/"+zero(date.getMonth()+1)+"/"+date.getYear().toString().slice(1);
 				irc.say(input.context, body.title["$t"]+rating+date+views+" ~ "+host.replace("www.",""), false);
+				date = null; rating = null; views = null; body = null; response = null; error = null;
 			});
 		}
 		
@@ -99,10 +100,14 @@ listen({
 			youtubeIt(/^\/([^ &\?]+)/.exec(uri.path)[1], uri.host);
 			return;
 		}
+		if (uri.host === "imgur.com") {
+			sayTitle(uri.href, length, true);
+			return;
+		}
 		if (uri.host === "i.imgur.com" && uri.href.slice(-4).match(/\.jpg|\.png|\.gif/i)) {
 			uri.path = uri.path.slice(0,-4);
 			uri.href = uri.href.slice(0,-4);
-			sayTitle(uri, length, true);
+			sayTitle(uri.href, length, true);
 			return;
 		}
 		ext = /.*\.([a-zA-Z0-9]+)$/.exec(uri.path);
@@ -114,7 +119,7 @@ listen({
 		}
 		// ton of garbage in the first 15000 characters. o_O
 		if (uri.host.indexOf("kotaku") > -1) length = 20000;
-		sayTitle(uri, length);
+		sayTitle(uri.href, length);
 	}
 });
 
