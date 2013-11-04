@@ -2,7 +2,6 @@
 	repliesDB = new DB.Json({filename: "actback/replies"});
 
 var isObj = (function () {
-
 	var nonObjs = [
 		config.nick,
 		config.nick + "'s",
@@ -40,7 +39,6 @@ function transformObj(args, num) {
 }
 
 var questionReply = (function () {
-
 	var what = [
 		//"Probably something like {randThing}",
 		"Err... 42?",
@@ -242,7 +240,7 @@ var questionReply = (function () {
 		";~;", "o_O", "O_o", "...", ". . .", "wtf", "D:", ":D", ":>", ">:("
 	];
 
-	return function questionReply(question) {
+	return function innerQuestionReply(question) {
 		question = question.toLowerCase();
 
 		switch (question) {
