@@ -29,7 +29,7 @@ module.exports = (function () {
 							vm.runInContext("(function() {" + current + "}())", context, scripts[i]);
 							lib.memProf("loading plugin "+scripts[i]);
 						} catch (err) {
-							logger.error("Error in plugin " + scripts[i] + ": " + err, err);
+							logger.error("Error in plugin " + scripts[i], err);
 						}
 					}
 				}
