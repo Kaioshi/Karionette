@@ -175,9 +175,11 @@ evListen({
 	handle: "seenMsg",
 	event: "PRIVMSG",
 	callback: function (input) {
-		var date = new Date().valueOf(),
-			data = (isAction(input.message) ? "* "+input.nick+" "+input.message
-				: "<"+input.nick+"> "+input.message);
+		var date, data;
+		if (!input.channel) return; // query
+		date = new Date().valueOf();
+		data = (isAction(input.message) ? "* "+input.nick+" "+input.message
+			: "<"+input.nick+"> "+input.message);
 		ial.addActive(input.channel, input.nick, date, input.address);
 		setLastMessage(input.nick, input.channel, data, date);
 		data = null; date = null;
