@@ -189,7 +189,7 @@ evListen({
 	event: "JOIN",
 	callback: function (input) {
 		if (input.nick === config.nick) loadSeen(input.channel);
-		removeUserLeft(input.channel);
+		removeUserLeft(input.nick, input.channel);
 	}
 });
 
