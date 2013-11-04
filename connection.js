@@ -108,11 +108,11 @@ module.exports = function (Eventpipe) {
 		socket.setNoDelay(true);
 		socket.setEncoding("utf8");
 		// Connection TimeOut support
-		socket.setTimeout(240 * 1000, function socketTimeout() {
+		socket.setTimeout(300 * 1000, function socketTimeout() {
 			// If fails, error and close events trigger
 			//logger.warn("Socket Timeout...");
 			send("VERSION");
-			//socket.destroy();
+			socket.destroy();
 		});
 		socket.on("close", function socketCloseEvent(hadError) {
 			if (!(hadError || connected)) {
