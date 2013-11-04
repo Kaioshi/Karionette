@@ -3,18 +3,17 @@
 	currentNick = config.nickname[0];
 
 // Keeps the bot connected
-listen({
-	plugin: "CORE",
-	handle: 'ping',
-	regex: /^PING :(.+)$/i,
-	callback: function (input, match) {
-		irc.pong(match[1]);
+evListen({
+	handle: "corePing",
+	event: "PING",
+	callback: function (input) {
+		irc.pong(input.challenge);
 	}
 });
 
 listen({
 	plugin: "CORE",
-	handle: 'nickChange',
+	handle: "nickChange",
 	regex: /^:[^ ]+ 433 [^ ]+ [^ ]+ :.*$/,
 	once: true,
 	callback: function () {
@@ -74,11 +73,9 @@ listen({
 	}
 });
 
-listen({
-	plugin: "CORE",
-	handle: 'joinChannels',
-	regex: /^:[^ ]+ 376 [^ ]+ :.*$/,
-	once: false,
+evListen({
+	handle: "coreAutojoin",
+	event: "376",
 	callback: function () {
 		// 376 is the end of MOTD
 		if (autojoinDB.size() > 0) {
@@ -92,8 +89,9 @@ listen({
 				}, 3000); // wait for the joins to finish
 			}, 2000); // wait 2 seconds for a cloak to apply
 		}
-	}
+	},
 });
+
 
 /*
  * COMMANDS:

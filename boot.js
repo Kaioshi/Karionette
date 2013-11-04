@@ -15,6 +15,7 @@ require("./lib/ial.js");
 require("./lib/permissions.js");
 require("./lib/timers.js");
 require("./lib/words.js");
+require("./lib/caveman.js");
 
 var DB = require("./lib/fileDB.js"),
 	web = require("./lib/web.js"),
@@ -86,6 +87,7 @@ function createSandbox() {
 		require: require,
 		regexFactory: regexFactory,
 		listen: Eventpipe.bind,
+		evListen: caveman.eventListen,
 		logger: logger,
 		words: words,
 		permissions: permissions,

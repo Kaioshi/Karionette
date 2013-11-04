@@ -31,6 +31,7 @@ module.exports = function (Eventpipe) {
 			};
 		// Log the data if not a ping
 		logger.filter(data);
+		caveman.emitEvent(data);
 		// Check it's a PRIVMSG in a context
 		if (data.indexOf('PRIVMSG') > -1) {
 			regArr = (/^:([^!]+)!([^ ]+@[^ ]+) PRIVMSG ([^ ]+) :(.*)$/i).exec(data);
@@ -63,6 +64,7 @@ module.exports = function (Eventpipe) {
 				}
 			}
 		}
+		
 		// Fire any events
 		Eventpipe.fire(input);
 	}
