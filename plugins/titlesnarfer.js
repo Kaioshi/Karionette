@@ -43,8 +43,12 @@ listen({
 			length = 10000;
 		
 		function sayTitle(uri, length, imgur) {
-			web.get(uri, function (error, response, body) {
+			web.get(uri.href, function (error, response, body) {
 				if (error) {
+					return;
+				}
+				if (!body) {
+					irc.say(input.context, "There was no body. For some reason.");
 					return;
 				}
 				reg = /<title?[^>]+>([^<]+)<\/title>/i.exec(body.replace(/\n|\t|\r/g, ""));
@@ -101,13 +105,13 @@ listen({
 			return;
 		}
 		if (uri.host === "imgur.com") {
-			sayTitle(uri.href, length, true);
+			sayTitle(uri, length, true);
 			return;
 		}
 		if (uri.host === "i.imgur.com" && uri.href.slice(-4).match(/\.jpg|\.png|\.gif/i)) {
 			uri.path = uri.path.slice(0,-4);
 			uri.href = uri.href.slice(0,-4);
-			sayTitle(uri.href, length, true);
+			sayTitle(uri, length, true);
 			return;
 		}
 		ext = /.*\.([a-zA-Z0-9]+)$/.exec(uri.path);
@@ -119,7 +123,7 @@ listen({
 		}
 		// ton of garbage in the first 15000 characters. o_O
 		if (uri.host.indexOf("kotaku") > -1) length = 20000;
-		sayTitle(uri.href, length);
+		sayTitle(uri, length);
 	}
 });
 
