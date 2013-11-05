@@ -211,6 +211,16 @@ cmdChek:	for (i = 0; i < cmdArr.length; i += 1) {
 	}
 });
 
+// Show node version
+listen({
+	plugin: "CORE",
+	handle: "nodeVersion",
+	regex: regexFactory.startsWith("nodeversion"),
+	callback: function (input) {
+		irc.say(input.context, lib.nodeVersion());
+	}
+});
+
 // Memory usage report
 listen({
 	plugin: "CORE",
