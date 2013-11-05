@@ -27,59 +27,61 @@ function tokenizeLine(line) {
 	return ret.join(" ");
 }
 
-listen({
-	plugin: "words",
-	handle: "word",
-	regex: regexFactory.startsWith(["word", "words"]),
-	command: {
-		root: "word",
-		help: "verb add, remove, get, count",
-		syntax: "[Help] Syntax: "+config.command_prefix+
-			"word verb/adverb/noun/adjective/pronoun add/remove/get/count/random [word] - Example: "+config.command_prefix+
-			"word noun add apple - "+config.command_prefix+
-			"word adjective remove overconfident"
-	},
-	callback: function (input, match) {
-		var entry, reg, verb,
-			args = match[1].toLowerCase().split(" ");
-		if (args[0] === "personalpronoun") args[0] = "personalPronoun";     // ugliest hack
-		if (args[0] === "possessivepronoun") args[0] = "possessivePronoun"; // ever.
-		if (args[0].match(/^adjective$|^adverb$|^noun$|^pronoun$|^possessivePronoun$|^personalPronoun$/)) {
-			switch (args[1]) {
+cmdListen({
+	command: "word",
+	help: "Word list management",
+	syntax: config.command_prefix+"word verb/adverb/noun/adjective/pronoun add/remove/get/count/random/correct(verbs only) [word] - Example: "
+		+config.command_prefix+"word noun add apple - "+config.command_prefix+"word adjective remove overconfident - "
+		+config.command_prefix+"word verb correct fondle fondles fondled fondling",
+	callback: function (input) {
+		var entry, reg, verb;
+		if (!input.args || !input.args[0]) {
+			irc.say(input.context, cmdHelp("word", "syntax"));
+			return;
+		}
+		input.user = input.nick+"!"+input.address;
+		if (input.args[0] === "personalpronoun") input.args[0] = "personalPronoun";     // ugliest hack
+		if (input.args[0] === "possessivepronoun") input.args[0] = "possessivePronoun"; // ever.
+		if (input.args[0].match(/^adjective$|^adverb$|^noun$|^pronoun$|^possessivePronoun$|^personalPronoun$/)) {
+			if (!input.args[1]) {
+				irc.say(input.context, cmdHelp("word", "syntax"));
+				return;
+			}
+			switch (input.args[1]) {
 				case "random":
-					irc.say(input.context, words[args[0]].random());
+					irc.say(input.context, words[input.args[0]].random());
 					break;
 				case "count":
-					irc.say(input.context, "I know of "+words[args[0]].list.length+" "+args[0]+"s.");
+					irc.say(input.context, "I know of "+words[input.args[0]].list.length+" "+input.args[0]+"s.");
 					break;
 				case "get":
-					irc.say(input.context, words[args[0]].get(args[2]));
+					irc.say(input.context, words[input.args[0]].get(input.args[2]));
 					break;
 				case "add":
 					if (!permissions.isAdmin(input.user)) {
 						irc.say(input.context, "Admins only sucka.");
 						return;
 					}
-					irc.say(input.context, words[args[0]].add(args[2]));
+					irc.say(input.context, words[input.args[0]].add(input.args[2]));
 					break;
 				case "remove":
 					if (!permissions.isAdmin(input.user)) {
 						irc.say(input.context, "Admins only sucka!");
 						return;
 					}
-					irc.say(input.context, words[args[0]].remove(args[2]));
+					irc.say(input.context, words[input.args[0]].remove(input.args[2]));
 					break;
 				default:
 					break; // never happens
 			}
 			return;
 		}
-		switch (args[0]) {
+		switch (input.args[0]) {
 			case "analyze":
-				irc.say(input.context, tokenizeLine(args.slice(1).join(" ")));
+				irc.say(input.context, tokenizeLine(input.args.slice(1).join(" ")));
 				break;
 			case "verb":
-				switch (args[1]) {
+				switch (input.args[1]) {
 					case "count":
 						irc.say(input.context, "I know of "+words.verb.list.length+" verbs.");
 						break;
@@ -88,7 +90,7 @@ listen({
 						irc.say(input.context, entry.base+" - "+entry.s+" - "+entry.ed+" - "+entry.ing);
 						break;
 					case "get":
-						entry = words.verb.get(args[2]);
+						entry = words.verb.get(input.args[2]);
 						if (!entry) irc.say(input.context, "I don't know it.");
 						else irc.say(input.context, entry.base+" - "+entry.s+" - "+entry.ed+" - "+entry.ing);
 						break;
@@ -97,29 +99,29 @@ listen({
 							irc.say(input.context, "Admins only.");
 							return;
 						}
-						irc.say(input.context, words.verb.remove(args[2]));
+						irc.say(input.context, words.verb.remove(input.args[2]));
 						break;
 					case "add":
 						if (!permissions.isAdmin(input.user)) {
 							irc.say(input.context, "Admins only.");
 							return;
 						}
-						irc.say(input.context, words.verb.add(args.slice(2).join(" ")));
+						irc.say(input.context, words.verb.add(input.args.slice(2).join(" ")));
 						break;
 					case "correct":
 						if (!permissions.isAdmin(input.user)) {
 							irc.say(input.context, "Admins only.");
 							return;
 						}
-						irc.say(input.context, words.verb.change(args.slice(2).join(" ")));
+						irc.say(input.context, words.verb.change(input.args.slice(2).join(" ")));
 						break;
 					default:
-						irc.say(input.context, this.command.syntax);
+						irc.say(input.context, cmdHelp("word", "syntax"));
 						break;
 				}
 				break;
 			default:
-				irc.say(input.context, this.command.syntax);
+				irc.say(input.context, cmdHelp("word", "syntax"));
 				break;
 		}
 	}
