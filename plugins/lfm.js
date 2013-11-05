@@ -1,54 +1,50 @@
 ﻿var ent = require('./lib/entities.js'),
 	lfmBindingsDB = new DB.Json({filename: "lfm"});
 
+function dura(ms) {
+	var secs = Math.floor(ms/1000),
+		mins = Math.floor(secs/60),
+		hours = Math.floor(mins/60),
+		ret = [];
+	secs = (secs % 60);
+	mins = (mins % 60);
+	hours = (hours % 24);
+	if (hours) ret.push(hours);
+	if (mins) ret.push(mins);
+	ret.push((secs > 9 ? secs : "0"+secs));
+	return ret.join(":");
+	
+}
+
+function timeAgo(then, now) {
+	var dura = now - then,
+		secs = Math.floor(dura/1000),
+		mins = Math.floor(secs/60),
+		hours = Math.floor(mins/60),
+		days = Math.floor(hours/24),
+		years = Math.floor(days/365.25);
+	secs = (secs % 60);
+	mins = (mins % 60);
+	hours = (hours % 24);
+	days %= 365.25;
+	if (years) return years + " years ago";
+	if (days) return days + " days ago";
+	if (hours) return hours + " hours ago";
+	if (mins) return mins + " minutes ago";
+	return secs + " seconds ago";
+}
+
 // Last.fm
-listen({
-	plugin: "lfm",
-	handle: "lfm",
-	regex: regexFactory.startsWith("lfm"),
-	command: {
-		root: "lfm",
-		options: "-bind -prev -top -artist",
-		help: "Get's your last played track. Use -bind to bind your nick to your lfm account, allowing you to not have to supply an account name. Else just supply your account name."
-	},
-	callback: function (input, match) {
+cmdListen({
+	command: "lfm",
+	help: "Get's your last played track. Use -bind to bind your nick to your lfm account, "+
+		"allowing you to not have to supply an account name. Else just supply your account name.",
+	syntax: config.command_prefix+"lfm [-bind / -prev / -top / -artist] [<account>|<artist>] - Example: "+
+		config.command_prefix+"lfm plonk420",
+	callback: function (input) {
 		var uri, user, i, method, artist, track, formed, summary,
 			result, keys, ret, song, then, now, tags, from,
-			args = match[1].split(" "),
 			max, tn = 0;
-		
-		function dura(ms) {
-			var secs = Math.floor(ms/1000),
-				mins = Math.floor(secs/60),
-				hours = Math.floor(mins/60),
-				ret = [];
-			secs = (secs % 60);
-			mins = (mins % 60);
-			hours = (hours % 24);
-			if (hours) ret.push(hours);
-			if (mins) ret.push(mins);
-			ret.push((secs > 9 ? secs : "0"+secs));
-			return ret.join(":");
-			
-		}
-		
-		function timeAgo(then, now) {
-			var dura = now - then,
-				secs = Math.floor(dura/1000),
-				mins = Math.floor(secs/60),
-				hours = Math.floor(mins/60),
-				days = Math.floor(hours/24),
-				years = Math.floor(days/365.25);
-			secs = (secs % 60);
-			mins = (mins % 60);
-			hours = (hours % 24);
-			days %= 365.25;
-			if (years) return years + " years ago";
-			if (days) return days + " days ago";
-			if (hours) return hours + " hours ago";
-			if (mins) return mins + " minutes ago";
-			return secs + " seconds ago";
-		}
 		
 		if (config.api.lfm.length < 1) {
 			irc.say(input.context, "I.. I don't have a lastfm api key. ;<");
@@ -56,17 +52,17 @@ listen({
 			return;
 		}
 		
-		if (args[0]) {
-			switch (args[0]) {
+		if (input.args && input.args[0]) {
+			switch (input.args[0]) {
 			case "-a":
 			case "-artist":
-				if (!args[1]) {
+				if (!input.args[1]) {
 					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
 						"lfm -a <artist> - Example: "+config.command_prefix+
 						"lfm -a Rebecca Black");
 					return;
 				}
-				uri = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist="+args.slice(1).join(" ")+
+				uri = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist="+input.args.slice(1).join(" ")+
 					"&api_key="+config.api.lfm+"&format=json";
 				web.get(uri, function (error, response, body) {
 					result = JSON.parse(body);
@@ -92,25 +88,25 @@ listen({
 				});
 				return;
 			case "-bind":
-				if (args[1]) {
-					lfmBindingsDB.saveOne(input.from, args[1]);
+				if (input.args[1]) {
+					lfmBindingsDB.saveOne(input.from, input.args[1]);
 					irc.say(input.context, "At your service :)");
 				} else {
 					irc.say(input.context, "What am I binding?");
 				}
 				return;
 			case "-top":
-				if (!args[1]) {
+				if (!input.args[1]) {
 					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"lfm -top <artists/tracks>");
 					return;
 				}
-				if (args[1] === "artists" || args[1] === "tracks") {
-					method = (args[1] === "tracks" ? "chart.gettoptracks" : "chart.gettopartists");
+				if (input.args[1] === "artists" || input.args[1] === "tracks") {
+					method = (input.args[1] === "tracks" ? "chart.gettoptracks" : "chart.gettopartists");
 					uri = "http://ws.audioscrobbler.com/2.0/?method="+method+"&api_key="+config.api.lfm+"&limit=5&format=json";
 					web.get(uri, function (error, response, body) {
 						result = JSON.parse(body);
 						ret = [];
-						if (args[1] === "artists") {
+						if (input.args[1] === "artists") {
 							keys = Object.keys(result.artists.artist);
 							for (i = 0; i < keys.length; i++) {
 								artist = result.artists.artist[i];
@@ -128,7 +124,7 @@ listen({
 					return;
 				}
 				// assume we've gone ;lfm -top <artist name>
-				artist = args.slice(1).join(" ");
+				artist = input.args.slice(1).join(" ");
 				uri = "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptracks&artist="+artist+
 					"&api_key="+config.api.lfm+"&limit=5&format=json";
 				web.get(uri, function (error, response, body) {
@@ -149,7 +145,7 @@ listen({
 			case "-prev":
 				tn = 1;
 			default:
-				user = (tn === 0 ? match[1] : (args[1] || lfmBindingsDB.getOne(input.from)));
+				user = (tn === 0 ? input.data : (input.args[1] || lfmBindingsDB.getOne(input.from)));
 				break;
 			}
 		} else {
@@ -204,7 +200,6 @@ listen({
 							keys = Object.keys(result.toptags.tag);
 							max = (keys.length < 3 ? keys.length : 3);
 							for (i = 0; i < max; i++) {
-							
 								song.tags.push(result.toptags.tag[i].name);
 							}
 						} else if (result.toptags.tag.name) {
