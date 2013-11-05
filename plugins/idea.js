@@ -1,13 +1,7 @@
 ﻿// Idea from 'this for that'
-listen({
-	plugin: "idea",
-	handle: "idea",
-	regex: regexFactory.startsWith("idea"),
-	command: {
-		root: "idea",
-		options: "No options",
-		help: "Random idea for you to ponder!"
-	},
+cmdListen({
+	command: "idea",
+	help: "Random idea for you to ponder!",
 	callback: function (input) {
 		var result,
 			uri = "http://itsthisforthat.com/api.php?json";
