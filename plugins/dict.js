@@ -55,31 +55,28 @@ function showSuggestions(context, word) {
 	}, 200);
 }
 
-listen({
-	plugin: "dict",
-	handle: "dict",
-	regex: regexFactory.startsWith("dict"),
-	command: {
-		root: "dict",
-		help: "It's a dictionary. What?"
-	},
-	callback: function (input, match) {
+cmdListen({
+	command: "dict",
+	help: "It's a dictionary. What?",
+	syntax: config.command_prefix+"dict <word> - Example: "+config.command_prefix+
+		"dict obvious",
+	callback: function (input) {
 		var result = [], tmp, i,
 			client = new net.Socket();
 		
-		if (!match[1]) {
-			irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"dict <word>");
+		if (!input.args || !input.args[0] || input.args[1]) {
+			irc.say(input.context, cmdHelp("dict", "syntax"));
 			return;
 		}
 		client.connect(2628, 'localhost');
 		client.on('connect', function () {
-			client.write("D wn "+match[1]+"\r\n");
+			client.write("D wn "+input.data+"\r\n");
 		});
 		
 		client.on('data', function (data) {
 			data = data.toString();
 			if (data.slice(0,3) === "552") {
-				showSuggestions(input.context, match[1]);
+				showSuggestions(input.context, input.data);
 				return;
 			} else {
 				if (data.slice(0,3) === "220") {
@@ -91,7 +88,7 @@ listen({
 				for (i = 0; i < data.length; i++) {
 					tmp = data[i].slice(0,3);
 					if (tmp !== "151" && tmp !== "250" && tmp !== "150") {
-						if (data[i].length > 0 && data[i].toLowerCase() !== match[1].toLowerCase()) {
+						if (data[i].length > 0 && data[i].toLowerCase() !== input.data.toLowerCase()) {
 							result.push(cleanWhitespace(data[i]));
 						}
 					}
