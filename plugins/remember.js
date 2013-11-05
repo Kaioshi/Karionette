@@ -14,22 +14,16 @@ var memDB = new DB.Json({filename: "remember"}),
 		"I'm not aware of such a thing"
 	];
 
-listen({
-	plugin: "remember",
-	handle: "remember",
-	regex: regexFactory.startsWith("remember"),
-	command: {
-		root: "remember",
-		help: "remembers things so you don't have to. See also: memories, forget, wtf",
-		syntax: "[Help] Syntax: "
-			+config.command_prefix+"remember <memory handle> <as/are/is/were> <thing to remember> - Example: "
-			+config.command_prefix+"remember Uni's pantsu as being striped blue and white"
-	},
-	callback: function (input, match) {
+cmdListen({
+	command: "remember",
+	help: "remembers things so you don't have to. See also: memories, forget, wtf",
+	syntax: config.command_prefix+"remember <memory handle> <as/are/is/were> <thing to remember> - Example: "
+			+config.command_prefix+"remember Uni's pantsu as being striped white and blue.",
+	callback: function (input) {
 		var old,
-			reg = /(.*) (as|is|are|were) (.*)/.exec(match[1]);
+			reg = /(.*) (as|is|are|were) (.*)/.exec(input.data);
 		if (!reg) {
-			irc.say(input.context, this.command.syntax);
+			irc.say(input.context, cmdHelp("remember", "syntax"));
 			return;
 		}
 		old = memDB.getOne(reg[1]);
@@ -39,30 +33,32 @@ listen({
 	}
 });
 
-listen({
-	plugin: "remember",
-	handle: "memories",
-	regex: regexFactory.startsWith("memories"),
-	command: {
-		root: "memories",
-		help: "lists memory handles. See also: remember, forget, wtf",
-		options: "-find",
-		syntax: "[Help] Syntax: "+config.command_prefix+"memories -f <string> - Example: "
-			+config.command_prefix+"memories -f pantsu"
-	},
-	callback: function (input, match) {
-		var args = match[1].split(" "),
-			memories, term,
+cmdListen({
+	command: "memories",
+	help: "lists memory handles. See also: remember, forget, wtf",
+	syntax: config.command_prefix+"memories [-find <string>] - no arg to list memories"
+		+" - Example: "+config.command_prefix+"memories -f pantsu",
+	callback: function (input) {
+		var memories, term,
 			handles = [],
 			ret = [];
-		switch (args[0]) {
+		if (!input.args || !input.args[0]) {
+			memories = Object.keys(memDB.getAll());
+			if (memories.length > 0) {
+				irc.say(input.context, "I have "+memories.length+" memories: "+memories.sort().join(", "), false);
+			} else {
+				irc.say(input.context, "I..I don't remember anything. ;~;");
+			}
+			return;
+		}
+		switch (input.args[0]) {
 			case "-f":
 			case "-find":
-				if (!args[1]) {
-					irc.say(input.context, this.command.syntax);
+				if (!input.args[1]) {
+					irc.say(input.context, cmdHelp("memories", "syntax"));
 					return;
 				}
-				term = args.slice(1).join(" ");
+				term = input.args.slice(1).join(" ");
 				memories = memDB.getAll();
 				Object.keys(memories).forEach(function (memory) {
 					if (memory.indexOf(term) > -1) handles.push(memory);
@@ -80,50 +76,44 @@ listen({
 				}
 				break;
 			default:
-				memories = Object.keys(memDB.getAll());
-				if (memories.length === 0) irc.say(input.context, "I..I don't remember anything. ;~;");
-				else {
-					irc.say(input.context, "I remember "+memories.join(", "), false);
-				}
+				irc.say(input.context, cmdHelp("memories", "syntax"));
 				break;
 		}
 	}
 });
 
-listen({
-	plugin: "remember",
-	handle: "forget",
-	regex: regexFactory.startsWith("forget"),
-	command: {
-		root: "forget",
-		help: "forgets .. what was I doing? See also: remember, memories, wtf",
-		syntax: "[Help] Syntax: "+config.command_prefix+"forget <memory handle>"
-	},
-	callback: function (input, match) {
-		if (memDB.getOne(match[1])) {
-			memDB.removeOne(match[1]);
-			irc.say(input.context, "I've forgotten all about "+match[1], false);
+cmdListen({
+	command: "forget",
+	help: "forgets .. what was I doing? See also: remember, memories, wtf",
+	syntax: config.command_prefix+"forget <memory handle>",
+	callback: function (input) {
+		if (!input.args || !input.args[0]) {
+			irc.say(input.context, cmdHelp("forget", "syntax"));
+			return;
+		}
+		if (memDB.getOne(input.data)) {
+			memDB.removeOne(input.data);
+			irc.say(input.context, "I've forgotten all about "+input.data, false);
 		} else {
-			irc.say(input.context, "I don't remember "+match[1]+" in the first place.. :\\ - try "
-				+config.command_prefix+"memories", false);
+			irc.say(input.context, "I don't remember "+input.data+" in the first place.. :\\ - try \""
+				+config.command_prefix+"memories\" for a list.", false);
 		}
 	}
 });
 
-listen({
-	plugin: "remember",
-	handle: "wtf",
-	regex: regexFactory.startsWith("wtf"),
-	command: {
-		root: "wtf",
-		help: "wtf is wtf? See also: remember, memories, forget",
-		syntax: "[Help] Syntax: "
-			+config.command_prefix+"wtf is <memory handle> - Example: "
-			+config.command_prefix+"wtf is the colour of ranma's pantsu"
-	},
-	callback: function (input, match) {
-		var reg = /(were|are|was|is) (.*)/.exec(match[1]),
-			memory = memDB.getOne(reg[2]);
+cmdListen({
+	command: "wtf",
+	help: "wtf is wtf? See also: remember, memories, forget",
+	syntax: config.command_prefix+"wtf <is/are/was/were> <memory handle> - Example: "
+			+config.command_prefix+"wtf is the colour of ranma's pantsu",
+	callback: function (input) {
+		var reg, memory;
+		if (!input.args || !input.args[0] || !input.args[1]) {
+			irc.say(input.context, cmdHelp("wtf", "syntax"));
+			return;
+		}
+		reg = /(were|are|was|is) (.*)/.exec(input.data);
+		memory = memDB.getOne(reg[2]);
 		if (!memory) {
 			irc.say(input.context, lib.randSelect(dunno));
 			return;
