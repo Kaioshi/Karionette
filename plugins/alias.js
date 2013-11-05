@@ -9,10 +9,10 @@ cmdListen({
 	syntax: config.command_prefix+"alias <add/remove/info/list> <alias name> - Example: "+
 		config.command_prefix+"alias add mal g site:myanimelist.net {args*}",
 	callback: function (input) {
-		var aKeys, aliasList, i, alias, cmdArr, permission,
-			cmd = input.args[1],
+		var aKeys, aliasList, i, alias, cmdArr, permission, cmd, aliasString;
+		if (input.args && input.args[0] && input.args[1]) {
+			cmd = input.args[1];
 			aliasString = input.args.slice(2).join(" ");
-		if (input.args[0]) {
 			input.user = input.nick+"!"+input.address;
 			switch (input.args[0]) {
 			case "add":
@@ -103,9 +103,9 @@ cmdListen({
 	syntax: config.command_prefix+"var <add/remove/append/seppend/seprem/seprand> - "+
 		"try each command on it's own for further help.",
 	callback: function (input) {
-		var keys, list, i, variable, varName, permission, owners, arr,
+		var keys, list, i, variable, varName, permission, owners, arr, varString;
+		if (input.args && input.args[0]) {
 			varString = input.args.slice(2).join(" ");
-		if (input.args[0]) {
 			switch (input.args[0]) {
 			case "add":
 				if (input.args[1] && varString) {
