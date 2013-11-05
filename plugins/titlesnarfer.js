@@ -45,10 +45,11 @@ listen({
 		function sayTitle(uri, length, imgur) {
 			web.get(uri.href, function (error, response, body) {
 				if (error) {
+					logger.warn("error fetching "+uri.href+": "+error);
 					return;
 				}
 				if (!body) {
-					irc.say(input.context, "There was no body. For some reason.");
+					logger.warn(uri.href + " - curl returned no body.");
 					return;
 				}
 				reg = /<title?[^>]+>([^<]+)<\/title>/i.exec(body.replace(/\n|\t|\r/g, ""));
