@@ -70,28 +70,23 @@ function addReminder(time, nick, context, reminder) {
 lib.events.on("autojoinFinished", loadReminders);
 
 // Reminds you about things
-listen({
-	plugin: "remind",
-	handle: "remind",
-	regex: regexFactory.startsWith("remind"),
-	command: {
-		root: "remind",
-		options: "me in {when} {time unit} to/that {what}",
-		help: "Reminds you to do something in"
-	},
-	callback: function (input, match) {
+cmdListen({
+	command: "remind",
+	help: "Reminds you to do something in",
+	syntax: config.command_prefix+"remind me in <N seconds/minutes/hours> to/that <reminder here>",
+	callback: function (input) {
 		var time, timeUnits, what, rMatch;
 		
-		rMatch = (/^me in (\d*) (seconds?|minutes?|hours?) (to|that) (.*)$/i).exec(match[1]);
+		rMatch = /^me in (\d*) (seconds?|minutes?|hours?) (to|that) (.*)$/i.exec(input.data);
 		if (rMatch) {
 			time = parseInt(rMatch[1], 10);
 			timeUnits = rMatch[2];
 			time = transformTime(timeUnits, time);
 			what = rMatch[4];
 		} else {
-			rMatch = (/^me (to|that) (.*) in (\d*) (seconds?|minutes?|hours?)[.!?]?$/i).exec(match[1]);
+			rMatch = /^me (to|that) (.*) in (\d*) (seconds?|minutes?|hours?)[.!?]?$/i.exec(input.data);
 			if (!rMatch) {
-				irc.say(input.context, "Wrong syntax ~ ;remind " + this.command.options);
+				irc.say(input.context, "Bad syntax - "+cmdHelp("remind", "syntax"));
 				return;
 			}
 			time = parseInt(rMatch[3], 10);
@@ -101,7 +96,7 @@ listen({
 		}
 		if (time >= 1000) {
 			irc.say(input.context, "I will remind you! .. if you're here at the time, I mean!");
-			addReminder(time, input.from, input.context, "reminder ~ "+what);
+			addReminder(time, input.nick, input.context, "reminder ~ "+what);
 		} else {
 			irc.say(input.context, "nou");
 		}
