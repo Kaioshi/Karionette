@@ -2,6 +2,8 @@
 cmdListen({
 	command: "btc",
 	help: "Retrieves high and low of bitcoin value. Defaults to USD if no argument is given",
+	syntax: config.command_prefix+"btc [<currency code>] - Example: "+config.command_prefix+
+		"btc AUD",
 	callback: function (input) {
 		var uri;
 		if (input.args && input.args[0]) {
