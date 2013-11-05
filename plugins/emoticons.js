@@ -53,18 +53,13 @@ listen({
 });
 
 // flips dudes
-listen({
-	plugin: "emoticons",
-	handle: "flip",
-	regex: regexFactory.startsWith("flip"),
-	command: {
-		root: "flip",
-		options: "{What to flip}",
-		help: "Flips a motherflipper"
-	},
-	callback: function (input, match) {
+cmdListen({
+	command: "flip",
+	help: "Flips a motherflipper",
+	syntax: config.command_prefix+"flip <text>",
+	callback: function (input) {
 		var i, c, r, last, result,
-			target = match[1].toLowerCase(),
+			target = input.data.toLowerCase(),
 			flipTable = {
 				a : '\u0250',
 				b : 'q',
@@ -89,18 +84,24 @@ listen({
 				y : '\u028E',
 				'.' : '\u02D9',
 				'[' : ']',
+				']' : '[',
 				'(' : ')',
+				')' : '(',
 				'{' : '}',
+				'}' : '{',
 				'?' : '\u00BF',
 				'!' : '\u00A1',
+				'\\' : '/',
+				'/' : '\\',
 				"\'" : ',',
 				'<' : '>',
+				'>' : '<',
 				'_' : '\u203E',
 				'\u203F' : '\u2040',
 				'\u2045' : '\u2046',
 				'\u2234' : '\u2235'
 			};
-		if (!target) { target = input.context.toLowerCase(); }
+		if (!target) target = input.context.toLowerCase();
 		last = target.length - 1;
 		result = [target.length];
 
