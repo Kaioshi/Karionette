@@ -238,24 +238,22 @@ evListen({
 });
 
 // Handles Last Seen interface
-listen({
-	plugin: "user",
-	handle: "seen",
-	regex: regexFactory.startsWith(["seen", "have you seen"]),
-	command: {
-		root: "seen",
-		options: "{Person to search}",
-		help: "Displays the last known time {person} was seen, and what they last said."
-	},
-	callback: function (input, match) {
-		var user, chan, target, seen,
-			args = match[1].split(" ");
-		if (args[0][0] === "#" && args[1]) {
-			chan = args[0];
-			target = args[1].replace("?", "");
+cmdListen({
+	command: "seen",
+	help: "Displays the last known time {person} was seen, and what they last said.",
+	syntax: config.command_prefix+"seen <nick>",
+	callback: function (input) {
+		var user, chan, target, seen;
+		if (!input.args || !input.args[0]) {
+			irc.say(input.context, cmdHelp("seen", "syntax"));
+			return;
+		}
+		if (input.channel && input.args[1]) {
+			chan = input.args[0];
+			target = input.args[1].replace("?", "");
 		} else {
 			chan = input.context;
-			target = args[0].replace("?", "");
+			target = input.args[0].replace("?", "");
 		}
 		if (target.toLowerCase() === config.nick.toLowerCase()) {
 			irc.say(input.context, "I'm right here, baaaka.");
