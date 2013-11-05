@@ -92,24 +92,22 @@ function checkManga(manga, context, first) {
 	});
 }
 
-listen({
-	plugin: "mangawatch",
-	handle: "mangawatch",
-	regex: regexFactory.startsWith(["mangawatch", "mw"]),
-	command: {
-		root: "mangawatch",
-		options: "add, remove, update, check, list",
-		syntax: "[Help] Syntax: "+config.command_prefix+
-			"mw <add/remove/update/check/list/announce> - Example: "+config.command_prefix+"mw check Noblesse"
-	},
-	callback: function (input, match) {
-		var feed, reg, list, manga, tmp,
-			args = match[1].split(" ");
-		switch (args[0]) {
+cmdListen({
+	command: "mw",
+	help: "Mangafox RSS watcher",
+	syntax: config.command_prefix+"mw <add/remove/update/check/list/announce> - Example: "
+		+config.command_prefix+"mw check Noblesse",
+	callback: function (input) {
+		var feed, reg, list, manga, tmp;
+		if (!input.args || !input.args[0]) {
+			irc.say(input.context, cmdHelp("mw", "syntax"));
+			return;
+		}
+		switch (input.args[0]) {
 			case "announce":
-				switch (args[1]) {
+				switch (input.args[1]) {
 					case "add":
-						reg = /^([^ ]+) (.*)/.exec(args.slice(2).join(" "));
+						reg = /^([^ ]+) (.*)/.exec(input.args.slice(2).join(" "));
 						if (!reg) {
 							irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"mw announce add <#channel/nick> <manga>");
 							return;
@@ -155,7 +153,7 @@ listen({
 						}
 						break;
 					case "remove":
-						reg = /^([^ ]+) (.*)/.exec(args.slice(2).join(" "));
+						reg = /^([^ ]+) (.*)/.exec(input.args.slice(2).join(" "));
 						if (!reg) {
 							irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"mw announce remove <#channel/nick> <manga>");
 							return;
@@ -178,7 +176,7 @@ listen({
 						}
 						break;
 					case "list":
-						manga = args.slice(2).join(" ");
+						manga = input.args.slice(2).join(" ");
 						if (!manga) {
 							irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"mw announce list <manga>");
 							return;
@@ -199,7 +197,7 @@ listen({
 				}
 				break;
 			case "update":
-				reg = /(.*) every ([0-9]+) ?(m|minutes|h|hour|hours)/i.exec(args.slice(1).join(" "));
+				reg = /(.*) every ([0-9]+) ?(m|minutes|h|hour|hours)/i.exec(input.args.slice(1).join(" "));
 				globals.lastReg = reg;
 				if (!reg) {
 					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
@@ -229,7 +227,7 @@ listen({
 				timers.Add(feed.freq, checkManga, reg[1]);
 				break;
 			case "add":
-				reg = /^(.*) (https?:\/\/mangafox.me\/rss\/[^ \.]+\.xml)$/i.exec(args.slice(1).join(" "));
+				reg = /^(.*) (https?:\/\/mangafox.me\/rss\/[^ \.]+\.xml)$/i.exec(input.args.slice(1).join(" "));
 				if (!reg) {
 					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
 						"mw add Manga Name http://mangafox.me/rss/<manga>.xml - Example: "+config.command_prefix+
@@ -252,8 +250,11 @@ listen({
 				irc.say(input.context, "Added "+reg[1]+" to the manga watch list.");
 				break;
 			case "remove":
-				manga = args.slice(1).join(" ");
-				if (!manga) { irc.say(input.context, this.command.syntax); return; }
+				manga = input.args.slice(1).join(" ");
+				if (!manga) {
+					irc.say(input.context, cmdHelp("mw", "syntax"));
+					return;
+				}
 				if (mangaDB.getOne(manga)) {
 					mangaDB.removeOne(manga);
 					irc.say(input.context, "Removed "+manga+" from the manga watch list.");
@@ -262,10 +263,13 @@ listen({
 				}
 				break;
 			case "check":
-				manga = args.slice(1).join(" ");
+				manga = input.args.slice(1).join(" ");
 				if (manga === "all") checkAllManga();
 				else {
-					if (!manga) { irc.say(input.context, this.command.syntax); return; }
+					if (!manga) {
+						irc.say(input.context, cmdHelp("mw", "syntax"));
+						return;
+					}
 					checkManga(manga, input.context);
 				}
 				break;
@@ -275,7 +279,7 @@ listen({
 				else irc.say(input.context, "There are no entries in the manga watch list yet.");
 				break;
 			default:
-				irc.say(input.context, this.command.syntax);
+				irc.say(input.context, cmdHelp("mw", "syntax"));
 				break;
 		}
 	}
