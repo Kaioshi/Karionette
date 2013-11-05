@@ -105,6 +105,7 @@ cmdListen({
 	callback: function (input) {
 		var keys, list, i, variable, varName, permission, owners, arr, varString;
 		if (input.args && input.args[0]) {
+			input.user = input.nick+"!"+input.address;
 			varString = input.args.slice(2).join(" ");
 			switch (input.args[0]) {
 			case "add":
