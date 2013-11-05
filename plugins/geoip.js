@@ -1,33 +1,27 @@
 var url = require('url');
 
-listen({
-	plugin: "geoip",
-	handle: "geoip",
-	regex: regexFactory.startsWith("geoip"),
-	command: {
-		root: "geoip",
-		help: "Stalks motherflippers - Syntax: " + config.command_prefix + "geoip <nick/hostname/IP/url>",
-		syntax: "[Help] Syntax: " + config.command_prefix + "geoip <nick/hostname/IP/url>"
-	},
-	callback: function (input, match) {
-		var args = match[1].split(" "),
-			uri, target, resp, nick, area;
-		if (args && args[0].length > 0) {
-			if (args[0].match(/\.|\:/)) {
-				if (args[0].match(/https?:\/\/[^ ]+/)) target = url.parse(args[0]).host;
-				else target = args[0];
+cmdListen({
+	command: "geoip",
+	help: "Stalks motherflippers",
+	syntax: "[Help] Syntax: " + config.command_prefix + "geoip <nick/hostname/IP/url>",
+	callback: function (input) {
+		var uri, target, resp, nick, area;
+		if (input.args && input.args[0].length > 0) {
+			if (input.args[0].match(/\.|\:/)) {
+				if (input.args[0].match(/https?:\/\/[^ ]+/)) target = url.parse(input.args[0]).host;
+				else target = input.args[0];
 			} else {
 				if (input.context[0] !== "#") {
 					irc.say(input.context, "You need to give me a hostname in queries.");
 					return;
 				}
-				target = ial.User(args[0], input.context);
+				target = ial.User(input.args[0], input.context);
 				if (target.address) {
 					nick = target.nick;
 					target = target.address.split("@")[1];
 				} else {
-					irc.say(input.context, "I don't see a "+args[0]+" in here.");
-					irc.say(input.context, this.command.syntax);
+					irc.say(input.context, "I don't see a "+input.args[0]+" in here.");
+					irc.say(input.context, cmdHelp("geoip", "syntax"));
 					return;
 				}
 			}
@@ -61,7 +55,7 @@ listen({
 				}
 			});
 		} else {
-			irc.say(input.context, this.command.syntax);
+			irc.say(input.context, cmdHelp("geoip", "syntax"));
 		}
 	}
 });
