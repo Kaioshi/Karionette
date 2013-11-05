@@ -1,16 +1,12 @@
 ﻿// Urban dictionary look-up
-listen({
-	plugin: "ud",
-	handle: "ud",
-	regex: regexFactory.startsWith("ud"),
-	command: {
-		root: "ud",
-		options: "No options",
-		help: "Look up something from Urban dictionary!"
-	},
-	callback: function (input, match) {
+cmdListen({
+	command: "ud",
+	help: "Look up something from Urban dictionary!",
+	syntax: config.command_prefix+"ud <term> - Example: "+config.command_prefix+
+		"ud scrobble",
+	callback: function (input) {
 		var result,
-			uri = 'http://api.urbandictionary.com/v0/define?term=' + match[1];
+			uri = 'http://api.urbandictionary.com/v0/define?term=' + input.data;
 		web.get(uri, function (error, response, body) {
 			result = JSON.parse(body);
 			if (result.result_type === "no_results" || result.list.length === 0) {
