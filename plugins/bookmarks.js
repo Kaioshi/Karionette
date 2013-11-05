@@ -58,46 +58,46 @@ function parseRemArgs(context, from, line) {
 	return ret;
 }
 
-listen({
-	plugin: "bookmarks",
-	handle: "bookmarks",
-	regex: regexFactory.startsWith(["bookmarks", "bookmark", "bm", "link"]),
-	command: {
-		root: "bookmark",
-		options: "-add, -remove, -list, -find - issue each command with no arguments for further help",
-		help: "Allows you to store links for later retrieval.",
-		syntax: {
-			def: "[Help] Syntax: "+config.command_prefix+"bookmark [-a(dd) / -r(emove) / -l(ist) / -f(ind) / -h(elp)] [<handle>] [<url>]",
-			add: "[Help] Syntax: "+config.command_prefix+
-				"bookmark -add [-c(hannel)|-u(ser)] <bookmark handle> <http://url.here.pantsu.org> - Example: "+config.command_prefix+
-				"bookmark -a -c wat http://i.minus.com/iPFeOpHpfLc4I.gif - default store location is global (channel/query)",
-			remove: "[Help] Syntax: "+config.command_prefix+
-				"bookmark -remove [-c(hannel)|-u(ser)] <bookmark handle|url> - Example: "+config.command_prefix+
-				"bookmark -remove http://some.dodgy.url.org/pantsu.jpeg - "+config.command_prefix+
-				"bookmark -r -c slashdot",
-			list: "[Help] Syntax: "+config.command_prefix+
-				"bookmark -list [-c(hannel)|-u(ser)] <handle> - Example: "+config.command_prefix+
-				"bookmark -list -channel - "+config.command_prefix+
-				"bookmark -l (current context)",
-			find: "[Help] Syntax: "+config.command_prefix+
-				"bookmark -find [-c(hannel)|-u(ser)] <string> - Example: "+config.command_prefix+
-				"bookmark -f -c pantsu - "+config.command_prefix+
-				"bookmark -find imgur.com",
-			help: "[Help] Syntax: "+config.command_prefix+
-				"bookmark -help <add/remove/list/find> - Example: "+config.command_prefix+
-				"bookmark -h add"
-		},
-	},
-	callback: function (input, match) {
+var bmhelp = {
+	add: "[Help] Syntax: "+config.command_prefix+
+		"bm -add [-c(hannel)|-u(ser)] <bookmark handle> <http://url.here.pantsu.org> - Example: "+config.command_prefix+
+		"bm -a -c wat http://i.minus.com/iPFeOpHpfLc4I.gif - default store location is global (channel/query)",
+	remove: "[Help] Syntax: "+config.command_prefix+
+		"bm -remove [-c(hannel)|-u(ser)] <bookmark handle|url> - Example: "+config.command_prefix+
+		"bm -remove http://some.dodgy.url.org/pantsu.jpeg - "+config.command_prefix+
+		"bm -r -c slashdot",
+	list: "[Help] Syntax: "+config.command_prefix+
+		"bm -list [-c(hannel)|-u(ser)] <handle> - Example: "+config.command_prefix+
+		"bm -list -channel - "+config.command_prefix+
+		"bm -l (current context)",
+	find: "[Help] Syntax: "+config.command_prefix+
+		"bm -find [-c(hannel)|-u(ser)] <string> - Example: "+config.command_prefix+
+		"bm -f -c pantsu - "+config.command_prefix+
+		"bm -find imgur.com",
+	help: "[Help] Syntax: "+config.command_prefix+
+		"bm -help <add/remove/list/find> - Example: "+config.command_prefix+
+		"bm -h add"
+};
+
+cmdListen({
+	command: "bm",
+	help: "Allows you to store links for later retrieval.",
+	syntax: config.command_prefix+
+		"bm [-a(dd) / -r(emove) / -l(ist) / -f(ind) / -h(elp)] [<handle>] [<url>] - Example: "
+		+config.command_prefix+"bm -a ranma's dodgy undies http://imgur.com/dodgy_undies.png",
+	callback: function (input) {
 		var bookmarks, i, keys, overwrite, dupes, url, removed, result, reg,
-			handle, target, matchedUrl, matchedHandle,
-			args = match[1].split(" ");
-		switch (args[0].toLowerCase()) {
+			handle, target, matchedUrl, matchedHandle, args;
+		if (!input.args) {
+			irc.say(input.context, cmdHelp("bm", "syntax"));
+			return;
+		}
+		switch (input.args[0].toLowerCase()) {
 			case "-a":
 			case "-add":
-				args = parseAddArgs(input.context, input.from, args.slice(1).join(" "));
+				args = parseAddArgs(input.context, input.from, input.args.slice(1).join(" "));
 				if (!args) {
-					irc.say(input.context, this.command.syntax.add);
+					irc.say(input.context, bmhelp.add);
 					return;
 				}
 				dupes = [];
@@ -122,9 +122,9 @@ listen({
 				break;
 			case "-r":
 			case "-remove":
-				args = parseRemArgs(input.context, input.from, args.slice(1).join(" "));
+				args = parseRemArgs(input.context, input.from, input.args.slice(1).join(" "));
 				if (!args) {
-					irc.say(input.context, this.command.syntax.remove);
+					irc.say(input.context, bmhelp.remove);
 					return;
 				}
 				bookmarks = bookmarkDB.getOne(args.target);
@@ -160,8 +160,8 @@ listen({
 				break;
 			case "-l":
 			case "-list":
-				if (args[1] && args[1][0] === "-" && args[1].match(/-c|-channel|-u|-user/)) {
-					target = (args[1].match(/-c|-channel/i) ? input.context : input.from);
+				if (input.args[1] && input.args[1][0] === "-" && input.args[1].match(/-c|-channel|-u|-user/)) {
+					target = (input.args[1].match(/-c|-channel/i) ? input.context : input.from);
 				} else {
 					target = "global";
 				}
@@ -183,15 +183,15 @@ listen({
 				break;
 			case "-f":
 			case "-find":
-				if (!args[1]) {
-					irc.say(input.context, this.command.syntax.find);
+				if (!input.args[1]) {
+					irc.say(input.context, bmhelp.find);
 					return;
 				}
-				args = args.slice(1).join(" ");
+				args = input.args.slice(1).join(" ");
 				target = getTarget(input.context, input.from, args);
 				handle = getHandle(input.context, input.from, args);
 				if (!target || !handle) {
-					irc.say(input.context, this.command.syntax.def);
+					irc.say(input.context, cmdHelp("bm", "syntax"));
 					return;
 				}
 				bookmarks = bookmarkDB.getOne(target);
@@ -233,22 +233,22 @@ listen({
 				break;
 			case "-h":
 			case "-help":
-				if (!args[1]) {
-					irc.say(input.context, this.command.syntax.help);
+				if (!input.args[1]) {
+					irc.say(input.context, bmhelp.help);
 					return;
 				}
-				args[1] = args[1].toLowerCase();
-				if (!this.command.syntax[args[1]]) irc.say(input.context, "There is no help for "+args[1]+" - valid: add, remove, list, find");
-				else irc.say(input.context, this.command.syntax[args[1]]);
+				input.args[1] = input.args[1].toLowerCase();
+				if (!bmhelp[input.args[1]]) irc.say(input.context, "There is no help for "+input.args[1]+" - valid: add, remove, list, find");
+				else irc.say(input.context, bmhelp[input.args[1]]);
 				break;
 			default:
-				reg = /(.*)@(.*)/.exec(match[1]);
-				if (reg) match[1] = match[1].split("@")[0].trim();
-				match[1] = match[1].toLowerCase();
-				target = getTarget(input.context, input.from, match[1]);
-				handle = getHandle(input.context, input.from, match[1]);
+				reg = /(.*)@(.*)/.exec(input.data);
+				if (reg) input.data = input.data.split("@")[0].trim();
+				input.data = input.data.toLowerCase();
+				target = getTarget(input.context, input.from, input.data);
+				handle = getHandle(input.context, input.from, input.data);
 				if (!target || !handle) {
-					irc.say(input.context, this.command.syntax.def);
+					irc.say(input.context, cmdHelp("bm", "syntax"));
 					return;
 				}
 				bookmarks = bookmarkDB.getOne(target);
