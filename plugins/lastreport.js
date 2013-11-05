@@ -1,60 +1,47 @@
 // shows the last recorded error.
-listen({
-	plugin: "lastreport",
-	handle: "last",
-	regex: regexFactory.startsWith("last"),
-	command: {
-		root: "last",
-		options: "error, warning",
-		help: "Shows the last error/warning, if there is one.",
-		syntax: "[Help] Syntax: " + config.command_prefix + "last <warning/error> [clear]"
-	},
-	callback: function (input, match) {
-		var args = match[1].split(" ");
-		if (args[0]) {
-			switch (args[0]) {
-				case "err":
-				case "error":
-					if (globals.lastError) {
-						if (args[1]) { 
-							if (args[1] === "clear") {
-								globals.lastError = "";
-								if (globals.lastErrstack) delete globals.lastErrstack;
-								irc.say(input.context, "Last error cleared.");
-								break;
-							}
-							irc.say(input.context, this.command.syntax);
-							break;
-						}
-						irc.say(input.context, "The last recorded error was: "+globals.lastError);
-						if (globals.lastErrstack) irc.say(input.context, "There's also a recorded error stack - type globals.lastErrstack in the console.");
+cmdListen({
+	command: "last",
+	help: "Shows the last error/warning, if there is one.",
+	syntax: config.command_prefix + "last <warning/error> [clear]",
+	callback: function (input) {
+		if (!input.args || !input.args[0]) {
+			irc.say(input.context, cmdHelp("last", "syntax"));
+			return;
+		}
+		switch (input.args[0]) {
+			case "err":
+			case "error":
+				if (globals.lastError) {
+					if (input.args[1] === "clear") {
+						globals.lastError = "";
+						if (globals.lastErrstack) delete globals.lastErrstack;
+						irc.say(input.context, "Last error cleared.");
 						break;
 					}
-					irc.say(input.context, "There haven't been any errors.");
+					irc.say(input.context, "The last recorded error was: "+globals.lastError);
+					if (globals.lastErrstack) {
+						irc.say(input.context, "There's also a recorded error stack - type globals.lastErrstack in the console.");
+					}
 					break;
-				case "warn":
-				case "warning":
-					if (globals.lastWarning) {
-						if (args[1]) { 
-							if (args[1] === "clear") {
-								globals.lastWarning = "";
-								irc.say(input.context, "Last warning cleared.");
-								break;
-							}
-							irc.say(input.context, this.command.syntax);
-							break;
-						}
-						irc.say(input.context, "The last recorded warning was: "+globals.lastWarning);
+				}
+				irc.say(input.context, "There haven't been any errors.");
+				break;
+			case "warn":
+			case "warning":
+				if (globals.lastWarning) {
+					if (input.args[1] === "clear") { 
+						globals.lastWarning = "";
+						irc.say(input.context, "Last warning cleared.");
 						break;
 					}
-					irc.say(input.context, "There haven't been any warnings.");
+					irc.say(input.context, "The last recorded warning was: "+globals.lastWarning);
 					break;
-				default:
-					irc.say(input.context, this.command.syntax);
-					break;
-			}
-		} else {
-			irc.say(input.context, this.command.syntax);
+				}
+				irc.say(input.context, "There haven't been any warnings.");
+				break;
+			default:
+				irc.say(input.context, cmdHelp("last", "syntax"));
+				break;
 		}
 	}
 });
