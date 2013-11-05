@@ -34,30 +34,30 @@ var DB = require("./lib/fileDB.js"),
  *  I'll do that another time. Butts united!
  */
 switch (process.argv[2]) {
-case "-h":
-case "--help":
-case "help":
-	console.log("Command line options: " + process.argv[0] + " --expose-gc boot.js <command>");
-	console.log("  nocmd\t\t\tDisables interactive prompt.");
-	console.log("  prompt \"Mari> \"\tSets interactive prompt string.");
-	console.log("  nogc\t\t\tDisables forced garbage collection every 10 seconds.");
-	console.log("  gc-interval <seconds>\tSets how often we do a forced garbage collection.");
-	console.log("  help\t\t\tShows this help.");
-	process.exit();
-	break;
-case "prompt":
-	if (process.argv[3]) prompt = process.argv[3];
-	break;
-case "gc-interval":
-	if (process.argv[3] && process.argv[3].match(/[0-9]+/)) {
-		gcInterval = parseInt(process.argv[3], 10) * 1000;
-	}
-	break;
-case "nogc":
-	gc = false;
-	break;
-default:
-	break;
+	case "-h":
+	case "--help":
+	case "help":
+		console.log("Command line options: " + process.argv[0] + " --expose-gc boot.js <command>");
+		console.log("  nocmd\t\t\tDisables interactive prompt.");
+		console.log("  prompt \"Mari> \"\tSets interactive prompt string.");
+		console.log("  nogc\t\t\tDisables forced garbage collection every 10 seconds.");
+		console.log("  gc-interval <seconds>\tSets how often we do a forced garbage collection.");
+		console.log("  help\t\t\tShows this help.");
+		process.exit();
+		break;
+	case "prompt":
+		if (process.argv[3]) prompt = process.argv[3];
+		break;
+	case "gc-interval":
+		if (process.argv[3] && process.argv[3].match(/[0-9]+/)) {
+			gcInterval = parseInt(process.argv[3], 10) * 1000;
+		}
+		break;
+	case "nogc":
+		gc = false;
+		break;
+	default:
+		break;
 }
 
 lib.memProf("loading requires");
@@ -88,6 +88,9 @@ function createSandbox() {
 		regexFactory: regexFactory,
 		listen: Eventpipe.bind,
 		evListen: caveman.eventListen,
+		cmdListen: caveman.commandListen,
+		cmdHelp: caveman.cmdHelp,
+		cmdList: caveman.cmdList,
 		logger: logger,
 		words: words,
 		permissions: permissions,
