@@ -1,8 +1,8 @@
 // permissions for any type of thing! huzzah.
 cmdListen({
 	command: "permissions",
-	options: "allow, deny, owner, search",
 	help: "Allows you to edit permissions for any command, alias or variable.",
+	syntax: permissions.Syntax.split(" ").slice(2).join(" ") + " - " + permissions.Example,
 	callback: function (input) {
 		var user, access;
 		if (input.channel) {
