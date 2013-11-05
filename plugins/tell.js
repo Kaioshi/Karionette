@@ -1,26 +1,91 @@
 ﻿// Tell someone something on join if saved message for them
-var messagesDB = new DB.List({filename: 'messages', queue: true}),
+var msgwatch,
+	messagesDB = new DB.List({filename: 'messages', queue: true}),
 	messages = messagesDB.getAll();
 
-function isUser(str) {
-	return str[0] !== "#";
+setTimeout(function () {
+	if (!msgwatch) {
+		msgwatch = {};
+		prepareMessages();
+	}
+}, 1000); // wait for messagesDB to finish loading
+
+function prepareMessages() {
+	var i, reg, channel, nick,
+		pruned = false;
+	for (i = 0; i < messages.length; i++) {
+		reg = /^([^ ]+)@([^ ]+): (.*)$/.exec(messages[i]);
+		if (!reg) {
+			logger.warn("Removed invalidly formatted messages.txt entry: "+messages.splice(i,1));
+			pruned = true;
+		} else {
+			channel = reg[1].toLowerCase();
+			nick = reg[2].toLowerCase();
+			if (channel[0] !== "#") { // prune bad entries. REMINDER: remove this after a while
+				logger.warn("Removed invalid messages.txt entry: "+messages.splice(i,1));
+				pruned = true;
+			} else {
+				if (!msgwatch[channel]) msgwatch[channel] = {};
+				if (!msgwatch[channel][nick]) msgwatch[channel][nick] = [];
+				msgwatch[channel][nick].push(reg[3]);
+			}
+		}
+	}
+	if (pruned) {
+		logger.warn("Saving pruned messages.txt");
+		messagesDB.saveAll(messages);
+	}
 }
 
-function getMessages(room, user) {
+function removeMessage(channel, nick, entry) {
 	var i,
-		altered = false,
-		userMessages = [],
-		prefix = room + "@" + user + ": ";
-	
-	for (i = 0; i < messages.length; i += 1) {
-		if (messages[i].toLowerCase().indexOf(prefix.toLowerCase()) === 0) {
-			userMessages.push(messages[i].substr(prefix.length));
+		altered = false;
+	entry = channel+"@"+nick+": "+entry;
+	entry = entry.toLowerCase();
+	for (i = 0; i < messages.length; i++) {
+		if (messages[i].toLowerCase() === entry) {
 			messages.splice(i,1);
 			altered = true;
 		}
 	}
-	if (altered) messagesDB.saveAll(messages);
-	return userMessages;
+	if (altered) {
+		messagesDB.saveAll(messages);
+	} else {
+		logger.debug("removeMessage() happened, yet nothing changed.");
+	}
+}
+
+function ratedMsg(channel, nick) {
+	var i = 0,
+		lnick = nick.toLowerCase(),
+		msgs = msgwatch[channel][lnick];
+	msgs.forEach(function (entry) {
+		i++;
+		setTimeout(function () {
+			irc.say(channel, nick + ", " + entry);
+			removeMessage(channel, lnick, entry);
+		}, i*1000);
+	});
+}
+
+function checkMessages(channel, nick) {
+	var i, ret, msg, lnick;
+	channel = channel.toLowerCase();
+	if (msgwatch[channel]) {
+		lnick = nick.toLowerCase();
+		if (msgwatch[channel][lnick]) {
+			if (msgwatch[channel][lnick].length === 1) {
+				irc.say(channel, nick + ", " + msgwatch[channel][lnick][0], false);
+				removeMessage(channel, lnick, msgwatch[channel][lnick][0]);
+			} else {
+				ratedMsg(channel, nick);
+			}
+			delete msgwatch[channel][lnick];
+			if (Object.keys(msgwatch[channel]).length === 0) {
+				delete msgwatch[channel];
+			}
+		}
+	}
 }
 
 listen({
@@ -33,61 +98,69 @@ listen({
 		help: "Passes along a message when the person in question next joins."
 	},
 	callback: function (input, match) {
-		var msgMatch = /^([^ ]+) (.+)$/.exec(match[1]);
+		var msgMatch, target, msg;
+		if (input.context[0] !== "#") {
+			irc.say(input.context, "tell can only be used in channels.");
+			return;
+		}
+		msgMatch = /^([^: ]+):? (.+)$/.exec(match[1]);
+		if (!msgMatch) {
+			irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"tell <nick> <message>");
+			msgMatch = null;
+			return;
+		}
 		if (msgMatch[1].toLowerCase() === input.from.toLowerCase()) {
 			irc.say(input.context, "nou");
 			return;
 		}
-		if (msgMatch && isUser(msgMatch[1])) {
-			messages.push(input.context + "@" + msgMatch[1] + ": " + "message from " + input.from + ": " + msgMatch[2]);
-			messagesDB.saveAll(messages);
-			irc.say(input.context, "I'll tell them when I see them next.");
+		if (msgMatch && msgMatch[1][0] !== "#") {
+			msg = "message from "+input.from+": "+msgMatch[2];
+			input.context = input.context.toLowerCase();
+			target = msgMatch[1].toLowerCase();
+			// check for dupes
+			if (msgwatch[input.context] && msgwatch[input.context][target]) {
+				if (msgwatch[input.context][target].some(function (entry) {
+					return (entry.toLowerCase() === msg.toLowerCase());
+				})) {
+					irc.say(input.context, "You've already asked me to tell them that.");
+				}
+			} else {
+				messages.push(input.context+"@"+msgMatch[1]+": "+msg);
+				if (!msgwatch[input.context]) msgwatch[input.context] = {};
+				if (!msgwatch[input.context][target]) msgwatch[input.context][target] = [];
+				msgwatch[input.context][target].push(msg);
+				messagesDB.saveAll(messages);
+				irc.say(input.context, "I'll tell them when I see them next.");
+			}
 		} else {
 			irc.say(input.context, "[Help] tell [user] [some message]");
 		}
 	}
 });
 
-// Listen for next message
-listen({
-	plugin: "tell",
-	handle: "tell_msg",
-	regex: regexFactory.onMsg(),
-	callback: function (input, match) {
-		var i, userMessages = getMessages(match[3], match[1]);
-		for (i = 0; i < userMessages.length; i++) {
-			irc.say(match[3], match[1] + ", " + userMessages[i], false);
-		}
+evListen({
+	handle: "tellMsg",
+	event: "PRIVMSG",
+	callback: function (input) {
+		if (input.channel) checkMessages(input.channel, input.nick);
 	}
 });
 
-// Listen for join
-listen({
-	plugin: "tell",
-	handle: "tell_join",
-	regex: regexFactory.onJoin(),
-	callback: function (input, match) {
-		var i, userMessages = getMessages(match[3], match[1]);
-		for (i = 0; i < userMessages.length; i += 1) {
-			irc.say(match[3], match[1] + ", " + userMessages[i], false);
-		}
+evListen({
+	handle: "tellJoin",
+	event: "JOIN",
+	callback: function (input) {
+		checkMessages(input.channel, input.nick);
 	}
 });
 
-// Listen for nick change
-listen({
-	plugin: "tell",
-	handle: "tell_nick",
-	regex: regexFactory.onNick(),
-	callback: function (input, match) {
+evListen({
+	handle: "tellNick",
+	event: "NICK",
+	callback: function (input) {
 		setTimeout(function () {
-			var i, userMessages,
-				channels = ial.Channels(match[3]);
-			channels.forEach(function (channel) {
-				userMessages = getMessages(channel, match[3]);
-				for (i = 0; i < userMessages.length; i++) {
-					irc.say(channel, match[3] + ", " + userMessages[i], false);
-				}
+			ial.Channels(input.newnick).forEach(function (channel) {
+				checkMessages(channel, input.newnick);
 			});
 		}, 500); // <- making sure IAL is updated first
 	}
