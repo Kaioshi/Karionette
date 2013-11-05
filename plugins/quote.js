@@ -10,30 +10,29 @@ function makeTime(time) {
 	return zero(time.getDate())+"/"+zero(time.getMonth()+1)+"/"+time.getYear().toString().slice(1);
 }
 
-listen({
-	plugin: "quote",
-	handle: "quote",
-	regex: regexFactory.startsWith("quote"),
-	command: {
-		root: "quote",
-		options: "add, remove, find, get, random, stats",
-		help: "Quote added by mitchplz on 24/07/13: <mitch_> should I into quotes",
-		syntax: "[Help] Syntax: "+config.command_prefix+
-			"quote <add/remove/find/get/random/stats> - Example: "+config.command_prefix+
-			"quote find <search term> - "+config.command_prefix+
-			"quote add <Mari> mitches be like, \">implying\""
-	},
-	callback: function (input, match) {
-		var i, k, quote, quotes, tmp, first, matches, time,
-			args = match[1].split(" ");
-		if (input.context[0] !== "#") {
+cmdListen({
+	command: "quote",
+	help: "Quote added by mitchplz on 24/07/13: <mitch_> should I into quotes",
+	syntax: config.command_prefix+"quote <add/remove/find/get/random/stats> - Example: "
+		+config.command_prefix+"quote find <search term> - "
+		+config.command_prefix+"quote add <Mari> mitches be like, \">implying\"",
+	callback: function (input) {
+		var i, k, quote, quotes, tmp, first, matches, time;
+		if (!input.channel) {
 			irc.say(input.context, "You can only use this in a channel for now, sorry.");
 			return;
 		}
-		switch (args[0]) {
+		if (!input.args || !input.args[0]) {
+			irc.say(input.context, cmdHelp("quote", "syntax"));
+			return;
+		}
+		switch (input.args[0]) {
 			case "add":
-				if (!args[1]) { irc.say(input.context, this.command.syntax); return; }
-				quote = { quote: args.slice(1).join(" ") };
+				if (!input.args[1]) {
+					irc.say(input.context, cmdHelp("quote", "syntax"));
+					return;
+				}
+				quote = { quote: input.args.slice(1).join(" ") };
 				quotes = quoteDB.getOne(input.context);
 				if (!quotes) {
 					quotes = [];
@@ -56,7 +55,7 @@ listen({
 				irc.say(input.context, "Added o7");
 				break;
 			case "remove":
-				if (!args[1]) { 
+				if (!input.args[1]) { 
 					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
 						"quote remove <quote ID/actual quote text> - Example: "+config.command_prefix+
 						"quote remove <mitch_> I loooove me some memes. / "+config.command_prefix+
@@ -68,16 +67,16 @@ listen({
 					irc.say(input.context, "There aren't any quotes for "+input.context+" ~ add some!");
 					return;
 				}
-				if (args[1].match(/[0-9]+/) && !args[2]) {
-					args[1] = parseInt(args[1]);
-					if (args[1] > quotes.length) {
+				if (input.args[1].match(/[0-9]+/) && !input.args[2]) {
+					input.args[1] = parseInt(input.args[1]);
+					if (input.args[1] > quotes.length) {
 						irc.say(input.context, "There are only "+quotes.length+" quotes in here.");
 						return;
 					}
 					tmp = [];
 					
 					for (i = 0, k = 0; i < quotes.length; i++) {
-						if (quotes[i].num === args[1]) {
+						if (quotes[i].num === input.args[1]) {
 							irc.say(input.context, "Removed quote: \""+quotes[i].quote+
 								"\" ~ which was added by "+quotes[i].from+" on "+makeTime(quotes[i].date)+".");
 						} else {
@@ -90,7 +89,7 @@ listen({
 					else quoteDB.saveOne(input.context, tmp);
 					return;
 				}
-				quote = args.slice(1).join(" ");
+				quote = input.args.slice(1).join(" ");
 				for (i = 0; i < quotes.length; i++) {
 					if (quotes[i].quote === quote) {
 						tmp = [];
@@ -106,7 +105,7 @@ listen({
 				irc.say(input.context, "Couldn't find it. :\\");
 				break;
 			case "find":
-				if (!args[1]) {
+				if (!input.args[1]) {
 					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
 						"quote find <string> - returns a random quote which contains string - Example: "+config.command_prefix+
 						"quote find butts");
@@ -117,7 +116,7 @@ listen({
 					irc.say(input.context, "There aren't any quotes for "+input.context+" ~ add some!");
 					return;
 				}
-				quote = args.slice(1).join(" ");
+				quote = input.args.slice(1).join(" ");
 				for (matches = [], i = 0; i < quotes.length; i++) {
 					if (quotes[i].quote.indexOf(quote) > -1) {
 						matches.push(quotes[i]);
@@ -138,13 +137,13 @@ listen({
 					irc.say(input.context, "There aren't any quotes for "+input.context+" ~ add some!");
 					return;
 				}
-				if (!args[1] || !args[1].match(/[0-9]+/) || parseInt(args[1]) > quotes.length) {
+				if (!input.args[1] || !input.args[1].match(/[0-9]+/) || parseInt(input.args[1]) > quotes.length) {
 					irc.say(input.context, "You have "+quotes.length+" quotes to choose from - try "+config.command_prefix+
 						"quote get "+Math.floor(Math.random()*quotes.length+1)+".");
 					return;
 				}
 				for (i = 0; i < quotes.length; i++) {
-					if (quotes[i].num === parseInt(args[1])) {
+					if (quotes[i].num === parseInt(input.args[1])) {
 						irc.say(input.context, "Quote #"+quotes[i].num+" added by "+quotes[i].from.split("!")[0]+
 							" on "+makeTime(quotes[i].date)+": "+quotes[i].quote);
 						return;
@@ -178,7 +177,7 @@ listen({
 					", added by "+tmp.length+" "+(tmp.length > 1 ? "people." : "person."));
 				break;
 			default:
-				irc.say(input.context, this.command.syntax);
+				irc.say(input.context, cmdHelp("quote", "syntax"));
 				break;
 		}
 	}
