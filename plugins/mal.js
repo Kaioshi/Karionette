@@ -1,5 +1,4 @@
-﻿var malBindingsDB = new DB.Json({filename: "mal"}),
-	ent = require("./lib/entities.js");
+var ent = require("./lib/entities.js");
 
 function listIt(context, body) {
 	var i,
@@ -96,20 +95,21 @@ function googleIt(context, full, type, term) {
 }
 
 // MyAnimeList anime API
-listen({
-	plugin: "mal",
-	handle: "mal",
-	regex: regexFactory.startsWith("mal"),
-	command: {
-		root: "mal",
-		options: "-top, -pop -s(ynopsis) <anime>",
-		help: "Allows you to search MyAnimeList (anime). Optional commands can be executed by prepending a dash. -s(ynopsis) <anime>, -top is Top Anime, -pop is Popular anime"
-	},
-	callback: function (input, match) {
-		var result, uri, doRes, boundName,
-			args = match[1].split(" ");
+cmdListen({
+	command: "mal",
+	options: "-top, -pop -s(ynopsis) <anime>",
+	help: "Allows you to search MyAnimeList (anime). Optional commands can be executed by prepending a dash. -s(ynopsis) <anime>, -top is Top Anime, -pop is Popular anime",
+	syntax: config.command_prefix+"mal [-s / -top / -pop] [<anime>] - Example: "+config.command_prefix+
+		"mal -s Steins;Gate",
+	callback: function (input) {
+		var result, uri, doRes;
 		
-		switch (args[0]) {
+		if (!input.args || !input.args[0]) {
+			irc.say(input.context, cmdHelp("mal", "syntax"));
+			return;
+		}
+		
+		switch (input.args[0]) {
 			case "-top":
 				uri = "http://mal-api.com/anime/top";
 				doRes = listIt;
@@ -120,13 +120,13 @@ listen({
 				break;
 			case "-synopsis":
 			case "-s":
-				googleIt(input.context, true, "anime", args.slice(1).join(" "));
+				googleIt(input.context, true, "anime", input.args.slice(1).join(" "));
 				return;
 			case "-l":
-				googleIt(input.context, false, "anime", args.slice(1).join(" "));
+				googleIt(input.context, false, "anime", input.args.slice(1).join(" "));
 				return;
 			default:
-				googleIt(input.context, false, "anime", args.join(" "));
+				googleIt(input.context, false, "anime", input.data);
 				return;
 		}
 		web.get(uri, function (error, response, body) {
@@ -136,16 +136,12 @@ listen({
 });
 
 // MyAnimeList manga API
-listen({
-	plugin: "mal",
-	handle: "mml",
-	regex: regexFactory.startsWith("mml"),
-	command: {
-		root: "mml",
-		options: "-s(ynopsis)",
-		help: "Allows you to search MyAnimeList (manga). -s(ynopsis) <manga title>"
-	},
-	callback: function (input, match) {
+cmdListen({
+	command: "mml",
+	help: "Allows you to search MyAnimeList (manga). -s(ynopsis) <manga title>",
+	syntax: config.command_prefix+"mml [-s] <manga> - Example: "+config.command_prefix+
+		"mml -s Slam Dunk",
+	callback: function (input) {
 		var result, uri, doRes
 			args = match[1].split(" ");
 		
