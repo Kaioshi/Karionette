@@ -88,32 +88,32 @@ function checkMessages(channel, nick) {
 	}
 }
 
-listen({
-	plugin: "tell",
-	handle: "tell",
-	regex: regexFactory.startsWith("tell"),
-	command: {
-		root: "tell",
-		options: "[person] [message]",
-		help: "Passes along a message when the person in question next joins."
-	},
-	callback: function (input, match) {
+cmdListen({
+	command: "tell",
+	help: "Passes along a message when the person person in question is spotted next.",
+	syntax: config.command_prefix+"tell <nick> <message> - Example: "+config.command_prefix+
+		"tell ranma your pantsu are lovely 1/2 the time.",
+	callback: function (input) {
 		var msgMatch, target, msg;
-		if (input.context[0] !== "#") {
+		if (!input.channel) {
 			irc.say(input.context, "tell can only be used in channels.");
 			return;
 		}
-		msgMatch = /^([^: ]+):? (.+)$/.exec(match[1]);
-		if (!msgMatch) {
-			irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"tell <nick> <message>");
+		if (!input.args || !input.args[2]) {
+			irc.say(input.context, cmdHelp("tell", "syntax"));
 			return;
 		}
-		if (msgMatch[1].toLowerCase() === input.from.toLowerCase()) {
+		msgMatch = /^([^: ]+):? (.+)$/.exec(input.data);
+		if (!msgMatch) {
+			irc.say(input.context, cmdHelp("tell", "syntax"));
+			return;
+		}
+		if (msgMatch[1].toLowerCase() === input.nick.toLowerCase()) {
 			irc.say(input.context, "nou");
 			return;
 		}
 		if (msgMatch && msgMatch[1][0] !== "#") {
-			msg = "message from "+input.from+": "+msgMatch[2];
+			msg = "message from "+input.nick+": "+msgMatch[2];
 			input.context = input.context.toLowerCase();
 			target = msgMatch[1].toLowerCase();
 			// check for dupes
@@ -132,7 +132,7 @@ listen({
 				irc.say(input.context, "I'll tell them when I see them next.");
 			}
 		} else {
-			irc.say(input.context, "[Help] tell [user] [some message]");
+			irc.say(input.context, cmdHelp("tell", "syntax"));
 		}
 	}
 });
