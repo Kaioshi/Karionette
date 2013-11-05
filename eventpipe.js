@@ -111,6 +111,7 @@ module.exports = (function () {
 						irc_config.command_prefix + toTransform
 					);
 					aliasMatch = null; toTransform = null; aliasVars = null; aliasKeys = null;
+					caveman.emitEvent(input.raw);
 					return input.raw;
 				}
 			}
