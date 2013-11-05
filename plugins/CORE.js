@@ -104,147 +104,141 @@ evListen({
  *	- uptime
  */
 
-listen({
-	plugin: "CORE",
-	handle: 'say',
-	regex: regexFactory.startsWith("say", "optional"),
-	command: {
-		root: "say",
-		options: "{What you want me to say}",
-		help: "Makes me say something. Duh!"
-	},
-	callback: function (input, match) {
-		irc.say(input.context, match[1]);
-	}
-});
-
-listen({
-	plugin: "CORE",
-	handle: 'sayuni',
-	regex: regexFactory.startsWith("sayuni", "optional"),
-	callback: function (input, match) {
-		irc.say(input.context, match[1], false);
-	}
-});
-
-listen({
-	plugin: "CORE",
-	handle: 'action',
-	regex: regexFactory.startsWith("action"),
-	command: {
-		root: "action",
-		options: "{What you want me to do}",
-		help: "Makes me do something. Duh!"
-	},
-	callback: function (input, match) {
-		irc.action(input.context, match[1]);
-	}
-});
-
-listen({
-	plugin: "CORE",
-	handle: "actionuni",
-	regex: regexFactory.startsWith("actionuni"),
-	command: {
-		root: "action",
-		options: "{What you want me to do}",
-		help: "Makes me do something. Der!"
-	},
-	callback: function (input, match) {
-		irc.action(input.context, match[1], false);
-	}
-});
-
-listen({
-	plugin: "CORE",
-	handle: "notice",
-	regex: regexFactory.startsWith("notice"),
-	command: {
-		root: "notice",
-		options: "{Who and what you want me to notice}",
-		help: "I'll notice someone. Being shifty, probably.",
-		syntax: "[Help] Syntax: " + config.command_prefix + "notice <nick> <notice message>"
-	},
-	callback: function (input, match) {
-		var args = match[1].split(" "),
-			target = args[0],
-			notice = args.slice(1).join(" ");
-		if (target[0] === "#" && !permissions.isAdmin(input.user)) {
-			irc.notice(input.from, "No. Only admins can make me notice an entire channel.");
+cmdListen({
+	command: "say",
+	help: "Makes me say something. Duh!",
+	syntax: config.command_prefix+"say <what you want me to say>",
+	callback: function (input) {
+		if (!input.args) {
+			irc.say(input.context, cmdHelp("say", "syntax"));
 			return;
 		}
-		irc.notice(target, notice);
+		irc.say(input.context, input.data);
 	}
 });
 
-listen({
-	plugin: "CORE",
-	handle: "help",
-	regex: regexFactory.startsWith("help"),
-	command: {
-		root: "help",
-		options: "{command you're interested in}",
-		help: "Seriously?"
-	},
-	callback: function (input, match) {
-		var i,
-			args = match[1].split(" "),
-			cmdArr = irc.help(),
-			cmdList = "",
-			notFound = true;
-		if (args[0]) {
-cmdChek:	for (i = 0; i < cmdArr.length; i += 1) {
-				if (cmdArr[i].root === args[0]) {
-					if (cmdArr[i].options) { irc.say(input.context, "Options: " + cmdArr[i].options); }
+cmdListen({
+	command: "sayuni",
+	help: "Makes me say something, Unicode-style. Represent!",
+	syntax: config.command_prefix+"sayuni <what you want me to say>",
+	callback: function (input) {
+		if (!input.args) {
+			irc.say(input.context, cmdHelp("sayuni", "syntax"));
+			return;
+		}
+		irc.say(input.context, input.data, false);
+	}
+});
+
+cmdListen({
+	command: "action",
+	help: "Makes me do something. Probably erotic.",
+	syntax: config.command_prefix+"action <what you want me to do>",
+	callback: function (input) {
+		if (!input.args) {
+			irc.say(input.context, cmdHelp("action", "syntax"));
+			return;
+		}
+		irc.action(input.context, input.data);
+	}
+});
+
+cmdListen({
+	command: "actionuni",
+	help: "Makes me do stuff in a Unicode-kinda way.",
+	syntax: config.command_prefix+"actionuni <what you want me to do>",
+	callback: function (input) {
+		if (!input.args) {
+			irc.say(input.context, cmdHelp("actionuni", "syntax"));
+			return;
+		}
+		irc.action(input.context, input.data, false);
+	}
+});
+
+cmdListen({
+	command: "notice",
+	help: "Makes me notice things. Like your new shoes!",
+	syntax: config.command_prefix+"notice <target> <what you want me to notice them>",
+	callback: function (input) {
+		if (input.args[0][0] === "#" && !permissions.isAdmin(input.nick+"!"+input.address)) {
+			irc.notice(input.nick, "No. Only admins can make me notice an entire channel.");
+			return;
+		}
+		console.log(input.data);
+		irc.notice(input.args[0], input.data.slice(input.data.indexOf(" ")+1));
+	}
+});
+
+cmdListen({
+	command: "help",
+	help: "Seriously?",
+	syntax: config.command_prefix+"help [<command you want help with>] - supply no command in order to list commands.",
+	callback: function (input) {
+		var found, cmd, cmdArr, i, help, syntax, options, commandList;
+		if (!input.args || !input.args[0]) {
+			// show all commands
+			commandList = cmdList();
+			irc.help().forEach(function (entry) {
+				commandList.push(entry.root);
+			});
+			irc.say(input.context, "Available commands: "+commandList.sort().join(", "));
+			return;
+		}
+		found = false;
+		cmd = input.args[0].toLowerCase();
+		help = cmdHelp(cmd, "help");
+		if (help) {
+			syntax = cmdHelp(cmd, "syntax");
+			options = cmdHelp(cmd, "options");
+			irc.say(input.context, help);
+			if (syntax) irc.say(input.context, syntax);
+			if (options) irc.say(input.context, options);
+			found = true;
+		} else {
+			// must not be caveman'd yet
+			cmdArr = irc.help();
+cmdCheck:	for (i = 0; i < cmdArr.length; i++) {
+				if (cmdArr[i].root === input.args[0]) {
+					if (cmdArr[i].options) { irc.say(input.context, "Options: "+cmdArr[i].options); }
 					if (cmdArr[i].help) { irc.say(input.context, cmdArr[i].help); }
-					notFound = false;
-					break cmdChek;
+					found = true;
+					break cmdCheck;
 				}
 			}
-			if (notFound) { irc.say(input.context, "[Help] Didn't find that command. Check the list again."); }
-		} else {
-			cmdList = cmdArr.map(function (element) {
-				return element.root;
-			}).sort().join(", ");
-			irc.say(input.context, "Commands: " + cmdList);
+			cmdArr = null;
+		}
+		if (!found) {
+			irc.say(input.context, "[Help] Couldn't find a \""+cmd+"\" command, or it had no help. Try "+
+				config.command_prefix+"help on it's own to see a list of available commands.");
 		}
 	}
 });
 
 // Show node version
-listen({
-	plugin: "CORE",
-	handle: "nodeVersion",
-	regex: regexFactory.startsWith("nodeversion"),
+cmdListen({
+	command: "nodeversion",
+	help: "Shows the node version I'm running.",
 	callback: function (input) {
 		irc.say(input.context, lib.nodeVersion());
 	}
 });
 
 // Memory usage report
-listen({
-	plugin: "CORE",
-	handle: "memstats",
-	regex: regexFactory.startsWith(["memstats", "memuse"]),
-	command: {
-		root: "memstats",
-		help: "Shows memory usage."
-	},
+cmdListen({
+	command: "memstats",
+	help: "Shows how much memory I'm using.",
 	callback: function (input) {
-		irc.say(input.context, "I'm currently using " + lib.memUse() + " MiB of memory.");
+		irc.say(input.context, "I'm currently using "+lib.memUse()+" MiB of memory.");
 	}
 });
 
 // get uptime
-listen({
-	plugin: "CORE",
-	handle: "uptime",
-	regex: regexFactory.startsWith("uptime"),
-	command: {
-		root: "uptime",
-		help: "Shows uptime since the bot was started."
-	},
+cmdListen({
+	command: "uptime",
+	help: "Shows how long it's been since I was started.",
 	callback: function (input) {
-		irc.say(input.context, "I've been running for " + lib.duration(globals.startTime) + ".");
+		irc.say(input.context, "I've been running for "+lib.duration(globals.startTime)+".");
 	}
 });
+
