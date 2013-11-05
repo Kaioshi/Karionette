@@ -35,7 +35,7 @@ function checkManga(manga, context, first) {
 		logger.debug("[manga] check("+[manga, context].join(", ")+") called, manga doesn't exist");
 		return;
 	}
-	sys.exec("curl -# "+entry.url+strip, function (error, stdout, stderr) {
+	sys.exec("curl -s -S -L "+entry.url+strip, function (error, stdout, stderr) {
 		stdout = stdout.split("\n");
 		title = /<title>(.*)<\/title>/i.exec(stdout[0]);
 		if (!title) {
