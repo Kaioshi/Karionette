@@ -106,7 +106,6 @@ listen({
 		msgMatch = /^([^: ]+):? (.+)$/.exec(match[1]);
 		if (!msgMatch) {
 			irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"tell <nick> <message>");
-			msgMatch = null;
 			return;
 		}
 		if (msgMatch[1].toLowerCase() === input.from.toLowerCase()) {
