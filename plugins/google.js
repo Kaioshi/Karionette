@@ -1,18 +1,12 @@
 ﻿// Returns first Google search result
 var ent = require("./lib/entities.js");
 
-listen({
-	plugin: "google",
-	handle: "google",
-	regex: regexFactory.startsWith(["google", "g"]),
-	command: {
-		root: "google",
-		options: "{String to search}",
-		help: "Google search. Gets the first result."
-	},
-	callback: function (input, match) {
+cmdListen({
+	command: "g",
+	help: "Google search - returns the first hit.",
+	callback: function (input) {
 		var result,
-			uri = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=1&q=' + match[1];
+			uri = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=1&q=' + input.data;
 		web.get(uri, function (error, response, body) {
 			result = JSON.parse(body).responseData.results[0];
 			if (result && result.titleNoFormatting) {
@@ -24,24 +18,18 @@ listen({
 	}
 });
 
-listen({
-	plugin: "google",
-	handle: "gi",
-	regex: regexFactory.startsWith("gi"),
-	command: {
-		root: "gi",
-		options: "{What to search for}",
-		help: "Google's image search",
-		syntax: "[Help] Syntax: " + config.command_prefix + "gi pantsu"
-	},
-	callback: function (input, match) {
+cmdListen({
+	command: "gi",
+	help: "Google image search - returns the first hit.",
+	syntax: config.command_prefix+"gi puppies",
+	callback: function (input) {
 		var uri;
-		if (match[1]) {
-			uri = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&safe=moderate&rsz=1&q="+match[1];
+		if (input.args) {
+			uri = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&safe=moderate&rsz=1&q="+input.data;
 			web.get(uri, function (error, response, body) {
 				if (error) {
 					irc.say(input.context, "Something has gone awry.");
-					logger.error("[google-images] error looking up " + match[1] + " -> " + error);
+					logger.error("[google-images] error looking up " + input.data + " -> " + error);
 					return;
 				}
 				body = JSON.parse(body);
@@ -53,25 +41,19 @@ listen({
 				}
 			});
 		} else {
-			irc.say(input.context, this.command.syntax);
+			irc.say(input.context, cmdHelp("gi", "syntax"));
 		}
 	}
 });
 
-listen({
-	plugin: "google",
-	handle: "convert",
-	regex: regexFactory.startsWith("convert"),
-	command: {
-		root: "convert",
-		options: "N <unit> to <unit>",
-		help: "Google's conversion thing!",
-		syntax: "[Help] Syntax: "+config.command_prefix+"convert N <unit> to <unit> - Example: "
-			+config.command_prefix+"convert 1 USD to AUD - Currency codes: http://en.wikipedia.org/wiki/ISO_4217#Active_codes"
-	},
-	callback: function (input, match) {
+/* cmdListen({ google have shut down iGoogle's calculator. Sad times.
+	command: "convert",
+	help: "Google's conversion thing!",
+	syntax: config.command_prefix+"convert 1 <unit type> to <other unit type> - Example: "
+		+config.command_prefix+"convert 1 USD to AUD",
+	callback: function (input) {
 		var uri, garbage, tmp, errsponse,
-			reg = /^(\-?[0-9\.?]+) ([A-Za-z ]+) (to|into) ([A-Za-z ]+)$/.exec(match[1]);
+			reg = /^(\-?[0-9\.?]+) ([A-Za-z ]+) (to|into) ([A-Za-z ]+)$/.exec(input.data);
 		if (reg) {
 			uri = "http://www.google.com/ig/calculator?hl=en&q="+reg[1]+reg[2]+"=?"+reg[4];
 			web.get(uri, function (error, response, body) {
@@ -107,35 +89,29 @@ listen({
 				irc.say(input.context, body.lhs+" is equal to "+body.rhs, false);
 			});
 		} else {
-			irc.say(input.context, this.command.syntax);
+			irc.say(input.context, cmdHelp("convert", "syntax"));
 		}
 	}
-});
+}); */
 
-listen({
-	plugin: "google",
-	handle: "define",
-	regex: regexFactory.startsWith("define"),
-	command: {
-		root: "define",
-		options: "{Word to define}",
-		help: "Google search's define: keyword.",
-		syntax: "[Help] Syntax: "+config.command_prefix+
-			"define <word> - this uses google's define: keyword you're probably familiar "+
-			"with - and so it is just as limited as that."
-	},
-	callback: function (input, match) {
+cmdListen({
+	command: "define",
+	help: "Google search's define: keyword.",
+	syntax: "[Help] Syntax: "+config.command_prefix+
+		"define <word> - this uses google's define: keyword you're probably familiar "+
+		"with - and so it is just as limited as that.",
+	callback: function (input) {
 		var definition, uri, meaning, related, type;
 		
-		if (!match[1]) {
-			irc.say(input.context, this.command.syntax);
+		if (!input.args) {
+			irc.say(input.context, cmdHelp("define", "syntax"));
 			return;
 		}
-		uri = "http://www.google.com/dictionary/json?callback=a&sl=en&tl=en&q=" + match[1].replace(/\"/g, "");
+		uri = "http://www.google.com/dictionary/json?callback=a&sl=en&tl=en&q=" + input.args[0].replace(/\"/g, "");
 		web.get(uri, function (error, response, body) {
 			if (error) {
 				irc.say(input.context, "Something has gone awry.");
-				logger.error("[google-define] error looking up " + match[1] + " -> " + error);
+				logger.error("[google-define] error looking up " + input.args[0] + " -> " + error);
 				return;
 			}
 			body = JSON.parse(ent.decode(lib.stripHtml(body.slice(2, -10)
@@ -150,8 +126,8 @@ listen({
 			if (body.primaries[0].terms[0].labels) {
 				type = body.primaries[0].terms[0].labels[0].text.toLowerCase();
 				if (type.match(/^adverb$|^noun$|^adjective$/)) {
-					if (!words[type].get(match[1], true)) {
-						words[type].add(match[1]);
+					if (!words[type].get(input.args[0], true)) {
+						words[type].add(input.args[0]);
 					}
 				}
 				type = " ("+type+")";
@@ -161,7 +137,7 @@ listen({
 			body.primaries[0].entries.forEach(function (entry) {
 				if (entry.type === 'related') {
 					entry.terms.forEach(function (item) {
-						if (item.text !== match[1]) {
+						if (item.text !== input.args[0]) {
 							if (!related.some(function (element) { return (element === item.text); })) {
 								related.push(item.text);
 							}
@@ -178,9 +154,9 @@ listen({
 			definition = meaning.join("; ");
 			if (related.length > 0) definition = "["+related.join(", ")+"] - "+definition;
 			if (body.terms) {
-				if (related.length > 0)	definition = match[1]+" - \""+body.terms[0].text+"\""+type+": "+definition;
-				else definition = match[1]+" - \""+body.terms[0].text+"\""+type+": "+definition;
-			} else definition = match[1]+type+": "+definition;
+				if (related.length > 0)	definition = input.args[0]+" - \""+body.terms[0].text+"\""+type+": "+definition;
+				else definition = input.args[0]+" - \""+body.terms[0].text+"\""+type+": "+definition;
+			} else definition = input.args[0]+type+": "+definition;
 			irc.say(input.context, definition, false, 2);
 		});
 	}
