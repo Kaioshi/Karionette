@@ -5,7 +5,7 @@ global.globals = {
 	admins: { lastCheck: new Date().getTime() },
 	channels: {},
 	startTime: new Date(),
-	memProf: { "loading requires": process.memoryUsage().rss }
+	memProf: {}
 };
 
 require("./config.js");
@@ -66,8 +66,6 @@ switch (process.argv[2]) {
 	default:
 		break;
 }
-
-lib.memProf("loading requires");
 
 if (gc) {
 	if (!global.gc) {
