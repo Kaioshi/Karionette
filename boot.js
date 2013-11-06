@@ -53,8 +53,6 @@ function processArgs(args) {
 				if (args[1].match(/[0-9]+/)) {
 					mwInterval = parseInt(args[1], 10) * 1000;
 					slicelen = 2;
-				} else {
-					logger.warn("memwatch needs a number in seconds as it's argument. Using default.");
 				}
 			}
 			setInterval(function () {
