@@ -89,7 +89,7 @@ cmdListen({
 				return;
 			case "-bind":
 				if (input.args[1]) {
-					lfmBindingsDB.saveOne(input.from, input.args[1]);
+					lfmBindingsDB.saveOne(input.nick, input.args[1]);
 					irc.say(input.context, "At your service :)");
 				} else {
 					irc.say(input.context, "What am I binding?");
@@ -145,11 +145,11 @@ cmdListen({
 			case "-prev":
 				tn = 1;
 			default:
-				user = (tn === 0 ? input.data : (input.args[1] || lfmBindingsDB.getOne(input.from)));
+				user = (tn === 0 ? input.data : (input.args[1] || lfmBindingsDB.getOne(input.nick)));
 				break;
 			}
 		} else {
-			user = lfmBindingsDB.getOne(input.from);
+			user = lfmBindingsDB.getOne(input.nick);
 		}
 		if (!user) {
 			irc.say(input.context, "You're not bound! See ;help lfm");
