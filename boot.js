@@ -23,11 +23,10 @@ var DB = require("./lib/fileDB.js"),
 	Connection = require("./connection.js"),
 	Plugin = require("./plugin.js"),
 	prompt = "",
-	norepl = false,
 	gc = true,
 	gcInterval = 5000,
 	mwInterval = 30000,
-	repl;
+	repl = true;
 
 function processArgs(args) {
 	var slicelen,
@@ -77,7 +76,7 @@ function processArgs(args) {
 			gc = false;
 			break;
 		case "nocmd":
-			norepl = true;
+			repl = false;
 			break;
 		default:
 			logger.warn("Invalid argument: "+args[0]);
@@ -153,7 +152,7 @@ IRC.open({
 	realname: irc_config.realname
 });
 
-if (!norepl) {
+if (repl) {
 	repl = require("repl");
 	repl.start({ prompt: prompt, ignoreUndefined: true });
 }
