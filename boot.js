@@ -23,58 +23,73 @@ var DB = require("./lib/fileDB.js"),
 	Connection = require("./connection.js"),
 	Plugin = require("./plugin.js"),
 	prompt = "",
+	norepl = false,
 	gc = true,
 	gcInterval = 5000,
 	mwInterval = 30000,
-	repl = (process.argv[2] !== "nocmd" ? require("repl") : null);
+	repl;
 
-/**
- *  I'm aware you can't do more than one of these options at a time.
- *  I guess it needs to loop through the args looking for commands.
- *  I'll do that another time. Butts united!
- */
-switch (process.argv[2]) {
-	case "-h":
-	case "--help":
-	case "help":
-		console.log("Command line options: " + process.argv[0] + " [--expose-gc] boot.js <command>");
-		console.log("  nocmd                \tDisables interactive prompt.");
-		console.log("  prompt \"Mari> \"    \tSets interactive prompt string.");
-		console.log("  nogc                 \tDisables forced garbage collection every 5 seconds.");
-		console.log("                       \t[note: you need to run with --expose-gc if not using \"nogc\"]");
-		console.log("  gc-interval <seconds>\tSets how often we do a forced garbage collection.                       (Default:  5)");
-		console.log("  memwatch [<seconds>] \tShows how much memory we're using, if it changed since the last report. (Default: 30)");
-		console.log("  help\t\t\tShows this help.");
-		process.exit();
-		break;
-	case "memwatch":
-		if (process.argv[3]) {
-			if (process.argv[3].match(/[0-9]+/)) {
-				mwInterval = parseInt(process.argv[3], 10) * 1000;
-			} else {
-				logger.warn("memwatch needs a number in seconds as it's argument. Using default.");
+function processArgs(args) {
+	var slicelen, opts = {},
+		args = process.argv.slice(2);
+	while (args.length > 0) {
+		slicelen = 1;
+		switch (args[0]) {
+		case "-h":
+		case "--help":
+		case "help":
+			console.log("Command line options: " + process.argv[0] + " [--expose-gc] boot.js <command>");
+			console.log("  nocmd                \tDisables interactive prompt.");
+			console.log("  prompt \"Mari> \"    \tSets interactive prompt string.");
+			console.log("  nogc                 \tDisables forced garbage collection every 5 seconds.");
+			console.log("                       \t[note: you need to run with --expose-gc if not using \"nogc\"]");
+			console.log("  gc-interval <seconds>\tSets how often we do a forced garbage collection.                       (Default:  5)");
+			console.log("  memwatch [<seconds>] \tShows how much memory we're using, if it changed since the last report. (Default: 30)");
+			console.log("  help\t\t\tShows this help.");
+			process.exit();
+			break;
+		case "memwatch":
+			if (args[1]) {
+				if (args[1].match(/[0-9]+/)) {
+					mwInterval = parseInt(args[1], 10) * 1000;
+					slicelen = 2;
+				} else {
+					logger.warn("memwatch needs a number in seconds as it's argument. Using default.");
+				}
 			}
+			setInterval(function () {
+				lib.memReport();
+			}, mwInterval);
+			break;
+		case "prompt":
+			if (args[1]) {
+				slicelen = 2;
+				prompt = args[1];
+			}
+			break;
+		case "gc-interval":
+			if (args[1] && args[1].match(/[0-9]+/)) {
+				slicelen = 2;
+				gcInterval = parseInt(args[1], 10) * 1000;
+			} else {
+				logger.warn("gc-interval needs a number in seconds as it's argument. Using default.");
+			}
+			break;
+		case "nogc":
+			gc = false;
+			break;
+		case "nocmd":
+			norepl = true;
+			break;
+		default:
+			logger.warn("Invalid argument: "+args[0]);
+			break;
 		}
-		setInterval(function () {
-			lib.memReport();
-		}, mwInterval);
-		break;
-	case "prompt":
-		if (process.argv[3]) prompt = process.argv[3];
-		break;
-	case "gc-interval":
-		if (process.argv[3] && process.argv[3].match(/[0-9]+/)) {
-			gcInterval = parseInt(process.argv[3], 10) * 1000;
-		} else {
-			logger.warn("gc-interval needs a number in seconds as it's argument. Using default.");
-		}
-		break;
-	case "nogc":
-		gc = false;
-		break;
-	default:
-		break;
+		args = args.slice(slicelen);
+	}
 }
+
+processArgs(process.argv);
 
 if (gc) {
 	if (!global.gc) {
@@ -140,6 +155,7 @@ IRC.open({
 	realname: irc_config.realname
 });
 
-if (repl) {
+if (!norepl) {
+	repl = require("repl");
 	repl.start({ prompt: prompt, ignoreUndefined: true });
 }
