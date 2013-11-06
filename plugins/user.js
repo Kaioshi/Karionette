@@ -218,8 +218,9 @@ evListen({
 	handle: "seenNick",
 	event: "NICK",
 	callback: function (input) {
-		ial.Channels(input.nick).forEach(function (channel) {
+		ial.Channels(input.newnick).forEach(function (channel) {
 			setUserLeft(input.nick, input.address, channel, "nick changed", " ~ "+input.nick+" -> "+input.newnick);
+			removeUserLeft(input.newnick, channel);
 		});
 	}
 });
