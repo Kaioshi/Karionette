@@ -10,8 +10,8 @@ cmdListen({
 		config.command_prefix+"alias add mal g site:myanimelist.net {args*}",
 	callback: function (input) {
 		var aKeys, aliasList, i, alias, cmdArr, permission, cmd, aliasString;
-		if (input.args && input.args[0] && input.args[1]) {
-			cmd = input.args[1];
+		if (input.args && input.args[0]) {
+			cmd = input.args[0];
 			aliasString = input.args.slice(2).join(" ");
 			input.user = input.nick+"!"+input.address;
 			switch (input.args[0]) {
