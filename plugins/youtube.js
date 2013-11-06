@@ -26,7 +26,7 @@ cmdListen({
 				rating = " ~ ";
 			}
 			views = body.entry[0].yt$statistics.viewCount;
-			irc.say(input.context, title + rating + date + ", " + views + " views ~ " + link, false);
+			irc.say(input.context, title + rating + date + ", " + lib.commaNum(views) + " views ~ " + link, false);
 		}
 		
 		if (!input.args || !input.args[0]) {
