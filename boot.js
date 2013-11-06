@@ -26,6 +26,7 @@ var DB = require("./lib/fileDB.js"),
 	prompt = "",
 	gc = true,
 	gcInterval = 5000,
+	mwInterval = 30000,
 	repl = (process.argv[2] !== "nocmd" ? require("repl") : null);
 
 /**
@@ -37,18 +38,27 @@ switch (process.argv[2]) {
 	case "-h":
 	case "--help":
 	case "help":
-		console.log("Command line options: " + process.argv[0] + " --expose-gc boot.js <command>");
-		console.log("  nocmd\t\t\tDisables interactive prompt.");
-		console.log("  prompt \"Mari> \"\tSets interactive prompt string.");
-		console.log("  nogc\t\t\tDisables forced garbage collection every 10 seconds.");
-		console.log("  gc-interval <seconds>\tSets how often we do a forced garbage collection.");
+		console.log("Command line options: " + process.argv[0] + " [--expose-gc] boot.js <command>");
+		console.log("  nocmd                \tDisables interactive prompt.");
+		console.log("  prompt \"Mari> \"    \tSets interactive prompt string.");
+		console.log("  nogc                 \tDisables forced garbage collection every 5 seconds.");
+		console.log("                       \t[note: you need to run with --expose-gc if not using \"nogc\"]");
+		console.log("  gc-interval <seconds>\tSets how often we do a forced garbage collection.                       (Default:  5)");
+		console.log("  memwatch [<seconds>] \tShows how much memory we're using, if it changed since the last report. (Default: 30)");
 		console.log("  help\t\t\tShows this help.");
 		process.exit();
 		break;
 	case "memwatch":
+		if (process.argv[3]) {
+			if (process.argv[3].match(/[0-9]+/)) {
+				mwInterval = parseInt(process.argv[3], 10) * 1000;
+			} else {
+				logger.warn("memwatch need a number in seconds as it's argument. Using default.");
+			}
+		}
 		setInterval(function () {
 			lib.memReport();
-		}, 30000);
+		}, mwInterval);
 		break;
 	case "prompt":
 		if (process.argv[3]) prompt = process.argv[3];
