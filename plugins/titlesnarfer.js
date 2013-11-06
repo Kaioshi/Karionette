@@ -73,7 +73,7 @@ listen({
 			web.get(uri, function (error, response, body) {
 				var date,
 					views = "",
-					rating = " ~ ";
+					rating = " - ";
 				if (error) {
 					logger.error("[titlesnarfer[youtubeIt("+id+")]] error: "+error);
 					irc.say(input.context, "Something has gone awry.");
@@ -81,14 +81,14 @@ listen({
 				}
 				body = JSON.parse(body).entry;
 				if (body["gd$rating"] && body["gd$rating"].average) {
-					rating = rating+"["+body["gd$rating"].average.toString().slice(0,3)+"/5] ~ ";
+					rating = rating+"["+body["gd$rating"].average.toString().slice(0,3)+"/5] ";
 				}
 				if (body["yt$statistics"] && body["yt$statistics"].viewCount) {
-					views = ", "+body["yt$statistics"].viewCount+" views";
+					views = " - "+lib.commaNum(body["yt$statistics"].viewCount)+" views";
 				}
 				date = new Date(body["media$group"]["yt$uploaded"]["$t"]);
 				date = zero(date.getDate())+"/"+zero(date.getMonth()+1)+"/"+date.getYear().toString().slice(1);
-				irc.say(input.context, body.title["$t"]+rating+date+views+" ~ "+host.replace("www.",""), false);
+				irc.say(input.context, body.title["$t"]+rating+date+views, false); //+" ~ "+host.replace("www.",""), false);
 				date = null; rating = null; views = null; body = null; response = null; error = null;
 			});
 		}

@@ -21,12 +21,12 @@ cmdListen({
 			date = new Date(body.entry[0].media$group.yt$uploaded.$t);
 			date = zero(date.getDate()) + "/" + zero(date.getMonth() + 1) + "/" + date.getYear().toString().slice(1);
 			if (body.entry[0].gd$rating && body.entry[0].gd$rating.average) {
-				rating = " ~ [" + body.entry[0].gd$rating.average.toString().slice(0, 3) + "/5] ";
+				rating = " - [" + body.entry[0].gd$rating.average.toString().slice(0, 3) + "/5] ";
 			} else {
 				rating = " ~ ";
 			}
 			views = body.entry[0].yt$statistics.viewCount;
-			irc.say(input.context, title + rating + date + ", " + lib.commaNum(views) + " views ~ " + link, false);
+			irc.say(input.context, title + rating + date + " - " + lib.commaNum(views) + " views ~ " + link, false);
 		}
 		
 		if (!input.args || !input.args[0]) {
