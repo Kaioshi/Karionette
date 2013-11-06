@@ -103,6 +103,7 @@ cmdListen({
 			irc.say(input.context, cmdHelp("mw", "syntax"));
 			return;
 		}
+		input.user = input.nick+"!"+input.address;
 		switch (input.args[0]) {
 			case "announce":
 				switch (input.args[1]) {
