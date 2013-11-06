@@ -87,7 +87,6 @@ function saveAllSeen() {
 function findUserIndex(nick, channel) {
 	var i;
 	if (!seen[channel]) loadSeen(channel);
-	//globals.lastSeen = seen;
 	if (!nick) {
 		logger.warn("findUserIndex("+[nick, channel].join(", ")+") called incorrectly.");
 		return;
@@ -95,7 +94,6 @@ function findUserIndex(nick, channel) {
 	nick = nick.toLowerCase()+" ";
 	for (i = 0; i < seen[channel].length; i++) {
 		if (seen[channel][i].slice(0,nick.length).toLowerCase() === nick) {
-			//console.log("Returning index "+i);
 			return i;
 		}
 	}
@@ -118,13 +116,7 @@ function getSeen(nick, channel) {
 		};
 	}
 	reg = /^([^ ]+) ([0-9]+) message: \"(.*)\"$/.exec(seen[channel][id]);
-	return {
-		last: {
-			nick: reg[1],
-			seen: reg[2],
-			message: reg[3]
-		}
-	};
+	return { last: { nick: reg[1], seen: reg[2], message: reg[3] } };
 }
 
 function setLastMessage(nick, channel, message, date) {
@@ -231,7 +223,7 @@ evListen({
 	callback: function (input) {
 		ial.Channels(input.nick).forEach(function (channel) {
 			setUserLeft(input.nick, input.address, channel, "quit", (
-				input.reason.slice(0,6) === "Quit: " ? input.reason = input.reason.slice(6) :
+				input.reason.slice(0,6) === "Quit: " ? input.reason = " ~ "+input.reason.slice(6) :
 				(input.reason.length > 0 ? " ~ "+input.reason : "")
 			));
 		});
