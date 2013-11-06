@@ -99,7 +99,7 @@ cmdListen({
 			irc.say(input.context, "tell can only be used in channels.");
 			return;
 		}
-		if (!input.args || !input.args[2]) {
+		if (!input.args || !input.args[1]) {
 			irc.say(input.context, cmdHelp("tell", "syntax"));
 			return;
 		}
@@ -112,6 +112,10 @@ cmdListen({
 			irc.say(input.context, "nou");
 			return;
 		}
+		if (msgMatch[1].toLowerCase() === config.nick.toLowerCase()) {
+			irc.say(input.context, "nome");
+			return;
+		}
 		if (msgMatch && msgMatch[1][0] !== "#") {
 			msg = "message from "+input.nick+": "+msgMatch[2];
 			input.context = input.context.toLowerCase();
@@ -122,15 +126,15 @@ cmdListen({
 					return (entry.toLowerCase() === msg.toLowerCase());
 				})) {
 					irc.say(input.context, "You've already asked me to tell them that.");
+					return;
 				}
-			} else {
-				messages.push(input.context+"@"+msgMatch[1]+": "+msg);
-				if (!msgwatch[input.context]) msgwatch[input.context] = {};
-				if (!msgwatch[input.context][target]) msgwatch[input.context][target] = [];
-				msgwatch[input.context][target].push(msg);
-				messagesDB.saveAll(messages);
-				irc.say(input.context, "I'll tell them when I see them next.");
 			}
+			messages.push(input.context+"@"+msgMatch[1]+": "+msg);
+			if (!msgwatch[input.context]) msgwatch[input.context] = {};
+			if (!msgwatch[input.context][target]) msgwatch[input.context][target] = [];
+			msgwatch[input.context][target].push(msg);
+			messagesDB.saveAll(messages);
+			irc.say(input.context, "I'll tell them when I see them next.");
 		} else {
 			irc.say(input.context, cmdHelp("tell", "syntax"));
 		}
