@@ -48,7 +48,7 @@ cmdListen({
 						}
 					}
 				}
-				quote.from = input.user;
+				quote.from = input.nick+"!"+input.address;
 				quote.date = new Date();
 				quotes.push(quote);
 				quoteDB.saveOne(input.context, quotes);
