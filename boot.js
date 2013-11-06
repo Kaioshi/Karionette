@@ -4,8 +4,7 @@ global.globals = {
 	lastWarning: "",
 	admins: { lastCheck: new Date().getTime() },
 	channels: {},
-	startTime: new Date(),
-	memProf: {}
+	startTime: new Date()
 };
 
 require("./config.js");
