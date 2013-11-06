@@ -52,7 +52,7 @@ switch (process.argv[2]) {
 			if (process.argv[3].match(/[0-9]+/)) {
 				mwInterval = parseInt(process.argv[3], 10) * 1000;
 			} else {
-				logger.warn("memwatch need a number in seconds as it's argument. Using default.");
+				logger.warn("memwatch needs a number in seconds as it's argument. Using default.");
 			}
 		}
 		setInterval(function () {
