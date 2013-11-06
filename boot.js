@@ -23,9 +23,7 @@ var DB = require("./lib/fileDB.js"),
 	Eventpipe = require("./eventpipe.js"),
 	Connection = require("./connection.js"),
 	Plugin = require("./plugin.js"),
-	memuseLast,
 	prompt = "",
-	memwatch = false,
 	gc = true,
 	gcInterval = 5000,
 	repl = (process.argv[2] !== "nocmd" ? require("repl") : null);
@@ -48,7 +46,9 @@ switch (process.argv[2]) {
 		process.exit();
 		break;
 	case "memwatch":
-		memwatch = true;
+		setInterval(function () {
+			lib.memReport();
+		}, 30000);
 		break;
 	case "prompt":
 		if (process.argv[3]) prompt = process.argv[3];
@@ -56,6 +56,8 @@ switch (process.argv[2]) {
 	case "gc-interval":
 		if (process.argv[3] && process.argv[3].match(/[0-9]+/)) {
 			gcInterval = parseInt(process.argv[3], 10) * 1000;
+		} else {
+			logger.warn("gc-interval needs a number in seconds as it's argument. Using default.");
 		}
 		break;
 	case "nogc":
@@ -67,44 +69,13 @@ switch (process.argv[2]) {
 
 lib.memProf("loading requires");
 
-if (memwatch) {
-	function space(text, len) {
-		var ret = "",
-			diff = len-text.length;
-		while (diff > 0) {
-			ret = ret+" ";
-			diff--;
-		}
-		return ret+text;
-	}
-	
-	function memReport() {
-		var memuse = process.memoryUsage().rss,
-			report, diff;
-		if (memuse !== memuseLast) {
-			report = (memuse/1024).toString();
-			//report = report.slice(0,2)+","+report.slice(2);
-			report = report.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-			diff = ((memuse-memuseLast)/1024);
-			if (diff > 0) {
-				diff = " [+"+space(diff.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), 5)+" KiB]";
-			} else {
-				diff = " [-"+space(diff.toString().slice(1).replace(/\B(?=(\d{3})+(?!\d))/g, ","), 5)+" KiB]";
-			}
-			console.log(lib.timestamp("Mem: "+report+" KiB"+diff));
-			memuseLast = memuse;
-			memuse = null;
-		}
-	}
-	memuseLast = process.memoryUsage().rss;
-	timers.Add(5000, memReport);
-}
-
 if (gc) {
 	if (!global.gc) {
 		logger.warn("You need to run node with --expose-gc if you want reasonable garbage collection.");
 	} else {
-		timers.Add(gcInterval, global.gc);
+		setInterval(function () {
+			global.gc();
+		}, gcInterval);
 	}
 }
 
