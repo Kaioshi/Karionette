@@ -30,7 +30,7 @@ var DB = require("./lib/fileDB.js"),
 	repl;
 
 function processArgs(args) {
-	var slicelen, opts = {},
+	var slicelen,
 		args = process.argv.slice(2);
 	while (args.length > 0) {
 		slicelen = 1;
