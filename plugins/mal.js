@@ -142,19 +142,21 @@ cmdListen({
 	syntax: config.command_prefix+"mml [-s] <manga> - Example: "+config.command_prefix+
 		"mml -s Slam Dunk",
 	callback: function (input) {
-		var result, uri, doRes
-			args = match[1].split(" ");
-		
-		switch (args[0]) {
+		var result, uri, doRes;
+		if (!input.args || !input.args[0]) {
+			irc.say(input.context, cmdHelp("mml", "syntax"));
+			return;
+		}
+		switch (input.args[0]) {
 			case "-synopsis":
 			case "-s":
-				googleIt(input.context, true, "manga", args.slice(1).join(" "));
+				googleIt(input.context, true, "manga", input.args.slice(1).join(" "));
 				return;
 			case "-l":
-				googleIt(input.context, false, "manga", args.slice(1).join(" "));
+				googleIt(input.context, false, "manga", input.args.slice(1).join(" "));
 				return;
 			default:
-				googleIt(input.context, false, "manga", args.join(" "));
+				googleIt(input.context, false, "manga", input.args.join(" "));
 				return;
 		}
 		
