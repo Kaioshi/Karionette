@@ -23,9 +23,11 @@ var DB = require("./lib/fileDB.js"),
 	Eventpipe = require("./eventpipe.js"),
 	Connection = require("./connection.js"),
 	Plugin = require("./plugin.js"),
+	memuseLast,
 	prompt = "",
+	memwatch = false,
 	gc = true,
-	gcInterval = 10000, // 10 sec
+	gcInterval = 5000,
 	repl = (process.argv[2] !== "nocmd" ? require("repl") : null);
 
 /**
@@ -45,6 +47,9 @@ switch (process.argv[2]) {
 		console.log("  help\t\t\tShows this help.");
 		process.exit();
 		break;
+	case "memwatch":
+		memwatch = true;
+		break;
 	case "prompt":
 		if (process.argv[3]) prompt = process.argv[3];
 		break;
@@ -62,14 +67,45 @@ switch (process.argv[2]) {
 
 lib.memProf("loading requires");
 
-function memClean() {
-	lib.memProf("Running GC");
-	global.gc();
-	lib.memProf("Running GC");
+if (memwatch) {
+	function space(text, len) {
+		var ret = "",
+			diff = len-text.length;
+		while (diff > 0) {
+			ret = ret+" ";
+			diff--;
+		}
+		return ret+text;
+	}
+	
+	function memReport() {
+		var memuse = process.memoryUsage().rss,
+			report, diff;
+		if (memuse !== memuseLast) {
+			report = (memuse/1024).toString();
+			//report = report.slice(0,2)+","+report.slice(2);
+			report = report.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+			diff = ((memuse-memuseLast)/1024);
+			if (diff > 0) {
+				diff = " [+"+space(diff.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), 5)+" KiB]";
+			} else {
+				diff = " [-"+space(diff.toString().slice(1).replace(/\B(?=(\d{3})+(?!\d))/g, ","), 5)+" KiB]";
+			}
+			console.log(lib.timestamp("Mem: "+report+" KiB"+diff));
+			memuseLast = memuse;
+			memuse = null;
+		}
+	}
+	memuseLast = process.memoryUsage().rss;
+	timers.Add(5000, memReport);
 }
 
 if (gc) {
-	timers.Add(gcInterval, memClean);
+	if (!global.gc) {
+		logger.warn("You need to run node with --expose-gc if you want reasonable garbage collection.");
+	} else {
+		timers.Add(gcInterval, global.gc);
+	}
 }
 
 function createSandbox() {
