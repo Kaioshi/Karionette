@@ -37,7 +37,7 @@ function timeAgo(then, now) {
 // Last.fm
 cmdListen({
 	command: "lfm",
-	help: "Get's your last played track. Use -bind to bind your nick to your lfm account, "+
+	help: "Gets your last played track. Use -bind to bind your nick to your lfm account, "+
 		"allowing you to not have to supply an account name. Else just supply your account name.",
 	syntax: config.command_prefix+"lfm [-bind / -prev / -top / -artist] [<account>|<artist>] - Example: "+
 		config.command_prefix+"lfm plonk420",
