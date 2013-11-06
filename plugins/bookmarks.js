@@ -95,7 +95,7 @@ cmdListen({
 		switch (input.args[0].toLowerCase()) {
 			case "-a":
 			case "-add":
-				args = parseAddArgs(input.context, input.from, input.args.slice(1).join(" "));
+				args = parseAddArgs(input.context, input.nick, input.args.slice(1).join(" "));
 				if (!args) {
 					irc.say(input.context, bmhelp.add);
 					return;
@@ -122,7 +122,7 @@ cmdListen({
 				break;
 			case "-r":
 			case "-remove":
-				args = parseRemArgs(input.context, input.from, input.args.slice(1).join(" "));
+				args = parseRemArgs(input.context, input.nick, input.args.slice(1).join(" "));
 				if (!args) {
 					irc.say(input.context, bmhelp.remove);
 					return;
@@ -161,7 +161,7 @@ cmdListen({
 			case "-l":
 			case "-list":
 				if (input.args[1] && input.args[1][0] === "-" && input.args[1].match(/-c|-channel|-u|-user/)) {
-					target = (input.args[1].match(/-c|-channel/i) ? input.context : input.from);
+					target = (input.args[1].match(/-c|-channel/i) ? input.context : input.nick);
 				} else {
 					target = "global";
 				}
@@ -188,8 +188,8 @@ cmdListen({
 					return;
 				}
 				args = input.args.slice(1).join(" ");
-				target = getTarget(input.context, input.from, args);
-				handle = getHandle(input.context, input.from, args);
+				target = getTarget(input.context, input.nick, args);
+				handle = getHandle(input.context, input.nick, args);
 				if (!target || !handle) {
 					irc.say(input.context, cmdHelp("bm", "syntax"));
 					return;
@@ -245,8 +245,8 @@ cmdListen({
 				reg = /(.*)@(.*)/.exec(input.data);
 				if (reg) input.data = input.data.split("@")[0].trim();
 				input.data = input.data.toLowerCase();
-				target = getTarget(input.context, input.from, input.data);
-				handle = getHandle(input.context, input.from, input.data);
+				target = getTarget(input.context, input.nick, input.data);
+				handle = getHandle(input.context, input.nick, input.data);
 				if (!target || !handle) {
 					irc.say(input.context, cmdHelp("bm", "syntax"));
 					return;

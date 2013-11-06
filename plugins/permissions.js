@@ -6,7 +6,7 @@ cmdListen({
 	callback: function (input) {
 		var user, access;
 		if (input.channel) {
-			irc.notice(input.from, "permissions can only be used via query.");
+			irc.notice(input.nick, "permissions can only be used via query.");
 			return;
 		}
 		if (!input.args || !input.args[0]) {

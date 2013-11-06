@@ -42,7 +42,7 @@ cmdListen({
 					for (i = 0; i < quotes.length; i++) {
 						if (quotes[i].quote === quote.quote) {
 							tmp = quotes[i].from.split("!")[0];
-							tmp = (tmp.toLowerCase() === input.from.toLowerCase() ? "you" : tmp);
+							tmp = (tmp.toLowerCase() === input.nick.toLowerCase() ? "you" : tmp);
 							irc.say(input.context, "That quote was already added "+lib.duration(new Date(quotes[i].date))+" ago by "+tmp+".");
 							return;
 						}

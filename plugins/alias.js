@@ -79,7 +79,7 @@ cmdListen({
 					if (alias) {
 						permission = permissions.Info(input.user, "alias", cmd);
 						irc.say(input.context, "The alias string for " + cmd + " is: " + alias);
-						if (permission) irc.notice(input.from, permission);
+						if (permission) irc.notice(input.nick, permission);
 					} else irc.say(input.context, "There is no such alias.");
 				} else {
 					irc.say(input.context, "[Help] Which alias do you want info about?");
@@ -263,7 +263,7 @@ cmdListen({
 					if (variable) {
 						permission = permissions.Info(input.user, "variable", input.args[1]);
 						irc.say(input.context, "Variable " +varName + " contains: \"" + variable + "\"");
-						if (permission) irc.notice(input.from, permission);
+						if (permission) irc.notice(input.nick, permission);
 					} else {
 						irc.say(input.context, "There is no such variable.");
 					}
