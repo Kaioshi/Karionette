@@ -91,6 +91,7 @@ processArgs(process.argv);
 if (gc) {
 	if (!global.gc) {
 		logger.warn("You need to run node with --expose-gc if you want reasonable garbage collection.");
+		logger.warn("Run with the \"nogc\" option to suppress this warning.");
 	} else {
 		setInterval(function () {
 			global.gc();
