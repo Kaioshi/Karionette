@@ -2,8 +2,9 @@
 var fs = require("fs"),
 	ent = require("./lib/entities.js");
 
-function rssToJson(body) {
+/*function rssToJson(body) {
 	var entries = [];
+	globals.body = body;
 	body = body.slice(body.indexOf("<item>"), body.lastIndexOf("</item>")+7)
 		.replace(/_|\./g, " ")
 		.replace(/\n|\t|  /g, "")
@@ -27,7 +28,7 @@ function rssToJson(body) {
 	});
 	body = null;
 	return entries;
-}
+}*/
 
 cmdListen({
 	command: "nyaa",
@@ -42,9 +43,19 @@ cmdListen({
 		uri = "http://www.nyaa.se/?page=rss&cats=1_37&filter=2&term="+input.data;
 		web.get(uri, function (error, resp, body) {
 			if (body) {
-				entries = rssToJson(body);
-				//globals.junk = {};
-				//globals.junk.lastJson = entries;
+				body = ent.decode(body);
+				entries = [];
+				body = body.slice(body.indexOf("<item>"), body.lastIndexOf("</item>")+7);
+				if (body.length === 0) {
+					irc.say(input.context, "There were no matches. I'm not sorry. :>");
+					return;
+				}
+				body = body.replace(/_|\./g, " ")
+					.replace(/<item>/g, "{").replace(/<title>/g, " \"release\": \"")
+					.replace(/<\/title[^{]+>/g, "\" }OHEYMITCH_").slice(0,-10).split("OHEYMITCH_");
+				body.forEach(function (entry) {
+					entries.push(JSON.parse(entry).release);
+				});
 				lib.events.emit("Event: processNyaaDone", input, entries);
 			}
 		}, 4000);
@@ -56,13 +67,12 @@ evListen({
 	event: "processNyaaDone",
 	callback: function (input, results) {
 		var i, line, reg, rel = {}, tmp;
-//		globals.lastResults = results;
 		if (results.length === 0) {
 			irc.say(input.context, "There were no matches, sorry.");
 			return;
 		}
 		for (i = 0; i < results.length; i++) {
-			reg = /\[(.*)\] (.*) - (.*) \[(.*)$/.exec(results[i].release);
+			reg = /\[(.*[^\&]+)\] (.*) - (.*) \[(.*)$/.exec(results[i]);
 			if (reg) {
 				if (!rel[reg[1]]) rel[reg[1]] = {};
 				if (!rel[reg[1]][reg[2]]) rel[reg[1]][reg[2]] = [];
@@ -70,7 +80,7 @@ evListen({
 					rel[reg[1]][reg[2]].push(reg[3]);
 				}
 			} else {
-				reg = /\[(.*)\] (.*) \[(.*)$/.exec(results[i].release);
+				reg = /\[(.*[^\&]+)\] (.*) (\(|\[)(.*)$/.exec(results[i]);
 				if (reg) {
 					if (!rel[reg[1]]) rel[reg[1]] = {};
 					rel[reg[1]][reg[2]] = [];
@@ -88,6 +98,6 @@ evListen({
 			});
 			irc.say(input.context, ent.decode(tmp.slice(0,-4)));
 		});
-		//globals.lastRel = rel;
+		tmp = null; reg = null;
 	}
 });
