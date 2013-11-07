@@ -5,7 +5,7 @@ var fs = require("fs"),
 function rssToJson(body) {
 	var entries = [];
 	body = body.slice(body.indexOf("<item>"), body.lastIndexOf("</item>")+7)
-		.replace(/_/g, " ")
+		.replace(/_|\./g, " ")
 		.replace(/\n|\t|  /g, "")
 		.replace(/<item><title>/g, "{ \"release\": \"")
 		.replace(/<\/title>/g, "\", ")
@@ -56,23 +56,35 @@ evListen({
 	event: "processNyaaDone",
 	callback: function (input, results) {
 		var i, line, reg, rel = {}, tmp;
-		//globals.lastResults = results;
+//		globals.lastResults = results;
+		if (results.length === 0) {
+			irc.say(input.context, "There were no matches, sorry.");
+			return;
+		}
 		for (i = 0; i < results.length; i++) {
 			reg = /\[(.*)\] (.*) - (.*) \[(.*)$/.exec(results[i].release);
-			if (!reg) {
-				irc.say(input.context, "Error, regex failed. Poke Kaioshi");
-				return;
-			}
-			if (!rel[reg[1]]) rel[reg[1]] = {};
-			if (!rel[reg[1]][reg[2]]) rel[reg[1]][reg[2]] = [];
-			if (!rel[reg[1]][reg[2]].some(function (item) { return (item === reg[3]); })) {
-				rel[reg[1]][reg[2]].push(reg[3]);
+			if (reg) {
+				if (!rel[reg[1]]) rel[reg[1]] = {};
+				if (!rel[reg[1]][reg[2]]) rel[reg[1]][reg[2]] = [];
+				if (!rel[reg[1]][reg[2]].some(function (item) { return (item === reg[3]); })) {
+					rel[reg[1]][reg[2]].push(reg[3]);
+				}
+			} else {
+				reg = /\[(.*)\] (.*) \[(.*)$/.exec(results[i].release);
+				if (reg) {
+					if (!rel[reg[1]]) rel[reg[1]] = {};
+					rel[reg[1]][reg[2]] = [];
+				}
 			}
 		}
 		Object.keys(rel).forEach(function (group) {
 			tmp = "["+group+"] have released: ";
 			Object.keys(rel[group]).forEach(function (show) {
-				tmp = tmp+show+" - "+rel[group][show].join(", ")+" :: ";
+				if (rel[group][show].length > 0) {
+					tmp = tmp+show+" - "+rel[group][show].join(", ")+" :: ";
+				} else {
+					tmp = tmp+show+" :: ";
+				}
 			});
 			irc.say(input.context, ent.decode(tmp.slice(0,-4)));
 		});
