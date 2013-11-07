@@ -203,10 +203,11 @@ module.exports = function (Eventpipe) {
 		say: function (context, message, sanitiseMessage, maxmsgs) {
 			var privmsg, max, maxMessages, i, tempMsg;
 			if (!context || !message) return;
+			message = message.replace(/\n|\t|\r/g, "");
 			context = sanitise(context); // Avoid sanitising more than once
 			privmsg = "PRIVMSG " + context + " :";
 			if (irc_config.address) {
-				max = 508 - (irc_config.nick.length+irc_config.address.length+3+privmsg.length);
+				max = 508 - (irc_config.nick+irc_config.address+privmsg).length+3;
 			} else {
 				max = 473 - privmsg.length; // yay magic numbers - haven't joined a channel yet.
 			}
@@ -239,6 +240,7 @@ module.exports = function (Eventpipe) {
 		},
 		action: function (channel, action, sanitiseAction) {
 			if (channel && action) {
+				action = action.replace(/\n|\t|\r/g, "");
 				if (sanitiseAction !== false) {
 					this.say(channel, "\x01ACTION "+sanitise(action)+"\x01", false);
 				} else {
@@ -248,6 +250,7 @@ module.exports = function (Eventpipe) {
 		},
 		notice: function (target, notice) {
 			if (target && notice) {
+				notice = notice.replace(/\n|\t|\r/g, "");
 				send("NOTICE " + sanitise(target) + " :" + sanitise(notice));
 			}
 		},
