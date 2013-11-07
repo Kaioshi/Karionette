@@ -33,14 +33,19 @@ var fs = require("fs"),
 cmdListen({
 	command: "nyaa",
 	help: "Tracks shows / groups on Nyaa",
-	syntax: config.command_prefix+"nyaa <search term>",
+	syntax: config.command_prefix+"nyaa [-u] <search term> - the -u flag removes any filtering. "+
+		"By default the filter is set to showing Trusted-quality Anime which has been subbed.",
 	callback: function (input) {
 		var entries, uri;
 		if (!input.args) {
 			irc.say(input.context, cmdHelp("nyaa", "syntax"));
 			return;
 		}
-		uri = "http://www.nyaa.se/?page=rss&cats=1_37&filter=2&term="+input.data;
+		if (input.args[0] === "-u") {
+			uri = "http://www.nyaa.se/?page=rss&cats=0_0&term="+input.args.slice(1).join(" ");
+		} else {
+			uri = "http://www.nyaa.se/?page=rss&cats=1_37&filter=2&term="+input.data;
+		}
 		web.get(uri, function (error, resp, body) {
 			if (body) {
 				body = ent.decode(body);
@@ -57,6 +62,7 @@ cmdListen({
 					entries.push(JSON.parse(entry).release);
 				});
 				lib.events.emit("Event: processNyaaDone", input, entries);
+				entries = null; body = null;
 			}
 		}, 4000);
 	}
@@ -98,6 +104,6 @@ evListen({
 			});
 			irc.say(input.context, ent.decode(tmp.slice(0,-4)));
 		});
-		tmp = null; reg = null;
+		tmp = null; reg = null; results = null;
 	}
 });
