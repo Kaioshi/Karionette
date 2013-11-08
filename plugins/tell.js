@@ -71,7 +71,7 @@ function ratedMsg(channel, nick) {
 function checkMessages(channel, nick) {
 	var i, ret, msg, lnick;
 	channel = channel.toLowerCase();
-	if (msgwatch[channel]) {
+	if (msgwatch && msgwatch[channel]) {
 		lnick = nick.toLowerCase();
 		if (msgwatch[channel][lnick]) {
 			if (msgwatch[channel][lnick].length === 1) {
