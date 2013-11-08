@@ -14,6 +14,7 @@ cmdListen({
 			body = JSON.parse(body).feed;
 			if (body.openSearch$totalResults.$t === 0 || !body.entry) {
 				irc.say(input.context, input.data + " is not a thing on youtube. :<");
+				body = null;
 				return;
 			}
 			link = "https://youtu.be/" + body.entry[0].link[0].href.split("&")[0].split("=")[1];
@@ -27,6 +28,7 @@ cmdListen({
 			}
 			views = body.entry[0].yt$statistics.viewCount;
 			irc.say(input.context, title + rating + date + " - " + lib.commaNum(views) + " views ~ " + link, false);
+			body = null; date = null; title = null; rating = null; date = null; views = null; link = null;
 		}
 		
 		if (!input.args || !input.args[0]) {
