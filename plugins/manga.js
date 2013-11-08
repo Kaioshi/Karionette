@@ -93,7 +93,7 @@ function checkManga(manga, context, first) {
 }
 
 cmdListen({
-	command: "mw",
+	command: [ "mw", "mangawatch" ],
 	help: "Mangafox RSS watcher",
 	syntax: config.command_prefix+"mw <add/remove/update/check/list/announce> - Example: "
 		+config.command_prefix+"mw check Noblesse",

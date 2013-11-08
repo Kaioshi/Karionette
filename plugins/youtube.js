@@ -4,7 +4,7 @@ function zero(n) {
 }
 
 cmdListen({
-	command: "yt",
+	command: [ "yt", "youtube", "y" ],
 	help: "Searches youtube!",
 	syntax: config.command_prefix + "yt <search terms> - Example: "+config.command_prefix+
 		"yt we like big booty mitches",

@@ -1,6 +1,6 @@
 // translates!
 cmdListen({
-	command: "trans",
+	command: [ "trans", "translate" ],
 	help: "attempts to translate from language to language. Example: "+config.command_prefix+
 		"trans -d enfr pants - see http://www.wordreference.com/docs/api.aspx for a list of dictionaries.",
 	syntax: config.command_prefix+"trans [-d dictionary] <word> - Example: "+config.command_prefix+
