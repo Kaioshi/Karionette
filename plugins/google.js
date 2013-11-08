@@ -2,7 +2,7 @@
 var ent = require("./lib/entities.js");
 
 cmdListen({
-	command: "g",
+	command: [ "g", "google" ],
 	help: "Google search - returns the first hit.",
 	callback: function (input) {
 		var result,
