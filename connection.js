@@ -9,7 +9,8 @@ var net = require("net"),
 	DB = require("./lib/fileDB.js"),
 	ignoreDB = new DB.List({filename: "ignore"});
 	
-module.exports = function (Eventpipe) {
+//module.exports = function (Eventpipe) {
+module.exports = function () {
 	var connected = false,
 		connectInterval,
 		socket = new net.Socket(),
@@ -20,53 +21,7 @@ module.exports = function (Eventpipe) {
 	
 	// Handles incoming data
 	function dataHandler(data) {
-		var regArr, ignores, i, matches,
-			input = {
-				raw: data,
-				from: "",
-				host: "",
-				user: "",
-				context: "",
-				data: ""
-			};
-		// Log the data if not a ping
-		logger.filter(data);
 		caveman.emitEvent(data);
-		// Check it's a PRIVMSG in a context
-		if (data.indexOf('PRIVMSG') > -1) {
-			regArr = (/^:([^!]+)!([^ ]+@[^ ]+) PRIVMSG ([^ ]+) :(.*)$/i).exec(data);
-			if (regArr) {
-				input.from = regArr[1];
-				input.host = regArr[2];
-				input.data = regArr[4];
-				input.user = regArr[1]+"!"+regArr[2];
-				// Reply to PMs
-				input.context = (regArr[3][0] === '#') ? regArr[3] : input.from;
-				// Check if 'from'/'user' should be ignored
-				if (ignoreDB.size() > 0) {
-					ignores = ignoreDB.getAll();
-					for (i = 0; i <= ignores.length; i++) {
-						if (ignores[i] === input.from) return;
-						if (ial.maskMatch(input.user, ignores[i])) return;
-					}
-				}
-				regArr = new RegExp("^"+irc_config.command_prefix+"([^ ]+)").exec(input.data);
-				if (regArr) {
-					matches = permissions.Search(regArr[1]);
-					if (matches.length > 0) {
-						for (i = 0; i < matches.length; i++) {
-							if (!permissions.Check(matches[i][0], matches[i][1], input.user)) {
-								logger.info("Denied "+input.from+" access to "+regArr[1]);
-								return;
-							}
-						}
-					}
-				}
-			}
-		}
-		
-		// Fire any events
-		Eventpipe.fire(input);
 	}
 	
 	// Utilise a Buffer on the data - this can also be used to catch data before it's handled
@@ -112,7 +67,7 @@ module.exports = function (Eventpipe) {
 			// If fails, error and close events trigger
 			//logger.warn("Socket Timeout...");
 			send("VERSION");
-			socket.destroy();
+			//socket.destroy();
 		});
 		socket.on("close", function socketCloseEvent(hadError) {
 			if (!(hadError || connected)) {
@@ -256,9 +211,6 @@ module.exports = function (Eventpipe) {
 		},
 		// CORE COMMANDS
 		reload: function () {},
-		help: function () {
-			return Eventpipe.getCommands();
-		},
 		ignore: function (user) {
 			ignoreDB.saveOne(user);
 		},

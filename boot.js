@@ -19,7 +19,6 @@ require("./lib/caveman.js");
 var DB = require("./lib/fileDB.js"),
 	web = require("./lib/web.js"),
 	regexFactory = require("./lib/regexFactory.js"),
-	Eventpipe = require("./eventpipe.js"),
 	Connection = require("./connection.js"),
 	Plugin = require("./plugin.js"),
 	prompt = "",
@@ -113,7 +112,6 @@ function createSandbox() {
 		timers: timers,
 		require: require,
 		regexFactory: regexFactory,
-		listen: Eventpipe.bind,
 		evListen: caveman.eventListen,
 		cmdListen: caveman.commandListen,
 		cmdHelp: caveman.cmdHelp,
@@ -125,16 +123,12 @@ function createSandbox() {
 	};
 }
 
-var IRC = global.mari = new Connection(Eventpipe);
+var IRC = global.mari = new Connection();
 IRC.reload = function (plugin) {
 	if (!plugin) {
-		Eventpipe.purgeAll();
 		Plugin.loadAll(createSandbox());
-		Eventpipe.setHandles();
 	} else {
-		Eventpipe.purgeOne(plugin);
 		Plugin.loadOne(createSandbox(), plugin);
-		Eventpipe.setHandles();
 	}
 };
 
@@ -143,7 +137,7 @@ process.on('uncaughtException', function (err) {
 });
 
 Plugin.loadAll(createSandbox());
-Eventpipe.setHandles();
+//Eventpipe.setHandles();
 
 IRC.open({
 	server: irc_config.server,
