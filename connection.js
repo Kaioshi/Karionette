@@ -67,7 +67,7 @@ module.exports = function () {
 			// If fails, error and close events trigger
 			//logger.warn("Socket Timeout...");
 			send("VERSION");
-			//socket.destroy();
+			socket.destroy();
 		});
 		socket.on("close", function socketCloseEvent(hadError) {
 			if (!(hadError || connected)) {
