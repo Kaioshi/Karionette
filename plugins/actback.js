@@ -274,19 +274,19 @@ var questionReply = (function () {
 	};
 }());
 
-listen({
-	plugin: "actback",
+evListen({
 	handle: "actback",
+	event: "PRIVMSG",
 	regex: regexFactory.actionMatching(config.nickname),
-	callback: function (input, match) {
+	callback: function (input) {
 		var randReply, tmp, suppVars,
 			randThings = randDB.getAll(),
 			randReplies = repliesDB.getAll(),
 			nicks = (input.context[0] === "#" ?
-					ial.Active(input.context).filter(function (nick) { return (nick !== input.from); })
+					ial.Active(input.context).filter(function (nick) { return (nick !== input.nick); })
 					: []),
 			nicks = (nicks.length > 0 ? nicks : [ "someone", "The Lawd Jasus", "your dad", lib.randSelect(config.local_whippingboys) ]),
-			args = match[0].split(" "),
+			args = input.match[0].split(" "),
 			verb = args[1], adv = "",
 			verbs, verbed, verbing,
 			radv = (lib.chance() ? words.adverb.random() : ""),
@@ -331,7 +331,7 @@ listen({
 			words.lookup("verb", verb.toLowerCase());
 		}
 		suppVars = {
-			"{from}": input.from,
+			"{from}": input.nick,
 			"{context}": input.context,
 			"{randThing}": randThing,
 			"{randNick}": lib.randSelect(nicks),
@@ -368,16 +368,16 @@ listen({
 	}
 });
 
-listen({
-	plugin: "actback",
+evListen({
 	handle: "actbackquestion",
+	event: "PRIVMSG",
 	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :(?:(?:(?:"
 			+ regexFactory.matchAny(config.nickname)
 			+ "[,:]\\s)(\\w+).+)|(?:(\\w+).+)"
 			+ regexFactory.matchAny(config.nickname)
 			+ ")!?\\?!?$", "i"),
-	callback: function (input, match) {
-		var m = match[1] || match[2],
+	callback: function (input) {
+		var m = input.match[1] || input.match[2],
 			rep = questionReply(m);
 
 		setTimeout(function () {
