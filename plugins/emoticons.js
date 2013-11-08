@@ -1,54 +1,57 @@
 // http://unicodeemoticons.com/
 // http://rishida.net/tools/conversion/
 
-listen({
-	plugin: "emoticons",
-	handle: 'mad',
-	regex: regexFactory.only("get mad"),
+cmdListen({
+	command: 'get',
+	help: "Get what?",
 	callback: function (input) {
-		irc.say(input.context, "(\u256F\u00B0\u25A1\u00B0\uFF09\u256F\uFE35 \u253B\u2501\u253B", false);
+		if (input.args && input.args[0] === "mad") {
+			irc.say(input.context, "(\u256F\u00B0\u25A1\u00B0\uFF09\u256F\uFE35 \u253B\u2501\u253B", false);
+		}
 	}
 });
 
-listen({
-	plugin: "emoticons",
-	handle: 'dis',
-	regex: regexFactory.only("dis"),
+cmdListen({
+	command: 'dis',
+	help: "Piss off",
 	callback: function (input) {
 		irc.say(input.context, "\u0CA0_\u0CA0", false);
 	}
 });
 
-listen({
-	plugin: "emoticons",
-	handle: 'soviet russia',
-	regex: regexFactory.only("soviet russia"),
+cmdListen({
+	command: "soviet",
+	help: "In soviet russia, ...",
 	callback: function (input) {
-		irc.say(input.context, "\u252C\u2500\u252C\uFEFF \uFE35 /(.\u25A1. \\\uFF09", false);
+		if (input.args && input.args[0] === "russia") {
+			irc.say(input.context, "\u252C\u2500\u252C\uFEFF \uFE35 /(.\u25A1. \\\uFF09", false);
+		}
 	}
 });
 
-listen({
-	plugin: "emoticons",
-	handle: 'calm',
-	regex: regexFactory.only("calm down"),
+cmdListen({
+	command: 'calm',
+	help: "No, you calm down.",
 	callback: function (input) {
-		irc.say(input.context, "\u252C\u2500\u2500\u252C \u30CE( \u309C-\u309C\u30CE)", false);
+		if (input.args && input.args[0] === "down") {
+			irc.say(input.context, "\u252C\u2500\u2500\u252C \u30CE( \u309C-\u309C\u30CE)", false);
+		}
 	}
 });
 
-listen({
-	plugin: "emoticons",
-	handle: 'cool',
-	regex: regexFactory.only("be cool"),
+cmdListen({
+	command: "be",
+	help: "EVERYBODY BE COOL, THIS IS A RUBBER DUCKY!!",
 	callback: function (input) {
-		irc.say(input.context, "\u2022_\u2022)", false);
-		setTimeout(function () {
-			irc.say(input.context, "( \u2022_\u2022)>\u2310\u25A0-\u25A0", false);
-		}, 750);
-		setTimeout(function () {
-			irc.say(input.context, "(\u2310\u25A0_\u25A0)", false);
-		}, 1500);
+		if (input.args && input.args[0] === "cool") {
+			irc.say(input.context, "\u2022_\u2022)", false);
+			setTimeout(function () {
+				irc.say(input.context, "( \u2022_\u2022)>\u2310\u25A0-\u25A0", false);
+			}, 750);
+			setTimeout(function () {
+				irc.say(input.context, "(\u2310\u25A0_\u25A0)", false);
+			}, 1500);
+		}
 	}
 });
 
