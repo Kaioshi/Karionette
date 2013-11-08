@@ -1,57 +1,44 @@
 // This script handles the following functions:
 //     ~secret password - authenticate to become an admin
 //     ~makeadmin user - make user an admin
-//     ~unadmin user - demote user input.from admin status
+//     ~unadmin user - demote user input.nick admin status
 //     ~admins - list admins
-//     ~ignore user - the bot will no longer respond to messages input.from [user]
-//     ~unignore user - the bot will once more respond to messages input.from [user]
+//     ~ignore user - the bot will no longer respond to messages input.nick [user]
+//     ~unignore user - the bot will once more respond to messages input.nick [user]
 //     ~reload - reload scripts
 
-var adminDB = new DB.List({filename: 'admins'}),
-	autojoinDB = new DB.List({filename: 'autojoin'}),
+var	autojoinDB = new DB.List({filename: 'autojoin'}),
 	fs = require('fs');
 
-// Admin Only
-function listen_admin(params) {
-	listen({
-		plugin: params.plugin,
-		handle: params.handle,
-		regex: params.regex,
-		command: params.command,
-		callback: function (input, match) {
-			if (permissions.isAdmin(input.user)) {
-				params.callback(input, match);
-			} else {
-				irc.say(input.context, "Bitch_, please.");
-			}
-		}
-	});
-}
-
-
-listen_admin({
-	plugin: "admin",
-	handle: "admin",
-	regex: regexFactory.startsWith("admin"),
-	command: {
-		root: "admin",
-		options: "add, remove, list",
-		help: "Adds, removes and lists admins. Admin only."
-	},
-	callback: function (input, match) {
-		var args = match[1].split(" ");
-		if (args[0]) {
-			switch (args[0]) {
+cmdListen({
+	command: "admin",
+	help: "Adds, removes and lists admins. Admin only.",
+	syntax: config.command_prefix+"admin <add/remove/list>",
+	admin: true,
+	callback: function (input) {
+		if (input.args) {
+			switch (input.args[0]) {
 			case "add":
-				irc.say(input.context, permissions.Admin.Add(input.user, args[1], args[2]));
+				if (!input.args[2]) {
+					irc.notice(irc.nick, permissions.Admin.Syntax);
+					return;
+				}
+				irc.say(input.context, permissions.Admin.Add(input.nick+"!"+input.address, input.args[1], input.args[2]));
 				break;
 			case "remove":
-				if (!args[2]) irc.say(input.context, permissions.Admin.Remove(input.user, args[1]));
-				else irc.say(input.context, permissions.Admin.Remove(input.user, args[1], args[2]));
+				if (!input.args[1]) {
+					irc.notice(irc.nick, permissions.Admin.Syntax);
+					return;
+				}
+				if (!input.args[2]) {
+					irc.say(input.context, permissions.Admin.Remove(input.nick+"!"+input.address, input.args[1]));
+				} else {
+					irc.say(input.context, permissions.Admin.Remove(input.nick+"!"+input.address, input.args[1], input.args[2]));
+				}
 				break;
 			case "list":
-				if (args[1]) irc.notice(input.from, permissions.Admin.List(input.user, args[1]));
-				else irc.notice(input.from, permissions.Admin.List(input.user));
+				if (input.args[1]) irc.notice(input.nick, permissions.Admin.List(input.nick+"!"+input.address, input.args[1]));
+				else irc.notice(input.nick, permissions.Admin.List(input.nick+"!"+input.address));
 				break;
 			default:
 				irc.say(input.context, "[Help] Options are: add, remove, list");
@@ -63,148 +50,149 @@ listen_admin({
 	}
 });
 
-listen({
-	plugin: "admin",
-	handle: "secret",
-	regex: regexFactory.startsWith("secret"),
-	callback: function (input, match) {
-		var args = match[1].split(" ");
-		if (permissions.isAdmin(input.user)) {
+cmdListen({
+	command: "secret",
+	help: "Adds you to admins when there are none.",
+	syntax: config.command_prefix+"secret <passcode>",
+	callback: function (input) {
+		if (permissions.isAdmin(input.nick+"!"+input.address)) {
 			irc.say(input.context, "You are already an admin.");
 			return;
 		}
-		if (!args[0]) { 
-			irc.say(input.context, "[Help] Syntax: secret <secret> [mask]");
+		if (!input.args && !input.args[0]) { 
+			irc.notice(input.nick, cmdHelp("secret", "syntax"));
 			return;
 		}
-		irc.say(input.context, permissions.Admin.Secret(input.user, args[0], args[1]));
+		irc.say(input.context, permissions.Admin.Secret(input.nick+"!"+input.address, input.args[0], input.args[1]));
 	}
 });
 
-listen_admin({
-	plugin: "admin",
-	handle: "ignore",
-	regex: regexFactory.startsWith("ignore"),
-	callback: function (input, match) {
-		irc.ignore(match[1]);
-		irc.say(input.context, match[1] + " is now ignored.");
-	}
-});
-
-listen_admin({
-	plugin: "admin",
-	handle: "unignore",
-	regex: regexFactory.startsWith("unignore"),
-	callback: function (input, match) {
-		irc.unignore(match[1]);
-		irc.say(input.context, match[1] + " unignored");
-	}
-});
-
-listen_admin({
-	plugin: "admin",
-	handle: "ignorelist",
-	regex: regexFactory.only("ignorelist"),
+cmdListen({
+	command: "ignore",
+	help: "Ignores people!",
+	syntax: config.command_prefix+"ignore <nick>",
+	admin: true,
 	callback: function (input) {
-		irc.say(input.context, irc.ignoreList());
+		if (!input.args) {
+			irc.notice(input.nick, cmdHelp("ignore", "syntax"));
+			return;
+		}
+		irc.ignore(input.args[0]);
+		irc.say(input.context, input.args[0]+" is now ignored.");
 	}
 });
 
-listen_admin({
-	plugin: "admin",
-	handle: "reload",
-	regex: regexFactory.startsWith('reload'),
-	callback: function (input, match) {
-		var args, before, gain;
-		if (match[1]) {
-			args = match[1].split(" ");
-			if (!fs.existsSync('plugins/'+args[0]+'.js')) {
+
+cmdListen({
+	command: "unignore",
+	help: "Unignores!",
+	admin: true,
+	syntax: config.command_prefix+"unignore <nick>",
+	callback: function (input) {
+		if (!input.args) {
+			irc.notice(input.nick, cmdHelp("unignore", "syntax"));
+			return;
+		}
+		irc.unignore(input.args[0]);
+		irc.say(input.context, input.args[0] + " unignored");
+	}
+});
+
+cmdListen({
+	command: "ignorelist",
+	help: "Shows ignore list.",
+	admin: true,
+	callback: function (input) {
+		irc.notice(input.nick, irc.ignoreList());
+	}
+});
+
+cmdListen({
+	command: "reload",
+	help: "Reloads plugins, or a single plugin.",
+	syntax: config.command_prefix+"reload [<plugin>]",
+	admin: true,
+	callback: function (input) {
+		if (input.args) {
+			if (!fs.existsSync('plugins/'+input.args[0]+'.js')) {
 				irc.say(input.context, "There is no such plugin. o.o;");
 				return;
 			}
-			before = lib.memUse(true);
-			irc.reload(args[0]);
+			irc.reload(input.args[0]);
 		} else {
-			before = lib.memUse(true);
 			irc.reload();
 		}
-		gain = (lib.memUse(true)-before)/1024;
-		if (gain === 0) gain = " - Gained NOTHING! HA! 8D";
-		else {
-			if (gain > 1024) gain = " - Gained "+(gain/1024).toString().slice(0,3)+" MiB.. ;~;";
-			else gain = " - Gained "+gain.toString()+" KiB. :D";
-		}
-		irc.say(input.context, "Reloaded "+(args && args[0] ? args[0] : "scripts")+gain);
+		irc.say(input.context, "Reloaded "+(input.args && input.args[0] ? "the "+input.args[0]+" plugin." : "all plugins."));
 	}
 });
 
-listen_admin({
-	plugin: "admin",
-	handle: "raw",
-	regex: regexFactory.startsWith("raw"),
-	callback: function (input, match) {
-		irc.raw(match[1]);
+cmdListen({
+	command: "raw",
+	help: "Sends raw text to the server.",
+	admin: true,
+	callback: function (input) {
+		if (!input.data) return;
+		irc.raw(input.data);
 	}
 });
 
-listen_admin({
-	plugin: "admin",
-	handle: "join",
-	regex: regexFactory.startsWith("join"),
-	callback: function (input, match) {
-		if (match[1][0] === "#") {
-			irc.join(match[1]);
+cmdListen({
+	command: "join",
+	help: "Joins channels. What did you expect?",
+	admin: true,
+	callback: function (input) {
+		if (input.args && input.args[0][0] === "#") {
+			irc.join(input.data);
 		}
 	}
 });
 
-listen_admin({
-	plugin: "admin",
-	handle: "autojoin",
-	regex: regexFactory.startsWith("autojoin"),
-	callback: function (input, match) {
-		if (match[1][0] === "#") {
-			autojoinDB.saveOne(match[1]);
-			irc.say(input.context, "Added " + match[1] + " to autojoin list");
-		}
-	}
-});
-
-listen_admin({
-	plugin: "admin",
-	handle: "unautojoin",
-	regex: regexFactory.startsWith("unautojoin"),
-	callback: function (input, match) {
-		if (match[1][0] === "#") {
-			autojoinDB.removeOne(match[1], true);
-			irc.say(input.context, "Removed " + match[1] + " from autojoin list");
-		}
-	}
-});
-
-listen_admin({
-	plugin: "admin",
-	handle: "part",
-	regex: regexFactory.startsWith("part"),
-	callback: function (input, match) {
-		if (match[1][0] === "#") {
-			irc.part(match[1]);
-		} else if (match[1].length === 0 && input.context[0] === "#") {
+cmdListen({
+	command: "part",
+	help: "Leaves channels.",
+	admin: true,
+	callback: function (input) {
+		if (input.args && input.args[0][0] === "#") {
+			irc.part(input.data);
+		} else if (input.context[0] === "#") {
 			irc.part(input.context);
 		}
 	}
 });
 
-listen_admin({
-	plugin: "CORE",
-	handle: "quit",
-	regex: regexFactory.startsWith("quit"),
-	command: {
-		root: "quit",
-		options: "[QUIT MESSAGE]",
-		help: "Quittin' Time!"
-	},
-	callback: function (input, match) {
-		irc.quit(match[1]);
+cmdListen({
+	command: "autojoin",
+	help: "Adds channels to the autojoin list.",
+	admin: true,
+	callback: function (input) {
+		if (input.args && input.args[0][0] === "#") {
+			autojoinDB.saveOne(input.args[0]);
+			irc.say(input.context, "Added " + input.args[0] + " to autojoin list");
+		} else {
+			irc.say(input.context, "Herp.");
+		}
+	}
+});
+
+cmdListen({
+	command: "unautojoin",
+	help: "Removes channels from the autojoin list.",
+	admin: true,
+	callback: function (input) {
+		if (input.args && input.args[0][0] === "#") {
+			autojoinDB.removeOne(input.args[0], true);
+			irc.say(input.context, "Removed " + input.args[0] + " from autojoin list");
+		} else {
+			irc.say(input.context, "Derp.");
+		}
+	}
+});
+
+cmdListen({
+	command: "quit",
+	help: "Quits!",
+	admin: true,
+	callback: function (input) {
+		irc.quit((input.data ? input.data : "PEACE! I'm out."));
 	}
 });
