@@ -11,42 +11,57 @@ evListen({
 	}
 });
 
-listen({
-	plugin: "CORE",
+evListen({
 	handle: "nickChange",
-	regex: /^:[^ ]+ 433 [^ ]+ [^ ]+ :.*$/,
-	once: true,
-	callback: function () {
-		nickArr = nickArr.filter(function (element) {
-			return (currentNick !== element);
-		});
-		if (nickArr[0]) {
-			currentNick = nickArr[0];
-		} else {
-			currentNick = config.nickname[0] + lib.randNum(100);
+	event: "433",
+	callback: function (input) {
+		var i;
+		/*
+		 * must be the one we set in config.js, and we're not connected yet.
+		 * since it's tracked after that point, and only when it's changed
+		 * successfully.
+		 */
+		input.args = input.raw.split(" ");
+		if (input.args[3] === config.nick) {
+			if (config.nickname.length === 0 || config.nickname.length === 1) {
+				// we've used all possible nicks, lets try config.nick_.
+				setTimeout(function () {
+					config.nick = config.nick+"_";
+					irc.raw("NICK "+config.nick);
+				}, 1000);
+			} else {
+				for (i = 0; i < config.nickname.length; i++) {
+					console.log(config.nickname[i]+" - "+i);
+					if (config.nickname[i] === config.nick) {
+						config.nickname.splice(i, 1);
+					} else {
+						config.nick = config.nickname[i];
+						setTimeout(function () {
+							irc.raw("NICK " + config.nick);
+						}, 1000);
+					}
+				}
+			}
 		}
-		// 433 is nick taken
-		setTimeout(function () {
-			irc.raw("NICK " + currentNick);
-		}, 3000); // wait 3 seconds
+		input = null;
 	}
 });
 
-listen({
-	plugin: "CORE",
-	handle: 'nickserv',
-	regex: new RegExp('^:' + config.nickserv_nickname + '!' + config.nickserv_hostname + ' NOTICE [^ ]+ :This nickname is registered', 'i'),
-	callback: function () {
-		irc.say('NickServ', 'IDENTIFY ' + config.nickserv_password);
+evListen({
+	handle: "nickserv",
+	event: "NOTICE",
+	regex: new RegExp("^:"+config.nickserv_nickname+"!"+config.nickserv_hostname+" NOTICE [^ ]+ :This nickname is registered", "i"),
+	callback: function (input) {
+		irc.say("NickServ", "IDENTIFY " + config.nickserv_password);
 	}
 });
 
-listen({
-	plugin: "CORE",
+evListen({
 	handle: "ctcp",
+	event: "PRIVMSG",
 	regex: /^:[^ ]+ PRIVMSG [^ ]+ :\x01(VERSION|PING .*|TIME)\x01$/i,
-	callback: function (input, match) {
-		var ctcp = match[1].split(" ");
+	callback: function (input) {
+		var ctcp = input.match[1].split(" ");
 		switch (ctcp[0].toUpperCase()) {
 			case "VERSION":
 				irc.raw("NOTICE "+input.context+" :\x01VERSION Karionette ~ \x02"+lib.randSelect([
