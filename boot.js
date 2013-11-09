@@ -15,6 +15,7 @@ require("./lib/permissions.js");
 require("./lib/timers.js");
 require("./lib/words.js");
 require("./lib/caveman.js");
+require("./lib/login.js");
 
 var DB = require("./lib/fileDB.js"),
 	web = require("./lib/web.js"),
@@ -109,6 +110,7 @@ function createSandbox() {
 		DB: DB,
 		lib: lib,
 		ial: ial,
+		userLogin: userLogin,
 		timers: timers,
 		require: require,
 		regexFactory: regexFactory,
