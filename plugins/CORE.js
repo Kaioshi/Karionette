@@ -194,9 +194,6 @@ cmdListen({
 		if (!input.args || !input.args[0]) {
 			// show all commands
 			commandList = cmdList();
-			irc.help().forEach(function (entry) {
-				commandList.push(entry.root);
-			});
 			irc.say(input.context, "Available commands: "+commandList.sort().join(", "));
 			return;
 		}
@@ -211,21 +208,7 @@ cmdListen({
 			if (options) irc.say(input.context, options);
 			found = true;
 		} else {
-			// must not be caveman'd yet
-			cmdArr = irc.help();
-cmdCheck:	for (i = 0; i < cmdArr.length; i++) {
-				if (cmdArr[i].root === input.args[0]) {
-					if (cmdArr[i].options) { irc.say(input.context, "Options: "+cmdArr[i].options); }
-					if (cmdArr[i].help) { irc.say(input.context, cmdArr[i].help); }
-					found = true;
-					break cmdCheck;
-				}
-			}
-			cmdArr = null;
-		}
-		if (!found) {
-			irc.say(input.context, "[Help] Couldn't find a \""+cmd+"\" command, or it had no help. Try "+
-				config.command_prefix+"help on it's own to see a list of available commands.");
+			irc.say(input.context, "\""+cmd+"\" either has no help or isn't a command.");
 		}
 	}
 });
