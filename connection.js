@@ -5,9 +5,7 @@
  */
 require("./lib/ial.js");
 var net = require("net"),
-	fs = require("fs"),
-	DB = require("./lib/fileDB.js"),
-	ignoreDB = new DB.List({filename: "ignore"});
+	fs = require("fs");
 	
 //module.exports = function (Eventpipe) {
 module.exports = function () {
@@ -210,16 +208,7 @@ module.exports = function () {
 			}
 		},
 		// CORE COMMANDS
-		reload: function () {},
-		ignore: function (user) {
-			ignoreDB.saveOne(user);
-		},
-		unignore: function (user) {
-			ignoreDB.removeOne(user, true);
-		},
-		ignoreList: function () {
-			return (ignoreDB.getAll().join(", ") || "Ignoring no one ;)");
-		}
+		reload: function () {}
 	}
 };
 

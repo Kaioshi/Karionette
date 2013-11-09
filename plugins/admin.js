@@ -8,6 +8,7 @@
 //     ~reload - reload scripts
 
 var	autojoinDB = new DB.List({filename: 'autojoin'}),
+	ignoreDB = new DB.List({filename: "ignore"}),
 	fs = require('fs');
 
 cmdListen({
@@ -77,7 +78,7 @@ cmdListen({
 			irc.notice(input.nick, cmdHelp("ignore", "syntax"));
 			return;
 		}
-		irc.ignore(input.args[0]);
+		ignoreDB.saveOne(input.args[0]);
 		irc.say(input.context, input.args[0]+" is now ignored.");
 	}
 });
@@ -93,7 +94,7 @@ cmdListen({
 			irc.notice(input.nick, cmdHelp("unignore", "syntax"));
 			return;
 		}
-		irc.unignore(input.args[0]);
+		ignoreDB.removeOne(input.args[0], true);
 		irc.say(input.context, input.args[0] + " unignored");
 	}
 });
@@ -103,7 +104,7 @@ cmdListen({
 	help: "Shows ignore list.",
 	admin: true,
 	callback: function (input) {
-		irc.notice(input.nick, irc.ignoreList());
+		irc.say(input.context, (ignoreDB.getAll().join(", ") || "Ignoring no one. ;)"));
 	}
 });
 
