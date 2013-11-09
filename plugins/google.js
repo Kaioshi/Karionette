@@ -97,9 +97,8 @@ cmdListen({
 cmdListen({
 	command: "define",
 	help: "Google search's define: keyword.",
-	syntax: "[Help] Syntax: "+config.command_prefix+
-		"define <word> - this uses google's define: keyword you're probably familiar "+
-		"with - and so it is just as limited as that.",
+	syntax: config.command_prefix+"define <word> - this uses google's define: \
+		keyword you're probably familiar with - and so it is just as limited as that.",
 	callback: function (input) {
 		var definition, uri, meaning, related, type;
 		
