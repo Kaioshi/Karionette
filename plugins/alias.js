@@ -23,10 +23,7 @@ cmdListen({
 						irc.say(input.context, "You need to own the "+cmd+" alias to overwrite it.");
 						return;
 					}
-					cmdArr = [];
-					irc.help().forEach(function (entry) {
-						cmdArr.push(entry.root);
-					});
+					cmdArr = cmdList();
 					for (i = 0; i < cmdArr.length; i++) {
 						if (cmdArr[i] === cmd) {
 							irc.say(input.context, "The "+cmd+" command is taken by a plugin or core function. I declare shenanigans! SHENANIGANS!!#*&^! >:(");
