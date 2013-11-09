@@ -26,7 +26,11 @@ evListen({
 	event: "PART",
 	callback: function (input) {
 		if (input.nick === config.nick) ial.Remove(input.channel);
-		else ial.Remove(input.channel, input.nick);
+		else {
+			setTimeout(function () {
+				ial.Remove(input.channel, input.nick);
+			}, 200);
+		}
 	}
 });
 
@@ -35,7 +39,11 @@ evListen({
 	event: "KICK",
 	callback: function (input) {
 		if (input.kicked === config.nick) ial.Remove(input.channel);
-		else ial.Remove(input.channel, input.kicked);
+		else {
+			setTimeout(function () {
+				ial.Remove(input.channel, input.kicked);
+			}, 200);
+		}
 	}
 });
 
