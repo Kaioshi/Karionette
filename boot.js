@@ -11,7 +11,6 @@ require("./config.js");
 require("./lib/funcs.js");
 require("./lib/logger.js");
 require("./lib/ial.js");
-require("./lib/permissions.js");
 require("./lib/perms.js");
 require("./lib/timers.js");
 require("./lib/words.js");
@@ -119,9 +118,9 @@ function createSandbox() {
 		cmdListen: caveman.commandListen,
 		cmdHelp: caveman.cmdHelp,
 		cmdList: caveman.cmdList,
+		cmdExists: caveman.cmdExists,
 		logger: logger,
 		words: words,
-		permissions: permissions,
 		perms: perms,
 		globals: globals
 	};
@@ -141,7 +140,6 @@ process.on('uncaughtException', function (err) {
 });
 
 Plugin.loadAll(createSandbox());
-//Eventpipe.setHandles();
 
 IRC.open({
 	server: irc_config.server,
