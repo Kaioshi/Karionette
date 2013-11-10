@@ -12,63 +12,6 @@ var	autojoinDB = new DB.List({filename: 'autojoin'}),
 	fs = require('fs');
 
 cmdListen({
-	command: "admin",
-	help: "Adds, removes and lists admins. Admin only.",
-	syntax: config.command_prefix+"admin <add/remove/list>",
-	admin: true,
-	callback: function (input) {
-		if (input.args) {
-			switch (input.args[0]) {
-			case "add":
-				if (!input.args[2]) {
-					irc.notice(irc.nick, permissions.Admin.Syntax);
-					return;
-				}
-				irc.say(input.context, permissions.Admin.Add(input.nick+"!"+input.address, input.args[1], input.args[2]));
-				break;
-			case "remove":
-				if (!input.args[1]) {
-					irc.notice(irc.nick, permissions.Admin.Syntax);
-					return;
-				}
-				if (!input.args[2]) {
-					irc.say(input.context, permissions.Admin.Remove(input.nick+"!"+input.address, input.args[1]));
-				} else {
-					irc.say(input.context, permissions.Admin.Remove(input.nick+"!"+input.address, input.args[1], input.args[2]));
-				}
-				break;
-			case "list":
-				if (input.args[1]) irc.notice(input.nick, permissions.Admin.List(input.nick+"!"+input.address, input.args[1]));
-				else irc.notice(input.nick, permissions.Admin.List(input.nick+"!"+input.address));
-				break;
-			default:
-				irc.say(input.context, "[Help] Options are: add, remove, list");
-				break;
-			}
-		} else {
-			irc.say(input.context, "You da admin.");
-		}
-	}
-});
-
-cmdListen({
-	command: "secret",
-	help: "Adds you to admins when there are none.",
-	syntax: config.command_prefix+"secret <passcode>",
-	callback: function (input) {
-		if (permissions.isAdmin(input.nick+"!"+input.address)) {
-			irc.say(input.context, "You are already an admin.");
-			return;
-		}
-		if (!input.args && !input.args[0]) { 
-			irc.notice(input.nick, cmdHelp("secret", "syntax"));
-			return;
-		}
-		irc.say(input.context, permissions.Admin.Secret(input.nick+"!"+input.address, input.args[0], input.args[1]));
-	}
-});
-
-cmdListen({
 	command: "ignore",
 	help: "Ignores people!",
 	syntax: config.command_prefix+"ignore <nick>",
