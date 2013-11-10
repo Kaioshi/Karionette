@@ -139,7 +139,7 @@ cmdListen({
 						} else {
 							// need to be an admin to add someone who isn't you
 							if (reg[1] !== input.nick) {
-								if (permissions.isAdmin(input.user)) {
+								if (userLogin.isAdmin(input.user)) {
 									irc.say(input.context, "Adding "+reg[1]+" to "+reg[2]+"'s announce list, since you're an admin.");
 									feed.announce.push(reg[1]);
 									mangaDB.saveOne(reg[2], feed);
@@ -165,7 +165,7 @@ cmdListen({
 							return;
 						}
 						if (feed.announce.some(function (entry) { return (entry === reg[1]); })) {
-							if (reg[1][0] !== '#' && reg[1] !== input.nick && !permissions.isAdmin(input.user)) {
+							if (reg[1][0] !== '#' && reg[1] !== input.nick && !userLogin.isAdmin(input.user)) {
 								irc.say(input.context, "You need to be an admin to remove people other than yourself.");
 								return;
 							}

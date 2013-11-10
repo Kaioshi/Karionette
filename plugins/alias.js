@@ -6,8 +6,8 @@ cmdListen({
 	command: "alias",
 	help: "Allows user defined 'commands' (Eg: The alias "+config.command_prefix+
 		"mal becomes google site:myanimelist.net). Vars can be used- see var help for more information",
-	syntax: config.command_prefix+"alias <add/remove/info/list> <alias name> - Example: "+
-		config.command_prefix+"alias add mal g site:myanimelist.net {args*}",
+	syntax: config.command_prefix+"alias <add/remove/info/list> <alias name> - \
+		Example: "+config.command_prefix+"alias add mal g site:myanimelist.net {args*}",
 	callback: function (input) {
 		var aKeys, aliasList, i, alias, cmdArr, permission, cmd, aliasString;
 		if (input.args && input.args[0]) {
@@ -19,42 +19,43 @@ cmdListen({
 				if (cmd && aliasString) {
 					cmd = cmd.toLowerCase();
 					alias = aliasDB.getOne(cmd);
-					if (alias && !permissions.isOwner("alias", cmd, input.user)) {
+					if (alias && !perms.isOwner(input.user, "alias", cmd)) {
 						irc.say(input.context, "You need to own the "+cmd+" alias to overwrite it.");
 						return;
 					}
 					cmdArr = cmdList();
 					for (i = 0; i < cmdArr.length; i++) {
 						if (cmdArr[i] === cmd) {
-							irc.say(input.context, "The "+cmd+" command is taken by a plugin or core function. I declare shenanigans! SHENANIGANS!!#*&^! >:(");
+							irc.say(input.context, "The "+cmd+" command is taken by a plugin or core \
+								function. I declare shenanigans! SHENANIGANS!!#*&^! >:(");
 							return;
 						}
 					}
-					permissions.Owner.Add(input.user, "alias", cmd, ial.toMask(input.user));
+					perms.Action(input.user, "owner add", "alias", cmd);
 					aliasDB.saveOne(cmd, aliasString);
 					irc.say(input.context, "Added :)");
 				} else {
-					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
-						"alias add <alias name> <command> - Example: "+config.command_prefix+
-						"alias add mitchslap action mitchslaps {args1}");
+					irc.say(input.context, config.command_prefix+"alias add <alias name> <command> - \
+						Example: "+config.command_prefix+"alias add mitchslap action mitchslaps {args1}");
 				}
 				break;
 			case "remove":
 				if (cmd) {
 					alias = aliasDB.getOne(cmd);
 					if (alias) { 
-						if (!permissions.isOwner("alias", cmd, input.user)) {
-							irc.say(input.context, "You need to own the "+cmd+" alias to remove it.");
+						if (!perms.isOwner(input.user, "alias", cmd)) {
+							irc.say(input.context, "You need to own the "+cmd+" alias to remove it. If you \
+								do own it, have you identified?");
 							return;
 						}
 						aliasDB.removeOne(cmd);
-						permissions.Delete(input.user, "alias", cmd);
+						perms.Action(input.user, "delete all", "alias", cmd);
 						irc.say(input.context, "Removed :)");
 					} else {
 						irc.say(input.context, "There is no such alias. o.O");
 					}
 				} else {
-					irc.say(input.context, "[Help] What should I remove?");
+					irc.say(input.context, "What should I remove?");
 				}
 				break;
 			case "list":
@@ -67,6 +68,7 @@ cmdListen({
 						irc.say(input.context, list.sort().join(", "));
 						break;
 					}
+					list = null;
 				}
 				irc.say(input.context, "There are no aliases yet.");
 				break;
@@ -74,12 +76,12 @@ cmdListen({
 				if (cmd) {
 					alias = aliasDB.getOne(cmd);
 					if (alias) {
-						permission = permissions.Info(input.user, "alias", cmd);
 						irc.say(input.context, "The alias string for " + cmd + " is: " + alias);
-						if (permission) irc.notice(input.nick, permission);
-					} else irc.say(input.context, "There is no such alias.");
+					} else {
+						irc.say(input.context, "There is no such alias.");
+					}
 				} else {
-					irc.say(input.context, "[Help] Which alias do you want info about?");
+					irc.say(input.context, "Which alias do you want info about?");
 				}
 				break;
 			default:
@@ -111,28 +113,21 @@ cmdListen({
 					varName = "{" + input.args[1] + "}";
 					variable = varDB.getOne(varName);
 					if (variable) {
-						permission = true;
-						owners = permissions.List("variable", input.args[1], "owner");
-						if (owners && owners.length > 0) {
-							permission = permissions.isOwner("variable", input.args[1], input.user);
-						} else {
-							permission = permissions.Check("variable", input.args[1], input.user);
-						}
-						if (permission) {
+						if (perms.isOwner(input.user, "variable", input.args[1])) {
 							varDB.saveOne(varName, varString);
 							irc.say(input.context, "Overwritten :S");
 						} else {
-							irc.reply(input, "you don't have permission to overwrite " + varName);
+							irc.say(input.context, "You need to own "+varName+" to overwrite it.");
 						}
 					} else {
 						varDB.saveOne(varName, varString);
-						permissions.Owner.Add(input.user, "variable", input.args[1], ial.toMask(input.user));
+						perms.Action(input.user, "owner add", "variable", input.args[1]);
 						irc.say(input.context, "Created :)");
 					}
 				} else {
-					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
-						"var add <variable> <entry> - Example: "+config.command_prefix+
-						"var add anime_list Steins;Gate, Hellsing Ultimate, Hyouka");
+					irc.say(input.context, config.command_prefix+"var add <variable> <entry> - \
+						Example: "+config.command_prefix+"var add anime_list Steins;Gate, \
+						Hellsing Ultimate, Hyouka");
 				}
 				break;
 			case "append":
@@ -140,21 +135,20 @@ cmdListen({
 					varName = "{" + input.args[1] + "}";
 					variable = varDB.getOne(varName);
 					if (variable) {
-						if (permissions.Check("variable", input.args[1], input.user)) {
+						if (perms.Check(input.user, "variable", input.args[1])) {
 							varDB.saveOne(varName, variable + " " + varString);
 							irc.say(input.context, "Added o7");
 						} else {
-							irc.reply(input, "you don't have permission to do that.");
+							irc.say(input.context, "You don't have permission to do that.");
 						}
 					} else {
 						varDB.saveOne(varName, varString);
-						permissions.Owner.Add(input.user, "variable", input.args[1], ial.toMask(input.user));
 						irc.say(input.context, "Added o7");
 					}
 				} else {
-					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
-						"var append <variable> <entry> - Example: "+config.command_prefix+
-						"var append towatch ranma's DIY guide to unplugging a butt.");
+					irc.say(input.context, config.command_prefix+"var append <variable> <entry> - \
+						Example: "+config.command_prefix+"var append towatch ranma's DIY guide to \
+						unplugging a butt.");
 				}
 				break;
 			case "seppend":
@@ -163,22 +157,22 @@ cmdListen({
 					varName = "{" + input.args[1] + "}";
 					variable = varDB.getOne(varName);
 					if (variable) {
-						if (permissions.Check("variable", input.args[1], input.user)) {
+						if (perms.Check(input.user, "variable", input.args[1])) {
 							varDB.saveOne(varName, variable + (input.args[2] === "," ? ", "
 								: " " + input.args[2] + " ") + varString.trim());
 							irc.say(input.context, "Added o7");
 						} else {
-							irc.reply(input, "you don't have permission to do that.");
+							irc.say(input.context, "You don't have permission to do that.");
 						}
 					} else {
 						varDB.saveOne(varName, varString.trim());
-						permissions.Owner.Add(input.user, "variable", input.args[1], ial.toMask(input.user));
+						// not sure what to do in this situation, usually if someone creates a 
+						// variable via seppend, it was part of an alias. Leave it I suppose.
 						irc.say(input.context, "Added o7");
 					}
 				} else {
-					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
-						"var seppend <variable> <separator> <entry> - Example: "+config.command_prefix+
-						"var seppend towatch | Black Books");
+					irc.say(input.context, config.command_prefix+"var seppend <variable> <separator> <entry> - \
+						Example: "+config.command_prefix+"var seppend towatch | Black Books");
 				}
 				break;
 			case "seprem":
@@ -187,14 +181,15 @@ cmdListen({
 					varName = "{" + input.args[1] + "}";
 					variable = varDB.getOne(varName);
 					if (variable) {
-						if (permissions.Check("variable", input.args[1], input.user)) {
+						if (perms.Check(input.user, "variable", input.args[1])) {
 							if (variable === varString) {
-								if (permissions.isOwner("variable", input.args[1], input.user)) {
+								if (perms.isOwner(input.user, "variable", input.args[1])) {
 									varDB.removeOne(varName);
-									permissions.Delete(input.user, "variable", input.args[1]);
+									perms.Action(input.user, "delete all", "variable", input.args[1]);
 									irc.say(input.context, "Removed o7");
 								} else {
-									irc.say(input.context, "This would remove the last entry, and thus the variable - you need to be an owner to do that.");
+									irc.say(input.context, "This would remove the last entry, and thus the \
+										variable - you need to be an owner to do that.");
 								}
 							} else {
 								varDB.saveOne(varName, variable.split((input.args[2] === "," ? ", " : " " + input.args[2] + " "))
@@ -205,15 +200,14 @@ cmdListen({
 								irc.say(input.context, "Removed o7");
 							}
 						} else {
-							irc.reply(input, "you don't have permission to do that.");
+							irc.say(input.context, "You don't have permission to do that.");
 						}
 					} else {
 						irc.say("[Error] There is no " + varName + " variable.");
 					}
 				} else {
-					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
-						"var seprem <varname> <separator> <entry> - Example: "+config.command_prefix+
-						"var seprem anime_list | Boku no Pico");
+					irc.say(input.context, config.command_prefix+"var seprem <varname> <separator> <entry> - \
+						Example: "+config.command_prefix+"var seprem anime_list | Boku no Pico");
 				}
 				break;
 			case "seprand":
@@ -225,12 +219,11 @@ cmdListen({
 						else arr = variable.split(" "+input.args[2]+" ");
 						irc.say(input.context, lib.randSelect(arr));
 					} else {
-						irc.reply(input, "there is no " + varName + " variable.");
+						irc.say(input.context, "there is no " + varName + " variable.");
 					}
 				} else {
-					irc.say(input.contex, "[Help] Syntax: "
-						+config.command_prefix+"var seprand <varname> <separator> - Example: "
-						+config.command_prefix+"var seprand anime_list |");
+					irc.say(input.contex, config.command_prefix+"var seprand <varname> <separator> - \
+						Example: "+config.command_prefix+"var seprand anime_list |");
 				}
 				break;
 			case "remove":
@@ -238,19 +231,19 @@ cmdListen({
 					varName = "{"+input.args[1]+"}";
 					variable = varDB.getOne(varName);
 					if (variable) {
-						if (!permissions.isOwner("variable", input.args[1], input.user)) {
-							irc.reply(input, "you don't have permission to do that.");
+						if (!perms.isOwner(input.user, "variable", input.args[1])) {
+							irc.say(input.context, "You don't have permission to do that.");
 							return;
 						}
 						varDB.removeOne(varName);
-						permissions.Delete(input.user, "variable", input.args[1]);
+						perms.Action(input.user, "delete all", "variable", input.args[1]);
 						irc.say(input.context, "Removed o7");
 					} else {
 						irc.say(input.context, "There is no such variable. O.o;");
 					}
 				} else {
-					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
-						"var remove <variable> - Example: "+config.command_prefix+"var remove anime_list");
+					irc.say(input.context, config.command_prefix+"var remove <variable> - \
+						Example: "+config.command_prefix+"var remove anime_list");
 				}
 				break;
 			case "info":
@@ -258,15 +251,13 @@ cmdListen({
 					varName = "{" + input.args[1] + "}";
 					variable = varDB.getOne(varName)
 					if (variable) {
-						permission = permissions.Info(input.user, "variable", input.args[1]);
 						irc.say(input.context, "Variable " +varName + " contains: \"" + variable + "\"");
-						if (permission) irc.notice(input.nick, permission);
 					} else {
 						irc.say(input.context, "There is no such variable.");
 					}
 				} else {
-					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
-						"var info <variable> - Example: "+config.command_prefix+"var info anime_list");
+					irc.say(input.context, config.command_prefix+"var info <variable> - \
+						Example: "+config.command_prefix+"var info anime_list");
 				}
 				break;
 			case "list":

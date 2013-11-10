@@ -176,7 +176,7 @@ cmdListen({
 	help: "Makes me notice things. Like your new shoes!",
 	syntax: config.command_prefix+"notice <target> <what you want me to notice them>",
 	callback: function (input) {
-		if (input.args[0][0] === "#" && !permissions.isAdmin(input.nick+"!"+input.address)) {
+		if (input.args[0][0] === "#" && !userLogin.isAdmin(input.user)) {
 			irc.notice(input.nick, "No. Only admins can make me notice an entire channel.");
 			return;
 		}

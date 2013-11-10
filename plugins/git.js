@@ -6,7 +6,7 @@ cmdListen({
 	callback: function (input) {
 		var reg;
 		if (input.args && input.args[0] === "pull") { 
-			if (permissions.isAdmin(input.nick+"!"+input.address)) {
+			if (userLogin.isAdmin(input.user)) {
 				sys.exec("git pull", function (error, stdout, stderr) {
 					if (stdout === "Already up-to-date.\n") irc.say(input.context, stdout.slice(0,-1));
 					else {

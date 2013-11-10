@@ -58,14 +58,14 @@ cmdListen({
 					irc.say(input.context, words[input.args[0]].get(input.args[2]));
 					break;
 				case "add":
-					if (!permissions.isAdmin(input.user)) {
+					if (!userLogin.isAdmin(input.user)) {
 						irc.say(input.context, "Admins only sucka.");
 						return;
 					}
 					irc.say(input.context, words[input.args[0]].add(input.args[2]));
 					break;
 				case "remove":
-					if (!permissions.isAdmin(input.user)) {
+					if (!userLogin.isAdmin(input.user)) {
 						irc.say(input.context, "Admins only sucka!");
 						return;
 					}
@@ -95,21 +95,21 @@ cmdListen({
 						else irc.say(input.context, entry.base+" - "+entry.s+" - "+entry.ed+" - "+entry.ing);
 						break;
 					case "remove":
-						if (!permissions.isAdmin(input.user)) {
+						if (!userLogin.isAdmin(input.user)) {
 							irc.say(input.context, "Admins only.");
 							return;
 						}
 						irc.say(input.context, words.verb.remove(input.args[2]));
 						break;
 					case "add":
-						if (!permissions.isAdmin(input.user)) {
+						if (!userLogin.isAdmin(input.user)) {
 							irc.say(input.context, "Admins only.");
 							return;
 						}
 						irc.say(input.context, words.verb.add(input.args.slice(2).join(" ")));
 						break;
 					case "correct":
-						if (!permissions.isAdmin(input.user)) {
+						if (!userLogin.isAdmin(input.user)) {
 							irc.say(input.context, "Admins only.");
 							return;
 						}
