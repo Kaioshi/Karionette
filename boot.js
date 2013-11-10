@@ -12,6 +12,7 @@ require("./lib/funcs.js");
 require("./lib/logger.js");
 require("./lib/ial.js");
 require("./lib/permissions.js");
+require("./lib/perms.js");
 require("./lib/timers.js");
 require("./lib/words.js");
 require("./lib/caveman.js");
@@ -121,6 +122,7 @@ function createSandbox() {
 		logger: logger,
 		words: words,
 		permissions: permissions,
+		perms: perms,
 		globals: globals
 	};
 }
