@@ -80,7 +80,7 @@ var bmhelp = {
 };
 
 cmdListen({
-	command: "bm",
+	command: [ "bm", "bookmark" ],
 	help: "Allows you to store links for later retrieval.",
 	syntax: config.command_prefix+
 		"bm [-a(dd) / -r(emove) / -l(ist) / -f(ind) / -h(elp)] [<handle>] [<url>] - Example: "
