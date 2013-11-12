@@ -59,9 +59,6 @@ evListen({
 			}, 200);
 		});
 		user = input.nick+"!"+input.address;
-		if (globals.admins[user] !== undefined) {
-			delete globals.admins[user];
-		}
 		user = null;
 	}
 });
@@ -84,9 +81,6 @@ evListen({
 			ial.updateUser(channel, input.nick, input.newnick, input.address);
 		});
 		user = input.nick+"!"+input.address;
-		if (globals.admins[user] !== undefined) {
-			delete globals.admins[user];
-		}
 	}
 });
 
