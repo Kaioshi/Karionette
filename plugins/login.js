@@ -114,15 +114,15 @@ cmdListen({
 			userLogin.unsetAttribute(username, input.args[0]);
 			irc.say(input.context, "\""+input.args[0]+"\" "+lib.randSelect([
 				"is no more.",
-				"has gone into the night.",
-				"has entered it's eternal slumber.",
+				"has gone quietly into the night.",
+				"has entered its eternal slumber.",
 				"has perished.",
 				"has been slain.",
-				"has met it's end at the hands of a dainty squirrel.",
+				"met its end at the hands of a dainty squirrel.",
 				"has been unset.",
 				"crossed into the nether.",
 				"faded into the mist.",
-				"has collapsed on your doorstep, gasping it's final breaths before succumbing to the eternal sleep..."
+				"has collapsed on your doorstep, gasping its final breaths before succumbing to the eternal sleep..."
 			]));
 		}
 	}
@@ -192,9 +192,13 @@ evListen({
 	handle: "loginNick",
 	event: "NICK",
 	callback: function (input) {
-		var user = userLogin.Check(input.user);
+		var user = userLogin.Check(input.user),
+			newuser;
 		if (user) {
-			userLogin.loggedIn[user].user = input.newnick+"!"+input.address;
+			newuser = input.newnick+"!"+input.address;
+			delete userLogin.loginCache[input.user];
+			userLogin.loginCache[newuser] = user;
+			userLogin.loggedIn[user].user = newuser;
 		}
 	}
 });
@@ -205,6 +209,7 @@ evListen({
 	callback: function (input) {
 		var user = userLogin.Check(input.user);
 		if (user) {
+			delete userLogin.loginCache[input.user];
 			delete userLogin.loggedIn[user];
 		}
 	}
