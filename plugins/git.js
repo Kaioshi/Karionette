@@ -9,7 +9,7 @@ cmdListen({
 			if (userLogin.isAdmin(input.user)) {
 				sys.exec("git pull", function (error, stdout, stderr) {
 					stdout = stdout.split("\n");
-					irc.say(input.context, stdout[stdout.length-2]);
+					irc.say(input.context, stdout[stdout.length-2].slice(1));
 				});
 			} else {
 				irc.say(input.context, "Only admins may pull the git.");
