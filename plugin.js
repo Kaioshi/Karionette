@@ -20,14 +20,17 @@ module.exports = (function () {
 				scripts = fs.readdirSync('plugins');
 			clearCache();
 			for (i = 0; i < scripts.length; i += 1) {
-				if (scripts[i].substr(-3) === '.js' && scripts[i].substr(-9) !== '.child.js') {
-					logger.info("Loading plugin " + scripts[i] + "...");
-					current = fs.readFileSync('plugins/' + scripts[i]);
-					if (current) {
-						try {
-							vm.runInContext("(function() {" + current + "}())", context, scripts[i]);
-						} catch (err) {
-							logger.error("Error in plugin " + scripts[i], err);
+				if (irc_config.disabled_plugins && irc_config.disabled_plugins.length > 0 &&
+					!irc_config.disabled_plugins.some(function (entry) { return (entry === scripts[i].slice(0,-3)); })) {
+					if (scripts[i].substr(-3) === '.js' && scripts[i].substr(-9) !== '.child.js') {
+						logger.info("Loading plugin " + scripts[i] + "...");
+						current = fs.readFileSync('plugins/' + scripts[i]);
+						if (current) {
+							try {
+								vm.runInContext("(function() {" + current + "}())", context, scripts[i]);
+							} catch (err) {
+								logger.error("Error in plugin " + scripts[i], err);
+							}
 						}
 					}
 				}
