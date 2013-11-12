@@ -3,6 +3,7 @@ cmdListen({
 	command: "last",
 	help: "Shows the last error/warning, if there is one.",
 	syntax: config.command_prefix + "last <warning/error> [clear]",
+	admin: true,
 	callback: function (input) {
 		if (!input.args || !input.args[0]) {
 			irc.say(input.context, cmdHelp("last", "syntax"));
