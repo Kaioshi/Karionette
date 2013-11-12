@@ -62,6 +62,73 @@ cmdListen({
 });
 
 cmdListen({
+	command: "set",
+	help: "Sets or shows per-user attributes. See also: unset",
+	syntax: config.command_prefix+"set [<attribute>] [<value>] - Supply a value to set it, none to show it, \
+		or no args to see all attributes.",
+	callback: function (input) {
+		var username, entry;
+		username = userLogin.Check(input.user);
+		if (!username) {
+			irc.say(input.context, "Unsurprisingly, you need to be logged in to set your attributes.");
+			return;
+		}
+		if (!input.args) {
+			entry = userLogin.getAttribute(username);
+			irc.say(input.context, (entry ? "You have the following attributes set, "+entry : 
+				"You have no attributes set."));
+			return;
+		}
+		if (!input.args[1]) {
+			entry = userLogin.getAttribute(username, input.args[0]);
+			irc.say(input.context, (entry ? "Your "+input.args[0]+" attribute is set to: \""+entry+"\"" : 
+				"No such thing is set."));
+			return;
+		}
+		userLogin.setAttribute(username, input.args[0], input.args.slice(1).join(" "));
+		irc.say(input.context, "Ok.");
+	}
+});
+
+cmdListen({
+	command: "unset",
+	help: "Unsets per-user attributes. See also: set",
+	syntax: config.command_prefix+"unset <attribute> - Supply no args to see your current attributes.",
+	callback: function (input) {
+		var username, entry;
+		username = userLogin.Check(input.user);
+		if (!username) {
+			irc.say(input.context, "You need to log in first.");
+			return;
+		}
+		if (!input.args) {
+			entry = userLogin.getAttribute(username);
+			irc.say(input.context, (entry ? "You have the following attributes set, "+entry :
+				"You have no attributes set."));
+			return;
+		}
+		entry = userLogin.getAttribute(username, input.args[0]);
+		if (!entry) {
+			irc.say(input.context, "No such thing is set.");
+		} else {
+			userLogin.unsetAttribute(username, input.args[0]);
+			irc.say(input.context, "\""+input.args[0]+"\" "+lib.randSelect([
+				"is no more.",
+				"has gone into the night.",
+				"has entered it's eternal slumber.",
+				"has perished.",
+				"has been slain.",
+				"has met it's end at the hands of a dainty squirrel.",
+				"has been unset.",
+				"crossed into the nether.",
+				"faded into the mist.",
+				"has collapsed on your doorstep, gasping it's final breaths before succumbing to the eternal sleep..."
+			]));
+		}
+	}
+});
+
+cmdListen({
 	command: "adduser",
 	help: "Adds a user to the bot. See also: deluser, whoami, identify, unidentify",
 	syntax: config.command_prefix+"adduser <username> <password> [<secret>] - \
