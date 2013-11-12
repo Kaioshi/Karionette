@@ -4,7 +4,8 @@ Forked from: https://github.com/Deide/Marionette
 
 ## Dependencies & Install
 ```
-No dependencies!
+On Linux/*NIX, you will need 'curl' installed.
+>Debian/Ubuntu~ $ sudo apt-get install curl
 ```
 
 > * Copy "config.default" to "config.js" and edit appropriately.
