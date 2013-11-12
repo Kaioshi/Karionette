@@ -199,6 +199,7 @@ evListen({
 			delete userLogin.loginCache[input.user];
 			userLogin.loginCache[newuser] = user;
 			userLogin.loggedIn[user].user = newuser;
+			userLogin.saveState();
 		}
 	}
 });
@@ -211,6 +212,7 @@ evListen({
 		if (user) {
 			delete userLogin.loginCache[input.user];
 			delete userLogin.loggedIn[user];
+			userLogin.saveState();
 		}
 	}
 });
