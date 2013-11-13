@@ -2,7 +2,6 @@
 global.globals = {
 	lastError: "",
 	lastWarning: "",
-	admins: { lastCheck: new Date().getTime() },
 	channels: {},
 	startTime: new Date()
 };
