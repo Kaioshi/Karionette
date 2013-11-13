@@ -40,6 +40,8 @@ cmdListen({
 		var user = userLogin.Check(input.user);
 		if (user) {
 			delete userLogin.loggedIn[user];
+			delete userLogin.loginCache[input.user];
+			userLogin.saveState();
 			irc.say(input.nick, "I no longer recognize you as "+user+".");
 			return;
 		}
