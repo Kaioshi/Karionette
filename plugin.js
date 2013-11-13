@@ -21,7 +21,9 @@ module.exports = (function () {
 			clearCache();
 			for (i = 0; i < scripts.length; i += 1) {
 				if (irc_config.disabled_plugins && irc_config.disabled_plugins.length > 0 &&
-					!irc_config.disabled_plugins.some(function (entry) { return (entry === scripts[i].slice(0,-3)); })) {
+					irc_config.disabled_plugins.some(function (entry) { return (entry === scripts[i].slice(0,-3)); })) {
+					logger.info("Not loading plugin "+scripts[i]+".");
+				} else {
 					if (scripts[i].substr(-3) === '.js' && scripts[i].substr(-9) !== '.child.js') {
 						logger.info("Loading plugin " + scripts[i] + "...");
 						current = fs.readFileSync('plugins/' + scripts[i]);
