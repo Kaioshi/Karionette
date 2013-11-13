@@ -62,7 +62,8 @@ cmdListen({
 				irc.say(input.context, "There is no such plugin. o.o;");
 				return;
 			}
-			if (config.disabled_plugins.some(function (entry) { return (entry === input.args[0]); })) {
+			if (config.disabled_plugins && config.disabled_plugins.length > 0 &&
+				config.disabled_plugins.some(function (entry) { return (entry === input.args[0]); })) {
 				irc.say(input.context, "This plugin is in the disabled plugins list, in config.js - loading it anyway.");
 			}
 			irc.reload(input.args[0]);
