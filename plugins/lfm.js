@@ -80,8 +80,8 @@ cmdListen({
 					}
 					tags = (tags.length > 0 ? " ~ ["+tags.join(", ")+"]" : "");
 					irc.say(input.context,"Artist: "+result.artist.name+formed+from+tags+
-						" ~ Total Plays: "+result.artist.stats.playcount+
-						", Listeners: "+result.artist.stats.listeners);
+						" ~ Total Plays: "+lib.commaNum(result.artist.stats.playcount)+
+						", Listeners: "+lib.commaNum(result.artist.stats.listeners));
 					summary = ent.decode(lib.stripHtml(result.artist.bio.summary));
 					summary = (summary.length > 0 ? summary : "There was no artist summary. Did you spell it correctly?");
 					irc.say(input.context, summary, true, 1);
@@ -110,13 +110,14 @@ cmdListen({
 							keys = Object.keys(result.artists.artist);
 							for (i = 0; i < keys.length; i++) {
 								artist = result.artists.artist[i];
-								ret.push("#"+(i+1)+" "+artist.name+" (Playcount: "+artist.playcount+")");
+								ret.push("#"+(i+1)+" "+artist.name+" (Playcount: "+lib.commaNum(artist.playcount)+")");
 							}
 						} else {
 							keys = Object.keys(result.tracks.track);
 							for (i = 0; i < keys.length; i++) {
 								track = result.tracks.track[i];
-								ret.push("#"+(i+1)+" "+track.artist.name+" ~ "+track.name+" (Playcount: "+track.playcount+")");
+								ret.push("#"+(i+1)+" "+track.artist.name+" ~ "+track.name+
+									" (Playcount: "+lib.commaNum(track.playcount)+")");
 							}
 						}
 						irc.say(input.context, ret.join(", "));
@@ -137,7 +138,8 @@ cmdListen({
 					ret = [];
 					for (i = 0; i < keys.length; i++) {
 						track = result.toptracks.track[i];
-						ret.push("#"+(i+1)+" "+track.artist.name+" ~ "+track.name+" (Playcount: "+track.playcount+")");
+						ret.push("#"+(i+1)+" "+track.artist.name+" ~ "+track.name+
+							" (Playcount: "+lib.commaNum(track.playcount)+")");
 					}
 					irc.say(input.context, ret.join(", "));
 				});
@@ -186,7 +188,7 @@ cmdListen({
 						"\" (Code: "+result.error+"). Pantsu.");
 					return;
 				}
-				song.userplays = (result.track.userplaycount ? " - User Plays: "+result.track.userplaycount : "");
+				song.userplays = (result.track.userplaycount ? " - User Plays: "+lib.commaNum(result.track.userplaycount) : "");
 				song.playcount = result.track.playcount;
 				song.listeners = result.track.listeners;
 				song.duration = dura(result.track.duration);
@@ -209,8 +211,9 @@ cmdListen({
 						song.tags.push("No tags found");
 					}
 					irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+
-						"\" ["+song.tags.join(", ")+"] ("+song.duration+") ~ "+song.date+song.userplays+
-						" - Total Plays: "+song.playcount+" - Current Listeners: "+song.listeners);
+						"\" ["+song.tags.join(", ")+"] ("+song.duration+") ~ "+lib.commaNum(song.date+song.userplays)+
+						" - Total Plays: "+lib.commaNum(song.playcount)+
+						" - Current Listeners: "+lib.commaNum(song.listeners));
 				});
 			});
 		});
