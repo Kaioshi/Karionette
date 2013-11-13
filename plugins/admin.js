@@ -8,21 +8,20 @@
 //     ~reload - reload scripts
 
 var	autojoinDB = new DB.List({filename: 'autojoin'}),
-	ignoreDB = new DB.List({filename: "ignore"}),
 	fs = require('fs');
 
 cmdListen({
 	command: "ignore",
 	help: "Ignores people!",
-	syntax: config.command_prefix+"ignore <nick>",
+	syntax: config.command_prefix+"ignore <mask> - Example: "+config.command_prefix+
+		"ignore mitch*!*@is.annoying.com",
 	admin: true,
 	callback: function (input) {
 		if (!input.args) {
 			irc.notice(input.nick, cmdHelp("ignore", "syntax"));
 			return;
 		}
-		ignoreDB.saveOne(input.args[0]);
-		irc.say(input.context, input.args[0]+" is now ignored.");
+		irc.say(input.context, ignore(input.args[0]));
 	}
 });
 
@@ -31,14 +30,14 @@ cmdListen({
 	command: "unignore",
 	help: "Unignores!",
 	admin: true,
-	syntax: config.command_prefix+"unignore <nick>",
+	syntax: config.command_prefix+"unignore <mask> - Example: "+config.command_prefix+
+		"unignore mitch*!*@is.annoying.com",
 	callback: function (input) {
 		if (!input.args) {
 			irc.notice(input.nick, cmdHelp("unignore", "syntax"));
 			return;
 		}
-		ignoreDB.removeOne(input.args[0], true);
-		irc.say(input.context, input.args[0] + " unignored");
+		irc.say(input.context, unignore(input.args[0]));
 	}
 });
 
@@ -47,7 +46,7 @@ cmdListen({
 	help: "Shows ignore list.",
 	admin: true,
 	callback: function (input) {
-		irc.say(input.context, (ignoreDB.getAll().join(", ") || "Ignoring no one. ;)"));
+		irc.say(input.context, (ignoreList() || "Ignoring no one. ;)"));
 	}
 });
 
