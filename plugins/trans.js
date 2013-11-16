@@ -25,7 +25,10 @@ cmdListen({
 		uri = "http://api.wordreference.com/0.8/"+config.api.wordreference+"/json/"+dict+"/"+term;
 		web.get(uri, function (error, response, body) {
 			result = JSON.parse(body);
-			//globals.lastRes = result;
+			if (!result) {
+				irc.say(input.context, "Something has gone awry.");
+				return;
+			}
 			if (result.Error) {
 				irc.say(input.context, result.Note.split('\n')[0], false);
 			} else {
