@@ -1,4 +1,5 @@
 // url title snarfer - THIS ONLY WORKS ON UNIX - must have wget, head and egrep installed.
+"use strict";
 var ent = require("./lib/entities.js"),
 	sys = require("sys"),
 	url = require("url"),
@@ -24,7 +25,8 @@ function getUrl(nick, channel, url) {
 urlSearch:	for (i = 0; i < keys.length; i++) {
 				for (k = 0; k < entry[keys[i]].length; k++) {
 					if (entry[keys[i]][k][0] === url) {
-						ret = "Old! " + (keys[i] === nick ? "You" : keys[i]) + " linked this " + lib.duration(new Date(entry[keys[i]][k][1])) + " ago.";
+						ret = "Old! " + (keys[i] === nick ? "You" :
+							keys[i]) + " linked this " + lib.duration(new Date(entry[keys[i]][k][1])) + " ago.";
 						break urlSearch;
 					}
 				}
@@ -59,6 +61,7 @@ function youtubeIt(context, id, host) {
 }
 
 function sayTitle(context, uri, length, imgur) {
+	var reg, title;
 	web.get(uri.href, function (error, response, body) {
 		if (error) {
 			logger.warn("error fetching "+uri.href+": "+error);
@@ -89,7 +92,7 @@ evListen({
 	event: "PRIVMSG",
 	regex: /^:[^ ]+ PRIVMSG #[^ ]+ :.*((?:https?:\/\/)[^ ]+)/i,
 	callback: function (input) {
-		var uri, title, reg, ext, allow,
+		var uri, ext, allow,
 			old = getUrl(input.nick, input.context, input.match[1]),
 			length = 10000;
 		
