@@ -1,5 +1,5 @@
 // word motherflipper!
-
+"use strict";
 function tokenizeLine(line) {
 	var i,
 		ret = [], hit = false,
@@ -30,9 +30,9 @@ function tokenizeLine(line) {
 cmdListen({
 	command: "word",
 	help: "Word list management",
-	syntax: config.command_prefix+"word verb/adverb/noun/adjective/pronoun add/remove/get/count/random/correct(verbs only) [word] - Example: "
-		+config.command_prefix+"word noun add apple - "+config.command_prefix+"word adjective remove overconfident - "
-		+config.command_prefix+"word verb correct fondle fondles fondled fondling",
+	syntax: config.command_prefix+"word verb/adverb/noun/adjective/pronoun add/remove/get/count/random/correct(verbs only) \
+		[word] - Example: "+config.command_prefix+"word noun add apple - "+config.command_prefix+"word adjective remove \
+		overconfident - "+config.command_prefix+"word verb correct fondle fondles fondled fondling",
 	callback: function (input) {
 		var entry, reg, verb;
 		if (!input.args || !input.args[0]) {

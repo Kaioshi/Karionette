@@ -1,4 +1,5 @@
 // perms fondling
+"use strict";
 var aliasDB = new DB.Json({filename: "alias/alias", queue: true}),
 	varDB = new DB.Json({filename: "alias/vars", queue: true});
 

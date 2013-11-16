@@ -1,4 +1,5 @@
 // user logins :<
+"use strict";
 cmdListen({
 	command: "identify",
 	help: "Identifies you with "+config.nick+". See also: unidentify, whoami, adduser, deluser",

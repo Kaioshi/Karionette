@@ -1,4 +1,5 @@
 // collects quotes
+"use strict";
 var quoteDB = new DB.Json({filename: "quotes"});
 
 function zero(n) {

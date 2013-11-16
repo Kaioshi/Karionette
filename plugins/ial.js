@@ -1,4 +1,5 @@
 // internal address list, updates itself whenever there is movement.
+"use strict";
 evListen({
 	handle: "ialWho",
 	event: "352",

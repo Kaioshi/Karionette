@@ -1,12 +1,13 @@
 // Mitchu harrassment 2013
 // this was ranma's idea.
+"use strict";
 function timeOfDay() {
-	var time = parseInt(new Date().toTimeString().slice(0,2));
-	if (time >= 06 && time <= 11) return "morning";
+	var time = new Date().getHours();
+	if (time >= 6 && time <= 11) return "morning";
 	if (time >= 11 && time <= 14) return "day";
 	if (time >= 14 && time <= 17) return "afternoon";
 	if (time >= 17 && time <= 12) return "evening";
-	if (time >= 0 && time <= 06) return "evening";
+	if (time >= 0 && time <= 6) return "evening";
 	return "SOME TIME OF THE DAY";
 }
 

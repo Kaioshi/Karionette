@@ -1,4 +1,5 @@
 ﻿// Returns first Google search result
+"use strict";
 var ent = require("./lib/entities.js");
 
 cmdListen({
@@ -45,54 +46,6 @@ cmdListen({
 		}
 	}
 });
-
-/* cmdListen({ google have shut down iGoogle's calculator. Sad times.
-	command: "convert",
-	help: "Google's conversion thing!",
-	syntax: config.command_prefix+"convert 1 <unit type> to <other unit type> - Example: "
-		+config.command_prefix+"convert 1 USD to AUD",
-	callback: function (input) {
-		var uri, garbage, tmp, errsponse,
-			reg = /^(\-?[0-9\.?]+) ([A-Za-z ]+) (to|into) ([A-Za-z ]+)$/.exec(input.data);
-		if (reg) {
-			uri = "http://www.google.com/ig/calculator?hl=en&q="+reg[1]+reg[2]+"=?"+reg[4];
-			web.get(uri, function (error, response, body) {
-				reg = /\{(.*): .*,(.*): .*,(.*): .*,(.*): .*\}$/.exec(body.replace(/\(|\)/g, ""));
-				if (reg[0].indexOf("\\x26") > -1) reg[0] = reg[0].replace(/\\x26/g, "");
-				if (reg[0].indexOf("#215;") > -1) reg[0] = reg[0].replace(/#215;/g, "x");
-				if (reg[0].indexOf("\\x3csup\\x3e") > -1) {
-					tmp = reg[0].slice(reg[0].indexOf("\\x3csup\\x3e"));
-					tmp = /^\\x3csup\\x3e(.*)\\x3c\/sup\\x3e/.exec(tmp);
-					reg[0] = reg[0].replace(tmp[0], "^"+tmp[1]);
-				}
-				reg.slice(1).forEach(function (item) {
-					reg[0] = reg[0].replace(item, "\""+item+"\"");
-				});
-				body = JSON.parse(reg[0]);
-				if (body.error.length > 0) {
-					errsponse = [
-						"O.o",
-						"o_O",
-						"-.-",
-						"yer doin' it wrong.",
-						"nope",
-						"try again!",
-						"need real units -.-",
-						"wat",
-						"try harder. >:(",
-						"look up the unit codes!",
-						"hurr imaginary units"
-					];
-					irc.say(input.context, lib.randSelect(errsponse));
-					return;
-				}
-				irc.say(input.context, body.lhs+" is equal to "+body.rhs, false);
-			});
-		} else {
-			irc.say(input.context, cmdHelp("convert", "syntax"));
-		}
-	}
-}); */
 
 cmdListen({
 	command: "define",
