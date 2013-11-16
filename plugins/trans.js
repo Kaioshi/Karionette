@@ -1,4 +1,5 @@
 // translates!
+"use strict";
 cmdListen({
 	command: [ "trans", "translate" ],
 	help: "attempts to translate from language to language. Example: "+config.command_prefix+
@@ -24,6 +25,7 @@ cmdListen({
 		}
 		uri = "http://api.wordreference.com/0.8/"+config.api.wordreference+"/json/"+dict+"/"+term;
 		web.get(uri, function (error, response, body) {
+			globals.lastTranslate = body;
 			result = JSON.parse(body);
 			if (!result) {
 				irc.say(input.context, "Something has gone awry.");
