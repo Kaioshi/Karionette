@@ -1,5 +1,27 @@
 // per-user / per-channel / global "bookmarks"
-var bookmarkDB = new DB.Json({filename: "bookmarks"});
+"use strict";
+var bookmarkDB = new DB.Json({filename: "bookmarks"}),
+	bmhelp = {
+		add: "[Help] Syntax: "+config.command_prefix+
+			"bm -add [-c(hannel)|-u(ser)] <bookmark handle> <http://url.here.pantsu.org> - \
+			Example: "+config.command_prefix+"bm -a -c wat http://i.minus.com/iPFeOpHpfLc4I.gif \
+			- default store location is global (channel/query)",
+		remove: "[Help] Syntax: "+config.command_prefix+
+			"bm -remove [-c(hannel)|-u(ser)] <bookmark handle|url> - Example: "+config.command_prefix+
+			"bm -remove http://some.dodgy.url.org/pantsu.jpeg - "+config.command_prefix+
+			"bm -r -c slashdot",
+		list: "[Help] Syntax: "+config.command_prefix+
+			"bm -list [-c(hannel)|-u(ser)] <handle> - Example: "+config.command_prefix+
+			"bm -list -channel - "+config.command_prefix+
+			"bm -l (current context)",
+		find: "[Help] Syntax: "+config.command_prefix+
+			"bm -find [-c(hannel)|-u(ser)] <string> - Example: "+config.command_prefix+
+			"bm -f -c pantsu - "+config.command_prefix+
+			"bm -find imgur.com",
+		help: "[Help] Syntax: "+config.command_prefix+
+			"bm -help <add/remove/list/find> - Example: "+config.command_prefix+
+			"bm -h add"
+	};
 
 function addBookmark(target, handle, bookmark) {
 	var entry, keys, i;
@@ -57,27 +79,6 @@ function parseRemArgs(context, from, line) {
 	if (!ret.handle || !ret.target) return;
 	return ret;
 }
-
-var bmhelp = {
-	add: "[Help] Syntax: "+config.command_prefix+
-		"bm -add [-c(hannel)|-u(ser)] <bookmark handle> <http://url.here.pantsu.org> - Example: "+config.command_prefix+
-		"bm -a -c wat http://i.minus.com/iPFeOpHpfLc4I.gif - default store location is global (channel/query)",
-	remove: "[Help] Syntax: "+config.command_prefix+
-		"bm -remove [-c(hannel)|-u(ser)] <bookmark handle|url> - Example: "+config.command_prefix+
-		"bm -remove http://some.dodgy.url.org/pantsu.jpeg - "+config.command_prefix+
-		"bm -r -c slashdot",
-	list: "[Help] Syntax: "+config.command_prefix+
-		"bm -list [-c(hannel)|-u(ser)] <handle> - Example: "+config.command_prefix+
-		"bm -list -channel - "+config.command_prefix+
-		"bm -l (current context)",
-	find: "[Help] Syntax: "+config.command_prefix+
-		"bm -find [-c(hannel)|-u(ser)] <string> - Example: "+config.command_prefix+
-		"bm -f -c pantsu - "+config.command_prefix+
-		"bm -find imgur.com",
-	help: "[Help] Syntax: "+config.command_prefix+
-		"bm -help <add/remove/list/find> - Example: "+config.command_prefix+
-		"bm -h add"
-};
 
 cmdListen({
 	command: [ "bm", "bookmark" ],
@@ -207,8 +208,7 @@ cmdListen({
 						entry.match = "handle";
 						matchedHandle.push(entry.handle);
 						keys.push(entry);
-					}
-					else if (entry.link.indexOf(handle) > -1) {
+					} else if (entry.link.indexOf(handle) > -1) {
 						entry.match = "url";
 						matchedUrl.push(entry.handle);
 						keys.push(entry);
@@ -238,8 +238,11 @@ cmdListen({
 					return;
 				}
 				input.args[1] = input.args[1].toLowerCase();
-				if (!bmhelp[input.args[1]]) irc.say(input.context, "There is no help for "+input.args[1]+" - valid: add, remove, list, find");
-				else irc.say(input.context, bmhelp[input.args[1]]);
+				if (!bmhelp[input.args[1]]) {
+					irc.say(input.context, "There is no help for "+input.args[1]+" - valid: add, remove, list, find");
+				} else {
+					irc.say(input.context, bmhelp[input.args[1]]);
+				}
 				break;
 			default:
 				reg = /(.*)@(.*)/.exec(input.data);
