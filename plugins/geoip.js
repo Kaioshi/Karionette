@@ -16,7 +16,7 @@ cmdListen({
 					return;
 				}
 				target = ial.User(input.args[0], input.context);
-				if (target.address) {
+				if (target && target.address) {
 					nick = target.nick;
 					target = target.address.split("@")[1];
 				} else {
