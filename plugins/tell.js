@@ -1,4 +1,5 @@
 ﻿// Tell someone something on join if saved message for them
+"use strict";
 var msgwatch,
 	messagesDB = new DB.List({filename: 'messages', queue: true}),
 	messages = messagesDB.getAll();

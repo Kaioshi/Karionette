@@ -1,4 +1,5 @@
 // remembers things
+"use strict";
 var memDB = new DB.Json({filename: "remember"}),
 	dunno = [
 		"I dunno.",
