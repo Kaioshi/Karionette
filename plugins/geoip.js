@@ -49,22 +49,22 @@ cmdListen({
 				if (body.region) area = " - "+body.region;
 				if (body.city) area += ", "+body.city;
 				if (area) resp += ", "+area;
-				if (resp.length > 0) {
-					resp = target+" is in [smart-ip]:"+resp;
-					web.get(uri2, function (error, response, body) {
-						body = JSON.parse(body);
-						if (body.status === "fail") {
-							irc.say(input.context, body.message);
-							return;
-						}
-						resp += " -- [ip-api]: "+body.country;
-						if (body.regionName) resp += " - "+body.regionName;
-						if (body.city) resp += ", "+body.city;
-						irc.say(input.context, resp);
-					});
+				if (resp.length === 0) {
+					resp = target+" is in [smart-ip]: no idea!";
 				} else {
-					irc.say(input.context, "Ninja detected.");
+					resp = target+" is in [smart-ip]:"+resp;
 				}
+				web.get(uri2, function (error, response, body) {
+					body = JSON.parse(body);
+					if (body.status === "fail") {
+						irc.say(input.context, body.message);
+						return;
+					}
+					resp += " -- [ip-api]: "+body.country;
+					if (body.regionName) resp += " - "+body.regionName;
+					if (body.city) resp += ", "+body.city;
+					irc.say(input.context, resp);
+				});
 			});
 		} else {
 			irc.say(input.context, cmdHelp("geoip", "syntax"));
