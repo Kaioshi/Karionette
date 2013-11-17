@@ -77,7 +77,7 @@ cmdListen({
 			irc.say(input.context, "You need to be an admin to inspect "+reg[1]+" "+reg[2]+".");
 			return;
 		}
-		irc.notice(input.nick, result);
+		irc.notice(input.nick, result.join(" -- "));
 	}
 });
 
