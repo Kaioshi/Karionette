@@ -1,5 +1,7 @@
-var fs = require('fs'),
-	reminders = [];
+// Reminders!
+"use strict";
+var reminders,
+	reminderDB = new DB.List({filename: "reminders", queue: true});
 
 ﻿function transformTime(timeUnits, time) {
 	if (timeUnits.indexOf("second") > -1) { time = time * 1000; }
@@ -13,20 +15,12 @@ function expectedTime(time) {
 }
 
 function loadReminders() {
-	if (fs.lstatSync("data/reminders.txt").size <= 0) return;
-	try {
-		reminders = fs.readFileSync("data/reminders.txt", "utf8").split("\n");
-	} catch (err) {
-		if (err.code === "ENOENT") {
-			fs.writeFileSync("data/reminders.txt", "");
-		} else {
-			logger.error("reminders plugin - loadReminders(): "+err, err);
-		}
-		return;
+	reminders = reminderDB.getAll() || [];
+	if (reminders.length > 0) {
+		reminders.forEach(function (reminder) {
+			startReminder(reminder);
+		});
 	}
-	reminders.forEach(function (reminder) {
-		startReminder(reminder);
-	});
 }
 
 function startReminder(reminder) {
@@ -51,12 +45,11 @@ function removeReminder(reminder) {
 		if (reminders[i] === reminder) {
 			reminders.splice(i,1);
 			reminder = null;
-			fs.writeFileSync("data/reminders.txt", reminders.join("\n"));
+			reminderDB.saveAll(reminders);
 			return;
 		}
 	}
 	logger.error("Failed to remove reminder \""+reminder+"\" - dumped reminders into globals.lastReminders");
-	globals.lastReminders = reminders;
 }
 
 function addReminder(time, nick, context, reminder) {
@@ -64,7 +57,7 @@ function addReminder(time, nick, context, reminder) {
 	reminder = time+" "+nick+"@"+context+" "+reminder;
 	startReminder(reminder);
 	reminders.push(reminder);
-	fs.writeFileSync("data/reminders.txt", reminders.join("\n"));
+	reminderDB.saveAll(reminders);
 }
 
 lib.events.on("autojoinFinished", loadReminders);
