@@ -95,13 +95,20 @@ evListen({
 		// 376 is the end of MOTD
 		if (autojoinDB.size() > 0) {
 			setTimeout(function () {
-				var channels = autojoinDB.getAll(), i;
+				var i, k = 0,
+					channels = autojoinDB.getAll();
 				for (i in channels) {
 					irc.join(channels[i]);
 				}
-				setTimeout(function () {
-					lib.events.emit("autojoinFinished");
-				}, 3000); // wait for the joins to finish
+				// 315 signifies the end of a channel's WHO response,
+				// at which point our IAL is fully updated.
+				lib.events.on("Event: 315", function (input) {
+					k++;
+					if (k === channels.length) {
+						logger.debug("Finished joins.");
+						lib.events.emit("autojoinFinished");
+					}
+				});
 			}, 2000); // wait 2 seconds for a cloak to apply
 		}
 	},
