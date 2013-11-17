@@ -76,7 +76,7 @@ cmdListen({
 				if (cmd) {
 					alias = aliasDB.getOne(cmd);
 					if (alias) {
-						irc.say(input.context, "The alias string for " + cmd + " is: " + alias);
+						irc.say(input.context, "The alias string for " + cmd + " is: " + alias, false);
 					} else {
 						irc.say(input.context, "There is no such alias.");
 					}
