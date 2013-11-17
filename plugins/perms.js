@@ -37,7 +37,7 @@ cmdListen({
 		deny add alias whip mitch",
 	callback: function (input) {
 		var reg, result, user;
-		reg = /^(allow|deny|owner) (add|remove) (alias|variable|command) ([^ ]+) ([^ ]+)/.exec(input.data.toLowerCase());
+		reg = /^(allow|deny|owner) (add|remove) (alias|variable|command) ([^ ]+) ([^ ]+)/.exec(input.data);
 		if (!reg) {
 			irc.say(input.context, cmdHelp("perms", "syntax"));
 			return;
