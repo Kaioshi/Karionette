@@ -36,6 +36,7 @@ cmdListen({
 						if (body.titles.japanese) title = (title ? "["+title+" / "+body.titles.japanese.trim()+"]" : body.titles.japanese);
 					}
 					irc.say(input.context, title+status+eps+airtime, false);
+					body = null; title = null; status = null; eps = null; airtime = null; date = null; now = null;
 				});
 			} else {
 				irc.say(input.context, "Couldn't find it. :<");
