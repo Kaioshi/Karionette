@@ -1,4 +1,5 @@
 // I hate XML.
+"use strict";
 var fs = require("fs"),
 	ent = require("./lib/entities.js");
 
@@ -33,19 +34,28 @@ var fs = require("fs"),
 cmdListen({
 	command: "nyaa",
 	help: "Nyaa.. it's a nyaa searcher!",
-	syntax: config.command_prefix+"nyaa [-u] <search term> - the -u flag removes any filtering. "+
-		"By default the filter is set to showing Trusted-quality Anime which has been subbed.",
+	syntax: config.command_prefix+"nyaa [-unfiltered/-raws] <search term>. \
+		By default the filter is set to Trusted and higher Anime, which has been subbed. \
+		The -raws flag is also filtered to Trusted and higher.",
 	callback: function (input) {
-		var entries;
+		var entries, unfiltered = false;
 		if (!input.args) {
 			irc.say(input.context, cmdHelp("nyaa", "syntax"));
 			return;
 		}
-		if (input.args[0] === "-u") {
-			input.term = input.args.slice(1).join(" ");
-			input.uri = "http://www.nyaa.se/?page=rss&cats=0_0&term="+input.term;
-		} else {
-			input.uri = "http://www.nyaa.se/?page=rss&cats=1_37&filter=2&term="+input.data;
+		switch (input.args[0]) {
+			case "-unfiltered":
+				input.term = input.args.slice(1).join(" ");
+				input.uri = "http://www.nyaa.se/?page=rss&cats=0_0&term="+input.term;
+				unfiltered = true;
+				break;
+			case "-raws":
+				input.term = input.args.slice(1).join(" ");
+				input.uri = "http://www.nyaa.se/?page=rss&cats=1_11&filter=2&term="+input.term;
+				break;
+			default:
+				input.uri = "http://www.nyaa.se/?page=rss&cats=1_37&filter=2&term="+input.data;
+				break;
 		}
 		web.get(input.uri, function (error, resp, body) {
 			if (body) {
@@ -62,10 +72,30 @@ cmdListen({
 				body.forEach(function (entry) {
 					entries.push(JSON.parse(entry).release);
 				});
-				lib.events.emit("Event: processNyaaDone", input, entries);
+				if (unfiltered) lib.events.emit("Event: processUnfilteredNyaaDone", input, entries);
+				else lib.events.emit("Event: processNyaaDone", input, entries);
 				entries = null; body = null;
 			}
 		}, 4000);
+	}
+});
+
+evListen({
+	handle: "handleUnfilteredNyaa",
+	event: "processUnfilteredNyaaDone",
+	callback: function (input, results) {
+		var i, ret = [];
+		// show the first 4 hits or less on a single line.
+		if (results.length > 4) {
+			for (i = 0; i < 4; i++) {
+				ret.push(results[i].replace(/ rar| mkv| mp4| avi| mp5/ig, ""));
+			}
+		} else {
+			results.forEach(function (entry) {
+				ret.push(entry.replace(/ rar| mkv| mp4| avi| mp5/ig, ""));
+			});
+		}
+		irc.say(input.context, ret.join(" -- "));
 	}
 });
 
@@ -91,18 +121,6 @@ evListen({
 				if (reg) {
 					if (!rel[reg[1]]) rel[reg[1]] = {};
 					rel[reg[1]][reg[2]] = [];
-				} else { // fake a google search!
-					tmp = (input.channel ? lib.randSelect(ial.Active(input.channel)) : "yourself.");
-					if (tmp === input.nick) tmp = lib.randSelect(config.local_whippingboys)+".";
-					logger.warn("Failed to parse Nyaa results for this - doing a google search for now.");
-					irc.say(input.context, "Had trouble with Nyaa - here's the google result. Blame "+tmp);
-					input.command = "g";
-					input.data = "site:nyaa.se "+(input.term ? input.term : input.data);
-					input.raw = ":"+input.nick+"!"+input.address+" PRIVMSG "+input.context+" :g "+input.data;
-					input.args = [ "site:nyaa.se", input.data ];
-					lib.events.emit("Command: g", input);
-					globals.lastResults = results;
-					return;
 				}
 			}
 		}
