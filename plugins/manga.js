@@ -1,4 +1,5 @@
 // http://mangafox.me/rss/fairy_tail.xml
+"use strict";
 var mangaDB = new DB.Json({filename: "manga"}),
 	ent = require('./lib/entities.js'),
 	sys = require('sys'),
@@ -27,19 +28,23 @@ function checkAllManga() {
 addTimers();
 
 function checkManga(manga, context, first) {
-	var huzzah, title, link, last, messages, date, sent,
-		strip = (!first ? " | head -n 18 | tail -n 2" : " | head -n 20 | tail -n 4"),
-		entry = mangaDB.getOne(manga);
-	//logger.debug("checkManga("+[manga, context, first].join(", ")+") called");
+	var huzzah, title, link, last, messages, date, sent, strip, entry;
+	
+	lib.memProf("Checking "+manga);
+	entry = mangaDB.getOne(manga);
 	if (!entry) {
 		logger.debug("[manga] check("+[manga, context].join(", ")+") called, manga doesn't exist");
+		lib.memProf("Checking "+manga);
 		return;
 	}
+	strip = (!first ? " | head -n 18 | tail -n 2" : " | head -n 20 | tail -n 4");
 	sys.exec("curl -s -S -L "+entry.url+strip, function (error, stdout, stderr) {
+		logger.debug("Checking for "+manga+" updates ...");
 		stdout = stdout.split("\n");
 		title = /<title>(.*)<\/title>/i.exec(stdout[0]);
 		if (!title) {
 			logger.debug("No response from "+entry.url);
+			lib.memProf("Checking "+manga);
 			return; // mangafox hasn't responded appropriately. let's just wait.
 		}
 		title = ent.decode(title[1]);
@@ -51,6 +56,7 @@ function checkManga(manga, context, first) {
 				}
 				irc.say(context, "No update for "+manga+"; Latest: "+entry.title+" ~ "+entry.link);
 			}
+			lib.memProf("Checking "+manga);
 			return;
 		}
 		entry.title = title;
@@ -89,6 +95,7 @@ function checkManga(manga, context, first) {
 				}
 			}
 		});
+		lib.memProf("Checking "+manga);
 	});
 }
 
