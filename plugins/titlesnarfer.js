@@ -44,6 +44,7 @@ function lastUrl(opts) {
 					if (date > mostrecent[0]) {
 						mostrecent = [ date, entry[keys[i]][k][0], keys[i] ];
 					}
+					match = true;
 				}
 			} else {
 				date = new Date(entry[keys[i]][k][1]).valueOf();
@@ -54,6 +55,10 @@ function lastUrl(opts) {
 		}
 	}
 	keys = null; entry = null; date = null;
+	if (opts.match) {
+		if (match) return mostrecent;
+		return -1;
+	}
 	return mostrecent;
 }
 
