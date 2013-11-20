@@ -9,6 +9,29 @@ function zero(n) {
 	return (n > 9 ? n : "0" + n);
 }
 
+function lastUrl(opts) {
+	var i, k, date, keys,
+		mostrecent = [ 0, "" ],
+		entry = urlDB.getOne(opts.channel);
+	if (!entry) return -1;
+	if (opts.nick) {
+		if (!entry[opts.nick]) return -1;
+		entry = entry[opts.nick][entry[opts.nick].length-1];
+		return [ new Date(entry[1]).valueOf(), entry[0], opts.nick ];
+	}
+	keys = Object.keys(entry);
+	for (i = 0; i < keys.length; i++) {
+		for (k = 0; k < entry[keys[i]].length; k++) {
+			date = new Date(entry[keys[i]][k][1]).valueOf();
+			if (date > mostrecent[0]) {
+				mostrecent = [ date, entry[keys[i]][k][0], keys[i] ];
+			}
+		}
+	}
+	keys = null; entry = null; date = null;
+	return mostrecent;
+}
+
 function urlStats(nick, channel, match) {
 	var i,
 		count = 0,
@@ -150,6 +173,30 @@ evListen({
 });
 
 cmdListen({
+	command: "lasturl",
+	help: "Shows the most recent URL, optionally from a person.",
+	syntax: config.command_prefix+"lasturl [<nick>] [<match text>] - Example: "+
+		config.command_prefix+"lasturl ranma",
+	callback: function (input) {
+		var result,
+			opts = {};
+		if (!input.channel) {
+			irc.say(input.context, "You need to use this in the channel you want the URL from.");
+			return;
+		}
+		if (input.args) opts.nick = input.args[0];
+		opts.channel = input.channel;
+		result = lastUrl(opts);
+		if (result === -1) {
+			irc.say(input.context, (opts.nick ? opts.nick+" hasn't linked anything." : "I haven't seen any URLs linked here."));
+			return;
+		}
+		irc.say(input.context, result[2]+" posted "+result[1]+" "+lib.duration(new Date(result[0]).valueOf())+" ago.", false);
+		opts = null; result = null;
+	}
+});
+
+cmdListen({
 	command: "urlstats",
 	help: "Shows how many URLs a person has posted.",
 	syntax: config.command_prefix+"urlstats <nick> [<string to match>] - Example: "
@@ -169,19 +216,19 @@ cmdListen({
 			match = input.args[1];
 			result = urlStats(input.args[0], input.channel, match);
 			if (result === -1) {
-				irc.say(input.context, "I haven't seen any urls form "+input.args[0]+", \
+				irc.say(input.context, "I haven't seen any URLs form "+input.args[0]+", \
 					let alone any matching \""+match+"\".", false);
 			} else if (result === 0) {
-				irc.say(input.context, "I haven't seen any urls containing \""+match+"\" from "+input.args[0]+".", false);
+				irc.say(input.context, "I haven't seen any URLs containing \""+match+"\" from "+input.args[0]+".", false);
 			} else {
-				irc.say(input.context, "I've seen "+result+" urls containing \""+match+"\" from "+input.args[0]+".", false);
+				irc.say(input.context, "I've seen "+result+" URLs containing \""+match+"\" from "+input.args[0]+".", false);
 			}
 		} else {
 			result = urlStats(input.args[0], input.channel);
 			if (result === -1) {
-				irc.say(input.context, "I haven't seen any urls from "+input.args[0]+".");
+				irc.say(input.context, "I haven't seen any URLs from "+input.args[0]+".");
 			} else {
-				irc.say(input.context, "I've seen "+result+" urls from "+input.args[0]+".");
+				irc.say(input.context, "I've seen "+result+" URLs from "+input.args[0]+".");
 			}
 		}
 	}
