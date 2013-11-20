@@ -9,6 +9,24 @@ function zero(n) {
 	return (n > 9 ? n : "0" + n);
 }
 
+function urlStats(nick, channel, match) {
+	var i,
+		count = 0,
+		entry = urlDB.getOne(channel);
+	if (!entry || !entry[nick]) return -1;
+	if (match) {
+		for (i = 0; i < entry[nick].length; i++) {
+			if (entry[nick][i][0].indexOf(match) > -1) {
+				count++;
+			}
+		}
+		return count;
+	}
+	count = entry[nick].length;
+	entry = null;
+	return count;
+}
+
 function recordUrl(nick, channel, url) {
 	var entry = urlDB.getOne(channel) || {};
 	if (!entry[nick]) entry[nick] = [];
@@ -128,6 +146,44 @@ evListen({
 		// ton of garbage in the first 15000 characters. o_O
 		if (uri.host.indexOf("kotaku") > -1) length = 20000;
 		sayTitle(input.context, uri, length);
+	}
+});
+
+cmdListen({
+	command: "urlstats",
+	help: "Shows how many URLs a person has posted.",
+	syntax: config.command_prefix+"urlstats <nick> [<string to match>] - Example: "
+		+config.command_prefix+"urlstats ranma imgur",
+	callback: function (input) {
+		var result,
+			match = false;
+		if (!input.args || !input.args[0]) {
+			irc.say(input.context, cmdHelp("urlstats", "syntax"));
+			return;
+		}
+		if (!input.channel) {
+			irc.say(input.context, "You need to use this in the channel you want the stats from.");
+			return;
+		}
+		if (input.args[1]) {
+			match = input.args[1];
+			result = urlStats(input.args[0], input.channel, match);
+			if (result === -1) {
+				irc.say(input.context, "I haven't seen any urls form "+input.args[0]+", \
+					let alone any matching \""+match+"\".", false);
+			} else if (result === 0) {
+				irc.say(input.context, "I haven't seen any urls containing \""+match+"\" from "+input.args[0]+".", false);
+			} else {
+				irc.say(input.context, "I've seen "+result+" urls containing \""+match+"\" from "+input.args[0]+".", false);
+			}
+		} else {
+			result = urlStats(input.args[0], input.channel);
+			if (result === -1) {
+				irc.say(input.context, "I haven't seen any urls from "+input.args[0]+".");
+			} else {
+				irc.say(input.context, "I've seen "+result+" urls from "+input.args[0]+".");
+			}
+		}
 	}
 });
 
