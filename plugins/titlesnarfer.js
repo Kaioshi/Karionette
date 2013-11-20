@@ -11,20 +11,45 @@ function zero(n) {
 
 function lastUrl(opts) {
 	var i, k, date, keys,
+		match = false,
 		mostrecent = [ 0, "" ],
 		entry = urlDB.getOne(opts.channel);
 	if (!entry) return -1;
 	if (opts.nick) {
 		if (!entry[opts.nick]) return -1;
-		entry = entry[opts.nick][entry[opts.nick].length-1];
-		return [ new Date(entry[1]).valueOf(), entry[0], opts.nick ];
+		if (opts.match) {
+			entry = entry[opts.nick];
+			for (i = 0; i < entry.length; i++) {
+				if (entry[i][0].indexOf(opts.match) > -1) {
+					date = new Date(entry[i][1]).valueOf();
+					if (date > mostrecent[0]) {
+						mostrecent = [ date, entry[i][0], opts.nick ];
+						match = true;
+					}
+				}
+			}
+			if (match) return mostrecent;
+			return -1;
+		} else {
+			entry = entry[opts.nick][entry[opts.nick].length-1];
+			return [ new Date(entry[1]).valueOf(), entry[0], opts.nick ];
+		}
 	}
 	keys = Object.keys(entry);
 	for (i = 0; i < keys.length; i++) {
 		for (k = 0; k < entry[keys[i]].length; k++) {
-			date = new Date(entry[keys[i]][k][1]).valueOf();
-			if (date > mostrecent[0]) {
-				mostrecent = [ date, entry[keys[i]][k][0], keys[i] ];
+			if (opts.match) {
+				if (entry[keys[i]][k][0].indexOf(opts.match) > -1) {
+					date = new Date(entry[keys[i]][k][1]).valueOf();
+					if (date > mostrecent[0]) {
+						mostrecent = [ date, entry[keys[i]][k][0], keys[i] ];
+					}
+				}
+			} else {
+				date = new Date(entry[keys[i]][k][1]).valueOf();
+				if (date > mostrecent[0]) {
+					mostrecent = [ date, entry[keys[i]][k][0], keys[i] ];
+				}
 			}
 		}
 	}
@@ -175,8 +200,8 @@ evListen({
 cmdListen({
 	command: "lasturl",
 	help: "Shows the most recent URL, optionally from a person.",
-	syntax: config.command_prefix+"lasturl [<nick>] [<match text>] - Example: "+
-		config.command_prefix+"lasturl ranma",
+	syntax: config.command_prefix+"lasturl [-s <search string>] [<nick>] - Example: "+
+		config.command_prefix+"lasturl -s imgur ranma",
 	callback: function (input) {
 		var result,
 			opts = {};
@@ -184,17 +209,42 @@ cmdListen({
 			irc.say(input.context, "You need to use this in the channel you want the URL from.");
 			return;
 		}
-		if (input.args) opts.nick = input.args[0];
+		if (input.args) {
+			if (input.args[0] === "-s") {
+				if (!input.args[1]) {
+					irc.say(input.context, cmdHelp("lasturl", "syntax"));
+					return;
+				}
+				opts.match = input.args[1];
+				if (input.args[2]) opts.nick = input.args[2];
+			} else {
+				opts.nick = input.args[0];
+			}
+		}
 		opts.channel = input.channel;
 		result = lastUrl(opts);
-		if (result === -1) {
-			irc.say(input.context, (opts.nick ? opts.nick+" hasn't linked anything." : "I haven't seen any URLs linked here."));
-			return;
+		if (opts.match) {
+			if (result === -1) {
+				irc.say(input.context, (opts.nick ? opts.nick+" hasn't linked anything matching \""+opts.match+"\"." :
+					"I haven't seen any URLs matching \""+opts.match+"\" here."), false);
+			} else {
+				irc.say(input.context, result[2]+" posted "+highlightMatch(result[1], opts.match)+" "
+					+lib.duration(new Date(result[0]).valueOf())+" ago.", false);
+			}
+		} else {
+			if (result === -1) {
+				irc.say(input.context, (opts.nick ? opts.nick+" hasn't linked anything." : "I haven't seen any URLs linked here."));
+				return;
+			}
+			irc.say(input.context, result[2]+" posted "+result[1]+" "+lib.duration(new Date(result[0]).valueOf())+" ago.", false);
 		}
-		irc.say(input.context, result[2]+" posted "+result[1]+" "+lib.duration(new Date(result[0]).valueOf())+" ago.", false);
 		opts = null; result = null;
 	}
 });
+
+function highlightMatch(str, match) {
+	return str.replace(new RegExp(match, "g"), "\x02"+match+"\x02");
+}
 
 cmdListen({
 	command: "urlstats",
