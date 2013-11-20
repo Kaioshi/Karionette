@@ -200,8 +200,8 @@ evListen({
 cmdListen({
 	command: "lasturl",
 	help: "Shows the most recent URL, optionally from a person.",
-	syntax: config.command_prefix+"lasturl [-s <search string>] [<nick>] - Example: "+
-		config.command_prefix+"lasturl -s imgur ranma",
+	syntax: config.command_prefix+"lasturl [-f <search string>] [<nick>] - Example: "+
+		config.command_prefix+"lasturl -f imgur ranma",
 	callback: function (input) {
 		var result,
 			opts = {};
@@ -210,7 +210,7 @@ cmdListen({
 			return;
 		}
 		if (input.args) {
-			if (input.args[0] === "-s") {
+			if (input.args[0] === "-f") {
 				if (!input.args[1]) {
 					irc.say(input.context, cmdHelp("lasturl", "syntax"));
 					return;
