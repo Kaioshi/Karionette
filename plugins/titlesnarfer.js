@@ -248,7 +248,7 @@ cmdListen({
 });
 
 function highlightMatch(str, match) {
-	return str.replace(new RegExp(match, "g"), "\x02"+match+"\x02");
+	return str.replace(new RegExp(match.replace(/\./g, "\\."), "g"), "\x02"+match+"\x02");
 }
 
 cmdListen({
