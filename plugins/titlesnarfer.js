@@ -161,7 +161,7 @@ function sayTitle(context, uri, length, imgur) {
 evListen({
 	handle: "titleSnarfer",
 	event: "PRIVMSG",
-	regex: /^:[^ ]+ PRIVMSG #[^ ]+ :.*((?:https?:\/\/)[^ ]+)/i,
+	regex: /^:[^ ]+ PRIVMSG #[^ ]+ :.*((?:https?:\/\/)[^\x01 ]+)/i,
 	callback: function (input) {
 		var uri, ext, allow,
 			old = getUrl(input.nick, input.context, input.match[1]),
