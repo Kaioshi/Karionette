@@ -17,7 +17,7 @@ cmdListen({
 					+ result.data.high.display_short
 					+ ", [LOW] "
 					+ result.data.low.display_short
-					+ ". [LATES SALE] "
+					+ ". [LAST SALE] "
 					+ result.data.last_all.display_short, false);
 		});
 	}
