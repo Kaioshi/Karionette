@@ -13,7 +13,12 @@ cmdListen({
 		}
 		web.get(uri, function (error, response, body) {
 			var result = JSON.parse(body);
-			irc.say(input.context, '1 Bitcoin has recently been worth: [HIGH] ' + result.data.high.display_short + ', [LOW] ' + result.data.low.display_short, false);
+			irc.say(input.context, "1 Bitcoin has recently been worth: [HIGH] "
+					+ result.data.high.display_short
+					+ ", [LOW] "
+					+ result.data.low.display_short
+					+ ". [LATES SALE] "
+					+ result.data.last_all.display_short, false);
 		});
 	}
 });
