@@ -112,7 +112,7 @@ cmdListen({
 						"hottie find butts");
 					return;
 				}
-				quotes = hottieDB.getOne(input.context);
+				hotties = hottieDB.getOne(input.context);
 				if (!hotties || hotties.length === 0) {
 					irc.say(input.context, "There aren't any hotties for "+input.context+" ~ add some!");
 					return;
@@ -135,7 +135,7 @@ cmdListen({
 			case "get":
 				hotties = hottieDB.getOne(input.context);
 				if (!hotties || hotties.length === 0) {
-					irc.say(input.context, "There aren't any quotes for "+input.context+" ~ add some!");
+					irc.say(input.context, "There aren't any hotties for "+input.context+" ~ add some!");
 					return;
 				}
 				if (!input.args[1] || !input.args[1].match(/[0-9]+/) || parseInt(input.args[1]) > hotties.length) {
@@ -158,7 +158,7 @@ cmdListen({
 					return;
 				}
 				hottie = lib.randSelect(hotties);
-				irc.say(input.context, "Quote #"+hottie.num+" added by "+hottie.from.split("!")[0]+
+				irc.say(input.context, "Hottie #"+hottie.num+" added by "+hottie.from.split("!")[0]+
 					" on "+makeTime(hottie.date)+": "+hottie.hottie);
 				break;
 			case "stats":
