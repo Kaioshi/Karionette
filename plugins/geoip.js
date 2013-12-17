@@ -38,31 +38,33 @@ cmdListen({
 					irc.say(input.context, "GeoIP service didn't reply. :<");
 					return;
 				}
-				if (body.error) {
-					irc.say(input.context, body.error);
-					return;
-				}
 				target = (nick ? nick : target);
 				resp = "";
-				if (body.host) target += " ("+body.host+")";
-				if (body.countryName) resp += " "+body.countryName;
-				if (body.region) area = " - "+body.region;
-				if (body.city) area += ", "+body.city;
-				if (area) resp += ", "+area;
-				if (resp.length === 0) {
-					resp = target+" is in [smart-ip]: no idea!";
+				if (body.error) {
+					resp = target+" is in [smart-ip]: "+body.error;
 				} else {
-					resp = target+" is in [smart-ip]:"+resp;
+					if (body.host) target += " ("+body.host+")";
+					if (body.countryName) resp += " "+body.countryName;
+					if (body.region) area = " - "+body.region;
+					if (body.city) area += ", "+body.city;
+					if (area) resp += ", "+area;
+					if (resp.length === 0) {
+						resp = target+" is in [smart-ip]: no idea!";
+					} else {
+						resp = target+" is in [smart-ip]:"+resp;
+					}
 				}
 				web.get(uri2, function (error, response, body) {
 					body = JSON.parse(body);
 					if (body.status === "fail") {
-						irc.say(input.context, body.message);
-						return;
+						//irc.say(input.context, body.message);
+						//return;
+						resp += " -- [ip-api]: "+body.status;
+					} else {
+						resp += " -- [ip-api]: "+body.country;
+						if (body.regionName) resp += " - "+body.regionName;
+						if (body.city) resp += ", "+body.city;
 					}
-					resp += " -- [ip-api]: "+body.country;
-					if (body.regionName) resp += " - "+body.regionName;
-					if (body.city) resp += ", "+body.city;
 					irc.say(input.context, resp);
 				});
 			});
