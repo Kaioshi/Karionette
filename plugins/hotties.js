@@ -1,4 +1,4 @@
-// collects ecchi
+// v0.11 plugin by coding amateur ranma. collects ecchi
 "use strict";
 var hottieDB = new DB.Json({filename: "hotties"});
 
@@ -13,7 +13,7 @@ function makeTime(time) {
 
 cmdListen({
 	command: "hottie",
-	help: "Hottie added by mitchplz on 24/07/13: <mitch_> should I into quotes",
+	help: "Hottie added by mitchplz on 24/07/13: http://en.wikipedia.org/wiki/My_Little_Pony",
 	syntax: config.command_prefix+"hottie <add/remove/find/get/random/stats> - Example: "
 		+config.command_prefix+"hottie find <search term> - "
 		+config.command_prefix+"hottie add <Mari> mitches be like, \">implying\"",
@@ -130,7 +130,7 @@ cmdListen({
 				i = Math.floor(Math.random()*matches.length);
 				time = makeTime(matches[i].date);
 				irc.say(input.context, (matches.length > 1 ? "("+matches.length+" matches) " : "")+
-					"Quote #"+matches[i].num+" added by "+matches[i].from.split("!")[0]+" on "+time+": "+matches[i].hottie);
+					"Hottie #"+matches[i].num+" added by "+matches[i].from.split("!")[0]+" on "+time+": "+matches[i].hottie);
 				break;
 			case "get":
 				hotties = hottieDB.getOne(input.context);
@@ -145,7 +145,7 @@ cmdListen({
 				}
 				for (i = 0; i < hotties.length; i++) {
 					if (hotties[i].num === parseInt(input.args[1])) {
-						irc.say(input.context, "Quote #"+hotties[i].num+" added by "+hotties[i].from.split("!")[0]+
+						irc.say(input.context, "Hottie #"+hotties[i].num+" added by "+hotties[i].from.split("!")[0]+
 							" on "+makeTime(hotties[i].date)+": "+hotties[i].hottie);
 						return;
 					}
