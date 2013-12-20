@@ -99,7 +99,7 @@ cmdListen({
 	help: "Allows you to add variables for use in aliases (only). Default variables are: "+
 		"{me} {from}, {channel}, {randThing}, {randNick}, {args*} (provided arguments), "+
 		"{args1} (first argument) - {variableName} for your custom vars.",
-	syntax: config.command_prefix+"var <add/remove/append/seppend/seprem/seprand> - "+
+	syntax: config.command_prefix+"var <add/remove/append/seppend/seprem/seprand/info> - "+
 		"try each command on it's own for further help.",
 	callback: function (input) {
 		var keys, list, i, variable, varName, permission, owners, arr, varString;
