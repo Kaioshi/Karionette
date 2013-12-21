@@ -168,6 +168,7 @@ cmdListen({
 				}
 				target = target.toLowerCase();
 				bookmarks = bookmarkDB.getOne(target);
+				globals.lastBookmarks = bookmarks;
 				if (!bookmarks) {
 					irc.say(input.context, target+" has no bookmarks.");
 					return;
