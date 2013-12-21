@@ -168,7 +168,6 @@ cmdListen({
 				}
 				target = target.toLowerCase();
 				bookmarks = bookmarkDB.getOne(target);
-				globals.lastBookmarks = bookmarks;
 				if (!bookmarks) {
 					irc.say(input.context, target+" has no bookmarks.");
 					return;
@@ -264,11 +263,16 @@ cmdListen({
 					if (entry.handle === handle) result = entry;
 				});
 				if (result) {
-					if (reg) result.handle = reg[2]+": "+result.handle;
-					irc.say(input.context, result.handle+" ~ "+result.link);
+					if (reg) {
+						irc.say(input.context, reg[2]+": "+result.handle+" ~ "+result.link);
+					} else {
+						irc.say(input.context, result.handle+" ~ "+result.link);
+					}
+					result = null;
 				} else {
 					irc.say(input.context, target+" has no such bookmark.");
 				}
+				
 				break;
 		}
 	}
