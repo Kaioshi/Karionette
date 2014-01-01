@@ -16,9 +16,7 @@ cmdListen({
 	syntax: config.command_prefix+"tvrage <show name> - Example: "+
 		config.command_prefix+"tvrage Sherlock",
 	callback: function (input) {
-		var uri,
-			resp = "",
-			show = {};
+		var uri, show, resp;
 		if (!input.args) {
 			irc.say(input.context, cmdHelp("tvrage", "syntax"));
 			return;
@@ -32,13 +30,16 @@ cmdListen({
 				return;
 			}
 			show = parseTvRage(body);
-			globals.lastShow = show;
 			if (!show["Next Episode"]) {
 				irc.say(input.context, "TvRage has no information about the next episode of "
 					+show["Show Name"]+" - Status: "+show["Status"]+".");
 				return;
 			}
 			resp = show["Show Name"]+" - "+show["Next Episode"].split("^").slice(0,-1).join(" - ");
+			// HELLO FUTURE! How do I test for daylight savings?! This currently adds an hour because
+			// the timezone it's written in doesn't practice daylight savings so the result is off by one hour.
+			// Blame timezones. And Deide for not being helpful. Bastard. Linked me to a youtube video about
+			// how timezones are annoying. I already knew that! - Grumposhi.
 			resp = resp+" airs in "+lib.duration(new Date(), new Date(show["GMT+0 NODST"]*1000+3600000));
 			resp = resp+" and has a runtime of "+show.Runtime+" minutes.";
 			irc.say(input.context, resp, false);
