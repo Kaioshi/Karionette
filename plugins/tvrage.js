@@ -1,24 +1,47 @@
+function parseTvRage(resp) {
+	var i, data,
+		ret = {};
+	resp = resp.replace("<pre>", "").split("\n").slice(0,-1);
+	for (i = 0; i < resp.length; i++) {
+		data = resp[i].split("@");
+		ret[data[0]] = data[1];
+	}
+	return ret;
+}
+
 cmdListen({
 	command: "tvrage",
-	help: "Shows the next airtime for a 3Dpd TV show.",
+	help: "Shows the next airtime for a show. Note that TvRage does a search based on your input and \
+		returns that result, so you may get something random sometimes, if it didn't know about the show.",
 	syntax: config.command_prefix+"tvrage <show name> - Example: "+
 		config.command_prefix+"tvrage Sherlock",
 	callback: function (input) {
-		var uri, show, last, next, timeUntil, runtime;
+		var uri,
+			resp = "",
+			show = {};
 		if (!input.args) {
 			irc.say(input.context, cmdHelp("tvrage", "syntax"));
 			return;
 		}
 		uri = "http://services.tvrage.com/tools/quickinfo.php?show="+input.data;
 		web.get(uri, function (error, response, body) {
-			globals.lastResp = body;
-			body = body.split("\n").slice(0,-1);
-			show = body[1].split("@")[1];
-			//last = body[6].split("@")[1]; last = last.split("^"); last = last[0]+" - "+last[1];
-			next = body[7].split("@")[1]; next = next.split("^"); next = next[0]+" - "+next[1];
-			timeUntil = lib.duration(new Date(), new Date(body[9].split("@")[1]*1000+3600000)); // this is bad. sorry. no daylight shavings here..
-			runtime = body[16].split("@")[1]+" minutes.";
-			irc.say(input.context, "\""+show+" - "+next+"\" airs in "+timeUntil+" and has a runtime of "+runtime, false);
+			if (body.indexOf("\n") === -1) {
+				// this is tvrage's version of an error.
+				// sort of.
+				irc.say(input.context, "Not found, I guess? TvRage replied with: "+body, false);
+				return;
+			}
+			show = parseTvRage(body);
+			globals.lastShow = show;
+			if (!show["Next Episode"]) {
+				irc.say(input.context, "TvRage has no information about the next episode of "
+					+show["Show Name"]+" - Status: "+show["Status"]+".");
+				return;
+			}
+			resp = show["Show Name"]+" - "+show["Next Episode"].split("^").slice(0,-1).join(" - ");
+			resp = resp+" airs in "+lib.duration(new Date(), new Date(show["GMT+0 NODST"]*1000+3600000));
+			resp = resp+" and has a runtime of "+show.Runtime+" minutes.";
+			irc.say(input.context, resp, false);
 		});
 	}
 });
