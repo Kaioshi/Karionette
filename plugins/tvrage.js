@@ -16,7 +16,7 @@ cmdListen({
 	syntax: config.command_prefix+"tvrage <show name> - Example: "+
 		config.command_prefix+"tvrage Sherlock",
 	callback: function (input) {
-		var uri, show, resp;
+		var uri, show, resp, showtime, now;
 		if (!input.args) {
 			irc.say(input.context, cmdHelp("tvrage", "syntax"));
 			return;
@@ -40,8 +40,13 @@ cmdListen({
 			// the timezone it's written in doesn't practice daylight savings so the result is off by one hour.
 			// Blame timezones. And Deide for not being helpful. Bastard. Linked me to a youtube video about
 			// how timezones are annoying. I already knew that! - Grumposhi.
-			resp = resp+" airs in "+lib.duration(new Date(), new Date(show["GMT+0 NODST"]*1000+3600000));
-			resp = resp+" and has a runtime of "+show.Runtime+" minutes.";
+			showtime = show["GMT+0 NODST"]*1000+3600000;
+			now = new Date().valueOf();
+			if (now > showtime) {
+				resp = resp+" aired "+lib.duration(showtime, now)+" ago and had a runtime of "+show.Runtime+" minutes.";
+			} else {
+				resp = resp+" airs in "+lib.duration(now, showtime)+" and has a runtime of "+show.Runtime+" minutes.";
+			}
 			irc.say(input.context, resp, false);
 		});
 	}
