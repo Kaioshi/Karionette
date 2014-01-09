@@ -5,7 +5,7 @@ cmdListen({
 	help: "Stalks motherflippers",
 	syntax: config.command_prefix + "geoip <nick/hostname/IP/url>",
 	callback: function (input) {
-		var uri, uri2, target, resp, nick, area;
+		var uri, target, resp, nick, area, blame;
 		if (input.args && input.args[0].length > 0) {
 			if (input.args[0].match(/\.|\:/)) {
 				if (input.args[0].match(/https?:\/\/[^ ]+/)) target = url.parse(input.args[0]).host;
@@ -25,48 +25,21 @@ cmdListen({
 					return;
 				}
 			}
-			uri = "http://smart-ip.net/geoip-json/"+target;
-			uri2 = "http://ip-api.com/json/"+target;
+			uri = "http://ip-api.com/json/"+target;
 			web.get(uri, function (error, response, body) {
-				if (error) {
-					logger.error("[GeoIP] Error - "+error);
-					irc.say(input.context, "Something has gone awry.");
-					return;
-				}
-				body = JSON.parse(body);
-				if (!body) {
-					irc.say(input.context, "GeoIP service didn't reply. :<");
-					return;
-				}
 				target = (nick ? nick : target);
-				resp = "";
-				if (body.error) {
-					resp = target+" is in [smart-ip]: "+body.error;
+				body = JSON.parse(body);
+				if (body.status === "fail") {
+					blame = lib.randSelect(ial.Active(input.context));
+					if (!blame || blame === input.nick) blame = lib.randSelect(config.local_whippingboys);
+					irc.say(input.context, "ip-api reported a failure status, sorry. Blame "+blame+lib.randSelect([".", "!", "?"]));
+					return;
 				} else {
-					if (body.host) target += " ("+body.host+")";
-					if (body.countryName) resp += " "+body.countryName;
-					if (body.region) area = " - "+body.region;
-					if (body.city) area += ", "+body.city;
-					if (area) resp += ", "+area;
-					if (resp.length === 0) {
-						resp = target+" is in [smart-ip]: no idea!";
-					} else {
-						resp = target+" is in [smart-ip]:"+resp;
-					}
+					resp = target+" is in "+body.country;
+					if (body.regionName) resp += " - "+body.regionName;
+					if (body.city) resp += ", "+body.city;
 				}
-				web.get(uri2, function (error, response, body) {
-					body = JSON.parse(body);
-					if (body.status === "fail") {
-						//irc.say(input.context, body.message);
-						//return;
-						resp += " -- [ip-api]: "+body.status;
-					} else {
-						resp += " -- [ip-api]: "+body.country;
-						if (body.regionName) resp += " - "+body.regionName;
-						if (body.city) resp += ", "+body.city;
-					}
-					irc.say(input.context, resp);
-				});
+				irc.say(input.context, resp+".");
 			});
 		} else {
 			irc.say(input.context, cmdHelp("geoip", "syntax"));
