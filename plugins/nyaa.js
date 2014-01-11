@@ -7,7 +7,6 @@ var fs = require("fs"),
 
 function rssToJson(body) {
 	var entries = [];
-	//globals.body = body;
 	body = body.slice(body.indexOf("<item>"), body.lastIndexOf("</item>")+7)
 		.replace(/_|\./g, " ")
 		.replace(/\n|\t|  /g, "")
@@ -59,13 +58,10 @@ function checkNyaa(group, show) {
 				if (!entry[show].latest || entries[0].release !== entry[show].latest.release) { // must be new! huzzah.
 					entry[show].latest = entries[0];
 					nyaaDB.saveOne(group, entry);
-					//announceNyaa(group, show);
 					entry[show].announce.forEach(function (target) {
 						irc.say(target, "Nyaa! "+entry[show].latest.release.replace(/ mkv| avi| mp4| mp5/gi, "").trim()+
 							" was released "+lib.duration(new Date(entry[show].latest.date).valueOf())+" ago. \\o/", false);
 					});
-				} else {
-					logger.debug("Nothing new, pant su.");
 				}
 			} else {
 				// Nyaa returned nothing - remove it from the list.
