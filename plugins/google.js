@@ -53,17 +53,19 @@ cmdListen({
 	syntax: config.command_prefix+"define <word> - this uses google's define: \
 		keyword you're probably familiar with - and so it is just as limited as that.",
 	callback: function (input) {
-		var definition, uri, meaning, related, type;
+		var definition, uri, meaning, related, type,
+			addword = true;
 		
 		if (!input.args) {
 			irc.say(input.context, cmdHelp("define", "syntax"));
 			return;
 		}
-		uri = "http://www.google.com/dictionary/json?callback=a&sl=en&tl=en&q=" + input.args[0].replace(/\"/g, "");
+		if (input.data[1]) addword = false; // don't add if it has more than one word
+		uri = "http://www.google.com/dictionary/json?callback=a&sl=en&tl=en&q=" + input.data.replace(/\"/g, "");
 		web.get(uri, function (error, response, body) {
 			if (error) {
 				irc.say(input.context, "Something has gone awry.");
-				logger.error("[google-define] error looking up " + input.args[0] + " -> " + error);
+				logger.error("[google-define] error looking up " + input.data + " -> " + error);
 				return;
 			}
 			body = JSON.parse(ent.decode(lib.stripHtml(body.slice(2, -10)
@@ -75,21 +77,23 @@ cmdListen({
 			}
 			related = [];
 			meaning = [];
-			if (body.primaries[0].terms[0].labels) {
-				type = body.primaries[0].terms[0].labels[0].text.toLowerCase();
-				if (type.match(/^adverb$|^noun$|^adjective$/)) {
-					if (!words[type].get(input.args[0], true)) {
-						words[type].add(input.args[0]);
+				if (body.primaries[0].terms[0].labels) {
+					type = body.primaries[0].terms[0].labels[0].text.toLowerCase();
+					if (addword) {
+						if (type.match(/^adverb$|^noun$|^adjective$/)) {
+							if (!words[type].get(input.args[0], true)) {
+								words[type].add(input.args[0]);
+							}
+						}
 					}
+					type = " ("+type+")";
+				} else {
+					type = "";
 				}
-				type = " ("+type+")";
-			} else {
-				type = "";
-			}
 			body.primaries[0].entries.forEach(function (entry) {
 				if (entry.type === 'related') {
 					entry.terms.forEach(function (item) {
-						if (item.text !== input.args[0]) {
+						if (item.text !== input.data) {
 							if (!related.some(function (element) { return (element === item.text); })) {
 								related.push(item.text);
 							}
@@ -106,9 +110,9 @@ cmdListen({
 			definition = meaning.join("; ");
 			if (related.length > 0) definition = "["+related.join(", ")+"] - "+definition;
 			if (body.terms) {
-				if (related.length > 0)	definition = input.args[0]+" - \""+body.terms[0].text+"\""+type+": "+definition;
-				else definition = input.args[0]+" - \""+body.terms[0].text+"\""+type+": "+definition;
-			} else definition = input.args[0]+type+": "+definition;
+				if (related.length > 0)	definition = input.data+" - \""+body.terms[0].text+"\""+type+": "+definition;
+				else definition = input.data+" - \""+body.terms[0].text+"\""+type+": "+definition;
+			} else definition = input.data+type+": "+definition;
 			irc.say(input.context, definition, false, 2);
 		});
 	}
