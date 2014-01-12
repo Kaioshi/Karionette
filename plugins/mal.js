@@ -34,7 +34,8 @@ function googleIt(context, full, type, term) {
 					irc.say(context, ent.decode(result.titleNoFormatting.replace(" - MyAnimeList.net", ""))+" ~ "+url, false);
 					return;
 				}
-				web.get(uri, function (error, response, body) {
+				// leaving this here incase it works in the future.
+				/*web.get(uri, function (error, response, body) {
 					if (error) {
 						irc.say(context, "Something has gone awry.");
 						logger.error("[mal-googleIt("+[context, type, term].join(", ")+")] hit error in mal-api fetch: "+error);
@@ -83,7 +84,7 @@ function googleIt(context, full, type, term) {
 					resp = result.title+" ("+result.members_score+eps+runtime+status+") ["+result.genres.join(", ")+"] ~ "+url;
 					irc.say(context, ent.decode(resp), false);
 					irc.say(context, ent.decode(result.synopsis), false, 1);
-				});
+				}); */
 			} else {
 				logger.warn("[mal-googleIt] couldn't get ID out of "+result.unescapedUrl);
 				irc.say(context, ".... Pantsu.");
@@ -120,7 +121,8 @@ cmdListen({
 				break;
 			case "-synopsis":
 			case "-s":
-				googleIt(input.context, true, "anime", input.args.slice(1).join(" "));
+				irc.say(input.context, "MAL-API went to hell, -s wont work anymore.");
+				googleIt(input.context, false, "anime", input.args.slice(1).join(" "));
 				return;
 			case "-l":
 				googleIt(input.context, false, "anime", input.args.slice(1).join(" "));
@@ -150,7 +152,8 @@ cmdListen({
 		switch (input.args[0]) {
 			case "-synopsis":
 			case "-s":
-				googleIt(input.context, true, "manga", input.args.slice(1).join(" "));
+				irc.say(input.context, "MAL-API went to hell, -s wont work anymore.");
+				googleIt(input.context, false, "manga", input.args.slice(1).join(" "));
 				return;
 			case "-l":
 				googleIt(input.context, false, "manga", input.args.slice(1).join(" "));
