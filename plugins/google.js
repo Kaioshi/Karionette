@@ -36,7 +36,8 @@ cmdListen({
 			irc.say(input.context, cmdHelp("fight", "syntax"));
 			return;
 		}
-		uri = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=1&q=";
+		uri = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=1&userip="+
+			ial.User(input.nick, input.context).address.split("@")[1]+"&q=";
 		web.get(uri+"\""+reg[1]+"\"", function (error, response, body) {
 			results = [ JSON.parse(body).responseData.cursor.estimatedResultCount ];
 			setTimeout(function () {
@@ -55,7 +56,7 @@ cmdListen({
 						irc.say(input.context, "\""+reg[1]+"\": "+results[0]+" -- \""+reg[2]+"\": "+results[1], false);
 					}
 				});
-			}, 5000);
+			}, 2000);
 		});
 	}
 });
