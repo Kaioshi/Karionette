@@ -110,11 +110,9 @@ cmdListen({
 	command: [ "nyaawatch", "nw" ],
 	help: "Nyaa.. it's a nyaa release watcher!",
 	syntax: config.command_prefix+"nyaawatch add/remove/list <group> <show> - Example: "
-		+config.command_prefix+"nyaawatch add [UTW] Kyoukai no Kanata - Note: \
-		this is filtered to Trusted and higher. Further, there are some naming restrictions. \
-		Blame the internet.",
+		+config.command_prefix+"nyaawatch add [UTW] Kyoukai no Kanata - Note: this is filtered to Trusted and higher.",
 	callback: function (input) {
-		var reg, entry, group;
+		var reg, entry, group, syntax;
 		if (!input.args) {
 			irc.say(input.context, cmdHelp("nyaawatch", "syntax"));
 			return;
@@ -173,6 +171,59 @@ cmdListen({
 					return;
 				}
 				irc.say(input.context, "Nyaa! I'm tracking these shows from "+group+": "+Object.keys(entry).join(", ")+".", false);
+				break;
+			case "announce":
+				// ;nw announce add/remove/list <group> <show> [<target>]
+				syntax = "[Help] "+config.command_prefix+"nyaawatch announce add/remove/list <group> <show> [<#target>] \
+					- Example: "+config.command_prefix+"nyaawatch announce add [Commie] Log Horizon #anime";
+				reg = /(\[.*\]) ([^#]+) ?(#[^ ]+)?/.exec(input.data);
+				if (!reg || (input.args[1] !== "list" && !reg[3])) {
+					irc.say(input.context, syntax);
+					return;
+				}
+				reg[2] = reg[2].trim();
+				entry = nyaaDB.getOne(reg[1]);
+				if (!entry || !entry[reg[2]]) {
+					irc.say(input.context, "I'm not tracking that.");
+					entry = null;
+					return;
+				}
+				switch (input.args[1]) {
+					case "add":
+						if (entry[reg[2]].announce.some(function (item) { return (item === reg[3]); })) {
+							irc.say(input.context, reg[3]+" is already on the announce list.");
+							break;
+						}
+						if (!ial.ison(reg[3], config.nick)) {
+							irc.say(input.context, "I'm not on "+reg[3]+", how could I announce to it?");
+							break;
+						}
+						entry[reg[2]].announce.push(reg[3]);
+						nyaaDB.saveOne(reg[1], entry);
+						irc.say(input.context, reg[1]+" "+reg[2]+" releases will now be announced to "+reg[3]+".", false);
+						break;
+					case "remove":
+						if (entry[reg[2]].announce.some(function (item) { return (item === reg[3]); })) {
+							if (entry[reg[2]].announce.length === 1) {
+								irc.say(input.context, reg[3]+" is the only entry in that announce list, add another before you remove it.");
+								break;
+							}
+							entry[reg[2]].announce = entry[reg[2]].announce.filter(function (item) { return (item !== reg[3]); });
+							nyaaDB.saveOne(reg[1], entry);
+							irc.say(input.context, reg[3]+" was removed from "+reg[1]+" "+reg[2]+"'s announce list.", false);
+						} else {
+							irc.say(input.context, reg[3]+" is not on the announce list for "+reg[1]+" "+reg[2]+".", false);
+						}
+						break;
+					case "list":
+						irc.say(input.context, reg[1]+" "+reg[2]+" releases are being announced to: "
+							+entry[reg[2]].announce.join(", ")+".", false);
+						break;
+					default:
+						irc.say(input.context, syntax);
+						break;
+				}
+				entry = null;
 				break;
 			default:
 				irc.say(input.context, cmdHelp("nyaawatch", "syntax"));
