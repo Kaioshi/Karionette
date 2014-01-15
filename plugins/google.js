@@ -38,8 +38,10 @@ cmdListen({
 		}
 		uri = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=1&q=";
 		web.get(uri+"\""+reg[1]+"\"", function (error, response, body) {
+			globals.lastBody = [ body ];
 			results = [ JSON.parse(body).responseData.cursor.estimatedResultCount ];
 			web.get(uri+"\""+reg[2]+"\"", function (error, response, body) {
+				globals.lastBody.push(body);
 				results.push(JSON.parse(body).responseData.cursor.estimatedResultCount);
 				if (results.length === 2) {
 					if (results[0] === undefined) results[0] = 0;
