@@ -30,7 +30,7 @@ cmdListen({
 			irc.say(input.context, cmdHelp("fight", "syntax"));
 			return;
 		}
-		reg = /(.*) vs.? (.*)/i.exec(input.data);
+		reg = /(.*) vs\.? (.*)/i.exec(input.data.trim());
 		if (!reg) {
 			irc.say(input.context, "You're doin' it wrong!");
 			irc.say(input.context, cmdHelp("fight", "syntax"));
