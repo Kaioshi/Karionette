@@ -20,48 +20,6 @@ cmdListen({
 });
 
 cmdListen({
-	command: "fight",
-	help: "Google search fight!",
-	syntax: config.command_prefix+"fight search term 1 vs. search term 2 - Example: "
-		+config.command_prefix+"fight ranma is a girl vs. ranma is a boy - Note: quotes are automatically added around your term, in the search query.",
-	callback: function (input) {
-		var reg, uri, results;
-		if (!input.args) {
-			irc.say(input.context, cmdHelp("fight", "syntax"));
-			return;
-		}
-		reg = /(.*) vs\.? (.*)/i.exec(input.data.trim());
-		if (!reg) {
-			irc.say(input.context, "You're doin' it wrong!");
-			irc.say(input.context, cmdHelp("fight", "syntax"));
-			return;
-		}
-		uri = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=1&userip="+
-			ial.User(input.nick, input.context).address.split("@")[1]+"&q=";
-		web.get(uri+"\""+reg[1]+"\"", function (error, response, body) {
-			results = [ JSON.parse(body).responseData.cursor.estimatedResultCount ];
-			setTimeout(function () {
-				web.get(uri+"\""+reg[2]+"\"", function (error, response, body) {
-					results.push(JSON.parse(body).responseData.cursor.estimatedResultCount);
-					if (results.length === 2) {
-						if (results[0] === undefined) results[0] = 0;
-						if (results[1] === undefined) results[1] = 0;
-						if (parseInt(results[0], 10) > parseInt(results[1], 10)) {
-							results[0] = "\x02"+lib.commaNum(results[0])+"\x02";
-							results[1] = lib.commaNum(results[1]);
-						} else {
-							results[1] = "\x02"+lib.commaNum(results[1])+"\x02";
-							results[0] = lib.commaNum(results[0]);
-						}
-						irc.say(input.context, "\""+reg[1]+"\": "+results[0]+" -- \""+reg[2]+"\": "+results[1], false);
-					}
-				});
-			}, 2000);
-		});
-	}
-});
-
-cmdListen({
 	command: "gi",
 	help: "Google image search - returns the first hit.",
 	syntax: config.command_prefix+"gi puppies",
