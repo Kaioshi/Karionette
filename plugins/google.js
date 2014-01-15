@@ -38,24 +38,24 @@ cmdListen({
 		}
 		uri = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=1&q=";
 		web.get(uri+"\""+reg[1]+"\"", function (error, response, body) {
-			globals.lastBody = [ body ];
 			results = [ JSON.parse(body).responseData.cursor.estimatedResultCount ];
-			web.get(uri+"\""+reg[2]+"\"", function (error, response, body) {
-				globals.lastBody.push(body);
-				results.push(JSON.parse(body).responseData.cursor.estimatedResultCount);
-				if (results.length === 2) {
-					if (results[0] === undefined) results[0] = 0;
-					if (results[1] === undefined) results[1] = 0;
-					if (parseInt(results[0], 10) > parseInt(results[1], 10)) {
-						results[0] = "\x02"+lib.commaNum(results[0])+"\x02";
-						results[1] = lib.commaNum(results[1]);
-					} else {
-						results[1] = "\x02"+lib.commaNum(results[1])+"\x02";
-						results[0] = lib.commaNum(results[0]);
+			setTimeout(function () {
+				web.get(uri+"\""+reg[2]+"\"", function (error, response, body) {
+					results.push(JSON.parse(body).responseData.cursor.estimatedResultCount);
+					if (results.length === 2) {
+						if (results[0] === undefined) results[0] = 0;
+						if (results[1] === undefined) results[1] = 0;
+						if (parseInt(results[0], 10) > parseInt(results[1], 10)) {
+							results[0] = "\x02"+lib.commaNum(results[0])+"\x02";
+							results[1] = lib.commaNum(results[1]);
+						} else {
+							results[1] = "\x02"+lib.commaNum(results[1])+"\x02";
+							results[0] = lib.commaNum(results[0]);
+						}
+						irc.say(input.context, "\""+reg[1]+"\": "+results[0]+" -- \""+reg[2]+"\": "+results[1], false);
 					}
-					irc.say(input.context, "\""+reg[1]+"\": "+results[0]+" -- \""+reg[2]+"\": "+results[1], false);
-				}
-			});
+				});
+			}, 5000);
 		});
 	}
 });
