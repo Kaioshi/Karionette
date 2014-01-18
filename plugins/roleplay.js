@@ -100,7 +100,8 @@ cmdListen({
 		var player = createPlayer(input.nick);
 		playerDB.saveOne(input.nick, player);
 		irc.say(input.context, "Random character created! "+input.nick+" is a "
-			+player.age+" year old "+player.gender+" "+player.ethnicity+" "+player.race+".");
+			+player.age+" year old "+player.gender+" "+player.ethnicity+" "
+			+(player.gender === "Female" && player.race === "Giant" ? "Giantess" : player.race)+".");
 	}
 });
 
@@ -137,7 +138,8 @@ cmdListen({
 					break;
 				}
 				player.race = race;
-				irc.say(input.context, input.nick+"'s race is now "+player.race+".");
+				irc.say(input.context, input.nick+"'s race is now "
+					+(player.gender === "Female" && player.race === "Giant" ? "Giantess" : player.race)+".");
 				// adjust age if needed
 				age = adjustAge(race, player.age);
 				if (age !== player.age) {
@@ -211,7 +213,8 @@ cmdListen({
 			irc.say(input.context, "I don't see a character associated with the nick "+input.args[0]+".");
 			return;
 		}
-		irc.say(input.context, "You see a "+player.age+" year old "+player.gender+" "+player.ethnicity+" "+player.race+".");
+		irc.say(input.context, "You see a "+player.age+" year old "+player.gender+" "+player.ethnicity+" "
+			+(player.gender === "Female" && player.race === "Giant" ? "Giantess" : player.race)+".");
 		irc.say(input.context, player.description, false);
 		player = null;
 	}
