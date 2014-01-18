@@ -110,7 +110,7 @@ cmdListen({
 	help: "Sets various character attributes. #roleplay",
 	syntax: config.command_prefix+"setchar <age/race/ethnicity/gender/description>",
 	callback: function (input) {
-		var player, age, race, gender, ethnicity;
+		var player, age, race, gender, ethnicity, ages, valid;
 		if (!input.args || !input.args[1]) {
 			irc.say(input.context, cmdHelp("setchar", "syntax"));
 			return;
@@ -128,8 +128,11 @@ cmdListen({
 					irc.say(input.context, input.nick+"'s age is now "+age+".");
 					break;
 				}
-				irc.say(input.context, age+" is not a valid age for your race. \
-					Currently, elves have to be between 80 and 10,000, the rest are 12-90 - waiting on more race data.");
+				ages = "";
+				races.forEach(function (race) {
+					ages += race+": "+getRaceAges(race).join("-")+", ";
+				});
+				irc.say(input.context, age+" is not a valid age for your race. Valid ages per race are "+ages.slice(0,-2)+".");
 				break;
 			case "race":
 				race = validateRace(input.args.slice(1).join("-"));
