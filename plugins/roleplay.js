@@ -217,9 +217,9 @@ cmdListen({
 			irc.say(input.context, "I don't see a character associated with the nick "+input.args[0]+".");
 			return;
 		}
-		irc.say(input.context, "You see a "+player.age+" year old "+player.gender+" "+player.ethnicity+" "
+		irc.say(input.context, "You see a "+lib.commaNum(player.age)+" year old "+player.gender+" "+player.ethnicity+" "
 			+(player.gender === "Female" && player.race === "Giant" ? "Giantess" : player.race)+".");
-		irc.say(input.context, player.description, false);
+		irc.say(input.context, player.description, false, 1);
 		player = null;
 	}
 });
