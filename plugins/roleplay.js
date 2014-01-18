@@ -107,7 +107,7 @@ cmdListen({
 cmdListen({
 	command: "setchar",
 	help: "Sets various character attributes. #roleplay",
-	syntax: config.command_prefix+"setchar <age/race/gender/description>",
+	syntax: config.command_prefix+"setchar <age/race/ethnicity/gender/description>",
 	callback: function (input) {
 		var player, age, race, gender, ethnicity;
 		if (!input.args || !input.args[1]) {
