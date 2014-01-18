@@ -1,6 +1,6 @@
 // http://mangafox.me/rss/fairy_tail.xml
 "use strict";
-var mangaDB = new DB.Json({filename: "manga"}),
+var mangaDB = new DB.Json({filename: "manga", queue: true}),
 	ent = require('./lib/entities.js'),
 	sys = require('sys'),
 	fs = require('fs');
@@ -30,21 +30,18 @@ addTimers();
 function checkManga(manga, context, first) {
 	var huzzah, title, link, last, messages, date, sent, strip, entry;
 	
-	lib.memProf("Checking "+manga);
 	entry = mangaDB.getOne(manga);
 	if (!entry) {
 		logger.debug("[manga] check("+[manga, context].join(", ")+") called, manga doesn't exist");
-		lib.memProf("Checking "+manga);
 		return;
 	}
 	strip = (!first ? " | head -n 18 | tail -n 2" : " | head -n 20 | tail -n 4");
 	sys.exec("curl -s -S -L "+entry.url+strip, function (error, stdout, stderr) {
-		logger.debug("Checking for "+manga+" updates ...");
 		stdout = stdout.split("\n");
 		title = /<title>(.*)<\/title>/i.exec(stdout[0]);
 		if (!title) {
 			logger.debug("No response from "+entry.url);
-			lib.memProf("Checking "+manga);
+			entry = null; stdout = null; stderr = null; strip = null;
 			return; // mangafox hasn't responded appropriately. let's just wait.
 		}
 		title = ent.decode(title[1]);
@@ -56,13 +53,17 @@ function checkManga(manga, context, first) {
 				}
 				irc.say(context, "No update for "+manga+"; Latest: "+entry.title+" ~ "+entry.link);
 			}
-			lib.memProf("Checking "+manga);
+			entry = null; stdout = null; stderr = null; strip = null; title = null;
 			return;
 		}
 		entry.title = title;
 		entry.link = /<link>(.*)<\/link>/i.exec(stdout[1])[1];
 		mangaDB.saveOne(manga, entry);
-		if (entry.announce.length === 0) return;
+		if (entry.announce.length === 0) {
+			logger.debug(manga+" has no announce targets. Why is it so?");
+			entry = null; stdout = null; stderr = null; strip = null;
+			return;
+		}
 		entry.announce.forEach(function (target) {
 			if (first) {
 				date = /<pubDate>(.*)<\/pubDate>/i.exec(stdout[3])[1];
@@ -95,7 +96,7 @@ function checkManga(manga, context, first) {
 				}
 			}
 		});
-		lib.memProf("Checking "+manga);
+		entry = null; stdout = null; stderr = null; strip = null; messages = null;
 	});
 }
 
