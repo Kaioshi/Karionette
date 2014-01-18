@@ -130,7 +130,8 @@ cmdListen({
 				}
 				ages = "";
 				races.forEach(function (race) {
-					ages += race+": "+getRaceAges(race).join("-")+", ";
+					valid = getRaceAges(race);
+					ages += race+": "+valid[0]+"-"+lib.commaNum(valid[1])+", ";
 				});
 				irc.say(input.context, age+" is not a valid age for your race. Valid ages per race are "+ages.slice(0,-2)+".");
 				break;
