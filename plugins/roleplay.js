@@ -1,9 +1,23 @@
 // rp thing
 var playerDB = new DB.Json({filename: "rp-players"}),
+	ethnicities = [ "Harikki", "Draskan", "Satlani", "Nasikan", "Atrisian", "Merekese" ],
 	races = [
-		"Harikki", "Draskan", "Satlani", "Nasikan", "Atrisian", "Merekese", "Dwarf",
-		"Half-dwarf", "Elf", "Half-elf", "Orc", "Half-orc", "Giant", "Half-giant"
+		"Human",
+		"Halfling", "Half-halfling",
+		"Dwarf", "Half-dwarf",
+		"Elf", "Half-elf",
+		"Orc", "Half-orc",
+		"Giant", "Half-giant"
 	];
+
+function validateEthnicity(ethnicity) {
+	var i;
+	for (i = 0; i < ethnicities.length; i++) {
+		if (ethnicity.toLowerCase() === ethnicities[i].toLowerCase()) {
+			return ethnicities[i];
+		}
+	}
+}
 
 function validateRace(race) {
 	var i;
@@ -14,15 +28,10 @@ function validateRace(race) {
 	}
 }
 
-function adjustAge(race, age) { // helper for ;setchar race <race with age limits>
-	switch (race) {
-		case "Elf":
-			if (age < 80) return 80;
-			break;
-		default:
-			if (age > 90) return 90;
-			break;
-	}
+function adjustAge(race, age) {
+	var valid = getRaceAges(race);
+	if (age < valid[0]) return valid[0];
+	if (age > valid[1]) return valid[1];
 	return age;
 }
 
@@ -35,35 +44,47 @@ function randNum(min, max) {
 	return ret;
 }
 
-function validAge(race, age) {
+function getRaceAges(race) {
 	switch (race) {
 		case "Elf":
-			if (age < 80) {
-				return false;
-			}
-			return true;
-			break;
-		default:
-			if (age >= 12 && age <= 90) return true;
-			return false;
+			return [ 80, 10000 ];
+		case "Half-elf":
+			return [ 30, 2000 ];
+		case "Dwarf":
+			return [ 40, 500 ];
+		case "Half-dwarf":
+			return [ 30, 250 ];
+		case "Orc":
+			return [ 8, 70 ];
+		case "Half-orc":
+			return [ 10, 75 ];
+		case "Halfling":
+			return [ 30, 120 ];
+		case "Half-halfling":
+			return [ 18, 90 ];
+		case "Giant":
+		case "Half-giant":
+		case "Human":
+			return [ 12, 80 ];
 	}
 }
 
+function validAge(race, age) {
+	var valid = getRaceAges(race);
+	if (age >= valid[0] && age <= valid[1]) return true;
+	return false;
+}
+
 function randAge(race) {
-	switch (race) {
-		case "Elf":
-			return randNum(80, 10000);
-			break;
-		default:
-			return randNum(12, 90);
-			break;
-	}
+	var valid = getRaceAges(race);
+	return randNum(valid[0], valid[1]);
 }
 
 function createPlayer(nick) {
 	var player = {
 		nick: nick,
-		race: lib.randSelect(races)
+		race: lib.randSelect(races),
+		ethnicity: lib.randSelect(ethnicities)
 	};
 	//player.stature = randStature(player.race);
 	player.age = randAge(player.race);
@@ -78,7 +99,8 @@ cmdListen({
 	callback: function (input) {
 		var player = createPlayer(input.nick);
 		playerDB.saveOne(input.nick, player);
-		irc.say(input.context, "Random character created! "+input.nick+" is a "+player.age+" year old "+player.gender+" "+player.race+".");
+		irc.say(input.context, "Random character created! "+input.nick+" is a "
+			+player.age+" year old "+player.gender+" "+player.ethnicity+" "+player.race+".");
 	}
 });
 
@@ -87,7 +109,7 @@ cmdListen({
 	help: "Sets various character attributes. #roleplay",
 	syntax: config.command_prefix+"setchar <age/race/gender/description>",
 	callback: function (input) {
-		var player, age, race, gender;
+		var player, age, race, gender, ethnicity;
 		if (!input.args || !input.args[1]) {
 			irc.say(input.context, cmdHelp("setchar", "syntax"));
 			return;
@@ -123,6 +145,16 @@ cmdListen({
 						+age+" from "+player.age+", according to the new race's age limits.");
 					player.age = age;
 				}
+				playerDB.saveOne(input.nick, player);
+				break;
+			case "ethnicity":
+				ethnicity = validateEthnicity(input.args[1]);
+				if (!ethnicity) {
+					irc.say(input.context, "Invalid ethnicity. Available: "+ethnicities.join(", ")+".");
+					break;
+				}
+				player.ethnicity = ethnicity;
+				irc.say(input.context, input.nick+"'s ethnicity is now "+player.ethnicity+".");
 				playerDB.saveOne(input.nick, player);
 				break;
 			case "gender":
@@ -179,7 +211,7 @@ cmdListen({
 			irc.say(input.context, "I don't see a character associated with the nick "+input.args[0]+".");
 			return;
 		}
-		irc.say(input.context, "You see a "+player.age+" year old "+player.gender+" "+player.race+".");
+		irc.say(input.context, "You see a "+player.age+" year old "+player.gender+" "+player.ethnicity+" "+player.race+".");
 		irc.say(input.context, player.description, false);
 		player = null;
 	}
