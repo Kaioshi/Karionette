@@ -40,7 +40,7 @@ function checkAllNyaa() {
 			setTimeout(function () {
 				checkNyaa(group, show);
 			}, delay);
-			delay += 1000;
+			delay += 5000;
 		});
 	});
 }
@@ -48,12 +48,11 @@ function checkAllNyaa() {
 function checkNyaa(group, show) {
 	var entries, entry,
 		uri = "http://www.nyaa.se/?page=rss&cats=1_37&filter=2&term="+group+" "+show;
-	logger.debug("Checking Nyaa for new "+group+" "+show+" releases.");
+	
 	web.get(uri, function (error, response, body) {
 		if (body) {
 			entry = nyaaDB.getOne(group);
 			entries = rssToJson(ent.decode(body));
-			//globals.lastNyaa = entries;
 			if (entries.length > 0) {
 				if (!entry[show].latest || entries[0].release !== entry[show].latest.release) { // must be new! huzzah.
 					entry[show].latest = entries[0];
