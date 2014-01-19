@@ -7,7 +7,7 @@ function itemExists(type, item) {
 	var variable, alias;
 	switch (type) {
 		case "variable":
-			variable = varDB.getOne("{"+item+"}");
+			variable = varDB.getOne("{"+item.toLowerCase()+"}");
 			if (variable) {
 				variable = null;
 				return true;
