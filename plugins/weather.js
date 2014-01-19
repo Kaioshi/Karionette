@@ -20,8 +20,7 @@ cmdListen({
 			temp = (f ? (body.main.temp*(1.8)-459.67).toString() : (body.main.temp-273.15).toString());
 			temp = temp.slice(0, temp.indexOf(".")+3) + (f ? "F" : "C");
 			place = (body.name ? body.name+", " : "")+body.sys.country;
-			irc.say(input.context, "The temperature in "+place+" is "+temp+" and was last updated "
-				+lib.duration(new Date(body.dt*1000), new Date())+" ago.");
+			irc.say(input.context, "The temperature in "+place+" is "+temp+".");
 		});
 	}
 });
