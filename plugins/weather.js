@@ -17,10 +17,14 @@ cmdListen({
 		uri = "http://api.openweathermap.org/data/2.5/weather?q="+input.data.trim();
 		web.get(uri, function (error, response, body) {
 			body = JSON.parse(body);
+			if (body.cod === "404") {
+				irc.say(input.context, "Nope. API said: "+body.message);
+				return;
+			}
 			temp = (f ? (body.main.temp*(1.8)-459.67).toString() : (body.main.temp-273.15).toString());
 			temp = temp.slice(0, temp.indexOf(".")+3) + (f ? "F" : "C");
 			place = (body.name ? body.name+", " : "")+body.sys.country;
-			irc.say(input.context, "The temperature in "+place+" is "+temp+".");
+			irc.say(input.context, "The temperature in "+place+" ("+body.coord.lon+", "+body.coord.lat+") is "+temp+".");
 		});
 	}
 });
