@@ -78,16 +78,18 @@ module.exports = function () {
 			} else {
 				logger.warn("Socket closed. Attempting to reconnect in 15 seconds...");
 				socket = new net.Socket();
-				connectInterval = setInterval(function () {
-					logger.warn("Attempting reconnect...");
-					openConnection({
-						server: irc_config.server,
-						port: irc_config.port,
-						nickname: irc_config.nickname[0],
-						username: irc_config.username,
-						realname: irc_config.realname
-					});
-				}, 15000);
+				if (!connectInterval) {
+					connectInterval = setInterval(function () {
+						logger.warn("Attempting reconnect...");
+						openConnection({
+							server: irc_config.server,
+							port: irc_config.port,
+							nickname: irc_config.nickname[0],
+							username: irc_config.username,
+							realname: irc_config.realname
+						});
+					}, 15000);
+				}
 			}
 		});
 		socket.on("error", function socketErrorEvent(e) {
@@ -104,7 +106,8 @@ module.exports = function () {
 			send("USER " + sanitise(params.username) + " localhost * " + sanitise(params.realname));
 			connected = true;
 			if (connectInterval) {
-				clearInterval(connectInterval)
+				clearInterval(connectInterval);
+				connectInterval = null;
 			}
 		});
 	}
