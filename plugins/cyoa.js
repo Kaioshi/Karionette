@@ -32,10 +32,9 @@ function loadScenario(channel, scenario) {
 		for (i = 0; i < entry.length; i++) {
 			switch (entry[i][0]) {
 				case "{":
-					section = entry[i][1];
+					//section = entry[i][1];
+					section = entry[i].split(" ")[0].slice(1,-1);
 					sections[section] = {};
-					sections[section].description = entry[i].slice(4);
-					// section marker and description
 					break;
 				case "[":
 					reg = /\[([0-9]+),? ?([0-9]+)?\]/.exec(entry[i]);
@@ -68,8 +67,9 @@ function loadScenario(channel, scenario) {
 					}
 					break;
 				default:
-					// no idea.
-					logger.debug("Found a weird section in scenario: "+entry[i]);
+					// no special character - must be story.
+					if (!sections[section].description) sections[section].description = "";
+					sections[section].description += " "+entry[i];
 					break;
 			}
 		}
@@ -138,7 +138,9 @@ function takeVotes(channel, position) {
 function doSection(channel, position) {
 	irc.say(channel, adventure[channel].sections[position].description, false);
 	if (adventure[channel].sections[position].end) {
-		irc.say(channel, "The End.");
+		setTimeout(function () {
+			irc.say(channel, "The End.");
+		}, 3000);
 		delete adventure[channel];
 		return;
 	}
