@@ -1,0 +1,46 @@
+The drunk and the cow.						<- this is the title, and it's shown before the first section. Keep it to one line.
+---											<- this denotes the start of a section.
+{0}											<- this is the section identifier
+You and some mates got drunk. You've wandered off and found a field.	<- section description. You can do multiple lines, they get put on one, though.
+[5, 10]										<- 5 is how long to wait before voting begins, 10 is how long they get to vote. in seconds
+<1*> Approach the field.					<- these are the options presented to the users. 1 is the section marker to move to, * makes it default
+<1> Approach the field!						<- you can have more than one going to the same place.
+---
+{1}
+You see a cow. There's some cowshit between you and it.
+[5, 10]
+<2*> Tip the cow.							<- users do not see the section markers as the options. they're numbered 1->N dynamically.
+<3> Stare at the cow.
+<4> Attempt to ride the cow.
+---
+{2}
+You attempt to tip the cow. It falls over on you, crushing you. You are dead.
+$END										<- this will say "The End." after 3 seconds. You don't need a [timer] if it is the end.
+---
+{3}
+You stare at the cow. It charges you, pinning you against a nearby tree. You're mostly unharmed, but unable to escape.
+[20]										<- the vote timer isn't required here
+<5*>										<- no text accompanying the option and the * make this a forced section change.
+---
+{4}
+You get a running start and attempt to jump up on the cow. You trip on the way and fall in a fresh pile of cow shit.
+Inhaling sharply at the sudden impact, you snort up a good wad of it. You do not feel fine.
+[20, 30]
+<6*> Try to blow your nose.
+<7> Inhale deeply again.
+---
+{5}
+A bull eyes the rear of the cow pinning you, and mounts it.
+The cow pinning you is being ravaged by a bull.
+Slowly, the bull's efforts cause the cow's body to crush your own.
+You done died under some bovine sex.
+$END
+---
+{6}
+You block one nostril and blow hard, discharging the dung at high velocity - and repeat the process for the other.
+After struggling to your feet, you give up on messing with the cow and make your way home.
+$END
+---
+{7}
+You inhale deeply again, snorting down the dung and attempting to swallow. It blocks your throat and you suffocate then and there.
+$END
