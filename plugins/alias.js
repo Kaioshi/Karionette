@@ -182,7 +182,11 @@ cmdListen({
 					variable = varDB.getOne(varName);
 					if (variable) {
 						if (perms.Check(input.user, "variable", lcVarname)) {
-							variable.data = variable.data+(input.args[2] === "," ? ", " : " "+input.args[2]+" ")+varString;
+							if (variable.data.length > 0) {
+								variable.data = variable.data+(input.args[2] === "," ? ", " : " "+input.args[2]+" ")+varString;
+							} else {
+								variable.data = varString;
+							}
 							varDB.saveOne(varName, variable);
 							irc.say(input.context, "Added o7");
 						} else {
