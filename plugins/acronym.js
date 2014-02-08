@@ -5,15 +5,26 @@ function upperFirst(word) {
 function getWord(letter, type) {
 	var word, i,
 		max = 5000;
+	letter = letter.toLowerCase();
 	for (i = 0; i < max; i++) {
 		word = words[type].random();
-		if (word[0] === letter) return word;
+		if (type === "verb") {
+			if (word.base[0] === letter) {
+				return word[lib.randSelect([ "base", "s", "ed", "ing" ])];
+			}
+		} else {
+			if (word[0] === letter) {
+				return word;
+			}
+		}
 	}
 	// if we don't have anything, try a noun.
 	type = "noun";
 	for (i = 0; i < max; i++) {
 		word = words[type].random();
-		if (word[0] === letter) return word;
+		if (word[0] === letter) {
+			return word;
+		}
 	}
 	return "???";
 }
@@ -34,7 +45,7 @@ cmdListen({
 			return;
 		}
 		line = "";
-		types = [ "verb", "noun", "adjective" ];
+		types = [ "verb", "noun", "adverb", "adjective" ];
 		letters = input.args[0].toLowerCase();
 		for (i = 0; i < letters.length; i++) {
 			type = lib.randSelect(types);
