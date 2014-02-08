@@ -45,7 +45,7 @@ cmdListen({
 			return;
 		}
 		line = "";
-		types = [ "verb", "noun", "adverb", "adjective" ];
+		types = [ "verb", "verb", "verb", "noun", "noun", "noun", "adverb", "adjective" ];
 		letters = input.args[0].toLowerCase();
 		for (i = 0; i < letters.length; i++) {
 			type = lib.randSelect(types);
