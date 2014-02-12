@@ -145,16 +145,18 @@ module.exports = function () {
 			send("PONG :" + server, true);
 		},
 		join: function (channel, key) {
-			if (channel) {
-				var cmd = "JOIN :" + sanitise(channel);
-				if (key) {
-					cmd += " " + sanitise(key);
-				}
-				send(cmd);
+			if (key) {
+				send("JOIN "+sanitise(channel)+" "+sanitise(key));
+			} else {
+				send("JOIN "+sanitise(channel));
 			}
 		},
-		part: function (channel) {
-			send("PART :" + sanitise(channel));
+		part: function (channel, reason) {
+			if (reason) {
+				send("PART "+sanitise(channel)+" :"+sanitise(reason));
+			} else {
+				send("PART "+sanitise(channel));
+			}
 		},
 		say: function (context, message, sanitiseMessage, maxmsgs) {
 			var privmsg, max, maxMessages, i, tempMsg;
