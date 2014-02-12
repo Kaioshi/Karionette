@@ -84,24 +84,51 @@ cmdListen({
 });
 
 cmdListen({
-	command: "join",
-	help: "Joins channels. What did you expect?",
+	command: "act",
+	help: "Sends an action to a target. Admin only.",
+	syntax: config.command_prefix+"act <target> <action to do> - Example: "
+		+config.command_prefix+"act #anime whips Deide's behind.",
 	admin: true,
 	callback: function (input) {
-		if (input.args && input.args[0][0] === "#") {
-			irc.join(input.data);
+		if (!input.args || !input.args[1]) {
+			irc.say(input.context, cmdHelp("act", "syntax"));
+			return;
+		}
+		irc.say(input.args[0], "\x01ACTION "+input.args.slice(1).join(" ")+"\x01", false);
+	}
+});
+
+cmdListen({
+	command: "join",
+	help: "Joins channels. Admin only.",
+	syntax: config.command_prefix+"join <channel> [<key>] - Example: "+config.command_prefix+"join #anime",
+	admin: true,
+	callback: function (input) {
+		if (!input.args) {
+			irc.say(input.context, cmdHelp("join", "syntax"));
+			return;
+		}
+		if (input.args[1]) {
+			irc.join(input.args[0], input.args[1]);
+		} else {
+			irc.join(input.args[0]);
 		}
 	}
 });
 
 cmdListen({
 	command: "part",
-	help: "Leaves channels.",
+	help: "Leaves channels. Admin only.",
 	admin: true,
 	callback: function (input) {
-		if (input.args && input.args[0][0] === "#") {
-			irc.part(input.data);
-		} else if (input.context[0] === "#") {
+		if (input.args) {
+			if (input.args[1]) {
+				//irc.raw("PART "+input.args[0]+" :"+input.args.slice(1).join(" "));
+				irc.part(input.args[0], input.args.slice(1).join(" "));
+			} else {
+				irc.part(input.args[0]);
+			}
+		} else {
 			irc.part(input.context);
 		}
 	}
