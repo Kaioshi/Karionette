@@ -12,7 +12,7 @@ cmdListen({
 			irc.say(input.context, cmdHelp("roll", "syntax"));
 			return;
 		}
-		if (reg[1] > 10) {
+		if (reg[1] > 100) {
 			irc.say(input.context, "No.");
 			return;
 		}
