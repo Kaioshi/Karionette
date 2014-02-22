@@ -21,7 +21,8 @@ cmdListen({
 		reg[1] = parseInt(reg[1], 10);
 		reg[2] = parseInt(reg[2], 10);
 		for (i = 0; i < reg[1]; i++) {
-			roll = Math.round(Math.random()*reg[2])+1;
+			roll = Math.round((Math.random()*reg[2])+1);
+			if (roll > reg[2]) roll = reg[2];
 			total += roll;
 			rolls.push(roll);
 		}
