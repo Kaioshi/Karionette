@@ -45,7 +45,7 @@ function checkAllNyaa() {
 	});
 }
 
-function checkNyaa(group, show) {
+function checkNyaa(group, show, add) {
 	var entries, entry,
 		uri = "http://www.nyaa.se/?page=rss&cats=1_37&filter=2&term="+group+" "+show;
 	
@@ -62,10 +62,9 @@ function checkNyaa(group, show) {
 							" was released "+lib.duration(new Date(entry[show].latest.date).valueOf())+" ago. \\o/", false);
 					});
 				}
-			} else {
-				// Nyaa returned nothing - remove it from the list.
+			} else if (add) { // no response and it was just added. remove it
 				entry[show].announce.forEach(function (target) {
-					irc.say(target, "Nyaa returned nothing when I looked for "+group+" "+show+". Removing it from the list.", false);
+					irc.say(target, "Nyaa returned nothing when I looked for "+group+" "+show+". Removing it.", false);
 				});
 				delete entry[show];
 				if (Object.keys(entry).length === 0) {
@@ -92,7 +91,7 @@ function addNyaa(context, group, show) {
 	entry[show] = { announce: [ context ] };
 	nyaaDB.saveOne(group, entry);
 	irc.say(context, "Added "+group+" "+show+" to Nyaa's watch list.", false);
-	checkNyaa(group, show);
+	checkNyaa(group, show, true);
 	startTimer();
 }
 
