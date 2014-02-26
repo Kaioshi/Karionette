@@ -3,7 +3,7 @@ cmdListen({
 	help: "Defines words or phrases using wordnik.",
 	syntax: config.command_prefix+"define <word/phrase> - Example: "+config.command_prefix+"define butt",
 	callback: function (input) {
-		var uri, i, definitions;
+		var uri, i, definitions, example, query;
 		if (!input.args) {
 			irc.say(input.context, cmdHelp("define", "syntax"));
 			return;
@@ -12,10 +12,10 @@ cmdListen({
 			irc.say(input.context, "The wordnik plugin requires an API key to be present in config.js, go to http://developer.wordnik.com to get one.");
 			return;
 		}
-		uri = "http://api.wordnik.com:80/v4/word.json/"+input.data.trim()+"/definitions?limit=3&includeRelated=true&useCanonical=true&includeTags=false&api_key="+config.api.wordnik;
+		query = input.data.trim();
+		uri = "http://api.wordnik.com:80/v4/word.json/"+query+"/definitions?limit=3&includeRelated=true&sourceDictionaries=wordnet,wiktionary&useCanonical=false&includeTags=false&api_key="+config.api.wordnik;
 		web.get(uri, function (error, response, body) {
 			body = JSON.parse(body);
-			globals.lastBody = body;
 			if (body.length === 0) {
 				irc.say(input.context, "Couldn't find it. "+lib.randSelect([
 					"You only have yourself to blame.",
@@ -28,10 +28,15 @@ cmdListen({
 				]));
 				return;
 			}
-			for (definitions = " ~", i = 0; i < body.length; i++) {
+			for (definitions = " -", i = 0; i < body.length; i++) {
 				definitions += " "+(i+1)+") ["+body[i].partOfSpeech+"] "+body[i].text;
 			}
-			irc.say(input.context, body[0].word+definitions, false);
+			uri = "http://api.wordnik.com:80/v4/word.json/"+query+"/topExample?useCanonical=false&api_key="+config.api.wordnik;
+			web.get(uri, function (error, response, body) {
+				body = JSON.parse(body);
+				irc.say(input.context, query+definitions, false);
+				irc.say(input.context, body.text+" - "+body.title, false);
+			});
 		});
 	}
 });
