@@ -306,19 +306,23 @@ evListen({
 		}
 		if (verb.indexOf("\"") > -1) verb = verb.replace(/\"/g, "");
 		if (verb.slice(-2) === "ly") {
+			if (words.adverb.get(verb) !== verb && config.api.wordnik) {
+				words.lookup("adverb", verb);
+			}
 			adv = args[1] + " ";
 			verb = args[2];
 		}
 		tmp = words.verb.get(verb);
 		if (tmp) {
-			// real
 			verbs = tmp.s;
 			verbed = tmp.ed;
 			verbing = tmp.ing;
 			verb = tmp.base;
 			tmp = null;
 		} else {
-			// future: fire function that tries to add verb to verbs.txt via google define
+			if (config.api.wordnik) {
+				words.lookup("verb", verb);
+			}
 			if (verb.slice(-3) === "hes") {
 				verb = verb.slice(0, -2); // "touches" vs. "acquires"
 			} else if (verb.slice(-1) === "s") {
