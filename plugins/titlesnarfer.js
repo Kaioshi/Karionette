@@ -9,6 +9,19 @@ function zero(n) {
 	return (n > 9 ? n : "0" + n);
 }
 
+function dura(secs) {
+	var mins = Math.floor(secs/60),
+		hours = Math.floor(mins/60),
+		ret = [];
+	secs = (secs % 60);
+	mins = (mins % 60);
+	hours = (hours % 24);
+	if (hours) ret.push(hours);
+	if (mins) ret.push(mins);
+	ret.push((secs > 9 ? secs : "0"+secs));
+	return ret.join(":");
+}
+
 function lastUrl(opts) {
 	var i, k, date, keys,
 		match = false,
@@ -109,25 +122,22 @@ urlSearch:	for (i = 0; i < keys.length; i++) {
 function youtubeIt(context, id, host) {
 	var uri = "https://gdata.youtube.com/feeds/api/videos/"+id+"?v=2&alt=json";
 	web.get(uri, function (error, response, body) {
-		var date,
-			views = "",
-			rating = " - ";
+		var date, duration,
+			views = "";
 		if (error) {
 			logger.error("[titlesnarfer[youtubeIt("+id+")]] error: "+error);
 			irc.say(context, "Something has gone awry.");
 			return;
 		}
 		body = JSON.parse(body).entry;
-		if (body["gd$rating"] && body["gd$rating"].average) {
-			rating = rating+"["+body["gd$rating"].average.toString().slice(0,3)+"/5] ";
-		}
 		if (body["yt$statistics"] && body["yt$statistics"].viewCount) {
 			views = " - "+lib.commaNum(body["yt$statistics"].viewCount)+" views";
 		}
+		duration = dura(parseInt(body.media$group.yt$duration.seconds, 10));
 		date = new Date(body["media$group"]["yt$uploaded"]["$t"]);
 		date = zero(date.getDate())+"/"+zero(date.getMonth()+1)+"/"+date.getYear().toString().slice(1);
-		irc.say(context, body.title["$t"]+rating+date+views, false); //+" ~ "+host.replace("www.",""), false);
-		date = null; rating = null; views = null; body = null; response = null; error = null;
+		irc.say(context, body.title["$t"]+" - ["+duration+"] "+date+views, false); //+" ~ "+host.replace("www.",""), false);
+		date = null; views = null; body = null; response = null; error = null;
 	});
 }
 

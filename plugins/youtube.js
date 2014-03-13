@@ -3,6 +3,20 @@ function zero(n) {
 	return (n > 9 ? n : "0" + n);
 }
 
+
+function dura(secs) {
+	var mins = Math.floor(secs/60),
+		hours = Math.floor(mins/60),
+		ret = [];
+	secs = (secs % 60);
+	mins = (mins % 60);
+	hours = (hours % 24);
+	if (hours) ret.push(hours);
+	if (mins) ret.push(mins);
+	ret.push((secs > 9 ? secs : "0"+secs));
+	return ret.join(":");
+}
+
 cmdListen({
 	command: [ "yt", "youtube", "y" ],
 	help: "Searches youtube!",
@@ -10,7 +24,7 @@ cmdListen({
 		"yt we like big booty mitches",
 	callback: function (input) {
 		function ytCB(error, response, body) {
-			var link, title, rating, views, date;
+			var link, title, views, date, duration;
 			body = JSON.parse(body).feed;
 			if (body.openSearch$totalResults.$t === 0 || !body.entry) {
 				irc.say(input.context, input.data + " is not a thing on youtube. :<");
@@ -21,14 +35,10 @@ cmdListen({
 			title = body.entry[0].media$group.media$title.$t;
 			date = new Date(body.entry[0].media$group.yt$uploaded.$t);
 			date = zero(date.getDate()) + "/" + zero(date.getMonth() + 1) + "/" + date.getYear().toString().slice(1);
-			if (body.entry[0].gd$rating && body.entry[0].gd$rating.average) {
-				rating = " - [" + body.entry[0].gd$rating.average.toString().slice(0, 3) + "/5] ";
-			} else {
-				rating = " ~ ";
-			}
+			duration = dura(parseInt(body.entry[0].media$group.yt$duration.seconds, 10));
 			views = body.entry[0].yt$statistics.viewCount;
-			irc.say(input.context, title + rating + date + " - " + lib.commaNum(views) + " views ~ " + link, false);
-			body = null; date = null; title = null; rating = null; date = null; views = null; link = null;
+			irc.say(input.context, title + " - ["+duration+"] " + date + " - " + lib.commaNum(views) + " views ~ " + link, false);
+			body = null; date = null; title = null; date = null; views = null; link = null;
 		}
 		
 		if (!input.args || !input.args[0]) {
