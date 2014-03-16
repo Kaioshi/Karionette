@@ -24,7 +24,7 @@ cmdListen({
 					"I'm not sorry.",
 					"I'm not even sorry. >:D",
 					";_;",
-					"Blame "+lib.randSelect(ial.Active(input.context))+"."
+					"Blame "+(input.context[0] === "#" ? lib.randSelect(ial.Active(input.context))+"." : "yourself.")
 				]));
 				return;
 			}
@@ -35,7 +35,7 @@ cmdListen({
 			web.get(uri, function (error, response, body) {
 				body = JSON.parse(body);
 				irc.say(input.context, query+definitions, false);
-				irc.say(input.context, body.text+" - "+body.title, false);
+				if (body.text && body.title) irc.say(input.context, body.text+" - "+body.title, false);
 			});
 		});
 	}
