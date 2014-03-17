@@ -98,7 +98,7 @@ cmdListen({
 	syntax: config.command_prefix+"gencharacter",
 	callback: function (input) {
 		var player = createPlayer(input.nick);
-		playerDB.saveOne(input.nick, player);
+		playerDB.saveOne(input.nick.toLowerCase(), player);
 		irc.say(input.context, "Random character created! "+input.nick+" is a "
 			+player.age+" year old "+player.gender+" "+player.ethnicity+" "
 			+(player.gender === "Female" && player.race === "Giant" ? "Giantess" : player.race)+".");
@@ -115,7 +115,7 @@ cmdListen({
 			irc.say(input.context, cmdHelp("setchar", "syntax"));
 			return;
 		}
-		player = playerDB.getOne(input.nick);
+		player = playerDB.getOne(input.nick.toLowerCase());
 		if (!player) {
 			return "I'm not familiar with your character. Is your nick correct?";
 		}
@@ -134,7 +134,7 @@ cmdListen({
 				}
 				if (validAge(player.race, age)) {
 					player.age = age;
-					playerDB.saveOne(input.nick, player);
+					playerDB.saveOne(input.nick.toLowerCase(), player);
 					irc.say(input.context, input.nick+"'s age is now "+age+".");
 					break;
 				}
@@ -147,7 +147,7 @@ cmdListen({
 					break;
 				}
 				player.race = race;
-				irc.say(input.context, input.nick+"'s race is now "
+				irc.say(input.context, input.nick.toLowerCase()+"'s race is now "
 					+(player.gender === "Female" && player.race === "Giant" ? "Giantess" : player.race)+".");
 				// adjust age if needed
 				age = adjustAge(race, player.age);
@@ -156,7 +156,7 @@ cmdListen({
 						+age+" from "+player.age+", according to the new race's age limits.");
 					player.age = age;
 				}
-				playerDB.saveOne(input.nick, player);
+				playerDB.saveOne(input.nick.toLowerCase(), player);
 				break;
 			case "ethnicity":
 				ethnicity = validateEthnicity(input.args.slice(1).join(" "));
@@ -166,7 +166,7 @@ cmdListen({
 				}
 				player.ethnicity = ethnicity;
 				irc.say(input.context, input.nick+"'s ethnicity is now "+player.ethnicity+".");
-				playerDB.saveOne(input.nick, player);
+				playerDB.saveOne(input.nick.toLowerCase(), player);
 				break;
 			case "gender":
 				gender = input.args.slice(1).join(" ").toLowerCase();
@@ -181,7 +181,7 @@ cmdListen({
 							break;
 						}
 						player.gender = "Male";
-						playerDB.saveOne(input.nick, player);
+						playerDB.saveOne(input.nick.toLowerCase(), player);
 						irc.say(input.context, input.nick+" is now Male.");
 						break;
 					case "female":
@@ -190,7 +190,7 @@ cmdListen({
 							break;
 						}
 						player.gender = "Female";
-						playerDB.saveOne(input.nick, player);
+						playerDB.saveOne(input.nick.toLowerCase(), player);
 						irc.say(input.context, input.nick+" is now Female.");
 						break;
 					default:
@@ -200,7 +200,7 @@ cmdListen({
 				break;
 			case "description":
 				player.description = input.args.slice(1).join(" ");
-				playerDB.saveOne(input.nick, player);
+				playerDB.saveOne(input.nick.toLowerCase(), player);
 				irc.say(input.context, input.nick+"'s description was updated.");
 				break;
 			default:
@@ -221,7 +221,7 @@ cmdListen({
 			irc.say(input.context, cmdHelp("look", "syntax"));
 			return;
 		}
-		player = playerDB.getOne(input.args[0]);
+		player = playerDB.getOne(input.args[0].toLowerCase());
 		if (!player) {
 			irc.say(input.context, "I don't see a character associated with the nick "+input.args[0]+".");
 			return;
