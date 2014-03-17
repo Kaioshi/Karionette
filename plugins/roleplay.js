@@ -111,7 +111,7 @@ cmdListen({
 	syntax: config.command_prefix+"setchar <age/race/ethnicity/gender/description>",
 	callback: function (input) {
 		var player, age, race, gender, ethnicity, ages, valid;
-		if (!input.args || !input.args[1]) {
+		if (!input.args) {
 			irc.say(input.context, cmdHelp("setchar", "syntax"));
 			return;
 		}
@@ -122,17 +122,22 @@ cmdListen({
 		switch (input.args[0]) {
 			case "age":
 				age = parseInt(input.args[1], 10);
+				ages = "";
+				races.forEach(function (race) {
+					valid = getRaceAges(race);
+					ages += race+": "+valid[0]+"-"+lib.commaNum(valid[1])+", ";
+				});
+				if (!age) {
+					irc.say(input.context, "Valid ages per race:");
+					irc.say(input.context, ages.slice(0,-2)+".");
+					return;
+				}
 				if (validAge(player.race, age)) {
 					player.age = age;
 					playerDB.saveOne(input.nick, player);
 					irc.say(input.context, input.nick+"'s age is now "+age+".");
 					break;
 				}
-				ages = "";
-				races.forEach(function (race) {
-					valid = getRaceAges(race);
-					ages += race+": "+valid[0]+"-"+lib.commaNum(valid[1])+", ";
-				});
 				irc.say(input.context, age+" is not a valid age for your race. Valid ages per race are "+ages.slice(0,-2)+".");
 				break;
 			case "race":
@@ -154,7 +159,7 @@ cmdListen({
 				playerDB.saveOne(input.nick, player);
 				break;
 			case "ethnicity":
-				ethnicity = validateEthnicity(input.args[1]);
+				ethnicity = validateEthnicity(input.args.slice(1).join(" "));
 				if (!ethnicity) {
 					irc.say(input.context, "Invalid ethnicity. Available: "+ethnicities.join(", ")+".");
 					break;
@@ -164,7 +169,11 @@ cmdListen({
 				playerDB.saveOne(input.nick, player);
 				break;
 			case "gender":
-				gender = input.args[1].toLowerCase();
+				gender = input.args.slice(1).join(" ").toLowerCase();
+				if (!gender) {
+					irc.say(input.context, "You can be Male or Female.");
+					return;
+				}
 				switch (gender) {
 					case "male":
 						if (player.gender === "Male") {
