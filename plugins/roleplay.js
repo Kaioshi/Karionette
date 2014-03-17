@@ -161,7 +161,7 @@ cmdListen({
 			case "ethnicity":
 				ethnicity = validateEthnicity(input.args.slice(1).join(" "));
 				if (!ethnicity) {
-					irc.say(input.context, "Invalid ethnicity. Available: "+ethnicities.join(", ")+".");
+					irc.say(input.context, "Available ethnicities: "+ethnicities.join(", ")+".");
 					break;
 				}
 				player.ethnicity = ethnicity;
