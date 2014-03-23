@@ -286,6 +286,7 @@ function checkDeny(context) {
 
 cmdListen({
 	command: "actback",
+	admin: true,
 	help: "Allows or denies actbacks in the channel.",
 	syntax: config.command_prefix+"actback [#channel] <on/off> - Example: "+config.command_prefix+"actback #roleplay off",
 	callback: function (input) {
