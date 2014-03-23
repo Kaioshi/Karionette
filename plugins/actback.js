@@ -1,4 +1,5 @@
-﻿var randDB = new DB.List({filename: "randomThings"}),
+﻿var denyDB = new DB.Json({filename: "actback/deny"}),
+	randDB = new DB.List({filename: "randomThings"}),
 	repliesDB = new DB.Json({filename: "actback/replies"});
 
 var isObj = (function () {
@@ -18,9 +19,9 @@ var isObj = (function () {
 		"their",
 		"her"
 	];
-
+	
 	return function innerIsObj(string) {
-
+	
 		return nonObjs.some(function (element) {
 			return (element.toUpperCase() === string.toUpperCase());
 		});
@@ -239,10 +240,10 @@ var questionReply = (function () {
 		"If you asked me last year, I would have said definitely not, but since I experienced the wonders of battery operated 'tools', I have changed my mind",
 		";~;", "o_O", "O_o", "...", ". . .", "wtf", "D:", ":D", ":>", ">:("
 	];
-
+	
 	return function innerQuestionReply(question) {
 		question = question.toLowerCase();
-
+		
 		switch (question) {
 		case "what":
 			return lib.randSelect(what);
@@ -274,30 +275,86 @@ var questionReply = (function () {
 	};
 }());
 
+function checkDeny(context) {
+	var entry = denyDB.getOne(context);
+	if (entry !== undefined) {
+		entry = null;
+		return false;
+	}
+	return true;
+}
+
+cmdListen({
+	command: "actback",
+	help: "Allows or denies actbacks in the channel.",
+	syntax: config.command_prefix+"actback [#channel] <on/off> - Example: "+config.command_prefix+"actback #roleplay off",
+	callback: function (input) {
+		var reg, target, entry;
+		if (!input.args) {
+			if (checkDeny(input.context.toLowerCase())) irc.say(input.context, "actback is allowed here.");
+			else irc.say(input.context, "actback is denied here.");
+			return;
+		}
+		if (input.args[0][0] === "#") {
+			target = input.args[0].toLowerCase();
+			if (!input.args[1]) {
+				if (checkDeny(target)) irc.say(input.context, "actback is allowed in "+target+".");
+				else irc.say(input.context, "actback is denied in "+target+".");
+				return;
+			}
+			input.data = input.args.slice(1).join(" ");
+		} else {
+			target = input.context;
+		}
+		reg = /(on|off)/i.exec(input.data.trim().toLowerCase());
+		if (!reg) {
+			irc.say(input.context, cmdHelp("actback", "syntax"));
+			return;
+		}
+		if (reg[0] === "on") {
+			if (!checkDeny(target)) {
+				denyDB.removeOne(target);
+				irc.say(input.context, "actback is now permitted "+(target === input.context.toLowerCase() ? "here." : "in "+target+"."));
+				return;
+			}
+			irc.say(input.context, "actback is already permitted "+(target === input.context.toLowerCase() ? "here." : "in "+target+"."));
+		} else {
+			if (!checkDeny(target)) {
+				irc.say(input.context, "actback is already forbidden "+(target === input.context.toLowerCase() ? "here." : "in "+target+"."));
+				return;
+			}
+			denyDB.saveOne(target, { deny: true });
+			irc.say(input.context, "actback is now forbidden "+(target === input.context.toLowerCase() ? "here." : "in "+target+"."));
+		}
+	}
+});
+
 evListen({
 	handle: "actback",
 	event: "PRIVMSG",
 	regex: regexFactory.actionMatching(config.nickname),
 	callback: function (input) {
-		var randReply, tmp, suppVars,
-			randThings = randDB.getAll(),
-			randReplies = repliesDB.getAll(),
-			nicks = (input.context[0] === "#" ?
-					ial.Active(input.context).filter(function (nick) { return (nick !== input.nick); })
-					: []),
-			nicks = (nicks.length > 0 ? nicks : [ "someone", "The Lawd Jasus", "your dad", lib.randSelect(config.local_whippingboys) ]),
-			args = input.match[0].split(" "),
-			verb = args[1], adv = "",
-			verbs, verbed, verbing,
-			radv = (lib.chance() ? words.adverb.random() : ""),
-			randVerb = words.verb.random().base,
-			randVerbs = words.verb.random().s,
-			randVerbed = words.verb.random().ed,
-			randVerbing = words.verb.random().ing,
-			obj = transformObj(args, 2),
-			randThing = lib.randSelect(randThings),
-			method = (lib.chance(50) ? "say" : "action");
-
+		var randReply, tmp, suppVars, randThings, randReplies, nicks, args, verb, verbs, radv, randVerb,
+			randVerbs, randVerbed, randVerbing, obj, randThing, method;
+		if (!checkDeny(input.context.toLowerCase())) {
+			logger.debug("ACTBACK: doing nothing, not allowed to speak in "+input.context+".");
+			return;
+		}
+		randThings = randDB.getAll();
+		randReplies = repliesDB.getAll();
+		nicks = (input.context[0] === "#" ? ial.Active(input.context).filter(function (nick) { return (nick !== input.nick); }) : []);
+		nicks = (nicks.length > 0 ? nicks : [ "someone", "The Lawd Jasus", "your dad", lib.randSelect(config.local_whippingboys) ]);
+		args = input.match[0].split(" ");
+		verb = args[1], adv = "";
+		radv = (lib.chance() ? words.adverb.random() : "");
+		randVerb = words.verb.random().base;
+		randVerbs = words.verb.random().s;
+		randVerbed = words.verb.random().ed;
+		randVerbing = words.verb.random().ing;
+		obj = transformObj(args, 2);
+		randThing = lib.randSelect(randThings);
+		method = (lib.chance(50) ? "say" : "action");
+	
 		if (radv) {
 			randVerb = radv + " " + randVerb;
 			randVerbs = radv + " " + randVerbs;
@@ -379,11 +436,18 @@ evListen({
 			+ regexFactory.matchAny(config.nickname)
 			+ ")!?\\?!?$", "i"),
 	callback: function (input) {
-		var m = input.match[1] || input.match[2],
-			rep = questionReply(m);
-
+		var m, rep;
+		if (!checkDeny(input.context.toLowerCase())) {
+			logger.debug("ACTBACK: doing nothing, not allowed to speak in "+input.context+".");
+			return;
+		}
+		
+		m = input.match[1] || input.match[2];
+		rep = questionReply(m);
+		
 		setTimeout(function () {
 			irc.say(input.context, rep);
 		}, getWpm(rep));
 	}
 });
+
