@@ -93,7 +93,7 @@ cmdListen({
 	help: "Fluffy RPG stuff. This wont make sense.",
 	syntax: "TBD",
 	callback: function (input) {
-		var char, reg;
+		var char, reg, name, race, gender;
 		if (!input.args) {
 			irc.say(input.context, "Derp.");
 			return;
@@ -103,8 +103,32 @@ cmdListen({
 				char = fluffyChars.getOne(input.nick.toLowerCase());
 				irc.say(input.context, statLine(char));
 				break;
+			case "rename":
+				char = fluffyChars.getOne(input.nick.toLowerCase());
+				if (!char) {
+					irc.say(input.context, "There's no character associated with your nick. Make one with "
+						+config.command_prefix+"fluffy genchar/randchar, or switch to the correct nick.");
+					return;
+				}
+				name = char.name;
+				char.name = input.args.slice(1).join(" ");
+				fluffyChars.saveOne(input.nick.toLowerCase(), char);
+				irc.say(input.context, "Renamed "+name+" to "+char.name+".");
+				break;
+			case "randchar":
+				if (!input.args[1]) { 
+					irc.say(input.context, "You need to give it a name.");
+					return;
+				}
+				name = input.args.slice(1).join(" ");
+				race = lib.randSelect(Object.keys(raceStats));
+				gender = lib.randSelect([ "male", "female" ]);
+				char = createCharacter(input.nick, name, race, gender);
+				irc.say(input.context, "Done! "+name+" is a "+gender+" "+race+".");
+				irc.say(input.context, statLine(char));
+				break;
 			case "genchar":
-				reg = /([a-zA-Z]+) (human|dwarf|woodelf|wood elf|demon|orc|draegen) (male|female)/i.exec(input.args.slice(1).join(" "));
+				reg = /([a-zA-Z ]+) (human|dwarf|woodelf|wood elf|demon|orc|draegen) (male|female)/i.exec(input.args.slice(1).join(" "));
 				if (!reg) {
 					irc.say(input.context, "Nope.");
 					return;
