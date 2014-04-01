@@ -3,7 +3,6 @@ function zero(n) {
 	return (n > 9 ? n : "0" + n);
 }
 
-
 function dura(secs) {
 	var mins = Math.floor(secs/60),
 		hours = Math.floor(mins/60),
@@ -11,9 +10,9 @@ function dura(secs) {
 	secs = (secs % 60);
 	mins = (mins % 60);
 	hours = (hours % 24);
-	if (hours) ret.push(hours);
-	if (mins) ret.push(mins);
-	ret.push((secs > 9 ? secs : "0"+secs));
+	if (hours) ret.push(zero(hours));
+	if (mins) ret.push(zero(mins));
+	ret.push(zero(secs));
 	return ret.join(":");
 }
 
