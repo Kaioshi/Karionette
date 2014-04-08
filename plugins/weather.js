@@ -5,7 +5,7 @@ function tellEmSteveDave(location, conditions, temp) {
 		"Yo, "+location+" has gots "+conditions+", and is "+temp+". Dayum!",
 		lib.randSelect([ "Vanessa", "Bridget", "Britney", "Miranda", "Megan", "Holly" ])+
 			" told me "+location+" was like, "+temp+" hot. That is so totally "+conditions+"!",
-		"I am going to master "+condition+" style! "+temp+" won't stop me from becoming "+location+"'s next ninja superstar! >:D",
+		"I am going to master "+conditions+" style! "+temp+" won't stop me from becoming "+location+"'s next ninja superstar! >:D",
 		"Location: "+location+" - Temperature: "+temp+" - Conditions: "+conditions+"."
 	]);
 }
