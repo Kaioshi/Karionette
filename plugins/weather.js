@@ -30,6 +30,18 @@ function getConditions(weather) {
 	return ret.join(", ");
 }
 
+function fondleCountry(country) {
+	switch (country) {
+		case "USA":
+		case "United States of America":
+			return lib.randSelect(["USA", "'murrica"]);
+		case "AU":
+		case "Australia":
+			return lib.randSelect(["Australia", "'stralia", "'straya"]);
+	}
+	return country;
+}
+
 cmdListen({
 	command: "weather",
 	help: "Weather thing! Weathers.",
@@ -49,7 +61,7 @@ cmdListen({
 				return;
 			}
 			temp = toCelsius(body.main.temp)+" / "+toFahrenheit(body.main.temp);
-			place = (body.name ? body.name+", " : "")+body.sys.country;
+			place = (body.name ? body.name+", " : "")+fondleCountry(body.sys.country);
 			irc.say(input.context, tellEmSteveDave(place, getConditions(body.weather), temp));
 		});
 	}
