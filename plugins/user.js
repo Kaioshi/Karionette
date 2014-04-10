@@ -259,19 +259,12 @@ cmdListen({
 			return;
 		}
 		if (user.left) {
-			irc.say(input.context, user.left.user
-					+ " "
-					+ (chan !== input.context ? user.left.type
-							+ " "
-							+ chan : user.left.type)
-					+ " "
-					+ lib.duration(new Date(parseInt(user.left.date, 10)))
-							+ " ago"
-							+ user.left.msg, false);
+			irc.say(input.context, user.left.user+" "+(chan !== input.context ? user.left.type+" "+chan : user.left.type)
+					+" "+lib.duration(new Date(parseInt(user.left.date, 10)), null, true)+" ago"+user.left.msg, false);
 		}
 		target = user.last.nick || target;
-		seen = (chan !== input.context ? target + " was last seen talking in " + chan + " " : target + " was last seen talking ");
-		seen = seen + lib.duration(new Date(parseInt(user.last.seen, 10))) + " ago ~ " + user.last.message;
+		seen = (chan !== input.context ? target+" was last seen talking in "+chan+" " : target+" was last seen talking ");
+		seen = seen+lib.duration(new Date(parseInt(user.last.seen, 10)), null, true)+" ago ~ "+user.last.message;
 		irc.say(input.context, seen, false);
 	}
 });
