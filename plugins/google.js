@@ -6,12 +6,14 @@ cmdListen({
 	command: [ "g", "google" ],
 	help: "Google search - returns the first hit.",
 	callback: function (input) {
-		var result,
-			uri = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=1&q=' + input.data;
+		var result, content, title,
+			uri = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=1&q='+input.data;
 		web.get(uri, function (error, response, body) {
 			result = JSON.parse(body).responseData.results[0];
 			if (result && result.titleNoFormatting) {
-				irc.say(input.context, ent.decode(result.titleNoFormatting) + ' ~ ' + result.unescapedUrl, false);
+				content = lib.stripHtml(ent.decode(result.content));
+				title = ent.decode(result.titleNoFormatting);
+				irc.say(input.context, title+' ~ '+result.unescapedUrl+" ~ "+content, false);
 			} else {
 				irc.action(input.context, "can't find it. :<");
 			}
