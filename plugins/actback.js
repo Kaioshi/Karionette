@@ -1,5 +1,6 @@
 ﻿var denyDB = new DB.Json({filename: "actback/deny"}),
 	randDB = new DB.List({filename: "randomThings"}),
+	statsDB = new DB.Json({filename: "actback/stats"}),
 	repliesDB = new DB.Json({filename: "actback/replies"});
 
 var isObj = (function () {
@@ -335,7 +336,7 @@ evListen({
 	event: "PRIVMSG",
 	regex: regexFactory.actionMatching(config.nickname),
 	callback: function (input) {
-		var randReply, tmp, suppVars, randThings, randReplies, nicks, args, verb, verbs, radv, randVerb,
+		var stats, randReply, tmp, suppVars, randThings, randReplies, nicks, args, verb, verbs, radv, randVerb,
 			randVerbs, randVerbed, randVerbing, obj, randThing, method;
 		if (!checkDeny(input.context.toLowerCase())) {
 			logger.debug("ACTBACK: doing nothing, not allowed to speak in "+input.context+".");
@@ -354,7 +355,7 @@ evListen({
 		randVerbing = words.verb.random().ing;
 		obj = transformObj(args, 2);
 		randThing = lib.randSelect(randThings);
-		method = (lib.chance(50) ? "say" : "action");
+		method = lib.randSelect([ "say", "action"]);
 	
 		if (radv) {
 			randVerb = radv + " " + randVerb;
@@ -421,6 +422,8 @@ evListen({
 			}
 			randReply = lib.randSelect(randReplies[verbs][method]);
 		}
+		stats = statsDB.getOne(verbs) || 0;
+		statsDB.saveOne(verbs, (stats+1));
 		randReply = lib.supplant(randReply, suppVars);
 		setTimeout(function () {
 			irc[method](input.context, randReply);
