@@ -1,4 +1,5 @@
 // weather!
+var weatherDB = new DB.Json({filename: "weather"});
 
 function tellEmSteveDave(location, conditions, temp) {
 	return lib.randSelect([
@@ -45,19 +46,31 @@ function fondleCountry(country) {
 cmdListen({
 	command: "weather",
 	help: "Weather thing! Weathers.",
-	syntax: config.command_prefix+"weather <city / state & country>",
+	syntax: config.command_prefix+"weather [-bind] [<city / state & country> / <nick>]",
 	callback: function (input) {
-		var uri, temp, time, sunriseTime, sunsetTime, C, F, place;
-		if (!input.args) {
+		var location, uri, temp, time, sunriseTime, sunsetTime, C, F, place;
+		if (input.args && input.args[0] === "-bind") {
+			if (!input.args[1]) {
+				irc.say(input.context, "[Help] "+config.command_prefix+
+					"weather -bind <location> - Example: "+config.command_prefix+"weather -bind Perth, Australia");
+				return;
+			}
+			location = input.args.slice(1).join(" ");
+			weatherDB.saveOne(input.nick.toLowerCase(), location);
+			irc.say(input.context, input.nick+": Your location is now bound to "+location+".");
+		} else if (input.args && input.args.length === 1) {
+			location = weatherDB.getOne(input.data.trim().toLowerCase());
+		}
+		location = location || (input.args ? input.args.join(" ") : null) || weatherDB.getOne(input.nick.toLowerCase());
+		if (!location) {
 			irc.say(input.context, cmdHelp("weather", "syntax"));
 			return;
 		}
-		uri = "http://api.openweathermap.org/data/2.5/weather?q="+input.data.trim();
+		uri = "http://api.openweathermap.org/data/2.5/weather?q="+location;
 		web.get(uri, function (error, response, body) {
 			body = JSON.parse(body);
-			globals.lastBody = body;
 			if (body.cod === "404") {
-				irc.say(input.context, "Nope. API said: "+body.message);
+				irc.say(input.context, "Nope. API said: "+body.message+" -- (attempted location: "+location+")");
 				return;
 			}
 			temp = toCelsius(body.main.temp)+" / "+toFahrenheit(body.main.temp);
