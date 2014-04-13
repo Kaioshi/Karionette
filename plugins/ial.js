@@ -52,15 +52,12 @@ evListen({
 	handle: "ialQuit",
 	event: "QUIT",
 	callback: function (input) {
-		var user;
 		if (input.nick === config.nick) return;
 		ial.Channels(input.nick).forEach(function (channel) {
 			setTimeout(function () {
 				ial.Remove(channel, input.nick);
 			}, 200);
 		});
-		user = input.nick+"!"+input.address;
-		user = null;
 	}
 });
 
@@ -68,7 +65,6 @@ evListen({
 	handle: "ialNick",
 	event: "NICK",
 	callback: function (input) {
-		var user;
 		if (input.nick === config.nick) { // update our nicks
 			config.nick = input.newnick;
 			if (!config.nickname.some(function (item) { return (item === input.newnick); })) {
@@ -81,7 +77,6 @@ evListen({
 		ial.Channels(input.nick).forEach(function (channel) {
 			ial.updateUser(channel, input.nick, input.newnick, input.address);
 		});
-		user = input.nick+"!"+input.address;
 	}
 });
 
