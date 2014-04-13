@@ -25,7 +25,7 @@ function getConditions(weather) {
 	var ret = [];
 	weather.forEach(function (condition) {
 		if (condition.description) {
-			ret.push(condition.description);
+			ret.push(condition.description.toLowerCase());
 		}
 	});
 	return ret.join(", ");
