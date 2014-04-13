@@ -48,7 +48,7 @@ cmdListen({
 	help: "Weather thing! Weathers.",
 	syntax: config.command_prefix+"weather [-bind] [<city / state & country> / <nick>]",
 	callback: function (input) {
-		var location, uri, temp, time, sunriseTime, sunsetTime, C, F, place;
+		var location, uri, temp, place;
 		if (input.args && input.args[0] === "-bind") {
 			if (!input.args[1]) {
 				irc.say(input.context, "[Help] "+config.command_prefix+
