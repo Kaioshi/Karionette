@@ -5,17 +5,17 @@ var ent = require("./lib/entities.js");
 cmdListen({
 	command: [ "g", "google" ],
 	help: "Google search - returns the first hit.",
+	syntax: config.command_prefix+"g <search term> - Example: "+config.command_prefix+"g puppies",
 	callback: function (input) {
-		var result, content, title,
-			uri = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=1&q='+input.data;
-		web.get(uri, function (error, response, body) {
-			result = JSON.parse(body).responseData.results[0];
-			if (result && result.titleNoFormatting) {
-				content = lib.stripHtml(ent.decode(result.content));
-				title = ent.decode(result.titleNoFormatting);
-				irc.say(input.context, title+' ~ '+result.unescapedUrl+" ~ "+content, false);
+		if (!input.args) {
+			irc.say(input.context, cmdHelp("g", "syntax"));
+			return;
+		}
+		web.google(input.data.trim(), function (error, hits, results) {
+			if (hits > 0) {
+				irc.say(input.context, results[0].title+" ~ "+results[0].url+" ~ "+results[0].content, false);
 			} else {
-				irc.action(input.context, "can't find it. :<");
+				irc.say(input.context, "Couldn't find it. :<");
 			}
 		});
 	}
