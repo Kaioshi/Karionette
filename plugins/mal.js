@@ -1,4 +1,5 @@
-// Deide's MAL API fondler
+// Unofficial MAL-API (clone) Fondler
+var ent = require("./lib/entities.js");
 
 function getGenres(genres) {
 	var ret = [];
@@ -17,7 +18,14 @@ function doSearch(type, context, title, synopsis) {
 			irc.say(context, "Couldn't find it. :\\");
 			return;
 		}
-		id = new RegExp("http:\\/\\/myanimelist\\.net\\/"+type+"\\/([0-9]+)\\/?", "i").exec(results[0].url)[1];
+		id = new RegExp("http:\\/\\/myanimelist\\.net\\/"+type+"\\/([0-9]+)\\/?", "i").exec(results[0].url);
+		if (!id) id = new RegExp("http:\\/\\/myanimelist\\.net/"+type+"\\.php\\?id=([0-9]+)", "i").exec(results[0].url);
+		if (id) id = id[1];
+		else {
+			irc.say(context, "Couldn't parse the result from google. Woops.");
+			logger.debug("Need a better regex! URL: "+results[0].url);
+			return;
+		}
 		uri = "http://api.atarashiiapp.com/"+type+"/"+id;
 		web.get(uri, function (error, response, body) {
 			body = JSON.parse(body);
@@ -28,9 +36,10 @@ function doSearch(type, context, title, synopsis) {
 				eps = " - "+body.chapters+" "+(parseInt(body.chapters, 10) > 1 ? "chapters" : "chapter");
 			}
 			uri = "http://myanimelist.net/"+type+"/"+id;
-			irc.say(context, body.title+" ~ Rank #"+body.rank+" ["+getGenres(body.genres)+"]"+eps+" - "+body.status+" ~ "+uri, false);
+			irc.say(context, ent.decode(body.title)+" ~ Rank #"+body.rank+
+				" ["+getGenres(body.genres)+"]"+eps+" - "+body.status+" ~ "+uri, false);
 			if (synopsis) {
-				irc.say(context, lib.stripHtml(body.synopsis.replace(/\n|\r|\t/g, " ")), false, 1);
+				irc.say(context, lib.stripHtml(ent.decode(body.synopsis.replace(/\n|\r|\t/g, " "))), false, 1);
 			}
 		});
 	});
@@ -38,7 +47,7 @@ function doSearch(type, context, title, synopsis) {
 
 cmdListen({
 	command: "mal",
-	help: "MyAnimeList fondler",
+	help: "MyAnimeList anime searcher",
 	syntax: config.command_prefix+"mal [-s(ynopsis)] <title> - Example: "+config.command_prefix+"mal -s Steins;Gate",
 	callback: function (input) {
 		if (!input.args) {
@@ -55,7 +64,7 @@ cmdListen({
 
 cmdListen({
 	command: "mml",
-	help: "MyAnimeList fondler",
+	help: "MyAnimeList manga searcher",
 	syntax: config.command_prefix+"mml [-s(ynopsis)] <title> - Example: "+config.command_prefix+"mml Pluto",
 	callback: function (input) {
 		if (!input.args) {
