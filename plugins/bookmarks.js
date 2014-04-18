@@ -38,10 +38,10 @@ function addBookmark(target, handle, bookmark) {
 function getHandle(context, from, line) {
 	if (line[0] === "-") {
 		line = line.split(" ");
-		if (line[1]) return line.slice(1).join(" ").toLowerCase();
+		if (line[1]) return line.slice(1).join(" ");
 		else return;
 	}
-	return line.toLowerCase();
+	return line;
 }
 
 function getTarget(context, from, line) {
@@ -177,7 +177,7 @@ cmdListen({
 					keys.push(entry.handle);
 				});
 				if (keys.length > 0) {
-					irc.say(input.context, target+" bookmarks: "+keys.sort().join(", "));
+					irc.say(input.context, target+" bookmarks: "+lib.sort(keys).join(", "));
 				} else {
 					irc.say(input.context, target+"'s... bookmarks.. something has gone wrong! halp!");
 				}
@@ -204,11 +204,11 @@ cmdListen({
 				matchedHandle = [];
 				matchedUrl = [];
 				bookmarks.forEach(function (entry) {
-					if (entry.handle.indexOf(handle) > -1) {
+					if (entry.handle.indexOf(handle.toLowerCase()) > -1) {
 						entry.match = "handle";
 						matchedHandle.push(entry.handle);
 						keys.push(entry);
-					} else if (entry.link.indexOf(handle) > -1) {
+					} else if (entry.link.indexOf(handle.toLowerCase()) > -1) {
 						entry.match = "url";
 						matchedUrl.push(entry.handle);
 						keys.push(entry);
@@ -223,10 +223,10 @@ cmdListen({
 						});
 					} else {
 						if (matchedHandle.length > 0) {
-							irc.say(input.context, "Matched by handle: "+matchedHandle.join(", "), false);
+							irc.say(input.context, "Matched by handle: "+lib.sort(matchedHandle).join(", "), false);
 						}
 						if (matchedUrl.length > 0) {
-							irc.say(input.context, "Matched by URL: "+matchedUrl.join(", "), false);
+							irc.say(input.context, "Matched by URL: "+lib.sort(matchedUrl).join(", "), false);
 						}
 					}
 				}
