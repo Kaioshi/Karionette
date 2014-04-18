@@ -46,7 +46,7 @@ cmdListen({
 		if (!input.args || !input.args[0]) {
 			memories = Object.keys(memDB.getAll());
 			if (memories.length > 0) {
-				irc.say(input.context, "I have "+memories.length+" memories: "+memories.sort().join(", "), false);
+				irc.say(input.context, "I have "+memories.length+" memories: "+lib.sort(memories).join(", "), false);
 			} else {
 				irc.say(input.context, "I..I don't remember anything. ;~;");
 			}
@@ -69,10 +69,10 @@ cmdListen({
 					irc.say(input.context, "No matches. :<");
 				} else {
 					if (handles.length > 0) {
-						irc.say(input.context, "Memory handles matching \""+term+"\": "+handles.join(", "), false);
+						irc.say(input.context, "Memory handles matching \""+term+"\": "+lib.sort(handles).join(", "), false);
 					}
 					if (ret.length > 0) {
-						irc.say(input.context, "Memories matching \""+term+"\": "+ret.join(", "), false);
+						irc.say(input.context, "Memories matching \""+term+"\": "+lib.sort(ret).join(", "), false);
 					}
 				}
 				break;
