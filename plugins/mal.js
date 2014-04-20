@@ -67,7 +67,7 @@ cmdListen({
 		if (input.args[0].match(/-s|-synopsis/i)) {
 			doSearch("anime", input.context, input.args.slice(1).join(" "), true);
 		} else if (input.args[0].match(/-g|-google/i)) {
-			doSearch("anime", input.context, input.args.slice(1).join(" "), false, true);
+			doSearch("anime", input.context, input.args.slice(1).join(" ")+" synopsis", false, true);
 		} else {
 			doSearch("anime", input.context, input.data.trim());
 		}
@@ -86,7 +86,7 @@ cmdListen({
 		if (input.args[0].match(/-s|-synopsis/i)) {
 			doSearch("manga", input.context, input.args.slice(1).join(" "), true);
 		} else if (input.args[0].match(/-g|-google/i)) {
-			doSearch("manga", input.context, input.args.slice(1).join(" "), false, true);
+			doSearch("manga", input.context, input.args.slice(1).join(" ")+" synopsis", false, true);
 		} else {
 			doSearch("manga", input.context, input.data.trim());
 		}
