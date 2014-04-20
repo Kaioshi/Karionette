@@ -29,6 +29,11 @@ function doSearch(type, context, title, synopsis) {
 		uri = "http://api.atarashiiapp.com/"+type+"/"+id;
 		web.get(uri, function (error, response, body) {
 			body = JSON.parse(body);
+			if (body.error) {
+				irc.say(context, lib.randSelect([ "Herp", "Derp" ])+". The unofficial MAL API said: "+body.error+" - "+body.details);
+				irc.say(context, "This is not a problem with my MAL plugin. Use "+config.command_prefix+"gmal until the remote API is fixed.");
+				return;
+			}
 			eps = "";
 			if (body.episodes) {
 				eps = " - "+body.episodes+" "+(parseInt(body.episodes, 10) > 1 ? "episodes" : "episode");
