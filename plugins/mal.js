@@ -11,11 +11,15 @@ function getGenres(genres) {
 	return ret.join(", ");
 }
 
-function doSearch(type, context, title, synopsis) {
+function doSearch(type, context, title, synopsis, google) {
 	var id, uri, eps;
 	web.google("site:myanimelist.net/"+type+"/ "+title, function (error, hits, results) {
 		if (!hits) {
 			irc.say(context, "Couldn't find it. :\\");
+			return;
+		}
+		if (google) {
+			irc.say(context, results[0].title+" ~ "+results[0].url+" ~ "+results[0].content, false, 1);
 			return;
 		}
 		id = new RegExp("http:\\/\\/myanimelist\\.net\\/"+type+"\\/([0-9]+)\\/?", "i").exec(results[0].url);
@@ -31,7 +35,8 @@ function doSearch(type, context, title, synopsis) {
 			body = JSON.parse(body);
 			if (body.error) {
 				irc.say(context, lib.randSelect([ "Herp", "Derp" ])+". The unofficial MAL API said: "+body.error+" - "+body.details);
-				irc.say(context, "This is not a problem with my MAL plugin. Use "+config.command_prefix+"gmal until the remote API is fixed.");
+				irc.say(context, "This is not a problem with my MAL plugin. Use "
+					+config.command_prefix+(type === "anime" ? "mal" : "mml")+" -g until the remote API is fixed.");
 				return;
 			}
 			eps = "";
@@ -53,14 +58,16 @@ function doSearch(type, context, title, synopsis) {
 cmdListen({
 	command: "mal",
 	help: "MyAnimeList anime searcher",
-	syntax: config.command_prefix+"mal [-s(ynopsis)] <title> - Example: "+config.command_prefix+"mal -s Steins;Gate",
+	syntax: config.command_prefix+"mal [-s(ynopsis)/-g(oogle)] <title> - Example: "+config.command_prefix+"mal -s Steins;Gate",
 	callback: function (input) {
 		if (!input.args) {
 			irc.say(input.context, cmdHelp("mal", "syntax"));
 			return;
 		}
-		if (input.args[0].toLowerCase().match(/-s|-synopsis/i)) {
+		if (input.args[0].match(/-s|-synopsis/i)) {
 			doSearch("anime", input.context, input.args.slice(1).join(" "), true);
+		} else if (input.args[0].match(/-g|-google/i)) {
+			doSearch("anime", input.context, input.args.slice(1).join(" "), false, true);
 		} else {
 			doSearch("anime", input.context, input.data.trim());
 		}
@@ -70,14 +77,16 @@ cmdListen({
 cmdListen({
 	command: "mml",
 	help: "MyAnimeList manga searcher",
-	syntax: config.command_prefix+"mml [-s(ynopsis)] <title> - Example: "+config.command_prefix+"mml Pluto",
+	syntax: config.command_prefix+"mml [-s(ynopsis)/-g(oogle)] <title> - Example: "+config.command_prefix+"mml Pluto",
 	callback: function (input) {
 		if (!input.args) {
 			irc.say(input.context, cmdHelp("mml", "syntax"));
 			return;
 		}
-		if (input.args[0].toLowerCase().match(/-s|-synopsis/i)) {
+		if (input.args[0].match(/-s|-synopsis/i)) {
 			doSearch("manga", input.context, input.args.slice(1).join(" "), true);
+		} else if (input.args[0].match(/-g|-google/i)) {
+			doSearch("manga", input.context, input.args.slice(1).join(" "), false, true);
 		} else {
 			doSearch("manga", input.context, input.data.trim());
 		}
