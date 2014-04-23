@@ -3,46 +3,38 @@
 	statsDB = new DB.Json({filename: "actback/stats"}),
 	repliesDB = new DB.Json({filename: "actback/replies"});
 
-var isObj = (function () {
-	var nonObjs = [
-		config.nick,
-		config.nick + "'s",
-		"a",
-		"an",
-		"the",
-		"some",
-		"one",
-		"loads",
-		"lot",
-		"of",
-		"all",
-		"his",
-		"their",
-		"her"
-	];
-	
-	return function innerIsObj(string) {
-	
-		return nonObjs.some(function (element) {
-			return (element.toUpperCase() === string.toUpperCase());
-		});
-	};
-}());
-
 function getWpm(line) {
 	return Math.floor((line.length / 5.0) * 1000);
 }
 
 function transformObj(args, num) {
-	while (isObj(args[num])) {
-		num += 1;
+	var me = (config.nick ? config.nick : config.nickname[0]),
+		nonObjs = [
+			me,
+			me+"s",
+			me+"'s",
+			"a",
+			"an",
+			"the",
+			"some",
+			"one",
+			"loads",
+			"lot",
+			"of",
+			"all",
+			"his",
+			"their",
+			"her"
+		];
+	
+	while (nonObjs.some(function (entry) { return (entry.toLowerCase() === args[num].toLowerCase()); })) {
+		num++;
 	}
 	return args[num];
 }
 
 var questionReply = (function () {
 	var what = [
-		//"Probably something like {randThing}",
 		"Err... 42?",
 		"I think the answer is probably lost at sea",
 		"The real question is 'what is a " + words.noun.random() + " doing in " + lib.randSelect(config.local_whippingboys) + "'s box?', fool.",
@@ -337,15 +329,21 @@ evListen({
 	regex: regexFactory.actionMatching(config.nickname),
 	callback: function (input) {
 		var stats, randReply, tmp, suppVars, randThings, randReplies, nicks, args, verb, verbs, radv, randVerb,
-			randVerbs, randVerbed, randVerbing, obj, randThing, method;
-		if (!checkDeny(input.context.toLowerCase())) {
-			logger.debug("ACTBACK: doing nothing, not allowed to speak in "+input.context+".");
-			return;
-		}
+			randVerbs, randVerbed, randVerbing, obj, randThing, method, reg,
+			parses = 3;
+		
+		if (!checkDeny(input.context.toLowerCase())) return; // not allowed to speak there
+		
 		randThings = randDB.getAll();
 		randReplies = repliesDB.getAll();
 		nicks = (input.context[0] === "#" ? ial.Active(input.context).filter(function (nick) { return (nick !== input.nick); }) : []);
-		nicks = (nicks.length > 0 ? nicks : [ "someone", "The Lawd Jasus", "your dad", lib.randSelect(config.local_whippingboys) ]);
+		nicks = (nicks.length > 0 ? nicks : [
+			"someone", "Spiderman", "Iron Man", "Orgasmo", "Invader Zim", "Jo Brand", "Stephen Fry", "David Mitchell", "Lee Mack", "Joffrey",
+			"Hillary Clinton", "Solid Snake", "Kirby", "a wild Jigglypuff", "Steve Holt", "Bob Loblaw",
+			(config.local_whippingboys && Array.isArray(config.local_whippingboys) && config.local_whippingboys.length > 0 ?
+				lib.randSelect(config.local_whippingboys) :
+				"the local whipping boy")
+		]);
 		args = input.match[0].split(" ");
 		verb = args[1], adv = "";
 		radv = (lib.chance() ? words.adverb.random() : "");
@@ -425,6 +423,11 @@ evListen({
 		stats = statsDB.getOne(verbs) || 0;
 		statsDB.saveOne(verbs, (stats+1));
 		randReply = lib.supplant(randReply, suppVars);
+		reg = new RegExp(Object.keys(suppVars).join("|"));
+		while (randReply.match(reg) && parses) {
+			parses--;
+			randReply = lib.supplant(randReply, suppVars);
+		}
 		setTimeout(function () {
 			irc[method](input.context, randReply);
 		}, getWpm(randReply));
@@ -441,10 +444,7 @@ evListen({
 			+ ")!?\\?!?$", "i"),
 	callback: function (input) {
 		var m, rep;
-		if (!checkDeny(input.context.toLowerCase())) {
-			logger.debug("ACTBACK: doing nothing, not allowed to speak in "+input.context+".");
-			return;
-		}
+		if (!checkDeny(input.context.toLowerCase())) return; // not allowed to speak there
 		
 		m = input.match[1] || input.match[2];
 		rep = questionReply(m);
