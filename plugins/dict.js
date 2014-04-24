@@ -1,13 +1,5 @@
 var net = require('net');
 
-function cleanWhitespace(line) {
-	var ret = [];
-	line.split(" ").forEach(function (word) {
-		if (word.length > 0) ret.push(word);
-	});
-	return ret.join(" ");
-}
-
 function showSuggestions(context, word) {
 	var result = [], i, tmp,
 		client = new net.Socket();
@@ -44,7 +36,7 @@ function showSuggestions(context, word) {
 			return;
 		}
 		irc.say(context, "Couldn't find \""+word+"\", perhaps you meant one of these: "+
-			cleanWhitespace(result.join(" ").replace(/\n/g, " ").slice(3).replace(/wn /g, "")));
+			lib.singleSpace(result.join(" ").replace(/\n/g, " ").slice(3).replace(/wn /g, "")));
 	});
 	
 	setTimeout(function () {
@@ -89,7 +81,7 @@ cmdListen({
 					tmp = data[i].slice(0,3);
 					if (tmp !== "151" && tmp !== "250" && tmp !== "150") {
 						if (data[i].length > 0 && data[i].toLowerCase() !== input.data.toLowerCase()) {
-							result.push(cleanWhitespace(data[i]));
+							result.push(lib.singleSpace(data[i]));
 						}
 					}
 				}
