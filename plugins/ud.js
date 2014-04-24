@@ -5,33 +5,27 @@ cmdListen({
 	syntax: config.command_prefix+"ud <term> - Example: "+config.command_prefix+
 		"ud scrobble",
 	callback: function (input) {
-		var result, uri, resp, i, tmp;
+		var result, i, tmp, def;
 		if (!input.args) {
 			irc.say(input.context, cmdHelp("ud", "syntax"));
 			return;
 		}
-		uri = 'http://api.urbandictionary.com/v0/define?term=' + input.data;
-		web.get(uri, function (error, response, body) {
+		web.get("http://api.urbandictionary.com/v0/define?term="+input.data, function (error, response, body) {
 			result = JSON.parse(body);
 			if (result.result_type === "no_results" || result.list.length === 0) {
 				irc.say(input.context, "Pantsu.");
 			} else {
-				tmp = "1) "+result.list[0].definition.replace(/\n|\r/g, " ").trim();
+				tmp = "1) "+lib.singleSpace(result.list[0].definition.replace(/\n|\r|\t/g, " "));
 				if (result.list.length > 1) {
 					for (i = 1; i < result.list.length; i++) {
-						if (tmp.length <= 300 && result.list[i].definition.trim().length <= (300-tmp.length)) {
-							tmp += " "+(i+1)+") "+result.list[i].definition.replace(/\n|\r/g, " ").trim();
-						} else {
-							break;
+						if (tmp.length >= 300) break;
+						def = lib.singleSpace(result.list[i].definition.replace(/\n|\r|\t/g, " "));
+						if (def.length <= (300-tmp.length)) {
+							tmp += " "+(i+1)+") "+def;
 						}
 					}
 				}
-				// remove double spaces
-				resp = [];
-				tmp.split(" ").forEach(function (item) {
-					if (item.length > 0) resp.push(item);
-				});
-				irc.say(input.context, resp.join(" "), false);
+				irc.say(input.context, tmp, false);
 			}
 		});
 	}
