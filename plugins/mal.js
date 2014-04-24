@@ -22,8 +22,8 @@ function doSearch(type, context, title, synopsis, google) {
 			irc.say(context, results[0].title+" ~ "+results[0].url+" ~ "+results[0].content, false, 1);
 			return;
 		}
-		id = new RegExp("http:\\/\\/myanimelist\\.net\\/"+type+"\\/([0-9]+)\\/?", "i").exec(results[0].url);
-		if (!id) id = new RegExp("http:\\/\\/myanimelist\\.net/"+type+"\\.php\\?id=([0-9]+)", "i").exec(results[0].url);
+		id = new RegExp("http://myanimelist\\.net/"+type+"/([0-9]+)/?", "i").exec(results[0].url);
+		if (!id) id = new RegExp("http://myanimelist\\.net/"+type+"\\.php\\?id=([0-9]+)", "i").exec(results[0].url);
 		if (id) id = id[1];
 		else {
 			irc.say(context, "Couldn't parse the result from google. Woops.");
@@ -34,9 +34,8 @@ function doSearch(type, context, title, synopsis, google) {
 		web.get(uri, function (error, response, body) {
 			body = JSON.parse(body);
 			if (body.error) {
-				irc.say(context, lib.randSelect([ "Herp", "Derp" ])+". The unofficial MAL API said: "+body.error+" - "+body.details);
-				irc.say(context, "This is not a problem with my MAL plugin. Use "
-					+config.command_prefix+(type === "anime" ? "mal" : "mml")+" -g until the remote API is fixed.");
+				irc.say(context, "The unofficial MAL API said: "+body.error+" - "+body.details);
+				irc.say(context, "Google result: "+results[0].title+" ~ "+results[0].url+" ~ "+results[0].content, false, 1);
 				return;
 			}
 			eps = "";
@@ -49,7 +48,7 @@ function doSearch(type, context, title, synopsis, google) {
 			irc.say(context, ent.decode(body.title)+" ~ Rank #"+body.rank+
 				" ["+getGenres(body.genres)+"]"+eps+" - "+body.status+" ~ "+uri, false);
 			if (synopsis) {
-				irc.say(context, lib.stripHtml(ent.decode(body.synopsis.replace(/\n|\r|\t/g, " "))), false, 1);
+				irc.say(context, lib.stripHtml(ent.decode(body.synopsis)), false, 1);
 			}
 		});
 	});
