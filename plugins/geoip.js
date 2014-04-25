@@ -39,7 +39,7 @@ cmdListen({
 					if (body.regionName) resp += " - "+body.regionName;
 					if (body.city) resp += ", "+body.city;
 				}
-				irc.say(input.context, resp+".");
+				irc.say(input.context, resp+".", false);
 			});
 		} else {
 			irc.say(input.context, cmdHelp("geoip", "syntax"));
