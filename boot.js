@@ -6,7 +6,27 @@ global.globals = {
 	startTime: new Date()
 };
 
-require("./config.js");
+var fs = require('fs'),
+	DB = require("./lib/fileDB.js"),
+	web = require("./lib/web.js"),
+	regexFactory = require("./lib/regexFactory.js"),
+	Connection = require("./connection.js"),
+	Plugin = require("./plugin.js"),
+	prompt = "",
+	gc = true, gcInterval = 5000, mwInterval = 30000, repl = true;
+
+if (!fs.existsSync("config")) {
+	if (fs.existsSync("config.js")) {
+		console.log(" *** USING OLD config.js CONFIG, PLEASE UPDATE TO \"config\" - SEE config.example");
+		require("./config.js");
+	} else {
+		console.log(" *** NO CONFIG FOUND~ SEE config.example");
+		process.exit();
+	}
+} else {
+	require("./lib/config.js");
+}
+
 require("./lib/funcs.js");
 require("./lib/logger.js");
 require("./lib/ial.js");
@@ -15,17 +35,6 @@ require("./lib/timers.js");
 require("./lib/words.js");
 require("./lib/caveman.js");
 require("./lib/login.js");
-
-var DB = require("./lib/fileDB.js"),
-	web = require("./lib/web.js"),
-	regexFactory = require("./lib/regexFactory.js"),
-	Connection = require("./connection.js"),
-	Plugin = require("./plugin.js"),
-	prompt = "",
-	gc = true,
-	gcInterval = 5000,
-	mwInterval = 30000,
-	repl = true;
 
 function processArgs(args) {
 	var slicelen,
