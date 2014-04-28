@@ -1,4 +1,4 @@
-# rename this file to "config" and edit to fit.
+# copy this file to "config" and edit to fit.
 # formatting notes - make sure there's a space after the : - ie. field: entry
 command prefix: ;
 server: irc.esper.net
