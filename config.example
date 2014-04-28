@@ -1,0 +1,37 @@
+# rename this file to "config" and edit to fit.
+# formatting notes - make sure there's a space after the : - ie. field: entry
+command prefix: ;
+server: irc.esper.net
+port: 6667
+
+realname: Karionette
+# make sure there's at least 3 nicks - comma separated
+nickname: Kari, Kari_,  Kari`
+username: Kyuuuuuuu
+
+# NickServ details, case-insensitive. Hostname can be a regex.
+#nickserv nickname: NickServ
+#nickserv hostname: NickServ@services\.
+#nickserv password: password
+
+#api wordnik: <your key here> - needed for word discovery
+#api lfm: <your key here> - needed for ;lfm lookups
+#api wordreference: <your key here> - needed for ;trans(late)
+
+# Pass to become admin
+secret: HuHu74Kfj&
+
+# logger options: true or false.
+logging timestamp: true
+logging info: false
+logging debug: true
+logging chat: true
+logging serv: true
+logging traffic: true
+
+# edit these to suit your environment - the names are used comically in replies.
+# the more the better.
+local whippingboys: Deide, ranma, Lumi
+
+# disabled plugins - put in whatever the filename is in plugins, minus ".js" - comma separated.
+# disabled plugins: lfm, manga, dict
