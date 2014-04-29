@@ -4,8 +4,7 @@
  * 			   as well as sending and receiving data from it.
  */
 
-var net = require("net"),
-	fs = require("fs");
+var net = require("net");
 
 module.exports = function () {
 	var connected = false,
