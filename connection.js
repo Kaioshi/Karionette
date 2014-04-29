@@ -17,11 +17,6 @@ module.exports = function () {
 			size: 0
 		};
 	
-	// Handles incoming data
-	function dataHandler(data) {
-		caveman.emitEvent(data);
-	}
-	
 	// Utilise a Buffer on the data - this can also be used to catch data before it's handled
 	function dataBuffer(data) {
 		var newlineIdx;
@@ -32,7 +27,7 @@ module.exports = function () {
 				newlineIdx += buffer.size;
 				buffer.size = 0;
 			}
-			dataHandler(data.substr(0, newlineIdx));
+			caveman.emitEvent(data.substr(0, newlineIdx));
 			data = data.slice(newlineIdx + 1);
 		}
 		if (data.length > 0) {
@@ -63,7 +58,6 @@ module.exports = function () {
 		// Connection TimeOut support
 		socket.setTimeout(300 * 1000, function socketTimeout() {
 			// If fails, error and close events trigger
-			//logger.warn("Socket Timeout...");
 			send("VERSION");
 			socket.destroy();
 		});
