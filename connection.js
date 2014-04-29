@@ -3,11 +3,10 @@
  * CONNECTION: This module handles connection to the IRC server,
  * 			   as well as sending and receiving data from it.
  */
-require("./lib/ial.js");
+
 var net = require("net"),
 	fs = require("fs");
-	
-//module.exports = function (Eventpipe) {
+
 module.exports = function () {
 	var connected = false,
 		connectInterval,
