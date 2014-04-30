@@ -2,6 +2,7 @@
 "use strict";
 var fs = require("fs"),
 	nyaaDB = new DB.Json({filename: "nyaa"}),
+	watching = nyaaDB.getAll(),
 	timerAdded,
 	ent = require("./lib/entities.js");
 
@@ -25,80 +26,95 @@ function rssToJson(body) {
 		.replace(/<\!\[CDATA\[/g, "")
 		.replace(/\]\]>/g, "")
 		.split("</item>").slice(0,-1);
-	body.forEach(function (item) {
-		entries.push(JSON.parse(item));
+	body.forEach(function (entry) {
+		entry = JSON.parse(entry);
+		entries.push({
+			release: entry.release,
+			date: entry.date
+		});
 	});
-	body = null;
 	return entries;
 }
 
-function checkAllNyaa() {
-	var delay = 1000,
-		entries = nyaaDB.getAll();
-	Object.keys(entries).forEach(function (group) {
-		Object.keys(entries[group]).forEach(function (show) {
-			setTimeout(function () {
-				checkNyaa(group, show);
-			}, delay);
-			delay += 5000;
-		});
+function checkNyaa(context) {
+	var i, l, results, group, show, term, entry, resolution,
+		updates = false;
+	web.get("http://www.nyaa.se/?page=rss&cats=1_37&filter=2&term=&minage=0&maxage=1", function (error, response, body) {
+		if (body) {
+			results = rssToJson(ent.decode(body));
+			for (i = 0, l = results.length; i < l; i++) {
+				entry = results[i].release.toLowerCase();
+				for (group in watching) {
+					for (show in watching[group]) {
+						term = group+" "+show; term = term.toLowerCase();
+						if (entry.indexOf(term) > -1) {
+							if (watching[group][show].resolution &&
+								entry.indexOf(watching[group][show].resolution.toLowerCase()) === -1) {
+								continue; // wrong resolution
+							}
+							results[i].date = new Date(results[i].date).valueOf();
+							if (!watching[group][show].latest || results[i].date > watching[group][show].latest.date) {
+								watching[group][show].latest = results[i];
+								watching[group][show].updated = true;
+								updates = true;
+							}
+						}
+					}
+				}
+			}
+			// go through and announce any updated shows
+			if (updates) {
+				for (group in watching) {
+					for (show in watching[group]) {
+						if (watching[group][show].updated) {
+							if (typeof context === 'string' && watching[group][show].announce.some(function (target) {
+								return (target.toLowerCase() !== context.toLowerCase()); })) {
+								irc.say(context,
+									"Nyaa! "+watching[group][show].latest.release.replace(/ mkv| avi| mp4| mp5/gi, "")+" was released "
+									+lib.duration(watching[group][show].latest.date, null, true)+" ago! \\o/", false);
+							}
+							watching[group][show].announce.forEach(function (target) {
+								irc.say(target,
+									"Nyaa! "+watching[group][show].latest.release.replace(/ mkv| avi| mp4| mp5/gi, "")+" was released "
+									+lib.duration(watching[group][show].latest.date, null, true)+" ago! \\o/", false);
+							});
+							delete watching[group][show].updated;
+						}
+					}
+				}
+				nyaaDB.saveAll(watching);
+			} else if (typeof context === 'string') {
+				irc.say(context, "Nothing new. :\\");
+			}
+		}
 	});
 }
 
-function checkNyaa(group, show, add) {
-	var entries, entry,
-		uri = "http://www.nyaa.se/?page=rss&cats=1_37&filter=2&term="+group+" "+show;
-	
-	web.get(uri, function (error, response, body) {
-		if (body) {
-			entry = nyaaDB.getOne(group);
-			entries = rssToJson(ent.decode(body));
-			if (entries.length > 0) {
-				if (!entry[show].latest || entries[0].release !== entry[show].latest.release) { // must be new! huzzah.
-					entry[show].latest = entries[0];
-					nyaaDB.saveOne(group, entry);
-					entry[show].announce.forEach(function (target) {
-						irc.say(target, "Nyaa! "+entry[show].latest.release.replace(/ mkv| avi| mp4| mp5/gi, "").trim()+
-							" was released "+lib.duration(new Date(entry[show].latest.date).valueOf())+" ago. \\o/", false);
-					});
-				}
-			} else if (add) { // no response and it was just added. remove it
-				entry[show].announce.forEach(function (target) {
-					irc.say(target, "Nyaa returned nothing when I looked for "+group+" "+show+". Removing it.", false);
-				});
-				delete entry[show];
-				if (Object.keys(entry).length === 0) {
-					nyaaDB.removeOne(group);
-				} else {
-					nyaaDB.saveOne(group, entry);
-				}
-			}
-		} else {
-			logger.warn("Something has gone awry in checkNyaa - no body. args: "+group+" "+show);
-		}
-		entries = null; entry = null; body = null;
-	}, 1000); // may or may not need to adjust this magic number.
-}
-
-function addNyaa(context, group, show) {
-	var entry = nyaaDB.getOne(group);
-	if (!entry) entry = {};
-	if (entry[show]) {
+function addNyaa(context, group, show, resolution) {
+	if (!watching[group]) watching[group] = {};
+	if (watching[group][show]) {
 		irc.say(context, "I'm already tracking that.");
 		return;
 	}
 	
-	entry[show] = { announce: [ context ] };
-	nyaaDB.saveOne(group, entry);
-	irc.say(context, "Added "+group+" "+show+" to Nyaa's watch list.", false);
-	checkNyaa(group, show, true);
+	watching[group][show] = { announce: [ context ] };
+	if (resolution) {
+		watching[group][show].resolution = resolution;
+		irc.say(context, "Added "+group+" "+show+" ("+resolution+") to Nyaa's watch list. Note: not all \
+			shows release with resolution information. This will break the search if they do not.");
+	} else {
+		irc.say(context, "Added "+group+" "+show+" to Nyaa's watch list.", false);
+	}
+	nyaaDB.saveAll(watching);
+	checkNyaa();
 	startTimer();
 }
 
 function startTimer() {
-	if (!timerAdded && Object.keys(nyaaDB.getAll()).length > 0) {
+	if (!timerAdded && Object.keys(watching).length > 0) {
 		timerAdded = true;
-		timers.Add(900000, checkAllNyaa);
+//		timers.Add(900000, checkNyaa);
+		timers.Add(60000, checkNyaa);
 	}
 }
 
@@ -110,7 +126,7 @@ cmdListen({
 	syntax: config.command_prefix+"nyaawatch add/remove/list <group> <show> - Example: "
 		+config.command_prefix+"nyaawatch add [UTW] Kyoukai no Kanata - Note: this is filtered to Trusted and higher.",
 	callback: function (input) {
-		var reg, entry, group, syntax;
+		var reg, entry, group, syntax, line;
 		if (!input.args) {
 			irc.say(input.context, cmdHelp("nyaawatch", "syntax"));
 			return;
@@ -118,57 +134,66 @@ cmdListen({
 		switch (input.args[0]) {
 			case "check":
 				if (!input.args[1]) {
-					// check all
-					checkAllNyaa();
+					checkNyaa(input.context);
 					return;
 				}
 				break;
 			case "add":
-				reg = /(\[.*\]) (.*)$/.exec(input.args.slice(1).join(" "));
-				if (!reg) {
-					irc.say(input.context, "Syntax wasn't right. Needs to be like [Group here] Show Title");
-					irc.say(input.context, cmdHelp("nyaawatch", "syntax"));
-					return;
+				line = input.args.slice(1).join(" ");
+				reg = /(\[.*\]) (.*) (360p|480p|720p|1080p)/.exec(line);
+				if (reg) {
+					reg[3] = reg[3].toLowerCase();
+				} else {
+					reg = /(\[.*\]) (.*)/.exec(line);
+					if (!reg) {
+						irc.say(input.context, "Syntax wasn't right. Needs to be like [Group here] Show Title");
+						irc.say(input.context, cmdHelp("nyaawatch", "syntax"));
+						return;
+					}
 				}
-				addNyaa(input.context, reg[1], reg[2]);
+				addNyaa(input.context, reg[1], lib.singleSpace(reg[2]), reg[3]);
 				break;
 			case "remove":
-				reg = /(\[.*\]) (.*)$/.exec(input.args.slice(1).join(" "));
+				line = lib.singleSpace(input.args.slice(1).join(" ").replace(/360p|720p|480p|1080p/i, ""));
+				reg = /(\[.*\]) (.*)$/.exec(line);
 				if (!reg) {
 					irc.say(input.context, "Syntax wasn't right. Needs to be like [Group here] Show Title");
 					irc.say(input.context, cmdHelp("nyaawatch", "syntax"));
 					return;
 				}
-				entry = nyaaDB.getOne(reg[1]);
-				if (!entry) {
+				if (!watching[reg[1]]) {
 					irc.say(input.context, "I'm not tracking anything from "+reg[1]+".", false);
 					return;
 				}
-				if (!entry[reg[2]]) {
+				if (!watching[reg[1]][reg[2]]) {
 					irc.say(input.context, "I'm not tracking "+reg[2]+" from "+reg[1]+", though there are entries for them.", false);
 					return;
 				}
-				delete entry[reg[2]];
-				if (Object.keys(entry).length === 0) {
-					nyaaDB.removeOne(reg[1]);
-				} else {
-					nyaaDB.saveOne(reg[1], entry);
+				delete watching[reg[1]][reg[2]];
+				if (Object.keys(watching[reg[1]]).length === 0) {
+					delete watching[reg[1]];
 				}
+				nyaaDB.saveAll(watching);
 				irc.say(input.context, "Removed. o7");
 				break;
 			case "list":
 				// by default we'll list groups, and you need to do ;nw list [Group] to show what we're tracking of theirs."
+				syntax = "[Help] "+config.command_prefix+"nyaawatch list [Group Name] - Example: "
+					+config.command_prefix+"nyaawatch list [HorribleSubs]";
 				if (!input.args[1]) {
-					irc.say(input.context, "Nyaa. I'm tracking shows from these groups: "+Object.keys(nyaaDB.getAll()).join(", ")+".", false);
+					irc.say(input.context, "Nyaa. I'm tracking shows from these groups: "+Object.keys(watching).join(", ")+".", false);
 					return;
 				}
-				group = input.args.slice(1).join(" ");
-				entry = nyaaDB.getOne(group);
-				if (!entry) {
-					irc.say(input.context, "I'm not tracking anything by \""+group+"\".", false);
+				reg = /(\[.*\])/i.exec(input.args.slice(1).join(" "));
+				if (!reg) {
+					irc.say(input.context, syntax);
 					return;
 				}
-				irc.say(input.context, "Nyaa! I'm tracking these shows from "+group+": "+Object.keys(entry).join(", ")+".", false);
+				if (!watching[reg[1]]) {
+					irc.say(input.context, "I'm not tracking anything by \""+reg[1]+"\".", false);
+					return;
+				}
+				irc.say(input.context, "Nyaa! I'm tracking these shows from "+reg[1]+": "+Object.keys(watching[reg[1]]).join(", ")+".", false);
 				break;
 			case "announce":
 				// ;nw announce add/remove/list <group> <show> [<target>]
@@ -180,15 +205,13 @@ cmdListen({
 					return;
 				}
 				reg[2] = reg[2].trim();
-				entry = nyaaDB.getOne(reg[1]);
-				if (!entry || !entry[reg[2]]) {
+				if (!watching[reg[1]] || !watching[reg[1]][reg[2]]) {
 					irc.say(input.context, "I'm not tracking that.");
-					entry = null;
 					return;
 				}
 				switch (input.args[1]) {
 					case "add":
-						if (entry[reg[2]].announce.some(function (item) { return (item === reg[3]); })) {
+						if (watching[reg[1]][reg[2]].announce.some(function (item) { return (item === reg[3]); })) {
 							irc.say(input.context, reg[3]+" is already on the announce list.");
 							break;
 						}
@@ -196,18 +219,20 @@ cmdListen({
 							irc.say(input.context, "I'm not on "+reg[3]+", how could I announce to it?");
 							break;
 						}
-						entry[reg[2]].announce.push(reg[3]);
-						nyaaDB.saveOne(reg[1], entry);
+						watching[reg[1]][reg[2]].announce.push(reg[3]);
+						nyaaDB.saveAll(watching);
 						irc.say(input.context, reg[1]+" "+reg[2]+" releases will now be announced to "+reg[3]+".", false);
 						break;
 					case "remove":
-						if (entry[reg[2]].announce.some(function (item) { return (item === reg[3]); })) {
-							if (entry[reg[2]].announce.length === 1) {
+						if (watching[reg[1]][reg[2]].announce.some(function (item) { return (item === reg[3]); })) {
+							if (watching[reg[1]][reg[2]].announce.length === 1) {
 								irc.say(input.context, reg[3]+" is the only entry in that announce list, add another before you remove it.");
 								break;
 							}
-							entry[reg[2]].announce = entry[reg[2]].announce.filter(function (item) { return (item !== reg[3]); });
-							nyaaDB.saveOne(reg[1], entry);
+							watching[reg[1]][reg[2]].announce = watching[reg[1]][reg[2]].announce.filter(function (item) {
+								return (item.toLowerCase() !== reg[3].toLowerCase());
+							});
+							nyaaDB.saveAll(watching);
 							irc.say(input.context, reg[3]+" was removed from "+reg[1]+" "+reg[2]+"'s announce list.", false);
 						} else {
 							irc.say(input.context, reg[3]+" is not on the announce list for "+reg[1]+" "+reg[2]+".", false);
@@ -215,13 +240,12 @@ cmdListen({
 						break;
 					case "list":
 						irc.say(input.context, reg[1]+" "+reg[2]+" releases are being announced to: "
-							+entry[reg[2]].announce.join(", ")+".", false);
+							+watching[reg[1]][reg[2]].announce.join(", ")+".", false);
 						break;
 					default:
 						irc.say(input.context, syntax);
 						break;
 				}
-				entry = null;
 				break;
 			default:
 				irc.say(input.context, cmdHelp("nyaawatch", "syntax"));
