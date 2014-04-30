@@ -13,7 +13,7 @@ cmdListen({
 		}
 		web.google(input.data.trim(), function (error, hits, results) {
 			if (hits > 0) {
-				irc.say(input.context, results[0].title+" ~ "+results[0].url+" ~ "+results[0].content, false);
+				irc.say(input.context, results[0].title+" ~ "+results[0].url+" ~ "+results[0].content, false, 1);
 			} else {
 				irc.say(input.context, "Couldn't find it. :<");
 			}
