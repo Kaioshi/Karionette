@@ -113,8 +113,7 @@ function addNyaa(context, group, show, resolution) {
 function startTimer() {
 	if (!timerAdded && Object.keys(watching).length > 0) {
 		timerAdded = true;
-//		timers.Add(900000, checkNyaa);
-		timers.Add(60000, checkNyaa);
+		timers.Add(900000, checkNyaa);
 	}
 }
 
