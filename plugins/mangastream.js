@@ -1,0 +1,167 @@
+var ent = require("./lib/entities.js"),
+	msDB = new DB.Json({filename: "mangastream"}),
+	watched = msDB.getAll(), timerAdded;
+
+function findUpdates(releases, notify) {
+	var i = 0, l = releases.length, updated = false,
+		index, date, release, title, reltitle, method;
+	for (; i < l; i++) {
+		for (title in watched) {
+			index = releases[i].title.toLowerCase().indexOf(title);
+			if (index > -1) {
+				reltitle = releases[i].title.slice(index, index+title.length);
+				release = releases[i].title.slice(index+title.length+1);
+				date = new Date(releases[i].date).valueOf();
+				if (!watched[title].latest || date > watched[title].latest.date) {
+					// new release~
+					updated = true;
+					// make the case nice if the user put in something weird.
+					if (watched[title].title !== reltitle) watched[title].title = reltitle;
+					// sometimes there's weird unrequired trailing ?foo=butts&butts=foo stuff.
+					index = releases[i].link.indexOf("?");
+					watched[title].latest = {
+						title: releases[i].title,
+						link: (index > -1 ? releases[i].link.slice(0, index) : releases[i].link), // we dun wannit.
+						release: release,
+						date: date
+					};
+					watched[title].announce.forEach(function (target) {
+						method = (target[0] === "#" ? "say" : "notice");
+						irc[method](target, releases[i].title+" was released "+
+							lib.duration(date, null, true)+" ago on MangaStream! \\o/ ~ "+watched[title].latest.link, false);
+					});
+				}
+			}
+		}
+	}
+	if (updated) {
+		msDB.saveAll(watched);
+	} else if (typeof notify === 'string') {
+		irc.say(notify, "Nothing new. :\\");
+	}
+}
+
+function checkMangaStream(notify) {
+	web.get("http://mangastream.com/rss", function (error, response, body) {
+		findUpdates(rssToJson(body), notify);
+	})
+}
+if (!timerAdded) {
+	timers.Add(900000, checkMangaStream);
+	timerAdded = true;
+}
+
+cmdListen({
+	command: [ "ms", "mangastream" ],
+	help: "MangaStream RSS watcher",
+	syntax: config.command_prefix+"mangastream <add/remove/list/check> [<manga title>] - Example: "
+		+config.command_prefix+"mangastream add One Piece",
+	callback: function (input) {
+		var title, ltitle, titles;
+		if (!input.args) {
+			irc.say(input.context, cmdHelp("ms", "syntax"));
+			return;
+		}
+		switch (input.args[0].toLowerCase()) {
+			case "add":
+				if (!input.args[1]) {
+					irc.say(input.context, "[Help] "+config.command_prefix+"mangastream add <manga title> - Example: "
+						+config.command_prefix+"mangastream add One Piece - \
+						Check http://mangastream.com/manga to see what's available.");
+					return;
+				}
+				title = input.args.slice(1).join(" ");
+				ltitle = title.toLowerCase();
+				if (watched[ltitle]) {
+					irc.say(input.context, "I'm already tracking "+title+" updates.");
+					return;
+				}
+				watched[ltitle] = {
+					title: title,
+					announce: [ input.context ]
+				};
+				msDB.saveAll(watched);
+				irc.say(input.context, "Added! o7");
+				checkMangaStream();
+				break;
+			case "remove":
+				if (!input.args[1]) {
+					irc.say(input.context, "[Help] "+config.command_prefix+"mangastream remove <manga title> - Example: "
+						+config.command_prefix+"mangastream remove Fairy Tail");
+					return;
+				}
+				ltitle = input.args.slice(1).join(" ").toLowerCase();
+				if (!watched[ltitle]) {
+					irc.say(input.context, "I'm not tracking "+input.args.slice(1).join(" ")+".");
+					return;
+				}
+				delete watched[ltitle];
+				msDB.saveAll(watched);
+				irc.say(input.context, "Removed. o7");
+				break;
+			case "list":
+				titles = [];
+				for (title in watched) {
+					titles.push(watched[title].title);
+				}
+				if (titles.length > 1) {
+					irc.say(input.context, "I'm tracking releases of "+titles.slice(0, -1).join(", ")+" and "+titles[titles.length-1]+" from MangaStream.");
+				} else if (titles.length > 0) {
+					irc.say(input.context, "I'm tracking releases of "+titles[0]+" from MangaStream.");
+				} else {
+					irc.say(input.context, "I'm not tracking any MangaStream releases right now. Add some!");
+				}
+				titles = null;
+				break;
+			case "check":
+				checkMangaStream(input.context);
+				break;
+			default:
+				irc.say(input.context, cmdHelp("ms", "syntax"));
+				break;
+		}
+	}
+});
+
+function rssToJson(body) {
+	var entry, element = [], entries = [],
+		tmp = body.split("\n").slice(9, -4),
+		i = 0, l = tmp.length;
+	for (; i < l; i++) {
+		if (!tmp[i]) {
+			entries.push(JSON.parse(element.join(" ")));
+			element = [];
+			continue;
+		}
+		entry = tmp[i].slice(tmp[i].indexOf("<")+1, tmp[i].indexOf(">"));
+		switch (entry) {
+			case "item":
+				tmp[i] = "{";
+				break;
+			case "title":
+				tmp[i] = "\"title\": \""+getEntry(tmp[i])+"\",";
+				break;
+			case "link":
+				tmp[i] = "\"link\": \""+ent.decode(getEntry(tmp[i]))+"\",";
+				break;
+			case "pubDate":
+				tmp[i] = "\"date\": \""+getEntry(tmp[i])+"\"";
+				break;
+			case "/item":
+				tmp[i] = "}";
+				break;
+			default:
+				tmp.splice(i, 1); i--; l--; // don't want this entry~
+				continue;
+				break;
+		}
+		element.push(tmp[i]);
+	}
+	
+	return entries;
+}
+
+function getEntry(line) {
+	var index = line.indexOf(">")+1;
+	return line.slice(index, line.indexOf("<", index));
+}
