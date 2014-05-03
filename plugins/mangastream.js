@@ -54,15 +54,88 @@ if (!timerAdded) {
 cmdListen({
 	command: [ "ms", "mangastream" ],
 	help: "MangaStream RSS watcher",
-	syntax: config.command_prefix+"mangastream <add/remove/list/check> [<manga title>] - Example: "
+	syntax: config.command_prefix+"mangastream <add/remove/list/check> [<manga title>] / <announce add/remove/list> <manga title> [<target>] - Example: "
 		+config.command_prefix+"mangastream add One Piece",
 	callback: function (input) {
-		var title, ltitle, titles;
-		if (!input.args) {
+		var title, ltitle, titles, target, ltarget, i, l;
+		if (!input.args || input.args[0].toLowerCase() === "announce" && !input.args[1]) {
 			irc.say(input.context, cmdHelp("ms", "syntax"));
 			return;
 		}
 		switch (input.args[0].toLowerCase()) {
+			case "announce":
+				switch (input.args[1].toLowerCase()) {
+					case "add":
+						if (input.args.length >= 4) {
+							title = input.args.slice(2,-1).join(" ");
+							ltitle = title.toLowerCase();
+							if (!watched[ltitle]) {
+								irc.say(input.context, "I'm not tracking \""+title+"\" updates, so there's no announce list for it.");
+								return;
+							}
+							target = input.args[input.args.length-1];
+							if (lib.hasElement(watched[ltitle].announce, target)) {
+								irc.say(input.context, "I'm already announcing "+title+" releases to "+target+".");
+								return;
+							}
+							watched[ltitle].announce.push(target);
+							msDB.saveAll(watched);
+							irc.say(input.context, "Added! o7");
+						} else {
+							irc.say(input.context, "[Help] "+config.command_prefix+"mangastream announce add <manga title> <target> - Example: "
+								+config.command_prefix+"mangastream announce add One Piece #pyoshi");
+						}
+						break;
+					case "remove":
+						if (input.args.length >= 4) {
+							title = input.args.slice(2,-1).join(" ");
+							ltitle = title.toLowerCase();
+							if (!watched[ltitle]) {
+								irc.say(input.context, "I'm not tracking \""+title+"\" updates, so there's no announce list for it.");
+								return;
+							}
+							target = input.args[input.args.length-1];
+							ltarget = target.toLowerCase();
+							i = 0; l = watched[ltitle].announce.length;
+							for (; i < l; i++) {
+								if (watched[ltitle].announce[i].toLowerCase() === ltarget) {
+									if (l === 1) {
+										irc.say(input.context, "Removed ~ "+title+" now has an empty announce list, so I'm removing it from the watch list.");
+										delete watched[ltitle];
+									} else {
+										watched[ltitle].announce.splice(i, 1);
+										irc.say(input.context, "Removed. o7");
+									}
+									msDB.saveAll(watched);
+									return;
+								}
+							}
+							irc.say(input.context, target+" isn't on the announce list for "+title+".");
+						} else {
+							irc.say(input.context, "[Help] "+config.command_prefix+"mangastream announce remove <manga title> <target> - Example: "
+								+config.command_prefix+"mangastream announce remove Fairy Tail #pyoshi");
+						}
+						break;
+					case "list":
+						if (input.args.length >= 3) {
+							title = input.args.slice(2).join(" ");
+							ltitle = title.toLowerCase();
+							if (!watched[ltitle]) {
+								irc.say(input.context, "I'm not tracking \""+title+"\" updates, so there's no announce list for it.");
+								return;
+							}
+							irc.say(input.context, watched[ltitle].title+" releases are announced to "+lib.commaList(watched[ltitle].announce)+".");
+						} else {
+							irc.say(input.context, "[Help] "+config.command_prefix+"mangastream announce list <manga title> - Example: "
+								+config.command_prefix+"mangastream announce list One Piece");
+						}
+						break;
+					default:
+						irc.say(input.context, "[Help] "+config.command_prefix+"mangastream announce <add/remove/list> <manga title> [<target>]\
+							- Example: "+config.command_prefix+"mangastream announce add One Piece #pyoshi");
+						break;
+				}
+				break;
 			case "add":
 				if (!input.args[1]) {
 					irc.say(input.context, "[Help] "+config.command_prefix+"mangastream add <manga title> - Example: "
@@ -105,9 +178,7 @@ cmdListen({
 					titles.push(watched[title].title);
 				}
 				if (titles.length > 1) {
-					irc.say(input.context, "I'm tracking releases of "+titles.slice(0, -1).join(", ")+" and "+titles[titles.length-1]+" from MangaStream.");
-				} else if (titles.length > 0) {
-					irc.say(input.context, "I'm tracking releases of "+titles[0]+" from MangaStream.");
+					irc.say(input.context, "I'm tracking releases of "+lib.commaList(titles)+" from MangaStream.");
 				} else {
 					irc.say(input.context, "I'm not tracking any MangaStream releases right now. Add some!");
 				}
