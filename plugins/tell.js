@@ -1,7 +1,9 @@
 ﻿// Tell someone something on join if saved message for them
 "use strict";
 var msgwatch,
-	messagesDB = new DB.List({filename: 'messages', queue: true}),
+	noticesDB = new DB.Json({filename: 'notices'}),
+	notices = noticesDB.getAll(),
+	messagesDB = new DB.List({filename: 'messages'}),
 	messages = messagesDB.getAll();
 
 setTimeout(function () {
@@ -12,9 +14,10 @@ setTimeout(function () {
 }, 1000); // wait for messagesDB to finish loading
 
 function prepareMessages() {
-	var i, reg, channel, nick,
+	var reg, channel, nick,
+		i = 0, l = messages.length,
 		pruned = false;
-	for (i = 0; i < messages.length; i++) {
+	for (; i < l; i++) {
 		reg = /^([^ ]+)@([^ ]+): (.*)$/.exec(messages[i]);
 		if (!reg) {
 			logger.warn("Removed invalidly formatted messages.txt entry: "+messages.splice(i,1));
@@ -39,21 +42,17 @@ function prepareMessages() {
 }
 
 function removeMessage(channel, nick, entry) {
-	var i,
-		altered = false;
+	var i = 0, l = messages.length, altered = false;
 	entry = channel+"@"+nick+": "+entry;
 	entry = entry.toLowerCase();
-	for (i = 0; i < messages.length; i++) {
+	for (; i < l; i++) {
 		if (messages[i].toLowerCase() === entry) {
 			messages.splice(i,1);
 			altered = true;
+			break;
 		}
 	}
-	if (altered) {
-		messagesDB.saveAll(messages);
-	} else {
-		logger.debug("removeMessage() happened, yet nothing changed.");
-	}
+	if (altered) messagesDB.saveAll(messages);
 }
 
 function ratedMsg(channel, nick) {
@@ -69,8 +68,42 @@ function ratedMsg(channel, nick) {
 	});
 }
 
+function ratedNotice(nick) {
+	var i = 0,
+		lnick = nick.toLowerCase(),
+		ntcs = notices[lnick];
+	ntcs.forEach(function (message) {
+		i++;
+		setTimeout(function () {
+			irc.notice(nick, message);
+		}, i*1000);
+	});
+	delete notices[lnick];
+	noticesDB.saveAll(notices);
+}
+
+// let other plugins add messages
+lib.events.on("Event: messageQueued", function (nick, channel, message) {
+	var lnick = nick.toLowerCase();
+	channel = channel.toLowerCase();
+	msgwatch[channel] = msgwatch[channel] || {};
+	msgwatch[channel][lnick] = msgwatch[channel][lnick] || [];
+	msgwatch[channel][lnick].push(nick+": "+message);
+	messages.push(channel+"@"+nick+": "+message);
+	messagesDB.saveAll(messages);
+	logger.debug("Added message to queue for "+channel+": "+nick+": "+message);
+});
+
+lib.events.on("Event: noticeQueued", function (nick, message) {
+	var lnick = nick.toLowerCase();
+	notices[lnick] = notices[lnick] || [];
+	notices[lnick].push(message);
+	noticesDB.saveAll(notices);
+	logger.debug("Added notice to queue for "+nick+": "+message);
+});
+
 function checkMessages(channel, nick) {
-	var i, ret, msg, lnick;
+	var lnick;
 	channel = channel.toLowerCase();
 	if (msgwatch && msgwatch[channel]) {
 		lnick = nick.toLowerCase();
@@ -85,6 +118,20 @@ function checkMessages(channel, nick) {
 			if (Object.keys(msgwatch[channel]).length === 0) {
 				delete msgwatch[channel];
 			}
+		}
+	}
+}
+
+function checkNotices(nick) {
+	var lnick = nick.toLowerCase(),
+		altered = false;
+	if (notices[lnick] && notices[lnick].length > 0) {
+		if (notices[lnick].length === 1) {
+			irc.notice(nick, notices[lnick][0], false);
+			delete notices[lnick];
+			noticesDB.saveAll(notices);
+		} else {
+			ratedNotice(nick);
 		}
 	}
 }
@@ -147,6 +194,7 @@ evListen({
 	event: "PRIVMSG",
 	callback: function (input) {
 		if (input.channel) checkMessages(input.channel, input.nick);
+		checkNotices(input.nick);
 	}
 });
 
@@ -155,6 +203,7 @@ evListen({
 	event: "JOIN",
 	callback: function (input) {
 		checkMessages(input.channel, input.nick);
+		checkNotices(input.nick);
 	}
 });
 
@@ -167,6 +216,7 @@ evListen({
 				checkMessages(channel, input.newnick);
 			});
 		}, 500); // <- making sure IAL is updated first
+		checkNotices(input.newnick);
 	}
 });
 
