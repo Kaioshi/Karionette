@@ -4,7 +4,7 @@ var ent = require("./lib/entities.js"),
 
 function findUpdates(releases, notify) {
 	var i = 0, l = releases.length, updated = false,
-		index, date, release, title, reltitle, method;
+		index, date, release, title, reltitle, msg;
 	for (; i < l; i++) {
 		for (title in watched) {
 			index = releases[i].title.toLowerCase().indexOf(title);
@@ -26,9 +26,17 @@ function findUpdates(releases, notify) {
 						date: date
 					};
 					watched[title].announce.forEach(function (target) {
-						method = (target[0] === "#" ? "say" : "notice");
-						irc[method](target, releases[i].title+" was released "+
-							lib.duration(date, null, true)+" ago on MangaStream! \\o/ ~ "+watched[title].latest.link, false);
+						msg = releases[i].title+" was released "+lib.duration(date, null, true)+" ago on MangaStream! \\o/ ~ "
+							+watched[title].latest.link;
+						if (target[0] === "#") {
+							irc.say(target, msg, false);
+						} else {
+							if (ial.maskSearch(target+"!*@*").length === 0) {
+								lib.events.emit("Event: noticeQueued", target, msg);
+							} else {
+								irc.notice(target, msg, false);
+							}
+						}
 					});
 				}
 			}
