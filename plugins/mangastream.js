@@ -2,8 +2,26 @@ var ent = require("./lib/entities.js"),
 	msDB = new DB.Json({filename: "mangastream"}),
 	watched = msDB.getAll(), timerAdded;
 
+function announceUpdates(updates) {
+	var i = 0;
+	updates.forEach(function (update) {
+		setTimeout(function () {
+			if (update[0][0] === "#") {
+				irc.say(update[0], update[1], false);
+			} else {
+				if (ial.maskSearch(update[0]+"!*@*").length) {
+					irc.notice(update[0], update[1], false);
+				} else {
+					lib.events.emit("Event: noticeQueued", update[0], update[1]);
+				}
+			}
+		}, i);
+		i += 1000;
+	});
+}
+
 function findUpdates(releases, notify) {
-	var i = 0, l = releases.length, updated = false,
+	var i = 0, l = releases.length, updates,
 		index, date, release, title, reltitle, msg;
 	for (; i < l; i++) {
 		for (title in watched) {
@@ -14,7 +32,7 @@ function findUpdates(releases, notify) {
 				date = new Date(releases[i].date).valueOf();
 				if (!watched[title].latest || date > watched[title].latest.date) {
 					// new release~
-					updated = true;
+					if (!updates) updates = [];
 					// make the case nice if the user put in something weird.
 					if (watched[title].title !== reltitle) watched[title].title = reltitle;
 					// sometimes there's weird unrequired trailing ?foo=butts&butts=foo stuff.
@@ -25,25 +43,19 @@ function findUpdates(releases, notify) {
 						release: release,
 						date: date
 					};
+					msg = releases[i].title+" was released "+lib.duration(date, null, true)+
+								" ago on MangaStream! \\o/ ~ "+watched[title].latest.link;
 					watched[title].announce.forEach(function (target) {
-						msg = releases[i].title+" was released "+lib.duration(date, null, true)+" ago on MangaStream! \\o/ ~ "
-							+watched[title].latest.link;
-						if (target[0] === "#") {
-							irc.say(target, msg, false);
-						} else {
-							if (ial.maskSearch(target+"!*@*").length === 0) {
-								lib.events.emit("Event: noticeQueued", target, msg);
-							} else {
-								irc.notice(target, msg, false);
-							}
-						}
+						updates.push([ target, msg ]);
 					});
 				}
 			}
 		}
 	}
-	if (updated) {
+	if (updates) {
+		announceUpdates(updates);
 		msDB.saveAll(watched);
+		updates = null;
 	} else if (typeof notify === 'string') {
 		irc.say(notify, "Nothing new. :\\");
 	}
