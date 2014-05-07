@@ -138,7 +138,7 @@ module.exports = function () {
 		},
 		join: function (channel, key) {
 			if (key) {
-				send("JOIN "+sanitise(channel)+" "+sanitise(key));
+				send(sanitise("JOIN "+channel+" "+key));
 			} else {
 				send("JOIN "+sanitise(channel));
 			}
@@ -178,6 +178,22 @@ module.exports = function () {
 				send(privmsg + tempMsg.trim());
 				message = message.slice(max - i);
 			}
+		},
+		rated: function (messages) {
+			// messages = [ [ method, target, message, sanitise ], ... ]
+			var i, l, n, that;
+			if (!messages.length) {
+				logger.debug("Tried to irc.rated() an empty array");
+				return;
+			}
+			n = 0; that = this;
+			messages.forEach(function (msg) {
+				msg[3] = msg[3] || false;
+				setTimeout(function () {
+					that[msg[0]](msg[1], msg[2], msg[3]);
+				}, n);
+				n += 500;
+			});
 		},
 		reply: function (input, message, sanitiseReply) {
 			if (input && message) {
