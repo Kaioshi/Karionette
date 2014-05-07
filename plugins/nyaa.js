@@ -6,87 +6,61 @@ var fs = require("fs"),
 	timerAdded,
 	ent = require("./lib/entities.js");
 
-function rssToJson(body) {
-	var entries = [];
-	body = body.slice(body.indexOf("<item>"), body.lastIndexOf("</item>")+7)
-		.replace(/_|\./g, " ")
-		.replace(/\n|\t|  /g, "")
-		.replace(/<item><title>/g, "{ \"release\": \"")
-		.replace(/<\/title>/g, "\", ")
-		.replace(/<category>/g, "\"category\": \"")
-		.replace(/<\/category>/g, "\", ")
-		.replace(/<link>/g, "\"link\": \"")
-		.replace(/<\/link>/g, "\", ")
-		.replace(/<guid>/g, "\"guid\": \"")
-		.replace(/<\/guid>/g, "\", ")
-		.replace(/<description>/g, "\"description\": \"")
-		.replace(/<\/description>/g, "\", ")
-		.replace(/<pubDate>/g, "\"date\": \"")
-		.replace(/<\/pubDate>/g, "\"}")
-		.replace(/<\!\[CDATA\[/g, "")
-		.replace(/\]\]>/g, "")
-		.split("</item>").slice(0,-1);
-	body.forEach(function (entry) {
-		entry = JSON.parse(entry);
+function rssToJson(rss) {
+	var i, l, entries = [];
+	rss = rss.replace(/_|\./g, " ").split("</item>").slice(0, -1); // cruft at the end
+	rss[0] = rss[0].slice(rss[0].indexOf("<item>")); // cruft at the start
+	for (i = 0, l = rss.length; i < l; i++) {
 		entries.push({
-			release: entry.release,
-			date: entry.date
+			release: rss[i].slice(rss[i].indexOf("<title>")+7, rss[i].indexOf("</title>")),
+			date: new Date(rss[i].slice(rss[i].indexOf("<pubDate>")+9, rss[i].indexOf("</pubDate>"))).valueOf()
 		});
-	});
+	}
+	rss = null;
 	return entries;
 }
 
 function checkNyaa(context) {
-	var i, l, results, group, show, term, entry, resolution,
-		updates = false;
+	var i, l, results, group, show, term, entry, resolution, msg, updates;
 	web.get("http://www.nyaa.se/?page=rss&cats=1_37&filter=2&term=&minage=0&maxage=1", function (error, response, body) {
-		if (body) {
-			results = rssToJson(ent.decode(body));
-			for (i = 0, l = results.length; i < l; i++) {
-				entry = results[i].release.toLowerCase();
-				for (group in watching) {
-					for (show in watching[group]) {
-						term = group+" "+show; term = term.toLowerCase();
-						if (entry.indexOf(term) > -1) {
-							if (watching[group][show].resolution &&
-								entry.indexOf(watching[group][show].resolution.toLowerCase()) === -1) {
-								continue; // wrong resolution
-							}
-							results[i].date = new Date(results[i].date).valueOf();
-							if (!watching[group][show].latest || results[i].date > watching[group][show].latest.date) {
-								watching[group][show].latest = results[i];
-								watching[group][show].updated = true;
-								updates = true;
-							}
+		if (!body) return;
+		results = rssToJson(ent.decode(body));
+		for (i = 0, l = results.length; i < l; i++) {
+			entry = results[i].release.toLowerCase();
+			for (group in watching) {
+				for (show in watching[group]) {
+					term = group+" "+show; term = term.toLowerCase();
+					if (entry.indexOf(term) > -1) {
+						if (watching[group][show].resolution &&
+							entry.indexOf(watching[group][show].resolution.toLowerCase()) === -1) {
+							continue; // wrong resolution
 						}
-					}
-				}
-			}
-			// go through and announce any updated shows
-			if (updates) {
-				for (group in watching) {
-					for (show in watching[group]) {
-						if (watching[group][show].updated) {
-							if (typeof context === 'string' && watching[group][show].announce.some(function (target) {
-								return (target.toLowerCase() !== context.toLowerCase()); })) {
-								irc.say(context,
-									"Nyaa! "+watching[group][show].latest.release.replace(/ mkv| avi| mp4| mp5/gi, "")+" was released "
-									+lib.duration(watching[group][show].latest.date, null, true)+" ago! \\o/", false);
+						results[i].date = new Date(results[i].date).valueOf();
+						if (!watching[group][show].latest || results[i].date > watching[group][show].latest.date) {
+							if (!updates) updates = [];
+							watching[group][show].latest = results[i];
+							msg = "Nyaa! "+watching[group][show].latest.release.replace(/ mkv| avi| mp4| mp5/gi, "")+" was released "
+								+lib.duration(watching[group][show].latest.date, null, true)+" ago! \\o/";
+							// announce to current context if it's not in the announce list, if nw check was run
+							if (typeof context === 'string' && !lib.hasElement(watching[group][show].announce, context)) {
+								updates.push([ "say", context, msg, false ]);
 							}
 							watching[group][show].announce.forEach(function (target) {
-								irc.say(target,
-									"Nyaa! "+watching[group][show].latest.release.replace(/ mkv| avi| mp4| mp5/gi, "")+" was released "
-									+lib.duration(watching[group][show].latest.date, null, true)+" ago! \\o/", false);
+								updates.push([ "say", target, msg, false ]);
 							});
-							delete watching[group][show].updated;
 						}
 					}
 				}
-				nyaaDB.saveAll(watching);
-			} else if (typeof context === 'string') {
-				irc.say(context, "Nothing new. :\\");
 			}
 		}
+		// go through and announce any updated shows
+		if (updates && updates.length > 0) {
+			irc.rated(updates);
+			nyaaDB.saveAll(watching);
+		} else if (typeof context === 'string') {
+			irc.say(context, "Nothing new. :\\");
+		}
+		results = null; msg = null; updates = null;
 	});
 }
 
