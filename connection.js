@@ -181,7 +181,7 @@ module.exports = function () {
 		},
 		rated: function (messages) {
 			// messages = [ [ method, target, message, sanitise ], ... ]
-			var i, l, n, that;
+			var n, that;
 			if (!messages.length) {
 				logger.debug("Tried to irc.rated() an empty array");
 				return;
