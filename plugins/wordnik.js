@@ -13,7 +13,9 @@ cmdListen({
 			return;
 		}
 		query = input.data.trim();
-		uri = "http://api.wordnik.com:80/v4/word.json/"+query+"/definitions?limit=3&includeRelated=true&sourceDictionaries=wordnet,wiktionary&useCanonical=false&includeTags=false&api_key="+config.api.wordnik;
+		uri = "http://api.wordnik.com:80/v4/word.json/"+query+
+			"/definitions?limit=3&includeRelated=true&sourceDictionaries=wordnet,wiktionary&useCanonical=false&includeTags=false&api_key="
+			+config.api.wordnik;
 		web.get(uri, function (error, response, body) {
 			body = JSON.parse(body);
 			if (body.length === 0) {
@@ -34,8 +36,8 @@ cmdListen({
 			uri = "http://api.wordnik.com:80/v4/word.json/"+query+"/topExample?useCanonical=false&api_key="+config.api.wordnik;
 			web.get(uri, function (error, response, body) {
 				body = JSON.parse(body);
-				irc.say(input.context, query+definitions, false);
-				if (body.text && body.title) irc.say(input.context, body.text+" - "+body.title, false);
+				irc.say(input.context, lib.singleSpace(query+definitions), false);
+				if (body.text && body.title) irc.say(input.context, lib.singleSpace(body.text+" - "+body.title), false);
 			});
 		});
 	}
