@@ -20,6 +20,10 @@ function rssToJson(rss) {
 	return entries;
 }
 
+function tidyRelease(release) {
+	return lib.singleSpace(release.replace(/ mkv| avi| mp4| mp5|\[[A-F0-9]{8}\]/gi, ""));
+}
+
 function checkNyaa(context) {
 	var i, l, results, group, show, term, entry, resolution, msg, updates;
 	web.get("http://www.nyaa.se/?page=rss&cats=1_37&filter=2&term=&minage=0&maxage=1", function (error, response, body) {
@@ -39,14 +43,30 @@ function checkNyaa(context) {
 						if (!watching[group][show].latest || results[i].date > watching[group][show].latest.date) {
 							if (!updates) updates = [];
 							watching[group][show].latest = results[i];
-							msg = "Nyaa! "+watching[group][show].latest.release.replace(/ mkv| avi| mp4| mp5/gi, "")+" was released "
-								+lib.duration(watching[group][show].latest.date, null, true)+" ago! \\o/";
+							msg = "Nyaa! "+tidyRelease(watching[group][show].latest.release)+" is out! \\o/";
 							// announce to current context if it's not in the announce list, if nw check was run
 							if (typeof context === 'string' && !lib.hasElement(watching[group][show].announce, context)) {
 								updates.push([ "say", context, msg, false ]);
 							}
 							watching[group][show].announce.forEach(function (target) {
-								updates.push([ "say", target, msg, false ]);
+								if (target[0] === "#") {
+									if (lib.hasElement(ial.Channels(), target)) {
+										updates.push([ "say", target, msg, false ]);
+									} else {
+										logger.debug("Tried to send a Nyaa update to "+target+", which I'm not on.");
+									}
+								} else {
+									if (ial.Channels(target).length) {
+										updates.push([ "notice", target, msg, false ]);
+									} else { // user not found :S
+										lib.events.emit("Event: queueMessage", {
+											method: "notice",
+											nick: target,
+											message: msg,
+											sanitise: false
+										});
+									}
+								}
 							});
 						}
 					}
@@ -57,6 +77,7 @@ function checkNyaa(context) {
 		if (updates && updates.length > 0) {
 			irc.rated(updates);
 			nyaaDB.saveAll(watching);
+			updates = null;
 		} else if (typeof context === 'string') {
 			irc.say(context, "Nothing new. :\\");
 		}
