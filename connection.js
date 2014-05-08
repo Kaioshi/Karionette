@@ -44,9 +44,7 @@ module.exports = function () {
 			logger.error("Tried to send data > 510 chars in length: " + data);
 			return;
 		}
-		socket.write(data + "\r\n", "utf8", function () {
-			if (!silent) logger.sent(data);
-		});
+		socket.write(data+"\r\n", "utf8", logger.sent(data, silent));
 	}
 	
 	// Configure the socket appropriately
@@ -214,10 +212,11 @@ module.exports = function () {
 				}
 			}
 		},
-		notice: function (target, notice) {
+		notice: function (target, notice, sanitiseNotice) {
 			if (target && notice) {
 				notice = notice.replace(/\n|\t|\r/g, "");
-				send("NOTICE " + sanitise(target) + " :" + sanitise(notice));
+				if (sanitiseNotice) send(sanitise("NOTICE "+target+" :"+notice));
+				else send("NOTICE "+target+" :"+notice);
 			}
 		},
 		// CORE COMMANDS
