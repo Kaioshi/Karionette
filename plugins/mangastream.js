@@ -2,24 +2,6 @@ var ent = require("./lib/entities.js"),
 	msDB = new DB.Json({filename: "mangastream"}),
 	watched = msDB.getAll(), timerAdded;
 
-function announceUpdates(updates) {
-	var i = 0;
-	updates.forEach(function (update) {
-		setTimeout(function () {
-			if (update[0][0] === "#") {
-				irc.say(update[0], update[1], false);
-			} else {
-				if (ial.maskSearch(update[0]+"!*@*").length) {
-					irc.notice(update[0], update[1], false);
-				} else {
-					lib.events.emit("Event: noticeQueued", update[0], update[1]);
-				}
-			}
-		}, i);
-		i += 1000;
-	});
-}
-
 function findUpdates(releases, notify) {
 	var i = 0, l = releases.length, updates,
 		index, date, release, title, reltitle, msg;
@@ -43,17 +25,33 @@ function findUpdates(releases, notify) {
 						release: release,
 						date: date
 					};
-					msg = releases[i].title+" was released "+lib.duration(date, null, true)+
-								" ago on MangaStream! \\o/ ~ "+watched[title].latest.link;
+					msg = releases[i].title+" is out! \\o/ ~ "+watched[title].latest.link;
 					watched[title].announce.forEach(function (target) {
-						updates.push([ target, msg ]);
+						if (target[0] === "#") {
+							if (lib.hasElement(ial.Channels(), target)) {
+								updates.push([ "say", target, msg, false ]);
+							} else {
+								logger.debug("Tried to send a mangastream update to "+target+", but I'm not on it.");
+							}
+						} else {
+							if (ial.Channels(target).length) {
+								updates.push([ "notice", target, msg, false ]); // notice users
+							} else { // user not found :S
+								lib.events.emit("Event: queueMessage", {
+									method: "notice",
+									nick: target,
+									message: msg,
+									sanitise: false
+								});
+							}
+						}
 					});
 				}
 			}
 		}
 	}
 	if (updates) {
-		announceUpdates(updates);
+		irc.rated(updates);
 		msDB.saveAll(watched);
 		updates = null;
 	} else if (typeof notify === 'string') {
