@@ -18,15 +18,14 @@ module.exports = function () {
 	// Utilise a Buffer on the data - this can also be used to catch data before it's handled
 	function dataBuffer(data) {
 		var newlineIdx;
-		data = data.replace(/\r/g, "");
-		while ((newlineIdx = data.indexOf("\n")) > -1) {
+		while ((newlineIdx = data.indexOf("\r\n")) > -1) {
 			if (buffer.size > 0) {
 				data = buffer.ob.toString("utf8", 0, buffer.size) + data;
 				newlineIdx += buffer.size;
 				buffer.size = 0;
 			}
 			caveman.emitEvent(data.substr(0, newlineIdx));
-			data = data.slice(newlineIdx + 1);
+			data = data.slice(newlineIdx + 2);
 		}
 		if (data.length > 0) {
 			buffer.ob.write(data, buffer.size, "utf8");
