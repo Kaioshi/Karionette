@@ -1,5 +1,4 @@
-﻿var ent = require('./lib/entities.js'),
-	lfmBindingsDB = new DB.Json({filename: "lfm"});
+﻿var lfmBindingsDB = new DB.Json({filename: "lfm"});
 
 function dura(ms) {
 	var secs = Math.floor(ms/1000),
@@ -82,7 +81,7 @@ cmdListen({
 					irc.say(input.context,"Artist: "+result.artist.name+formed+from+tags+
 						" ~ Total Plays: "+lib.commaNum(result.artist.stats.playcount)+
 						", Listeners: "+lib.commaNum(result.artist.stats.listeners));
-					summary = ent.decode(lib.stripHtml(result.artist.bio.summary));
+					summary = lib.decode(lib.stripHtml(result.artist.bio.summary));
 					summary = (summary.length > 0 ? summary : "There was no artist summary. Did you spell it correctly?");
 					irc.say(input.context, summary, true, 1);
 				});

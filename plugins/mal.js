@@ -1,5 +1,4 @@
 // Unofficial MAL-API (clone) Fondler
-var ent = require("./lib/entities.js");
 
 function getGenres(genres) {
 	var ret = [];
@@ -45,10 +44,10 @@ function doSearch(type, context, title, synopsis, google) {
 				eps = " - "+body.chapters+" "+(parseInt(body.chapters, 10) > 1 ? "chapters" : "chapter");
 			}
 			uri = "http://myanimelist.net/"+type+"/"+id;
-			irc.say(context, ent.decode(body.title)+" ~ Rank #"+body.rank+
+			irc.say(context, lib.decode(body.title)+" ~ Rank #"+body.rank+
 				" ["+getGenres(body.genres)+"]"+eps+" - "+body.status+" ~ "+uri, false);
 			if (synopsis) {
-				irc.say(context, lib.stripHtml(ent.decode(body.synopsis)), false, 1);
+				irc.say(context, lib.stripHtml(lib.decode(body.synopsis)), false, 1);
 			}
 		});
 	});

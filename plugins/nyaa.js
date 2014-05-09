@@ -2,9 +2,7 @@
 "use strict";
 var fs = require("fs"),
 	nyaaDB = new DB.Json({filename: "nyaa"}),
-	watching = nyaaDB.getAll(),
-	timerAdded,
-	ent = require("./lib/entities.js");
+	watching = nyaaDB.getAll(), timerAdded;
 
 function rssToJson(rss) {
 	var i, l, entries = [];
@@ -28,7 +26,7 @@ function checkNyaa(context) {
 	var i, l, results, group, show, term, entry, resolution, msg, updates;
 	web.get("http://www.nyaa.se/?page=rss&cats=1_37&filter=2&term=&minage=0&maxage=1", function (error, response, body) {
 		if (!body) return;
-		results = rssToJson(ent.decode(body));
+		results = rssToJson(lib.decode(body));
 		for (i = 0, l = results.length; i < l; i++) {
 			entry = results[i].release.toLowerCase();
 			for (group in watching) {
@@ -276,7 +274,7 @@ cmdListen({
 		}
 		web.get(input.uri, function (error, resp, body) {
 			if (body) {
-				body = ent.decode(body);
+				body = lib.decode(body);
 				entries = [];
 				body = body.slice(body.indexOf("<item>"), body.lastIndexOf("</item>")+7);
 				if (body.length === 0) {

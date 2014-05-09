@@ -1,11 +1,10 @@
 "use strict";
-var ent = require("./lib/entities.js"),
-	mfDB = new DB.Json({filename: "mangafox"}),
+var mfDB = new DB.Json({filename: "mangafox"}),
 	watched = mfDB.getAll(), timerAdded;
 
 function rssToJson(rss) {
 	var ret = [], i, l;
-	rss = ent.decode(rss.replace(/\n|\t|\r/g, "")).split("<item>").slice(1);
+	rss = lib.decode(rss.replace(/\n|\t|\r/g, "")).split("<item>").slice(1);
 	i = 0; l = rss.length;
 	for (; i < l; i++) {
 		ret.push({

@@ -1,8 +1,6 @@
-// url title snarfer - THIS ONLY WORKS ON UNIX - must have wget, head and egrep installed.
+// url title snarfer
 "use strict";
-var ent = require("./lib/entities.js"),
-	sys = require("sys"),
-	url = require("url"),
+var url = require("url"),
 	urlDB = new DB.Json({ filename: "urls" });
 
 function zero(n) {
@@ -23,7 +21,7 @@ function dura(secs) {
 }
 
 function lastUrl(opts) {
-	var i, k, date, keys,
+	var i, l, k, n, date, keys,
 		match = false,
 		mostrecent = [ 0, "" ],
 		entry = urlDB.getOne(opts.channel);
@@ -49,8 +47,10 @@ function lastUrl(opts) {
 		}
 	}
 	keys = Object.keys(entry);
-	for (i = 0; i < keys.length; i++) {
-		for (k = 0; k < entry[keys[i]].length; k++) {
+	i = 0; l = keys.length;
+	for (; i < l; i++) {
+		k = 0; n = entry[keys[i]].length;
+		for (; k < n; k++) {
 			if (opts.match) {
 				if (entry[keys[i]][k][0].indexOf(opts.match) > -1) {
 					date = new Date(entry[keys[i]][k][1]).valueOf();
@@ -76,21 +76,19 @@ function lastUrl(opts) {
 }
 
 function urlStats(nick, channel, match) {
-	var i,
-		count = 0,
+	var i, l, count,
 		entry = urlDB.getOne(channel);
 	if (!entry || !entry[nick]) return -1;
 	if (match) {
-		for (i = 0; i < entry[nick].length; i++) {
+		count = 0; i = 0; l = entry[nick].length;
+		for (; i < l; i++) {
 			if (entry[nick][i][0].indexOf(match) > -1) {
 				count++;
 			}
 		}
 		return count;
 	}
-	count = entry[nick].length;
-	entry = null;
-	return count;
+	return entry[nick].length;
 }
 
 function recordUrl(nick, channel, url) {
@@ -149,7 +147,7 @@ function sayTitle(context, uri, length, imgur, old) {
 			return;
 		}
 		if (!body) {
-			logger.warn(uri.href + " - curl returned no body.");
+			logger.warn(uri.href + " - returned no body.");
 			return;
 		}
 		reg = /<title?[^>]+>([^<]+)<\/title>/i.exec(body.replace(/\n|\t|\r/g, ""));
@@ -163,7 +161,8 @@ function sayTitle(context, uri, length, imgur, old) {
 		if (imgur) { // I know there are a lot of imgur corner cases, but it's really common.
 			if (title === "imgur: the simple image sharer") return; // deal with it
 		}
-		irc.say(context, ent.decode(title.trim()) + " ~ " + uri.host.replace("www.", "")+(old ? " ("+old+")" : ""), false);
+		irc.say(context, lib.singleSpace(lib.decode(title))+
+			" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""), false);
 		reg = null; title = null; body = null; response = null; error = null;
 	}, length);
 }
