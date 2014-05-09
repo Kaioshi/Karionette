@@ -157,7 +157,7 @@ cmdListen({
 								irc.say(input.context, "I'm not tracking \""+title+"\" updates, so there's no announce list for it.");
 								return;
 							}
-							irc.say(input.context, watched[ltitle].title+" releases are announced to "+lib.commaList(watched[ltitle].announce)+".");
+							irc.say(input.context, watched[ltitle].title+" releases are announced to "+lib.commaList(lib.sort(watched[ltitle].announce))+".");
 						} else {
 							irc.say(input.context, "[Help] "+config.command_prefix+"mangastream announce list <manga title> - Example: "
 								+config.command_prefix+"mangastream announce list One Piece");
@@ -211,7 +211,7 @@ cmdListen({
 					titles.push(watched[title].title);
 				}
 				if (titles.length > 1) {
-					irc.say(input.context, "I'm tracking releases of "+lib.commaList(titles)+" from MangaStream.");
+					irc.say(input.context, "I'm tracking releases of "+lib.commaList(lib.sort(titles))+" from MangaStream.");
 				} else {
 					irc.say(input.context, "I'm not tracking any MangaStream releases right now. Add some!");
 				}
