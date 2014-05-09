@@ -43,9 +43,9 @@ cmdListen({
 			showtime = show["GMT+0 NODST"]*1000+3600000;
 			now = new Date().valueOf();
 			if (now > showtime) {
-				resp = resp+" aired "+lib.duration(showtime, now)+" ago and had a runtime of "+show.Runtime+" minutes.";
+				resp = resp+" aired "+lib.duration(showtime, now, true)+" ago and had a runtime of "+show.Runtime+" minutes.";
 			} else {
-				resp = resp+" airs in "+lib.duration(now, showtime)+" and has a runtime of "+show.Runtime+" minutes.";
+				resp = resp+" airs in "+lib.duration(now, showtime, true)+" and has a runtime of "+show.Runtime+" minutes.";
 			}
 			irc.say(input.context, resp, false);
 		});
