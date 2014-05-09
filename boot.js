@@ -17,10 +17,10 @@ var fs = require('fs'),
 
 if (!fs.existsSync("config")) {
 	if (fs.existsSync("config.js")) {
-		console.log(" *** USING OLD config.js CONFIG, PLEASE UPDATE TO \"config\" - SEE config.example");
+		console.error(" * USING OLD config.js CONFIG, PLEASE UPDATE TO \"config\" - SEE config.example");
 		require("./config.js");
 	} else {
-		console.log(" *** NO CONFIG FOUND~ SEE config.example");
+		console.error(" * NO CONFIG FOUND~ SEE config.example");
 		process.exit();
 	}
 } else {
