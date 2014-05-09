@@ -1,6 +1,21 @@
+"use strict";
 var ent = require("./lib/entities.js"),
 	msDB = new DB.Json({filename: "mangastream"}),
 	watched = msDB.getAll(), timerAdded;
+
+function rssToJson(rss) {
+	var ret = [], i, l;
+	rss = ent.decode(rss.replace(/\n|\t|\r/g, "")).split("<item>").slice(1);
+	i = 0; l = rss.length;
+	for (; i < l; i++) {
+		ret.push({
+			title: rss[i].slice(rss[i].indexOf("<title>")+7, rss[i].indexOf("</title>")),
+			link: rss[i].slice(rss[i].indexOf("<link>")+6, rss[i].indexOf("</link>")),
+			date: new Date(rss[i].slice(rss[i].indexOf("<pubDate>")+9, rss[i].indexOf("</pubDate>"))).valueOf()
+		});
+	}
+	return ret;
+}
 
 function findUpdates(releases, notify) {
 	var i = 0, l = releases.length, updates,
@@ -212,45 +227,3 @@ cmdListen({
 	}
 });
 
-function rssToJson(body) {
-	var entry, element = [], entries = [],
-		tmp = body.split("\n").slice(9, -4),
-		i = 0, l = tmp.length;
-	for (; i < l; i++) {
-		if (!tmp[i]) {
-			entries.push(JSON.parse(element.join(" ")));
-			element = [];
-			continue;
-		}
-		entry = tmp[i].slice(tmp[i].indexOf("<")+1, tmp[i].indexOf(">"));
-		switch (entry) {
-			case "item":
-				tmp[i] = "{";
-				break;
-			case "title":
-				tmp[i] = "\"title\": \""+getEntry(tmp[i])+"\",";
-				break;
-			case "link":
-				tmp[i] = "\"link\": \""+ent.decode(getEntry(tmp[i]))+"\",";
-				break;
-			case "pubDate":
-				tmp[i] = "\"date\": \""+getEntry(tmp[i])+"\"";
-				break;
-			case "/item":
-				tmp[i] = "}";
-				break;
-			default:
-				tmp.splice(i, 1); i--; l--; // don't want this entry~
-				continue;
-				break;
-		}
-		element.push(tmp[i]);
-	}
-	
-	return entries;
-}
-
-function getEntry(line) {
-	var index = line.indexOf(">")+1;
-	return line.slice(index, line.indexOf("<", index));
-}
