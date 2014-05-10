@@ -1,7 +1,3 @@
-﻿var autojoinDB = new DB.List({filename: 'autojoin'}),
-	nickArr = config.nickname,
-	currentNick = config.nickname[0];
-
 // Keeps the bot connected
 evListen({
 	handle: "corePing",
@@ -92,28 +88,35 @@ evListen({
 	handle: "coreAutojoin",
 	event: "376",
 	callback: function () {
-		// 376 is the end of MOTD
-		if (autojoinDB.size() > 0) {
-			setTimeout(function () {
-				var i, k = 0,
-					channels = autojoinDB.getAll();
-				for (i in channels) {
-					irc.join(channels[i]);
-				}
-				// 315 signifies the end of a channel's WHO response,
-				// at which point our IAL is fully updated.
-				lib.events.on("Event: 315", function (input) {
-					k++;
-					if (k === channels.length) {
-						logger.debug("Finished joins.");
-						lib.events.emit("autojoinFinished");
-					}
-				});
-			}, 2000); // wait 2 seconds for a cloak to apply
+		if (config.autojoin && config.autojoin.length > 0) {
+			globals.autojoining = config.autojoin;
+			logger.info("Autojoining "+lib.commaList(config.autojoin)+".");
+			irc.join(config.autojoin.join(","));
 		}
-	},
+	}
 });
 
+evListen({
+	handle: "coreWhoFinished",
+	event: "315",
+	callback: function (input) {
+		var channel;
+		if (globals.autojoining !== undefined) {
+			if (globals.autojoining.length > 0) {
+				channel = input.raw.slice(input.raw.indexOf("#"));
+				channel = channel.slice(0, channel.indexOf(" "));
+				globals.autojoining = globals.autojoining.filter(function (element) {
+					return (element.toLowerCase() !== channel.toLowerCase());
+				});
+				if (globals.autojoining.length === 0) {
+					delete globals.autojoining;
+					lib.events.emit("Event: autojoinFinished");
+					logger.debug("Finished joining channels");
+				}
+			}
+		}
+	}
+});
 
 /*
  * COMMANDS:
