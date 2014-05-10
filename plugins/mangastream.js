@@ -8,7 +8,7 @@ function rssToJson(rss) {
 	i = 0; l = rss.length;
 	for (; i < l; i++) {
 		ret.push({
-			title: rss[i].slice(rss[i].indexOf("<title>")+7, rss[i].indexOf("</title>")),
+			title: lib.decode(rss[i].slice(rss[i].indexOf("<title>")+7, rss[i].indexOf("</title>"))),
 			link: rss[i].slice(rss[i].indexOf("<link>")+6, rss[i].indexOf("</link>")),
 			date: new Date(rss[i].slice(rss[i].indexOf("<pubDate>")+9, rss[i].indexOf("</pubDate>"))).valueOf()
 		});
