@@ -30,11 +30,21 @@ function startReminder(reminder) {
 	time = time-now;
 	if (time > 0) {
 		setTimeout(function () {
-			irc.say(reg[3], reg[2]+": "+reg[4], false);
+			if (ial.Channels(reg[2]).length) {
+				irc.say(reg[3], reg[2]+": "+reg[4], false);
+			} else {
+				lib.events.emit("Event: queueMessage", {
+					method: "say",
+					nick: reg[2],
+					channel: reg[3],
+					message: reg[2]+", you weren't here! ;_; late "+reg[4],
+					sanitise: false
+				});
+			}
 			removeReminder(reminder);
 		}, time);
 	} else {
-		irc.say(reg[3], reg[2]+": Sorry, I was offline! ;~; late "+reg[4], false);
+		irc.say(reg[3], reg[2]+": Sorry, I was offline! ;_; late "+reg[4], false);
 		removeReminder(reminder);
 	}
 }
@@ -60,7 +70,11 @@ function addReminder(time, nick, context, reminder) {
 	reminderDB.saveAll(reminders);
 }
 
-lib.events.on("autojoinFinished", loadReminders);
+evListen({
+	handle: "loadRemindersListener",
+	event: "autojoinFinished",
+	callback: loadReminders
+});
 
 // Reminds you about things
 cmdListen({
