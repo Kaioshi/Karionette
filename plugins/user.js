@@ -211,10 +211,13 @@ evListen({
 	handle: "seenNick",
 	event: "NICK",
 	callback: function (input) {
-		ial.Channels(input.newnick).forEach(function (channel) {
-			setUserLeft(input.nick, input.address, channel, "nick changed", " ~ "+input.nick+" -> "+input.newnick);
-			removeUserLeft(input.newnick, channel);
-		});
+		var channels = ial.Channels(input.newnick);
+		if (channels && channels.length > 0) {
+			channels.forEach(function (channel) {
+				setUserLeft(input.nick, input.address, channel, "nick changed", " ~ "+input.nick+" -> "+input.newnick);
+				removeUserLeft(input.newnick, channel);
+			});
+		}
 	}
 });
 
@@ -222,12 +225,15 @@ evListen({
 	handle: "seenQuit",
 	event: "QUIT",
 	callback: function (input) {
-		ial.Channels(input.nick).forEach(function (channel) {
-			setUserLeft(input.nick, input.address, channel, "quit", (
-				input.reason.slice(0,6) === "Quit: " ? input.reason = " ~ "+input.reason.slice(6) :
-				(input.reason.length > 0 ? " ~ "+input.reason : "")
-			));
-		});
+		var channels = ial.Channels(input.nick);
+		if (channels && channels.length > 0) {
+			channels.forEach(function (channel) {
+				setUserLeft(input.nick, input.address, channel, "quit", (
+					input.reason.slice(0,6) === "Quit: " ? input.reason = " ~ "+input.reason.slice(6) :
+					(input.reason.length > 0 ? " ~ "+input.reason : "")
+				));
+			});
+		}
 	}
 });
 
