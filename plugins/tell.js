@@ -39,9 +39,7 @@ function addMessage(message) {
 evListen({
 	handle: "messageQueueListener",
 	event: "queueMessage",
-	callback: function (message) {
-		addMessage(message);
-	}
+	callback: addMessage
 });
 
 evListen({
