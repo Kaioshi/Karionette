@@ -6,10 +6,6 @@
 //     ~ignore user - the bot will no longer respond to messages input.nick [user]
 //     ~unignore user - the bot will once more respond to messages input.nick [user]
 //     ~reload - reload scripts
-
-var	autojoinDB = new DB.List({filename: 'autojoin'}),
-	fs = require('fs');
-
 cmdListen({
 	command: "ignore",
 	help: "Ignores people!",
@@ -140,7 +136,9 @@ cmdListen({
 	admin: true,
 	callback: function (input) {
 		if (input.args && input.args[0][0] === "#") {
-			autojoinDB.saveOne(input.args[0]);
+			config.autojoin = config.autojoin || [];
+			config.autojoin.push(input.args[0].toLowerCase());
+			config.saveChanges();
 			irc.say(input.context, "Added " + input.args[0] + " to autojoin list");
 		} else {
 			irc.say(input.context, "Herp.");
@@ -154,8 +152,16 @@ cmdListen({
 	admin: true,
 	callback: function (input) {
 		if (input.args && input.args[0][0] === "#") {
-			autojoinDB.removeOne(input.args[0], true);
-			irc.say(input.context, "Removed " + input.args[0] + " from autojoin list");
+			if (config.autojoin && config.autojoin.length > 0 && lib.hasElement(config.autojoin, input.args[0])) {
+				input.args[0] = input.args[0].toLowerCase();
+				config.autojoin = config.autojoin.filter(function (element) {
+					return (element.toLowerCase() !== input.args[0]);
+				});
+				config.saveChanges();
+				irc.say(input.context, "Removed!");
+			} else {
+				irc.say(input.context, input.args[0]+" isn't on the autojoin list.");
+			}
 		} else {
 			irc.say(input.context, "Derp.");
 		}
