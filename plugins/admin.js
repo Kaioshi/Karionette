@@ -6,6 +6,8 @@
 //     ~ignore user - the bot will no longer respond to messages input.nick [user]
 //     ~unignore user - the bot will once more respond to messages input.nick [user]
 //     ~reload - reload scripts
+var fs = require('fs');
+
 cmdListen({
 	command: "ignore",
 	help: "Ignores people!",
