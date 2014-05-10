@@ -9,6 +9,9 @@ realname: Karionette
 nickname: Kari, Kari_,  Kari`
 username: Kyuuuuuuu
 
+# Autojoin channels
+autojoin: #anime, #pyoshi
+
 # NickServ details, case-insensitive. Hostname can be a regex.
 #nickserv nickname: NickServ
 #nickserv hostname: NickServ@services\.
