@@ -13,6 +13,4 @@ On Linux/*NIX, you will need 'curl' installed for web fetches.
 > * Once the bot is up and running, add a new user as admin by doing ;adduser <user> <pass> <secret code from your config file>
 
 ## ISSUES
-'''
 If you have any problems, feel free to drop by #pyoshi on irc.esper.net and ask.
-'''
