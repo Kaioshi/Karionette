@@ -162,6 +162,8 @@ function isAction(data) {
 	return (data.substring(0, 7) === "\u0001ACTION");
 }
 
+timers.startTick(900);
+
 evListen({
 	handle: "saveAllSeen",
 	event: "900s tick",
