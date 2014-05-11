@@ -209,7 +209,7 @@ cmdListen({
 				for (title in watched) {
 					titles.push(watched[title].title);
 				}
-				if (titles.length > 1) {
+				if (titles.length > 0) {
 					irc.say(input.context, "I'm tracking releases of "+lib.commaList(lib.sort(titles))+" from MangaStream.");
 				} else {
 					irc.say(input.context, "I'm not tracking any MangaStream releases right now. Add some!");

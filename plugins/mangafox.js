@@ -75,6 +75,7 @@ function findUpdates(releases, notify) {
 
 function checkMangafox(notify) {
 	web.get("http://feeds.feedburner.com/mangafox/latest_manga_chapters?format=xml", function (error, response, body) {
+		globals.lastBody = body;
 		findUpdates(rssToJson(body), notify);
 	})
 }
@@ -209,7 +210,7 @@ cmdListen({
 				for (title in watched) {
 					titles.push(watched[title].title);
 				}
-				if (titles.length > 1) {
+				if (titles.length > 0) {
 					irc.say(input.context, "I'm tracking releases of "+lib.commaList(lib.sort(titles))+" from Mangafox.");
 				} else {
 					irc.say(input.context, "I'm not tracking any Mangafox releases right now. Add some!");
