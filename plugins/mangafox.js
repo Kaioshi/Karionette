@@ -75,7 +75,6 @@ function findUpdates(releases, notify) {
 
 function checkMangafox(notify) {
 	web.get("http://feeds.feedburner.com/mangafox/latest_manga_chapters?format=xml", function (error, response, body) {
-		globals.lastBody = body;
 		findUpdates(rssToJson(body), notify);
 	})
 }
