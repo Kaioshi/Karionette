@@ -162,7 +162,11 @@ function isAction(data) {
 	return (data.substring(0, 7) === "\u0001ACTION");
 }
 
-timers.Add(900000, saveAllSeen);
+evListen({
+	handle: "saveAllSeen",
+	event: "900s tick",
+	callback: saveAllSeen
+});
 
 evListen({
 	handle: "seenMsg",
