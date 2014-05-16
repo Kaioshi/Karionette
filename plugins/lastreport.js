@@ -14,7 +14,7 @@ cmdListen({
 			case "error":
 				if (globals.lastError) {
 					if (input.args[1] === "clear") {
-						globals.lastError = "";
+						delete globals.lastError;
 						if (globals.lastErrstack) delete globals.lastErrstack;
 						irc.say(input.context, "Last error cleared.");
 						break;
@@ -31,7 +31,7 @@ cmdListen({
 			case "warning":
 				if (globals.lastWarning) {
 					if (input.args[1] === "clear") { 
-						globals.lastWarning = "";
+						delete globals.lastWarning;
 						irc.say(input.context, "Last warning cleared.");
 						break;
 					}
