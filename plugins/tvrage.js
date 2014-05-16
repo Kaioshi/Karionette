@@ -70,8 +70,7 @@ cmdListen({
 			}
 			globals.lastBody = body;
 			globals.lastParsed = parseTvRage(body);
-			irc.say(input.contxt, getShowInfo(globals.lastParsed), false);
-			//irc.say(input.context, getShowInfo(parseTvRage(body)), false);
+			irc.say(input.context, getShowInfo(parseTvRage(body)), false);
 		});
 	}
 });
