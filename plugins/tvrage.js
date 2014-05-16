@@ -1,12 +1,53 @@
+// TvRage fondler
 function parseTvRage(resp) {
-	var i, data,
-		ret = {};
-	resp = resp.replace("<pre>", "").split("\n").slice(0,-1);
-	for (i = 0; i < resp.length; i++) {
-		data = resp[i].split("@");
-		ret[data[0]] = data[1];
+	var resp = resp.replace("<pre>", "").split("\n").slice(0, -1),
+		data, i = 0, l = resp.length, ret = {};
+	for (; i < l; i++) {
+		data = parseEntry(resp[i].split("@"));
+		if (data) ret[data[0]] = data[1];
 	}
 	return ret;
+}
+
+function parseEntry(entry) {
+	if (!entry[1]) return;
+	switch (entry[0]) {
+		case "Latest Episode":
+			entry[1] = entry[1].split("^");
+			return [ entry[0], { title: entry[1][0]+" - "+entry[1][1], release: "Aired: "+entry[1][2] } ];
+		case "Next Episode":
+			entry[1] = entry[1].split("^");
+			return [ entry[0], { title: entry[1][0]+" - "+entry[1][1], release: "Airs: "+entry[1][2] } ];
+		case "Genres":
+			return [ entry[0], entry[1].split(" | ").join(", ") ];
+		default:
+			return entry;
+	}
+}
+
+function getShowDuration(show) {
+	var years;
+	if (show["Started"] && show["Ended"]) {
+		years = (parseInt(show["Ended"].slice(show["Ended"].length-4)) -
+			parseInt(show["Started"].slice(show["Started"].length-4), 10));
+		years = years || 1;
+		return " ~ Ran for "+years+" "+(years > 1 ? "years" : "year");
+	}
+	return "";
+}
+
+function consolidateStatusTypes(type) {
+	if (/Ended/i.test(type)) return "Ended";
+	return type;
+}
+
+function getShowtime(show) {
+	var type = (show["Next Episode"] ? "Next Episode" : "Latest Episode");
+	return show[type].title+" ~ "+show[type].release;
+}
+
+function getShowInfo(show) {
+	return show["Show Name"]+" - "+getShowtime(show)+getShowDuration(show)+" ~ Status: "+show["Status"];
 }
 
 cmdListen({
@@ -16,38 +57,21 @@ cmdListen({
 	syntax: config.command_prefix+"tvrage <show name> - Example: "+
 		config.command_prefix+"tvrage Sherlock",
 	callback: function (input) {
-		var uri, show, resp, showtime, now;
+		var uri;
 		if (!input.args) {
 			irc.say(input.context, cmdHelp("tvrage", "syntax"));
 			return;
 		}
 		uri = "http://services.tvrage.com/tools/quickinfo.php?show="+input.data;
 		web.get(uri, function (error, response, body) {
-			if (body.indexOf("\n") === -1) {
-				// this is tvrage's version of an error.
-				// sort of.
-				irc.say(input.context, "Not found, I guess? TvRage replied with: "+body, false);
+			if (body.indexOf("\n") === -1) { // this is tvrage's version of an error.
+				irc.say(input.context, "Couldn't find it. :<", false); // sort of.
 				return;
 			}
-			show = parseTvRage(body);
-			if (!show["Next Episode"]) {
-				irc.say(input.context, "TvRage has no information about the next episode of "
-					+show["Show Name"]+" - Status: "+show["Status"]+".");
-				return;
-			}
-			resp = show["Show Name"]+" - "+show["Next Episode"].split("^").slice(0,-1).join(" - ");
-			// HELLO FUTURE! How do I test for daylight savings?! This currently adds an hour because
-			// the timezone it's written in doesn't practice daylight savings so the result is off by one hour.
-			// Blame timezones. And Deide for not being helpful. Bastard. Linked me to a youtube video about
-			// how timezones are annoying. I already knew that! - Grumposhi.
-			showtime = show["GMT+0 NODST"]*1000+3600000;
-			now = new Date().valueOf();
-			if (now > showtime) {
-				resp = resp+" aired "+lib.duration(showtime, now, true)+" ago and had a runtime of "+show.Runtime+" minutes.";
-			} else {
-				resp = resp+" airs in "+lib.duration(now, showtime, true)+" and has a runtime of "+show.Runtime+" minutes.";
-			}
-			irc.say(input.context, resp, false);
+			globals.lastBody = body;
+			globals.lastParsed = parseTvRage(body);
+			irc.say(input.contxt, getShowInfo(globals.lastParsed), false);
+			//irc.say(input.context, getShowInfo(parseTvRage(body)), false);
 		});
 	}
 });
