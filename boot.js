@@ -6,6 +6,7 @@ global.globals = {
 
 var fs = require('fs'),
 	DB = require("./lib/fileDB.js"),
+	fragDB = require("./lib/fragStorage.js"),
 	web = require("./lib/web.js"),
 	regexFactory = require("./lib/regexFactory.js"),
 	Connection = require("./connection.js"),
@@ -114,6 +115,7 @@ function createSandbox() {
 		setInterval: setInterval,
 		web: web,
 		DB: DB,
+		fragDB: fragDB,
 		lib: lib,
 		ial: ial,
 		userLogin: userLogin,
