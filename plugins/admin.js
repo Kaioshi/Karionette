@@ -139,6 +139,10 @@ cmdListen({
 	callback: function (input) {
 		if (input.args && input.args[0][0] === "#") {
 			config.autojoin = config.autojoin || [];
+			if (lib.hasElement(config.autojoin, input.args[0])) {
+				irc.say(input.context, input.args[0]+" is already on the autojoin list.");
+				return;
+			}
 			config.autojoin.push(input.args[0].toLowerCase());
 			config.saveChanges();
 			irc.say(input.context, "Added " + input.args[0] + " to autojoin list");
