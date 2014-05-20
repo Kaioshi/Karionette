@@ -48,16 +48,18 @@ function rssToJson(rss, type) {
 }
 
 function findUpdates(releases, type, notify) {
-	var i = 0, l = releases.length, updates,
+	var i = 0, l = releases.length, updates, hits = [],
 		index, date, release, title, reltitle, msg;
 	for (; i < l; i++) {
 		for (title in watched[type]) {
 			index = releases[i].title.toLowerCase().indexOf(title);
 			if (index > -1) {
+				if (!lib.hasElement(hits, title)) hits.push(title);
 				reltitle = releases[i].title.slice(index, index+title.length);
 				release = releases[i].title.slice(index+title.length+1);
 				date = new Date(releases[i].date).valueOf();
-				watched[type][title] = mangaDB[type].getOne(title);
+				if (!watched[type][title].title)
+					watched[type][title] = mangaDB[type].getOne(title);
 				if (!watched[type][title].latest || date > watched[type][title].latest.date) {
 					// new release~
 					if (!updates) updates = [];
@@ -93,14 +95,19 @@ function findUpdates(releases, type, notify) {
 							}
 						}
 					});
-					watched[type][title] = "";
 				}
 			}
 		}
 	}
+	if (hits.length) {
+		hits.forEach(function (title) {
+			mangaDB[type].clearCache(title);
+			watched[type][title] = "";
+		});
+		hits = null;
+	}
 	if (updates) {
 		irc.rated(updates);
-		setTimeout(mangaDB[type].clearCache, 5000);
 		updates = null;
 	} else if (typeof notify === 'string') {
 		irc.say(notify, "Nothing new. :\\");
