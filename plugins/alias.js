@@ -1,5 +1,4 @@
-﻿var convertCheck = false, tmp,
-	aliasDB = new DB.Json({filename: "alias/alias"}),
+﻿var aliasDB = new DB.Json({filename: "alias/alias"}),
 	varDB = new DB.Json({filename: "alias/vars"});
 
 // Handles Alias interface
@@ -95,26 +94,6 @@ cmdListen({
 	}
 });
 
-// THIS IS BAD. I'M SORRY.
-if (!convertCheck) {
-	tmp = {};
-	varDB.getKeys().forEach(function (entry) {
-		tmp[entry] = varDB.getOne(entry);
-		if (!tmp[entry].handle) {
-			tmp[entry] = { handle: entry.slice(1, -1), data: tmp[entry] };
-			convertCheck = true;
-		}
-	});
-	// if convertCheck is already true, save changes. else nothing happened.
-	if (convertCheck) {
-		logger.debug("Updated vars.json format! Now with Case!");
-		varDB.saveAll(tmp);
-		tmp = null;
-	} else {
-		convertCheck = true;
-	}
-}
-
 cmdListen({
 	command: "var",
 	help: "Allows you to add variables for use in aliases (only). Default variables are: "+
@@ -123,7 +102,7 @@ cmdListen({
 	syntax: config.command_prefix+"var <add/remove/append/seppend/seprem/seprand/info> - "+
 		"try each command on it's own for further help.",
 	callback: function (input) {
-		var lcVarname, keys, list, i, variable, varName, permission, owners, arr, varString;
+		var lcVarname, keys, list, i, variable, varName, permission, owners, arr, varString, sep;
 		if (input.args) {
 			input.user = input.nick+"!"+input.address;
 			varString = input.args.slice(2).join(" ").trim();
@@ -207,29 +186,39 @@ cmdListen({
 					lcVarname = input.args[1].toLowerCase();
 					varName = "{" + lcVarname + "}";
 					variable = varDB.getOne(varName);
-					if (variable) {
-						if (perms.Check(input.user, "variable", lcVarname)) {
-							if (variable === varString) {
-								if (perms.isOwner(input.user, "variable", lcVarname)) {
-									varDB.removeOne(varName);
-									perms.Action(input.user, "delete all", "variable", lcVarname);
-									irc.say(input.context, "Removed o7");
-								} else {
-									irc.say(input.context, "This would remove the last entry, and thus the \
-										variable - you need to be an owner to do that.");
-								}
-							} else {
-								variable.data = variable.data.split((input.args[2] === "," ? ", " : " "+input.args[2]+" "))
-									.filter(function (element) { return (element !== varString); })
-									.join((input.args[2] === "," ? ", " : " "+input.args[2]+" "));
-								varDB.saveOne(varName, variable);
+					if (!variable) {
+						irc.say(input.context, "There is no {"+input.args[1]+"} variable.");
+						return;
+					}
+					if (perms.Check(input.user, "variable", lcVarname)) {
+						if (variable === varString) {
+							if (perms.isOwner(input.user, "variable", lcVarname)) {
+								varDB.removeOne(varName);
+								perms.Action(input.user, "delete all", "variable", lcVarname);
 								irc.say(input.context, "Removed o7");
+							} else {
+								irc.say(input.context, "This would remove the last entry, and thus the \
+									variable - you need to be an owner to do that.");
 							}
 						} else {
-							irc.say(input.context, "You don't have permission to do that.");
+							sep = (input.args[2] === "," ? ", " : " "+input.args[2]+" ");
+							if (variable.data.toLowerCase().indexOf(varString.toLowerCase()) > -1) {
+								variable.data = variable.data.split(sep);
+								if (lib.hasElement(variable.data, varString)) {
+									variable.data = variable.data.filter(function (element) {
+										return (element.toLowerCase() !== varString.toLowerCase());
+									});
+									varDB.saveOne(varName, variable);
+									irc.say(input.context, "Removed o7");
+									variable.data = variable.data.join(sep);
+									return;
+								}
+								variable.data = variable.data.join(sep);
+							}
+							irc.say(input.context, "There's no \""+varString+"\" entry in the {"+input.args[1]+"} variable.");
 						}
 					} else {
-						irc.say(input.context, "There is no {" + input.args[1] + "} variable.");
+						irc.say(input.context, "You don't have permission to do that.");
 					}
 				} else {
 					irc.say(input.context, "[Help] "+config.command_prefix+"var seprem <varname> <separator> <entry> - \
