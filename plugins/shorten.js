@@ -3,10 +3,30 @@
 cmdListen({
 	command: "shorten",
 	help: "Shortens URLs!",
-	syntax: config.command_prefix+"shorten <url> - Example: "
+	syntax: config.command_prefix+"shorten [-p(review)] <url> - Example: "
 		+config.command_prefix+"shorten http://mitch_.likesbuttse.xxx",
 	callback: function (input) {
-		web.get("http://is.gd/create.php?format=simple&url="+input.data.trim(), function (error, response, body) {
+		var gd, url;
+		if (!input.args) {
+			irc.say(input.context, cmdHelp("shorten", "syntax"));
+			return;
+		}
+		switch (input.args[0].toLowerCase()) {
+		case "-p":
+		case "-preview":
+			if (!input.args[1]) {
+				irc.say(input.context, cmdHelp("shorten", "syntax"));
+				return;
+			}
+			gd = "v.gd";
+			url = input.args.slice(1).join(" ");
+			break;
+		default:
+			gd = "is.gd";
+			url = input.data;
+			break;
+		}
+		web.get("http://"+gd+"/create.php?format=simple&url="+url.trim(), function (error, response, body) {
 			irc.say(input.context, body);
 		});
 	}
