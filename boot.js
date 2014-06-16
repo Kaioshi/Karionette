@@ -1,5 +1,6 @@
 "use strict";
 global.globals = {
+	os: process.platform,
 	channels: {},
 	startTime: new Date()
 };
