@@ -20,6 +20,7 @@ autojoin: #anime, #pyoshi
 #api wordnik: <your key here> - needed for word discovery
 #api lfm: <your key here> - needed for ;lfm lookups
 #api wordreference: <your key here> - needed for ;trans(late)
+#api googleurlshortener: <your key here> - needed for ;shorten
 
 # Pass to become admin
 secret: HuHu74Kfj&
