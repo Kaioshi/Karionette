@@ -14,7 +14,7 @@ function makeKey(len) {
 }
 
 function makeUrl(url) {
-	var word, key, ext = url.slice(url.lastIndexOf("."));
+	var word, ext = url.slice(url.lastIndexOf("."));
 	switch (ext) {
 		case ".png":
 		case ".gif":
@@ -52,7 +52,7 @@ function makeUrl(url) {
 			word = word+"_";
 			break;
 	}
-	return word+makeKey(9-word.length);
+	return word+makeKey(4);
 }
 
 cmdListen({
