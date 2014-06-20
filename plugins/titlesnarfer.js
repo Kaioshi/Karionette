@@ -172,7 +172,7 @@ function sayTitle(context, uri, length, imgur, old, record) {
 		}
 		reg = /<title?[^>]+>([^<]+)<\/title>/i.exec(body.replace(/\n|\t|\r/g, ""));
 		if (!reg || !reg[1]) return;
-		title = reg[1];
+		title = lib.singleSpace(lib.decode(reg[1]));
 		if (title.toLowerCase().indexOf(uri.host) > -1) {
 			reg = new RegExp(" "+uri.host+" ?", "ig");
 			title = title.replace(reg, "");
@@ -181,7 +181,6 @@ function sayTitle(context, uri, length, imgur, old, record) {
 		if (imgur) { // I know there are a lot of imgur corner cases, but it's really common.
 			if (title === "imgur: the simple image sharer") return; // deal with it
 		}
-		title = lib.singleSpace(lib.decode(title));
 		irc.say(context, title+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""), false);
 		if (record) {
 			recordURL(record[0], record[1], record[2], title);
