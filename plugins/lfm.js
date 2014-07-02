@@ -180,10 +180,17 @@ cmdListen({
 			uri = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&username="+user+
 				"&api_key="+config.api.lfm+"&artist="+song.artist+"&track="+song.track+"&format=json";
 			web.get(uri, function (error, response, body) {
-				result = JSON.parse(body);
+				try {
+					result = JSON.parse(body);
+				} catch (e) {
+					body = body.replace(/\n/g, " ");
+					logger.error("Couldn't parse Lastfm's response: "+body);
+					irc.say(input.context, "Couldn't JSON.parse Lastfm's response: "+body);
+					return;
+				}
 				if (result.error) {
 					irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+"\" "+song.date);
-					irc.say(input.context, "lastfm couldn't find detailed track info - \""+result.message+
+					irc.say(input.context, "Lastfm couldn't find detailed track info - \""+result.message+
 						"\" (Code: "+result.error+"). Pantsu.");
 					return;
 				}
