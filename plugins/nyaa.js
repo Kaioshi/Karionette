@@ -52,9 +52,6 @@ function checkNyaa(context) {
 							continue; // wrong resolution
 						}
 						results[i].date = new Date(results[i].date).valueOf();
-						if (!parseInt(watching[group][show].latest.date, 10)) { // old versions~
-							watching[group][show].latest.date = new Date(watching[group][show].latest.date).valueOf();
-						}
 						if (!watching[group][show].latest || results[i].date > watching[group][show].latest.date) {
 							if (!updates) updates = [];
 							watching[group][show].latest = results[i];
