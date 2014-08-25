@@ -6,7 +6,7 @@ cmdListen({
 	syntax: config.command_prefix+"gfy <url> - Example: "+
 		config.command_prefix+"gfy http://i.imgur.com/N2FEP.gif",
 	callback: function (input) {
-		var result, resp, sizeReduction;
+		var result, sizeReduction;
 		if (!input.args) {
 			irc.say(input.context, cmdHelp("gfycat", "syntax"));
 			return;
@@ -19,9 +19,7 @@ cmdListen({
 				return;
 			}
 			sizeReduction = Math.round((result.gifSize - result.gfysize)/1024);
-			resp = "Links ~ MP4: "+result.mp4Url+" - Webm: "+result.webmUrl+" - Gif: "+result.gifUrl;
-			irc.say(input.context, "Gfycat shrunk "+input.args[0]+" by "+sizeReduction+" KiB - Framerate: "+result.frameRate);
-			irc.say(input.context, resp);
+			irc.say(input.context, "http://gfycat.com/"+result.gfyname+" - Shrunk by "+sizeReduction+" KiB - Framerate: "+result.frameRate+".");
 		});
 	}
 });
