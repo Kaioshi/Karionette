@@ -12,6 +12,10 @@ function checkMessages(nick, context) {
 		if (messages[lnick][i].channel) {
 			if (context[0] === "#" && context.toLowerCase() === messages[lnick][i].channel) {
 				if (!send) send = [];
+				if (messages[lnick][i].time !== undefined) {
+					messages[lnick][i].message = messages[lnick][i].nick+", message from "+messages[lnick][i].from+" ("
+						+lib.duration(messages[lnick][i].time, false, true)+" ago): "+messages[lnick][i].message;
+				}
 				send.push([ messages[lnick][i].method, context, messages[lnick][i].message, messages[lnick][i].sanitise ]);
 				messages[lnick].splice(i, 1); i--; l--;
 			}
@@ -91,8 +95,10 @@ cmdListen({
 		addMessage({
 			method: "say",
 			nick: input.args[0],
+			from: input.nick,
 			channel: input.context,
-			message: input.args[0]+", message from "+input.nick+": "+input.args.slice(1).join(" ")
+			message: input.args.slice(1).join(" "),
+			time: new Date().valueOf()
 		});
 		irc.say(input.context, "I'll tell them when I see them next.");
 	}
