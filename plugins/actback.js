@@ -261,6 +261,22 @@ var questionReply = (function () {
 			break;
 		case "do":
 		case "is":
+		case "did":
+		case "were":
+		case "have":
+		case "had":
+		case "has":
+		case "can":
+		case "may":
+		case "might":
+		case "must":
+		case "shall":
+		case "should":
+		case "will":
+		case "would":
+		case "ought":
+		case "dare":
+		case "need":
 		default:
 			return lib.randSelect(yn);
 			break;
