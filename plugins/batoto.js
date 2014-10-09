@@ -109,7 +109,7 @@ function findUpdates(releases, notify) {
 function checkBatoto(notify) {
 	web.get("http://bato.to", function (err, resp, body) {
 		findUpdates(htmlToJson(body), notify);
-	}, 100000);
+	});
 }
 
 evListen({
