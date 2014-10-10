@@ -10,18 +10,15 @@ function extractRelease(chapter) {
 	if (index > -1) {
 		chapter = chapter.slice(0, index);
 	}
+	chapter = chapter.replace(/Vol\.|Ch\./gi, "").replace("v", ".");
 	index = chapter.indexOf(" ");
 	if (index > -1) {
 		// includes Vol.N Ch.N
 		chapter = chapter.split(" ");
-		chapter[0] = chapter[0].replace(/[^\d]/g, "");
-		chapter[1] = chapter[1].replace(/[^\d]/g, "");
-		if (chapter[1].length < 2) {
+		if (chapter[1] < 10) {
 			chapter[1] = "0"+chapter[1];
 		}
-		chapter = chapter[0].toString()+chapter[1].toString();
-	} else {
-		chapter = chapter.replace(/[^\d]/g, "");
+		chapter = chapter[0]+chapter[1];
 	}
 	return chapter;
 }
@@ -44,10 +41,11 @@ function htmlToJson(body) {
 		if (title) {
 			i++;
 			chapter = reg.exec(eng[i]);
+			chapter[2] = chapter[2].replace(/ read online/i, "");
 			time = timeReg.exec(eng[i]);
 			results.push({
 				title: title[1],
-				chapter: chapter[2].replace(/ read online/i, ""),
+				chapter: chapter[2],
 				release: extractRelease(chapter[2]),
 				time: time[1],
 				link: chapter[1]
