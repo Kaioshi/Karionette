@@ -10,7 +10,20 @@ function extractRelease(chapter) {
 	if (index > -1) {
 		chapter = chapter.slice(0, index);
 	}
-	return chapter.replace(/[^\d]/g, "");
+	index = chapter.indexOf(" ");
+	if (index > -1) {
+		// includes Vol.N Ch.N
+		chapter = chapter.split(" ");
+		chapter[0] = chapter[0].replace(/[^\d]/g, "");
+		chapter[1] = chapter[1].replace(/[^\d]/g, "");
+		if (chapter[1].length < 2) {
+			chapter[1] = "0"+chapter[1];
+		}
+		chapter = chapter[0].toString()+chapter[1].toString();
+	} else {
+		chapter = chapter.replace(/[^\d]/g, "");
+	}
+	return chapter;
 }
 
 function htmlToJson(body) {
