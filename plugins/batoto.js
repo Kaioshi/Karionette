@@ -151,7 +151,7 @@ cmdListen({
 			}
 			title = input.args.slice(1).join(" ");
 			ltitle = title.toLowerCase();
-			if (watched[ltitle]) {
+			if (watched[ltitle] !== undefined) {
 				irc.say(input.context, "I'm already tracking "+title+" updates.");
 				break;
 			}
