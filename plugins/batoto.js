@@ -56,16 +56,13 @@ function htmlToJson(body) {
 }
 
 function findUpdates(releases, notify) {
-	var i = 0, l = releases.length, updates, hits = [],
-		index, date, release, title, reltitle, msg;
+	var i = 0, l = releases.length, hits = [],
+		updates, title, msg;
 	for (; i < l; i++) {
 		for (title in watched) {
-			index = releases[i].title.toLowerCase().indexOf(title);
-			if (index > -1) {
+			if (releases[i].title.toLowerCase().trim() === title) {
 				if (!lib.hasElement(hits, title))
 					hits.push(title);
-				reltitle = releases[i].title.slice(index, index+title.length);
-				release = releases[i].title.slice(index+title.length+1);
 				if (!watched[title].title)
 					watched[title] = batotoDB.getOne(title);
 				if (!watched[title].latest || releases[i].release > watched[title].latest.release) {
@@ -73,8 +70,8 @@ function findUpdates(releases, notify) {
 					if (!updates)
 						updates = [];
 					// make the case nice if the user put in something weird.
-					if (watched[title].title !== reltitle)
-						watched[title].title = reltitle;
+					if (watched[title].title !== releases[i].title)
+						watched[title].title = releases[i].title;
 					watched[title].latest = releases[i];
 					batotoDB.saveOne(title, watched[title]);
 					msg = releases[i].title+" - "+releases[i].chapter+" was released "+releases[i].time+" \\o/ ~ "+releases[i].link;
