@@ -59,12 +59,14 @@ cmdListen({
 				irc.say(input.context, "There is no such plugin. o.o;");
 				return;
 			}
+			lib.events.emit("Event: Reloading plugin "+input.args[0]);
 			if (config.disabled_plugins && config.disabled_plugins.length > 0 &&
 				config.disabled_plugins.some(function (entry) { return (entry === input.args[0]); })) {
 				irc.say(input.context, "This plugin is in the disabled plugins list, in config.js - loading it anyway.");
 			}
 			irc.reload(input.args[0]);
 		} else {
+			lib.events.emit("Event: Reloading all plugins");
 			irc.reload();
 		}
 		irc.say(input.context, "Reloaded "+(input.args && input.args[0] ? "the "+input.args[0]+" plugin." : "all plugins."));
