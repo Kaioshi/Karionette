@@ -51,7 +51,7 @@ module.exports = function () {
 		socket.setNoDelay(true);
 		socket.setEncoding("utf8");
 		// Connection TimeOut support
-		socket.setTimeout(300 * 1000, function socketTimeout() {
+		socket.setTimeout(300000, function socketTimeout() {
 			// If fails, error and close events trigger
 			send("VERSION");
 			socket.destroy();
@@ -61,9 +61,7 @@ module.exports = function () {
 				process.emit("closing");
 				logger.warn("Socket closed. Exiting process...");
 				socket.end();
-				setTimeout(function () {
-					process.exit();
-				}, 1000);
+				setTimeout(process.exit, 1000);
 			} else {
 				logger.warn("Socket closed. Attempting to reconnect in 15 seconds...");
 				socket = new net.Socket();
@@ -118,6 +116,36 @@ module.exports = function () {
 			.replace(/[^\x02-\x03|\x16|\x20-\x7e]/g, "");
 	}
 	
+	function sendMessage(type, context, message, sanitiseMessage, maxmsgs) {
+		var msg, max, maxMessages, i, tempMsg;
+		if (!context || !message) return;
+		message = message.replace(/\n|\t|\r/g, "");
+		context = sanitise(context); // Avoid sanitising more than once
+		msg = type+ " " + context + " :";
+		if (irc_config.address) {
+			max = 508 - (irc_config.nick+irc_config.address+msg).length+3;
+		} else {
+			max = 473 - msg.length; // yay magic numbers - haven't joined a channel yet.
+		}
+		maxMessages = (maxmsgs < 3 ? maxmsgs : 3);
+		if (sanitiseMessage !== false) {
+			message = sanitise(message);
+		}
+		while (message && (maxMessages -= 1) >= 0) {
+			i = 0;
+			tempMsg = message.slice(0, max);
+			if (message.length > tempMsg.length) {
+				max = max-3;
+				while (message[max - i] !== " ") {
+					i += 1;
+				}
+				tempMsg = message.slice(0, (max - i)) + " ..";
+			}
+			send(msg + tempMsg.trim());
+			message = message.slice(max - i);
+		}
+	}
+	
 	return {
 		open: openConnection,
 		quit: function quitConnection(msg) {
@@ -148,32 +176,8 @@ module.exports = function () {
 			}
 		},
 		say: function (context, message, sanitiseMessage, maxmsgs) {
-			var privmsg, max, maxMessages, i, tempMsg;
-			if (!context || !message) return;
-			message = message.replace(/\n|\t|\r/g, "");
-			context = sanitise(context); // Avoid sanitising more than once
-			privmsg = "PRIVMSG " + context + " :";
-			if (irc_config.address) {
-				max = 508 - (irc_config.nick+irc_config.address+privmsg).length+3;
-			} else {
-				max = 473 - privmsg.length; // yay magic numbers - haven't joined a channel yet.
-			}
-			maxMessages = (maxmsgs < 3 ? maxmsgs : 3);
-			if (sanitiseMessage !== false) {
-				message = sanitise(message);
-			}
-			while (message && (maxMessages -= 1) >= 0) {
-				i = 0;
-				tempMsg = message.slice(0, max);
-				if (message.length > tempMsg.length) {
-					max = max-3;
-					while (message[max - i] !== " ") {
-						i += 1;
-					}
-					tempMsg = message.slice(0, (max - i)) + " ..";
-				}
-				send(privmsg + tempMsg.trim());
-				message = message.slice(max - i);
+			if (context && message) {
+				sendMessage("PRIVMSG", context, message, sanitiseMessage, maxmsgs);
 			}
 		},
 		rated: function (messages) {
@@ -214,8 +218,10 @@ module.exports = function () {
 		notice: function (target, notice, sanitiseNotice) {
 			if (target && notice) {
 				notice = notice.replace(/\n|\t|\r/g, "");
-				if (sanitiseNotice) send(sanitise("NOTICE "+target+" :"+notice));
-				else send("NOTICE "+target+" :"+notice);
+				if (sanitiseNotice)
+					sendMessage("NOTICE", target, notice, sanitiseNotice);
+				else
+					sendMessage("NOTICE", target, notice);
 			}
 		},
 		// CORE COMMANDS
