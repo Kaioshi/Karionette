@@ -190,8 +190,20 @@ cmdListen({
 			irc.notice(input.nick, "No. Only admins can make me notice an entire channel.");
 			return;
 		}
-		console.log(input.data);
 		irc.notice(input.args[0], input.data.slice(input.data.indexOf(" ")+1));
+	}
+});
+
+cmdListen({
+	command: "noticeuni",
+	help: "Makes me notice things in a Unicode-kinda way.",
+	syntax: config.command_prefix+"noticeuni <target> <what you want me to notice them>",
+	callback: function (input) {
+		if (input.args[0][0] === "#" && !userLogin.isAdmin(input.user)) {
+			irc.notice(input.nick, "No. Only admins can make me notice an entire channel.");
+			return;
+		}
+		irc.notice(input.args[0], input.data.slice(input.data.indexOf(" ")+1), false);
 	}
 });
 
