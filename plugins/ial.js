@@ -4,8 +4,8 @@ evListen({
 	handle: "ialWho",
 	event: "352",
 	callback: function (input) {
-		input.raw = input.raw.split(" ");
-		ial.Add(input.raw[3], input.raw[7], input.raw[4]+"@"+input.raw[5]);
+		var who = input.raw.split(" ");
+		ial.Add(who[3], who[7], who[4]+"@"+who[5]);
 	}
 });
 
@@ -14,7 +14,8 @@ evListen({
 	event: "JOIN",
 	callback: function (input) {
 		if (input.nick === config.nick) {
-			if (!config.address) config.address = input.address;
+			if (!config.address)
+				config.address = input.address;
 			irc.raw("WHO "+input.channel);
 		} else {
 			ial.Add(input.channel, input.nick, input.address);
@@ -26,7 +27,8 @@ evListen({
 	handle: "ialPart",
 	event: "PART",
 	callback: function (input) {
-		if (input.nick === config.nick) ial.Remove(input.channel);
+		if (input.nick === config.nick)
+			ial.Remove(input.channel);
 		else {
 			setTimeout(function () {
 				ial.Remove(input.channel, input.nick);
@@ -39,7 +41,8 @@ evListen({
 	handle: "ialKick",
 	event: "KICK",
 	callback: function (input) {
-		if (input.kicked === config.nick) ial.Remove(input.channel);
+		if (input.kicked === config.nick)
+			ial.Remove(input.channel);
 		else {
 			setTimeout(function () {
 				ial.Remove(input.channel, input.kicked);
@@ -52,7 +55,8 @@ evListen({
 	handle: "ialQuit",
 	event: "QUIT",
 	callback: function (input) {
-		if (input.nick === config.nick) return;
+		if (input.nick === config.nick)
+			return;
 		ial.Channels(input.nick).forEach(function (channel) {
 			setTimeout(function () {
 				ial.Remove(channel, input.nick);
@@ -69,7 +73,8 @@ evListen({
 			config.nick = input.newnick;
 			if (!config.nickname.some(function (item) { return (item === input.newnick); })) {
 				config.nickname = config.nickname.map(function (nick) {
-					if (nick === input.nick) return input.newnick;
+					if (nick === input.nick)
+						return input.newnick;
 					return nick;
 				});
 			}
