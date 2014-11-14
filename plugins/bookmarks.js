@@ -23,61 +23,49 @@ var bookmarkDB = new DB.Json({filename: "bookmarks"}),
 			"bm -h add"
 	};
 
-function addBookmark(target, handle, bookmark) {
-	var entry, keys, i;
-	if (!target || !handle || !bookmark) {
-		logger.debug("[bookmark] addBookmark("+target+", "+bookmark+") called improperly.");
-		return "wups.";
+function isUrl(text) {
+	text = text.toLowerCase();
+	if (text.length >= 10) {
+		if (text.slice(0,7) === "http://" || text.slice(0,8) === "https://")
+			return true;
 	}
-	entry = bookmarkDB.getOne(target);
-	entry[handle] = bookmark;
-	bookmarkDB.saveOne(target, entry);
-	return "Added o7";
 }
 
-function getHandle(context, from, line) {
-	if (line[0] === "-") {
-		line = line.split(" ");
-		if (line[1]) return line.slice(1).join(" ");
-		else return;
+function handleBookmark(args) {
+	var i = 0, l = args.length, handle = [], urls = [];
+	for (; i < l; i++) {
+		if (isUrl(args[i]) || urls.length !== 0)
+			urls.push(args[i]);
+		else if (urls.length === 0)
+			handle.push(args[i]);
 	}
-	return line;
+	if (urls.length === 0 || handle.length === 0)
+		return;
+	return {
+		handle: handle.join(" "),
+		link: urls.join(" ")
+	};
 }
 
-function getTarget(context, from, line) {
-	if (line[0] === "-") {
-		line = line.split(" ");
-		switch (line[0].toLowerCase()) {
-			case "-c":
-			case "-channel":
-				return context.toLowerCase();
-			case "-u":
-			case "-user":
-				return from.toLowerCase();
-			default:
-				return; // bad switch
-		}
+function showBookmark(context, target, handle) {
+	var bookmarks, result;
+	if (!target || !handle) {
+		irc.say(context, cmdHelp("bm", "syntax"));
+		return;
 	}
-	return "global";
-}
-
-function parseAddArgs(context, from, line) {
-	var ret = {},
-		reg = /(.*) (https?:\/\/[^ ]+\.[^ ]+)$/i.exec(line);
-	if (!reg) return;
-	ret.bookmark = reg[2];
-	ret.target = getTarget(context, from, reg[1]);
-	ret.handle = getHandle(context, from, reg[1]);
-	if (!ret.handle || !ret.target) return;
-	return ret;
-}
-
-function parseRemArgs(context, from, line) {
-	var ret = {};
-	ret.handle = getHandle(context, from, line);
-	ret.target = getTarget(context, from, line);
-	if (!ret.handle || !ret.target) return;
-	return ret;
+	bookmarks = bookmarkDB.getOne(target);
+	if (!bookmarks) {
+		irc.say(context, target+" has no bookmarks.");
+		return;
+	}
+	bookmarks.forEach(function (entry) {
+		if (entry.handle === handle)
+			result = entry;
+	});
+	if (result)
+		irc.say(context, result.handle+" ~ "+result.link);
+	else
+		irc.say(context, target+" has no such bookmark.");
 }
 
 cmdListen({
@@ -87,8 +75,8 @@ cmdListen({
 		"bm [-a(dd) / -r(emove) / -l(ist) / -f(ind) / -h(elp)] [<handle>] [<url>] - Example: "
 		+config.command_prefix+"bm -a ranma's dodgy undies http://imgur.com/dodgy_undies.png",
 	callback: function (input) {
-		var bookmarks, i, keys, overwrite, dupes, url, removed, result, reg,
-			handle, target, matchedUrl, matchedHandle, args;
+		var bookmarks, bookmark, i, keys, overwrite, dupes, url, removed, result, reg,
+			handle, target, matchedUrl, matchedHandle;
 		if (!input.args) {
 			irc.say(input.context, cmdHelp("bm", "syntax"));
 			return;
@@ -96,64 +84,104 @@ cmdListen({
 		switch (input.args[0].toLowerCase()) {
 			case "-a":
 			case "-add":
-				args = parseAddArgs(input.context, input.nick, input.args.slice(1).join(" "));
-				if (!args) {
+				if (input.args.length <= 2) {
+					irc.say(input.context, bmhelp.add);
+					return;
+				}
+				switch (input.args[1].toLowerCase()) {
+				case "-c":
+				case "-channel":
+					target = input.context.toLowerCase();
+					bookmark = handleBookmark(input.args.slice(2));
+					break;
+				case "-u":
+				case "-user":
+					target = input.nick.toLowerCase();
+					bookmark = handleBookmark(input.args.slice(2));
+					break;
+				default:
+					target = "global";
+					bookmark = handleBookmark(input.args.slice(1));
+					break;
+				}
+				if (!bookmark) {
 					irc.say(input.context, bmhelp.add);
 					return;
 				}
 				dupes = [];
-				bookmarks = bookmarkDB.getOne(args.target);
-				if (!bookmarks) bookmarks = [];
+				bookmarks = bookmarkDB.getOne(target);
+				if (!bookmarks)
+					bookmarks = [];
 				else { // replace if it's in there already - count link dupes if any
 					for (i = 0; i < bookmarks.length; i++) {
-						if (bookmarks[i].handle === args.handle) {
+						if (bookmarks[i].handle === bookmark.handle) {
 							bookmarks.splice(i,1);
 							overwrite = true;
 						}
-						if (bookmarks[i] && bookmarks[i].link === args.bookmark) {
+						if (bookmarks[i] && bookmarks[i].link === bookmark.link) {
 							dupes.push(bookmarks[i].handle);
 						}
 					}
 				}
-				bookmarks.push({ handle: args.handle, link: args.bookmark });
-				bookmarkDB.saveOne(args.target, bookmarks);
-				dupes = dupes.filter(function (entry) { return (entry !== args.handle); });
+				bookmarks.push(bookmark);
+				bookmarkDB.saveOne(target, bookmarks);
+				dupes = dupes.filter(function (entry) { return (entry !== bookmark.handle); });
 				dupes = (dupes.length > 0 ? " (this link is also known as "+dupes.join(", ")+")" : "");
 				irc.say(input.context, (overwrite ? "Overwritten :S" : "Added o7")+dupes);
 				break;
 			case "-r":
 			case "-remove":
-				args = parseRemArgs(input.context, input.nick, input.args.slice(1).join(" "));
-				if (!args) {
+				if (!input.args[1]) {
 					irc.say(input.context, bmhelp.remove);
 					return;
 				}
-				bookmarks = bookmarkDB.getOne(args.target);
-				if (!bookmarks) {
-					irc.say(input.context, args.target+" has no bookmarks - nothing to remove.");
+				switch (input.args[1].toLowerCase()) {
+				case "-c":
+				case "-channel":
+					target = input.context.toLowerCase();
+					handle = input.args.slice(2).join(" ");
+					break;
+				case "-u":
+				case "-user":
+					target = input.nick.toLowerCase();
+					handle = input.args.slice(2).join(" ");
+					break;
+				default:
+					target = "global";
+					handle = input.args.slice(1).join(" ");
+					break;
+				}
+				if (!handle) {
+					irc.say(input.context, bmhelp.remove);
 					return;
 				}
-				if (args.handle.match(/https?:\/\/[^ ]+\.[^ ]+/)) {
-					url = true;
+				bookmarks = bookmarkDB.getOne(target);
+				if (!bookmarks) {
+					irc.say(input.context, target+" has no bookmarks - nothing to remove.");
+					return;
 				}
+				if (handle.match(/https?:\/\/[^ ]+\.[^ ]+/))
+					url = true;
 				removed = [];
 				for (i = 0; i < bookmarks.length; i++) {
 					if (url) {
-						if (bookmarks[i].link === args.handle) {
+						if (bookmarks[i].link === handle) {
 							removed.push(bookmarks[i].handle);
 							bookmarks.splice(i,1);
 							i--;
 						}
 					} else {
-						if (bookmarks[i].handle === args.handle) {
+						if (bookmarks[i].handle === handle) {
 							removed.push(bookmarks[i].handle);
 							bookmarks.splice(i,1);
 						}
 					}
 				}
 				if (removed.length > 0) {
-					if (bookmarks.length === 0) bookmarkDB.removeOne(args.target);
-					else bookmarkDB.saveOne(args.target, bookmarks);
+					if (bookmarks.length === 0)
+						bookmarkDB.removeOne(target);
+					else
+						bookmarkDB.saveOne(target, bookmarks);
 					irc.say(input.context, "Removed "+(url ? "[by URL match] ":"")+removed.join(", "));
 				} else {
 					irc.say(input.context, "No match - nothing removed.");
@@ -161,11 +189,10 @@ cmdListen({
 				break;
 			case "-l":
 			case "-list":
-				if (input.args[1] && input.args[1][0] === "-" && input.args[1].match(/-c|-channel|-u|-user/)) {
+				if (input.args[1] && input.args[1][0] === "-" && input.args[1].match(/-c|-channel|-u|-user/))
 					target = (input.args[1].match(/-c|-channel/i) ? input.context : input.nick);
-				} else {
+				else
 					target = "global";
-				}
 				target = target.toLowerCase();
 				bookmarks = bookmarkDB.getOne(target);
 				if (!bookmarks) {
@@ -176,11 +203,10 @@ cmdListen({
 				bookmarks.forEach(function (entry) {
 					keys.push(entry.handle);
 				});
-				if (keys.length > 0) {
+				if (keys.length > 0)
 					irc.say(input.context, target+" bookmarks: "+lib.sort(keys).join(", "));
-				} else {
+				else
 					irc.say(input.context, target+"'s... bookmarks.. something has gone wrong! halp!");
-				}
 				break;
 			case "-f":
 			case "-find":
@@ -188,11 +214,24 @@ cmdListen({
 					irc.say(input.context, bmhelp.find);
 					return;
 				}
-				args = input.args.slice(1).join(" ");
-				target = getTarget(input.context, input.nick, args);
-				handle = getHandle(input.context, input.nick, args);
-				if (!target || !handle) {
-					irc.say(input.context, cmdHelp("bm", "syntax"));
+				switch (input.args[1].toLowerCase()) {
+				case "-c":
+				case "-channel":
+					target = input.context.toLowerCase();
+					handle = input.args.slice(2).join(" ");
+					break;
+				case "-u":
+				case "-user":
+					target = input.nick.toLowerCase();
+					handle = input.args.slice(2).join(" ");
+					break;
+				default:
+					target = "global";
+					handle = input.args.slice(1).join(" ");
+					break;
+				}
+				if (!handle) {
+					irc.say(input.context, bmhelp.find);
 					return;
 				}
 				bookmarks = bookmarkDB.getOne(target);
@@ -214,20 +253,18 @@ cmdListen({
 						keys.push(entry);
 					}
 				});
-				if (keys.length === 0) {
+				if (keys.length === 0)
 					irc.say(input.context, "No matches found~");
-				} else {
+				else {
 					if (keys.length <= 3) { // not too spammy, show them all in full
 						keys.forEach(function (entry) {
 							irc.say(input.context, entry.handle+" ["+entry.match+" match] ~ "+entry.link);
 						});
 					} else {
-						if (matchedHandle.length > 0) {
+						if (matchedHandle.length > 0)
 							irc.say(input.context, "Matched by handle: "+lib.sort(matchedHandle).join(", "), false);
-						}
-						if (matchedUrl.length > 0) {
+						if (matchedUrl.length > 0)
 							irc.say(input.context, "Matched by URL: "+lib.sort(matchedUrl).join(", "), false);
-						}
 					}
 				}
 				break;
@@ -238,41 +275,21 @@ cmdListen({
 					return;
 				}
 				input.args[1] = input.args[1].toLowerCase();
-				if (!bmhelp[input.args[1]]) {
+				if (!bmhelp[input.args[1]])
 					irc.say(input.context, "There is no help for "+input.args[1]+" - valid: add, remove, list, find");
-				} else {
+				else
 					irc.say(input.context, bmhelp[input.args[1]]);
-				}
+				break;
+			case "-c":
+			case "-channel":
+				showBookmark(input.context, input.context.toLowerCase(), input.args.slice(1).join(" "));
+				break;
+			case "-u":
+			case "-user":
+				showBookmark(input.context, input.nick.toLowerCase(), input.args.slice(1).join(" "));
 				break;
 			default:
-				reg = /(.*)@(.*)/.exec(input.data);
-				if (reg) input.data = input.data.split("@")[0].trim();
-				input.data = input.data.toLowerCase();
-				target = getTarget(input.context, input.nick, input.data);
-				handle = getHandle(input.context, input.nick, input.data);
-				if (!target || !handle) {
-					irc.say(input.context, cmdHelp("bm", "syntax"));
-					return;
-				}
-				bookmarks = bookmarkDB.getOne(target);
-				if (!bookmarks) {
-					irc.say(input.context, target+" has no bookmarks.");
-					return;
-				}
-				bookmarks.forEach(function (entry) {
-					if (entry.handle === handle) result = entry;
-				});
-				if (result) {
-					if (reg) {
-						irc.say(input.context, reg[2]+": "+result.handle+" ~ "+result.link);
-					} else {
-						irc.say(input.context, result.handle+" ~ "+result.link);
-					}
-					result = null;
-				} else {
-					irc.say(input.context, target+" has no such bookmark.");
-				}
-				
+				showBookmark(input.context, "global", input.args.join(" "));
 				break;
 		}
 	}
