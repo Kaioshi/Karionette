@@ -157,7 +157,6 @@ IRC.open({
 	server: irc_config.server,
 	port: irc_config.port,
 	nickname: irc_config.nickname[0],
-	hostname: (irc_config.hostname ? irc_config.hostname : "localhost"),
 	username: irc_config.username,
 	realname: irc_config.realname
 });
