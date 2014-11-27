@@ -72,6 +72,7 @@ module.exports = function () {
 							server: irc_config.server,
 							port: irc_config.port,
 							nickname: irc_config.nickname[0],
+							hostname: (irc_config.hostname ? irc_config.hostname : "localhost"),
 							username: irc_config.username,
 							realname: irc_config.realname
 						});
@@ -90,7 +91,7 @@ module.exports = function () {
 		configureSocket();
 		socket.connect(params.port, params.server, function () {
 			send("NICK " + sanitise(params.nickname));
-			send("USER " + sanitise(params.username) + " localhost * " + sanitise(params.realname));
+			send(sanitise("USER "+params.username+" "+params.hostname+" * "+params.realname));
 			connected = true;
 			if (connectInterval) {
 				clearInterval(connectInterval);
