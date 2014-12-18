@@ -20,7 +20,20 @@ cmdListen({
 	}
 });
 
-cmdListen({
+cmdListen({ // for ranmabutts
+	command: "gr",
+	help: "Constructs a google query",
+	syntax: config.command_prefix+"gr <search term> - Example: "+config.command_prefix+"gr puppies vs. kittens?",
+	callback: function (input) {
+		if (!input.args) {
+			irc.say(input.context, cmdHelp("gr", "syntax"));
+			return;
+		}
+		irc.say(input.context, "https://google.com/search?q="+encodeURIComponent(input.data.trim()));
+	}
+});
+
+cmdListen({ // this will stop working soon~
 	command: "gi",
 	help: "Google image search - returns the first hit.",
 	syntax: config.command_prefix+"gi puppies",
@@ -37,7 +50,8 @@ cmdListen({
 				body = JSON.parse(body);
 				if (body && body.responseData && body.responseData.results && body.responseData.results[0]) {
 					body = body.responseData.results;
-					irc.say(input.context, lib.decode(body[0].titleNoFormatting) + " (" + body[0].width + "x" + body[0].height + "): " + body[0].url);
+					irc.say(input.context, lib.decode(body[0].titleNoFormatting)
+						+" ("+body[0].width+"x"+body[0].height+"): "+body[0].url);
 				} else {
 					irc.say(input.context, "No image found. :<");
 				}
