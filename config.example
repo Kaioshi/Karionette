@@ -21,6 +21,7 @@ autojoin: #anime, #pyoshi
 #api lfm: <your key here> - needed for ;lfm lookups
 #api wordreference: <your key here> - needed for ;trans(late)
 #api googleurlshortener: <your key here> - needed for ;shorten
+#api googlesearch: <your key here> - go to https://developers.google.com/custom-search/ to get one
 
 # Pass to become admin
 secret: HuHu74Kfj&
