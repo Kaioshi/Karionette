@@ -1,7 +1,10 @@
 // url title snarfer
 "use strict";
 var url = require("url"),
-	fs = require('fs');
+	fs = require('fs'),
+	ytReg = /v=([^ &\?]+)/i,
+	ytBReg = /^\/([^ &\?]+)/,
+	titleReg = /<title?[^>]+>([^<]+)<\/title>/i;
 
 if (fs.existsSync("data/urls.json")) {
 	convertUrls();
@@ -29,13 +32,15 @@ function zero(n) {
 
 function dura(secs) {
 	var mins = Math.floor(secs/60),
-	hours = Math.floor(mins/60),
-	ret = [];
-	secs = (secs % 60);
-	mins = (mins % 60);
-	hours = (hours % 24);
-	if (hours) ret.push(zero(hours));
-	if (mins) ret.push(zero(mins));
+		hours = Math.floor(mins/60),
+		ret = [];
+		secs = (secs % 60);
+		mins = (mins % 60);
+		hours = (hours % 24);
+	if (hours)
+		ret.push(zero(hours));
+	if (mins)
+		ret.push(zero(mins));
 	ret.push(zero(secs));
 	return ret.join(":");
 }
@@ -43,7 +48,8 @@ function dura(secs) {
 function lastUrl(channel, nick, match) {
 	var i, urls, mostRecent, index, entry, lnick,
 		fn = "data/urls/"+channel.toLowerCase()+".txt";
-	if (!fs.existsSync(fn)) return "I haven't seen any URLs here.";
+	if (!fs.existsSync(fn))
+		return "I haven't seen any URLs here.";
 	urls = fs.readFileSync(fn).toString().split("\n");
 	i = urls.length;
 	if (match) match = match.toLowerCase();
@@ -64,7 +70,8 @@ function lastUrl(channel, nick, match) {
 		}
 	} else {
 		index = i-1; // lowest entry, probably.
-		while (!urls[index]) index--; // mmm tailing newlines
+		while (!urls[index])
+			index--; // mmm tailing newlines
 	}
 	if (index !== undefined) {
 		mostRecent = urls[index].split(" ");
@@ -170,7 +177,7 @@ function sayTitle(context, uri, length, imgur, old, record) {
 			logger.warn(uri.href + " - returned no body.");
 			return;
 		}
-		reg = /<title?[^>]+>([^<]+)<\/title>/i.exec(body.replace(/\n|\t|\r/g, ""));
+		reg = titleReg.exec(body.replace(/\n|\t|\r/g, ""));
 		if (!reg || !reg[1]) return;
 		title = lib.singleSpace(lib.decode(reg[1]));
 		if (title.toLowerCase().indexOf(uri.host) > -1) {
@@ -198,38 +205,34 @@ evListen({
 		
 		if (input.args) return; // don't process urls in commands
 		old = getURL(input.channel, input.match[1]) || false;
-		if (!old) record = [ input.nick, input.channel, input.match[1] ];
+		if (!old)
+			record = [ input.nick, input.channel, input.match[1] ];
 		uri = url.parse(input.match[1]);
-		if (uri.host.indexOf("youtube.com") > -1 && uri.path.indexOf("v=") > -1) {
-			youtubeIt(input.context, /v=([^ &\?]+)/i.exec(uri.path)[1], uri.host, old, record);
+		switch (uri.host.replace(/www\./gi, "")) {
+		case "youtube.com":
+			youtubeIt(input.context, ytReg.exec(uri.path)[1], uri.host, old, record);
 			return;
-		}
-		if (uri.host.indexOf("youtu.be") > -1 && uri.path.length > 1) {
-			youtubeIt(input.context, /^\/([^ &\?]+)/.exec(uri.path)[1], uri.host, old, record);
+		case "youtu.be":
+			youtubeIt(input.context, ytBReg.exec(uri.path)[1], uri.host, old, record);
 			return;
-		}
-		if (uri.host === "imgur.com") {
+		case "i.imgur.com":
+			ext = uri.href.slice(uri.href.lastIndexOf("."));
+			if (ext.match(/\.gif|\.gifv|\.jpg|\.jpeg|\.png|\.webm/i)) {
+				uri.path = uri.path.slice(0, -ext.length);
+				uri.href = uri.href.slice(0, -ext.length);
+			}
+		case "imgur.com":
 			sayTitle(input.context, uri, length, true, old, record);
 			return;
 		}
-		if (uri.host === "i.imgur.com") {
-			ext = uri.href.slice(uri.href.lastIndexOf("."));
-			if (ext.match(/\.gif|\.gifv|\.jpg|\.jpeg|\.png|\.webm/)) {
-				uri.path = uri.path.slice(0, -ext.length);
-				uri.href = uri.href.slice(0, -ext.length);
-				sayTitle(input.context, uri, length, true, old, record);
-			}
-			return;
-		}
-		ext = /.*\.([a-zA-Z0-9]+)$/.exec(uri.path);
-		allow = [ 'htm', 'html', 'asp', 'aspx', 'php', 'php3', 'php5' ];
-		if (ext && !ext[0].match(/&|\?/)) {
-			if (!allow.some(function (item) { return (ext[1] === item); })) {
-				return;
-			}
+		if (uri.path.length > 1 && uri.path.indexOf(".") > -1) {
+			ext = uri.path.slice(uri.path.lastIndexOf(".")+1);
+			if (!ext.match(/htm|html|asp|aspx|php|php3|php5/i))
+				return; // avoid trying to grab mp4s etc.
 		}
 		// ton of garbage in the first 15000 characters. o_O
-		if (uri.host.indexOf("kotaku") > -1) length = 20000;
+		if (uri.host.indexOf("kotaku") > -1)
+			length = 20000;
 		sayTitle(input.context, uri, length, false, old, record);
 	}
 });
