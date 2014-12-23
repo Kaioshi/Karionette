@@ -212,10 +212,13 @@ evListen({
 			sayTitle(input.context, uri, length, true, old, record);
 			return;
 		}
-		if (uri.host === "i.imgur.com" && uri.href.slice(-4).match(/\.jpg|\.png|\.gif/i)) {
-			uri.path = uri.path.slice(0,-4);
-			uri.href = uri.href.slice(0,-4);
-			sayTitle(input.context, uri, length, true, old, record);
+		if (uri.host === "i.imgur.com") {
+			ext = uri.href.slice(uri.href.lastIndexOf("."));
+			if (ext.match(/\.gif|\.gifv|\.jpg|\.jpeg|\.png|\.webm/)) {
+				uri.path = uri.path.slice(0, -ext.length);
+				uri.href = uri.href.slice(0, -ext.length);
+				sayTitle(input.context, uri, length, true, old, record);
+			}
 			return;
 		}
 		ext = /.*\.([a-zA-Z0-9]+)$/.exec(uri.path);
