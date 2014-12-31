@@ -4,31 +4,33 @@ function parseTvRage(resp) {
 		data, i = 0, l = resp.length, ret = {};
 	for (; i < l; i++) {
 		data = parseEntry(resp[i].split("@"));
-		if (data) ret[data[0]] = data[1];
+		if (data)
+			ret[data[0]] = data[1];
 	}
 	return ret;
 }
 
 function parseEntry(entry) {
-	if (!entry[1]) return;
+	if (!entry[1])
+		return;
 	switch (entry[0]) {
-		case "Latest Episode":
-			entry[1] = entry[1].split("^");
-			return [ entry[0], { title: entry[1][0]+" - "+entry[1][1], release: "Aired: "+entry[1][2] } ];
-		case "Next Episode":
-			entry[1] = entry[1].split("^");
-			return [ entry[0], { title: entry[1][0]+" - "+entry[1][1], release: "Airs: "+entry[1][2] } ];
-		case "Genres":
-			return [ entry[0], entry[1].split(" | ").join(", ") ];
-		default:
-			return entry;
+	case "Latest Episode":
+		entry[1] = entry[1].split("^");
+		return [ entry[0], { title: entry[1][0]+" - "+entry[1][1], release: "Aired: "+entry[1][2] } ];
+	case "Next Episode":
+		entry[1] = entry[1].split("^");
+		return [ entry[0], { title: entry[1][0]+" - "+entry[1][1], release: "Airs: "+entry[1][2] } ];
+	case "Genres":
+		return [ entry[0], entry[1].split(" | ").join(", ") ];
+	default:
+		return entry;
 	}
 }
 
 function getShowDuration(show) {
 	var years;
 	if (show["Started"] && show["Ended"]) {
-		years = (parseInt(show["Ended"].slice(show["Ended"].length-4)) -
+		years = (parseInt(show["Ended"].slice(show["Ended"].length-4), 10) -
 			parseInt(show["Started"].slice(show["Started"].length-4), 10));
 		years = years || 1;
 		return " ~ Ran for "+years+" "+(years > 1 ? "years" : "year");
@@ -43,11 +45,17 @@ function consolidateStatusTypes(type) {
 
 function getShowtime(show) {
 	var type = (show["Next Episode"] ? "Next Episode" : "Latest Episode");
+	if (!show[type] || !show[type].title)
+		return (show['Premiered'] ? "Premiered in "+show['Premiered'] : show['Started']+"->"+show['Ended']);
 	return show[type].title+" ~ "+show[type].release;
 }
 
+function getGenres(show) {
+	return (show['Genres'] ? " - ["+show['Genres']+"]" : "");
+}
+
 function getShowInfo(show) {
-	return show["Show Name"]+" - "+getShowtime(show)+getShowDuration(show)+" ~ Status: "+show["Status"];
+	return show["Show Name"]+" - "+getShowtime(show)+getShowDuration(show)+getGenres(show)+" ~ Status: "+show["Status"];
 }
 
 cmdListen({
@@ -68,8 +76,6 @@ cmdListen({
 				irc.say(input.context, "Couldn't find it. :<", false); // sort of.
 				return;
 			}
-			globals.lastBody = body;
-			globals.lastParsed = parseTvRage(body);
 			irc.say(input.context, getShowInfo(parseTvRage(body)), false);
 		});
 	}
