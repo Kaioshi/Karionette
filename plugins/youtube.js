@@ -36,7 +36,11 @@ cmdListen({
 			date = zero(date.getDate()) + "/" + zero(date.getMonth() + 1) + "/" + date.getYear().toString().slice(1);
 			duration = dura(parseInt(body.entry[0].media$group.yt$duration.seconds, 10));
 			views = body.entry[0].yt$statistics.viewCount;
-			irc.say(input.context, title + " - ["+duration+"] " + date + " - " + lib.commaNum(views) + " views ~ " + link, false);
+			if (body.entry[0].gd$rating.numRaters > views)
+				views = lib.commaNum(views)+"+";
+			else
+				views = lib.commaNum(views)
+			irc.say(input.context, title + " - ["+duration+"] " + date + " - " + views + " views ~ " + link, false);
 			body = null; date = null; title = null; date = null; views = null; link = null;
 		}
 		
