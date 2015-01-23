@@ -144,7 +144,11 @@ function youtubeIt(context, id, host, old, record) {
 		try {
 			body = JSON.parse(body).entry;
 			if (body["yt$statistics"] && body["yt$statistics"].viewCount) {
-				views = " - "+lib.commaNum(body["yt$statistics"].viewCount)+" views";
+				views = body.yt$statistics.viewCount;
+				if (body.gd$rating.numRaters > views)
+					views = " - " + lib.commaNum(views) + "+ views";
+				else
+					views = " - " + lib.commaNum(views) + " views";
 			}
 			duration = dura(parseInt(body.media$group.yt$duration.seconds, 10));
 			date = new Date(body["media$group"]["yt$uploaded"]["$t"]);
