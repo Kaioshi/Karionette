@@ -3,8 +3,8 @@
 var url = require("url"),
 	fs = require('fs'),
 	ytReg = /v=([^ &\?]+)/i,
-	ytBReg = /^\/([^ &\?]+)/,
-	titleReg = /<title?[^>]+>([^<]+)<\/title>/i;
+	ytBReg = /^\/([^ &\?]+)/;
+//	titleReg = /<title?[^>]+>([^<]+)<\/title>/i;
 
 if (fs.existsSync("data/urls.json")) {
 	convertUrls();
@@ -171,6 +171,23 @@ function youtubeIt(context, id, host, old, record) {
 }
 
 function sayTitle(context, uri, length, imgur, old, record) {
+	var title, result;
+	web.get("http://felt.ninja:5036/?uri="+uri.href, function (error, response, body) {
+		result = JSON.parse(body);
+		if (result.error) {
+			logger.error("titleSnarfer (sayTitle) API error: " + result.error);
+			if (record)
+				recordURL(record[0], record[1], record[2]);
+			return;
+		}
+		title = lib.singleSpace(lib.decode(result.title));
+		irc.say(context, title + " ~ " + uri.host.replace("www.", "")+(old ? " (" + old + ")" : ""), false);
+		if (record)
+			recordURL(record[0], record[1], record[2], title);
+	});
+}
+
+/*function sayTitle(context, uri, length, imgur, old, record) {
 	var reg, title;
 	web.get(uri.href, function (error, response, body) {
 		if (error) {
@@ -198,7 +215,7 @@ function sayTitle(context, uri, length, imgur, old, record) {
 		}
 		reg = null; title = null; body = null; response = null; error = null;
 	}, length);
-}
+}*/
 
 evListen({
 	handle: "titleSnarfer",
