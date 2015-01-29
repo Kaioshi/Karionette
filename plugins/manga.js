@@ -5,15 +5,21 @@ var	mangaDB = { mangafox: new fragDB("mangafox", "data/mangafox.json"), mangastr
 	check = {
 		mangafox: function (notify) {
 			if (Object.keys(watched.mangafox).length > 0) {
-				web.get("http://feeds.feedburner.com/mangafox/latest_manga_chapters?format=xml", function (error, response, body) {
+				/*web.get("http://feeds.feedburner.com/mangafox/latest_manga_chapters?format=xml", function (error, response, body) {
 					findUpdates(rssToJson(body, "Mangafox"), "mangafox", notify);
+				});*/
+				web.get("http://felt.ninja:5667/?source=mangafox", function (error, response, body) {
+					findUpdates(JSON.parse(body), "mangafox", notify);
 				});
 			}
 		},
 		mangastream: function (notify) {
 			if (Object.keys(watched.mangastream).length > 0) {
-				web.get("http://mangastream.com/rss", function (error, response, body) {
+				/*web.get("http://mangastream.com/rss", function (error, response, body) {
 					findUpdates(rssToJson(body, "MangaStream"), "mangastream", notify);
+				});*/
+				web.get("http://felt.ninja:5667/?source=mangastream", function (error, response, body) {
+					findUpdates(JSON.parse(body), "mangastream", notify);
 				});
 			}
 		},
@@ -23,9 +29,9 @@ var	mangaDB = { mangafox: new fragDB("mangafox", "data/mangafox.json"), mangastr
 		}
 	};
 
-timers.startTick(900); // start a 15 minute ticker
+timers.startTick(300); // start a 5 minute ticker
 
-function rssToJson(rss, type) {
+/*function rssToJson(rss, type) {
 	var ret = [], i, l, link;
 	rss = lib.decode(rss.replace(/\n|\t|\r/g, "")).split("<item>").slice(1);
 	i = 0; l = rss.length;
@@ -45,7 +51,7 @@ function rssToJson(rss, type) {
 		});
 	}
 	return ret;
-}
+}*/
 
 function findUpdates(releases, type, notify) {
 	var i = 0, l = releases.length, updates, hits = [],
@@ -116,7 +122,7 @@ function findUpdates(releases, type, notify) {
 
 evListen({
 	handle: "mangaCheck",
-	event: "900s tick", // check for updates every 15 min
+	event: "300s tick", // check for updates every 5 min
 	callback: check.all
 });
 
