@@ -181,6 +181,8 @@ function sayTitle(context, uri, length, imgur, old, record) {
 			return;
 		}
 		title = lib.singleSpace(lib.decode(result.title));
+		if (imgur && title === "imgur: the simple image sharer")
+			return;
 		irc.say(context, title + " ~ " + uri.host.replace("www.", "")+(old ? " (" + old + ")" : ""), false);
 		if (record)
 			recordURL(record[0], record[1], record[2], title);
