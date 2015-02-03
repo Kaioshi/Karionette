@@ -37,7 +37,7 @@ var questionReply = (function () {
 	var what = [
 		"Err... 42?",
 		"I think the answer is probably lost at sea",
-		"The real question is 'what is a " + words.noun.random() + " doing in " + lib.randSelect(config.local_whippingboys) + "'s box?', fool.",
+		"The real question is 'what is a " + words.noun.random().base + " doing in " + lib.randSelect(config.local_whippingboys) + "'s box?', fool.",
 		"It's... um... hmm... It's dead.",
 		"A BROODING COCKATRICE",
 		"You think I'm going to tell you that? Ha!",
@@ -401,7 +401,8 @@ evListen({
 			"{verbing}": adv + verbing,
 			"{adverb}": words.adverb.random(),
 			"{adjective}": words.adjective.random(),
-			"{noun}": words.noun.random(),
+			"{noun}": words.noun.random().base,
+			"{nouns}": words.noun.random().s,
 			"{pronoun}": words.pronoun.random(),
 			"{personalPronoun}": words.personalPronoun.random(),
 			"{possessivePronoun}": words.possessivePronoun.random(),
