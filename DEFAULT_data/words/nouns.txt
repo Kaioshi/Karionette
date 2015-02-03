@@ -1,1087 +1,2998 @@
-account
-achiever
-acoustics
-act
-action
-activity
-actor
-addition
-adjustment
-advertisement
-advice
-aftermath
-afternoon
-afterthought
-agreement
-air
-airplane
-airport
-alarm
-alley
-amount
-amusement
-anger
-angle
-animal
-answer
-ant
-ants
-apparatus
-apparel
-apples
-appliance
-approval
-arch
-argument
-arithmetic
-arm
-army
-art
-attack
-attempt
-attention
-attraction
-aunt
-authority
-babies
-baby
-back
-badge
-bag
-bait
-balance
-ball
-balloon
-balls
-banana
-band
-base
-baseball
-basin
-basket
-basketball
-bat
-bath
-battle
-bead
-beam
-bean
-bear
-bears
-beast
-bed
-bedroom
-beds
-bee
-beef
-beetle
-beggar
-beginner
-behavior
-belief
-believe
-bell
-bells
-berry
-bike
-bikes
-bird
-birds
-birth
-birthday
-bit
-bite
-blade
-blood
-blow
-board
-boat
-boats
-body
-bomb
-bone
-book
-books
-boot
-border
-bottle
-boundary
-box
-boy
-boys
-brain
-brake
-branch
-brass
-bread
-breakfast
-breath
-brick
-bridge
-brother
-brothers
-brush
-bubble
-bucket
-building
-bulb
-bun
-burn
-burst
-bushes
-business
-butter
-button
-cabbage
-cable
-cactus
-cake
-cakes
-calculator
-calendar
-camera
-camp
-can
-cannon
-canvas
-cap
-caption
-car
-card
-care
-carpenter
-carriage
-cars
-cart
-cast
-cat
-cats
-cattle
-cause
-cave
-celery
-cellar
-cemetery
-cent
-chain
-chair
-chairs
-chalk
-chance
-change
-channel
-cheese
-cherries
-cherry
-chess
-chicken
-chickens
-children
-chin
-church
-circle
-clam
-class
-clock
-clocks
-cloth
-cloud
-clouds
-clover
-club
-coach
-coal
-coast
-coat
-cobweb
-coil
-collar
-color
-comb
-comfort
-committee
-company
-comparison
-competition
-condition
-connection
-control
-cook
-copper
-copy
-cord
-cork
-corn
-cough
-country
-cover
-cow
-cows
-crack
-cracker
-crate
-crayon
-cream
-creator
-creature
-credit
-crib
-crime
-crook
-crow
-crowd
-crown
-crush
-cry
-cub
-cup
-current
-curtain
-curve
-cushion
-dad
-daughter
-day
-death
-debt
-decision
-deer
-degree
-design
-desire
-desk
-destruction
-detail
-development
-digestion
-dime
-dinner
-dinosaurs
-direction
-dirt
-discovery
-discussion
-disease
-disgust
-distance
-distribution
-division
-dock
-doctor
-dog
-dogs
-doll
-dolls
-donkey
-door
-downtown
-drain
-drawer
-dress
-drink
-driving
-drop
-drug
-drum
-duck
-ducks
-dust
-ear
-earth
-earthquake
-edge
-education
-effect
-egg
-eggnog
-eggs
-elbow
-end
-engine
-error
-event
-example
-exchange
-existence
-expansion
-experience
-expert
-eye
-eyes
-face
-fact
-fairies
-fall
-family
-fan
-fang
-farm
-farmer
-father
-father
-faucet
-fear
-feast
-feather
-feeling
-feet
-fiction
-field
-fifth
-finger
-finger
-fire
-fireman
-fish
-flag
-flame
-flavor
-flesh
-flight
-flock
-floor
-flower
-flowers
-fly
-fog
-fold
-food
-foot
-force
-fork
-form
-fowl
-frame
-friction
-friend
-friends
-frog
-frogs
-front
-fruit
-fuel
-furniture
-game
-garden
-gate
-geese
-ghost
-giants
-giraffe
-girl
-girls
-glass
-glove
-glue
-goat
-gold
-goldfish
-good-bye
-goose
-government
-governor
-grade
-grain
-grandfather
-grandmother
-grape
-grass
-grip
-ground
-group
-growth
-guide
-guitar
-gun
-hair
-haircut
-hall
-hammer
-hand
-hands
-harbor
-harmony
-hat
-hate
-head
-health
-hearing
-heart
-heat
-help
-hen
-hill
-history
-hobbies
-hole
-holiday
-home
-honey
-hook
-hope
-horn
-horse
-horses
-hose
-hospital
-hot
-hour
-house
-houses
-humor
-hydrant 	I
-ice
-icicle
-idea
-impulse
-income
-increase
-industry
-ink
-insect
-instrument
-insurance
-interest
-invention
-iron
-island
-jail
-jam
-jar
-jeans
-jelly
-jellyfish
-jewel
-join
-joke
-journey
-judge
-juice
-jump
-kettle
-key
-kick
-kiss
-kite
-kitten
-kittens
-kitty
-knee
-knife
-knot
-knowledge
-laborer
-lace
-ladybug
-lake
-lamp
-land
-language
-laugh
-lawyer
-lead
-leaf
-learning
-leather
-leg
-legs
-letter
-letters
-lettuce
-level
-library
-lift
-light
-limit
-line
-linen
-lip
-liquid
-list
-lizards
-loaf
-lock
-locket
-look
-loss
-love
-low
-lumber
-lunch
-lunchroom
-machine
-magic
-maid
-mailbox
-man
-manager
-map
-marble
-mark
-market
-mask
-mass
-match
-meal
-measure
-meat
-meeting
-memory
-men
-metal
-mice
-middle
-milk
-mind
-mine
-minister
-mint
-minute
-mist
-mitten
-mom
-money
-monkey
-month
-moon
-morning
-mother
-motion
-mountain
-mouth
-move
-muscle
-music
-nail
-name
-nation
-neck
-need
-needle
-nerve
-nest
-net
-news
-night
-noise
-nose
-note
-notebook
-number
-nut
-oatmeal
-observation
-ocean
-offer
-office
-oil
-operation
-opinion
-orange
-oranges
-order
-organization
-ornament
-oven
-owl
-owner
-page
-pail
-pain
-paint
-pan
-pancake
-paper
-parcel
-parent
-park
-part
-partner
-party
-passenger
-paste
-patch
-payment
-peace
-pear
-pen
-pencil
-person
-pest
-pet
-pets
-pickle
-picture
-pie
-pies
-pig
-pigs
-pin
-pipe
-pizzas
-place
-plane
-planes
-plant
-plantation
-plants
-plastic
-plate
-play
-playground
-pleasure
-plot
-plough
-pocket
-point
-poison
-police
-polish
-pollution
-popcorn
-porter
-position
-pot
-potato
-powder
-power
-price
-print
-prison
-process
-produce
-profit
-property
-prose
-protest
-pull
-pump
-punishment
-purpose
-push
-quarter
-quartz
-queen
-question
-quicksand
-quiet
-quill
-quilt
-quince
-quiver
-rabbit
-rabbits
-rail
-railway
-rain
-rainstorm
-rake
-range
-rat
-rate
-ray
-reaction
-reading
-reason
-receipt
-recess
-record
-regret
-relation
-religion
-representative
-request
-respect
-rest
-reward
-rhythm
-rice
-riddle
-rifle
-ring
-rings
-river
-road
-robin
-rock
-rod
-roll
-roof
-room
-root
-rose
-route
-rub
-rule
-run
-sack
-sail
-salt
-sand
-scale
-scarecrow
-scarf
-scene
-scent
-school
-science
-scissors
-screw
-sea
-seashore
-seat
-secretary
-seed
-selection
-self
-sense
-servant
-shade
-shake
-shame
-shape
-sheep
-sheet
-shelf
-ship
-shirt
-shock
-shoe
-shoes
-shop
-show
-side
-sidewalk
-sign
-silk
-silver
-sink
-sister
-sisters
-size
-skate
-skin
-skirt
-sky
-slave
-sleet
-slip
-slope
-smash
-smell
-smile
-smoke
-snail
-snails
-snake
-snakes
-sneeze
-snow
-soap
-society
-sock
-soda
-sofa
-son
-song
-songs
-sort
-sound
-soup
-space
-spade
-spark
-spiders
-sponge
-spoon
-spot
-spring
-spy
-square
-squirrel
-stage
-stamp
-star
-start
-statement
-station
-steam
-steel
-stem
-step
-stew
-stick
-sticks
-stitch
-stocking
-stomach
-stone
-stop
-store
-story
-stove
-stranger
-straw
-stream
-street
-stretch
-string
-structure
-substance
-sugar
-suggestion
-suit
-summer
-sun
-support
-surprise
-sweater
-swim
-swing
-system
-table
-tail
-talk
-tank
-taste
-tax
-team
-teeth
-temper
-tendency
-tent
-territory
-test
-texture
-theory
-thing
-things
-thought
-thread
-thrill
-throat
-throne
-thumb
-thunder
-ticket
-tiger
-time
-tin
-title
-toad
-toe
-toes
-tomatoes
-tongue
-tooth
-toothbrush
-toothpaste
-top
-touch
-town
-toy
-trade
-trail
-train
-trains
-tramp
-transport
-tray
-treatment
-tree
-trees
-trick
-trip
-trouble
-trousers
-truck
-trucks
-tub
-turkey
-turn
-twig
-twist
-umbrella
-uncle
-underwear
-unit
-use
-vacation
-value
-van
-vase
-vegetable
-veil
-vein
-verse
-vessel
-vest
-view
-visitor
-voice
-volcano
-volleyball
-voyage
-walk
-wall
-war
-wash
-waste
-watch
-water
-wave
-waves
-wax
-way
-wealth
-weather
-week
-weight
-wheel
-whip
-whistle
-wilderness
-wind
-window
-wine
-wing
-winter
-wire
-wish
-woman
-women
-wood
-wool
-word
-work
-worm
-wound
-wren
-wrench
-wrist
-writer
-writing
-yak
-yam
-yard
-yarn
-year
-yoke
-zebra
-zephyr
-zinc
-zipper
-zoo
-apple
-penis
-computer
-plan
-relationship
-relationships
-speed
-poop
-bacon
-niece
-occlusion
-coconut
-crocodile
-dialogue
-ninja
-ninjutsu
-nieces
-poacher
-wail
-wails
-wale
-log
-logs
-logging
-mustache
-moustaches
-evangelism
-mousse
-moose
-guinea
-guinea pig
-mantle
-vans
-practice
-mozzarella
-whore
-fence
-pantsu
-continent
-abs
-vitriol
-meow
-arthritis
-gavel
-rort
-manufacturer
-sheriff
-pinkie
-consequence
-situation
-gender
-switch
-surprises
-pimp
-guy
-diner
-couple
-bumper
-mast
-dander
-cue
-vagus
-incest
-cloaca
-archive
-rhyme
-disciplines
-masterpiece
-association
-achievement
-flick
-flicks
-tennis
-barbeque
-liquor
-plum
-professor
-nog
-libido
-villain
-study
-streaking
-commodity
-aversion
-reels
-genius
-flamingo
-LEMON
-bitch
-speaker
-blubber
-binge
-preposition
-awe
-fir
-stanza
-merchantman
-disdain
-contempt
-connotation
-squeal
-compass
-tackle
-etiquette
-cane
-access
-surgery
-centipede
-dike
-spaghetti
-dice
-confidence
-pigeon
+
+aardwolf aardwolves
+abacus abaci
+aboideau aboideaux
+aboiteau aboiteaux
+abscissa abscissae
+acanthus acanthi
+acarus acari
+acciaccatura acciaccature
+acetabulum acetabula
+achaemenid achaemenidae
+achaemenid achaemenides
+achievement achievements
+achiever achievers
+acicula aciculae
+aciculum acicula
+acinus acini
+acromion acromia
+act acts
+actinia actiniae
+actinozoan actinozoa
+action actions
+activity activities
+actor actors
+addendum addenda
+addendum addendums
+addition additions
+adenocarcinoma adenocarcinomata
+adenoma adenomata
+adieu adieux
+adjustment adjustments
+advertisement advertisements
+advice advice
+adytum adyta
+aecidium aecidia
+aecium aecia
+aerobium aerobia
+aftermath aftermaths
+afternoon afternoons
+afterthought afterthoughts
+aggiornamento aggiornamenti
+agnomen agnomina
+agon agones
+agora agorae
+agouti agouties
+agreement agreements
+air airs
+aircraft aircraft
+airplane airplanes
+airport airports
+ala alae
+alarm alarms
+alewife alewives
+alkali alkalies
+alley alleys
+allodium allodia
+alluvium alluvia
+alodium alodia
+altocumulus altocumuli
+altostratus altostrati
+alula alulae
+alumna alumnae
+alumnus alumni
+alveolus alveoli
+amanuensis amanuenses
+ambulacrum ambulacra
+ameba amebae
+amniocentesis amniocenteses
+amnion amnia
+amoeba amoebae
+amoebiasis amoebiases
+amora amoraim
+amoretto amoretti
+amorino amorini
+amount amounts
+amphiarthrosis amphiarthroses
+amphimixis amphimixes
+amphioxus amphioxi
+amphisbaena amphisbaenae
+amphithecium amphicia
+amphora amphorae
+ampulla ampullae
+amusement amusements
+amygdala amygdalae
+anabasis anabases
+anacoluthon anacolutha
+anacrusis anacruses
+anaerobium anaerobia
+anagnorisis anagnorises
+analemma analemmata
+analysis analyses
+anamnesis anamneses
+anamorphosis anamorphoses
+anaptyxis anatyxes
+anastomosis anastomoses
+anatto annattos
+ancon ancones
+androclinium androclinia
+androecium androecia
+androsphinx androsphinges
+angelfish angelfishes
+anger angers
+angioma angiomata
+angle angles
+animal animals
+animalculum animalcula
+anlage anlagen
+annulus annuli
+answer answers
+anta antae
+antalkali antalkalies
+ant ants
+antefix antefixa
+antenna antennae
+antenna antennas
+antependium antependia
+anthelion anthelia
+anthelix anthelices
+anthemion anthemia
+antheridium andtheridia
+antheridium antheridia
+anthodium anthodia
+anthozoan anthozoa
+anthrax anthraces
+anticlinorium anticlinoria
+antihelix antihelices
+antihero antiheroes
+antiserum antisera
+antithesis antitheses
+antitragus antitragi
+antrum antra
+anus anus
+aorta aortae
+apex apexes
+apex apices
+aphelion aphelia
+aphis aphides
+apodosis apodoses
+apomixis apomixes
+aponeurosis aponeuroses
+apophysis apophyses
+aposiopesis aposiopeses
+apothecium apothecia
+apotheosis apotheoses
+apparatus apparatus
+apparel apparels
+appendix appendices
+appendix appendices
+appendix appendixes
+apple apples
+appliance appliances
+appoggiatura appoggiature
+approval approvals
+apsis apsides
+aqua aquae
+aquarium aquaria
+arboretum arboreta
+arcanum arcana
+arch arches
+archegonium archegonia
+archerfish archerfishes
+archesporium archesporia
+archipelago archipelagoes
+archive archives
+areola areolae
+argali araglis
+argali argali
+argument arguments
+argumentum argumenta
+arietta ariette
+arista aristae
+arithmetic arithmetic
+armamentarium armamentaria
+arm arms
+army armies
+arsis arses
+art arts
+arteriosclerosis arterioscleroses
+aruspex aruspices
+ascesis asceses
+ascidium ascidia
+ascogonium ascogonia
+ascus asci
+ash ashes
+ashkenazi ashkenazim
+aspergillosis aspergilloses
+aspergillum aspergilla
+aspergillus aspergilli
+aspersorium aspersoria
+assagai assegais
+association associations
+astragalus astragali
+asyndeton asyndeta
+atheroma atheromata
+atherosclerosis atheroscleroses
+atmolysis atmolyses
+atrium atria
+attack attacks
+attempt attempts
+attention attentions
+attraction attractions
+auditorium auditoria
+aunt aunts
+aura aurae
+aureus aurei
+auricula auriculae
+aurora aurorae
+auspex auspices
+authority authorities
+autocatalysis autocatalyses
+autochthon autochthones
+automaton automata
+aversion aversions
+avitaminosis avitaminoses
+awe awes
+ax axes
+axilla axillae
+axis axes
+baby babies
+bacchant bacchantes
+bacchius bacchii
+bacillus bacilli
+back backs
+bacon bacon
+bacteriostasis bacteriostases
+bacterium bacteria
+baculum bacula
+badge badges
+bag bags
+bait baits
+balance balances
+ball balls
+ballista ballistae
+balloon balloons
+bambino bambini
+banana bananas
+ban bani
+band bands
+bandeau bandeaux
+bandit banditti
+banjo banjoes
+barbecue barbecues
+barklouse barklice
+barramundi barramundies
+baseball baseballs
+base bases
+basidium basidia
+basileus basileis
+basin basins
+basis bases
+basketball basketballs
+basket baskets
+basso bassi
+bastinado bastinadoes
+bat bats
+bateau bateaux
+batfish batfishes
+bath baths
+battle battles
+bead beads
+beadsman beadsmen
+beam beams
+bean beans
+bear bears
+beast beasts
+beau beaus
+bed beds
+bedroom bedrooms
+bee bees
+beef beefs
+beetle beetles
+beggar beggars
+beginner beginners
+behavior behaviors
+behoof behooves
+belief beliefs
+believe believes
+bell bells
+berry berries
+bersagliere bersaglieri
+bheesty bhishties
+bibliotheca bibliothecae
+bicentenary bicennaries
+bijou bijoux
+bike bikes
+bilbo bilboes
+billfish billfishes
+bimbo bimboes
+binge binges
+bird birds
+birth births
+birthday birthdays
+bisectrix bisectrices
+bison bison
+bit bits
+bitch bitches
+bite bites
+blackfish blackfishes
+blackfoot blackfeet
+blade blades
+blastema blastemata
+blastula blastulae
+blindfish blindfishes
+blood bloods
+blow blows
+blowfish blowfishes
+blubber blubbers
+bluefish bluefishes
+board boards
+boarfish boarfishes
+boat boats
+body bodies
+boletus boleti
+bolivar bolivares
+bolshevik bolsheviki
+bomb bombs
+bone bones
+bonefish bonefishes
+bongo bongoes
+bonito bonitoes
+book books
+booklouse booklice
+bookshelf bookshelves
+boot boots
+borax boraces
+borborygmus borborygmi
+border borders
+bordereau bordereaux
+boschbok bok
+boschbok bushbok
+boschbok bushboks
+botargo botargoes
+bottle bottles
+boundary boundaries
+box boxes
+boxfish boxfishes
+boy boys
+brachium brachia
+brain brains
+brainchild brainchildren
+brake brakes
+branch branches
+branchia branchiae
+brant brants
+brass brasses
+bravado bravadoes
+bravo bravoes
+bread breads
+breakfast breakfasts
+breath breaths
+bregma bregmata
+brick bricks
+bridge bridges
+broadleaf broadleaves
+bronchus bronchi
+brother brethren
+brother brothers
+brush brushes
+bryozoan bryozoa
+bubble bubbles
+bubo buboes
+bucket buckets
+bucko buckoes
+bucktooth buckteeth
+buffalo buffaloes
+building buildings
+bulb bulbs
+bulla bullae
+bumper bumpers
+bun buns
+bund bunde
+bureau bureaus
+bureau bureaux
+burn burns
+bursa bursae
+burst bursts
+bus busses
+business businesses
+butter butters
+butterfish butterfishes
+button buttons
+byssus byssi
+cabbage cabbages
+cable cables
+cactus cacti
+caduceus caducei
+caecum caeca
+caestus cestuses
+caesura caesurae
+cake cakes
+calamus calami
+calathus calathi
+calcaneum calcanei
+calculator calculators
+calculus calculi
+caldarium caldaria
+calendar calendars
+calf calves
+calico calicoes
+calix calices
+callus calli
+calx calces
+calyx calyces
+cambium cambia
+camera cameras
+camp camps
+canaliculus canaliculi
+can cans
+candelabrum candelabra
+candlefish candlefishes
+cane canes
+cannon cannons
+canthus canthi
+canula canulae
+canzone canzoni
+cap caps
+capitulum capitula
+capriccio capricci
+caption captions
+caput capita
+carabiniere carabinieri
+carbonado carbonadoes
+car cars
+carcinoma carcinomata
+card cards
+care cares
+cargo cargoes
+carina carinae
+carolus caroli
+carpenter carpenters
+carpogonium carpogonia
+carpus carpi
+carriage carriages
+cart carts
+caryatid carides
+caryopsis caryopses
+caryopsis caryopsides
+cast casts
+castrato castrati
+catabasis catabases
+cataclasis cataclases
+catalo cataloes
+catalysis catalyses
+cat cats
+catena catenae
+catfish catfishes
+cathar cathari
+cathexis cathexes
+cattalo cattaloes
+cattle cattle
+caudex caudices
+caulis caules
+cause causes
+cavatina cavatine
+cave caves
+cavefish cavefishes
+cavetto cavetti
+cecum ceca
+celery celery
+cella cellae
+cellar cellars
+cembalo cembali
+cemetery cemeteries
+cent cents
+centesimo centesimi
+centipede centipedes
+centrum centra
+cephalothorax cephalothoraces
+cercaria cercariae
+cercus cerci
+cerebellum cerebella
+cerebrum cerebra
+cervix cervices
+cesura cesurae
+chaeta chaetae
+chain chains
+chair chairs
+chalaza chalazae
+chalk chalks
+chalutz chalutzim
+chance chances
+change changes
+channel channels
+chapati chapaties
+chapatti chapatties
+chapeau chapeaux
+chasid chasidim
+chassid chassidim
+chateau chateaux
+chazan chazanim
+cheder chadarim
+cheder chedarim
+cheese cheeses
+chela chelae
+chelicera chelicerae
+cherry cherries
+cherub cherubim
+chess chess
+chiasma chiasmata
+chiasmus chiasmi
+chicken chickens
+child children
+children children
+chilli chillies
+chin chins
+chitarrone chitarroni
+chlamys chlamydes
+chondroma chondromata
+choragus choragi
+choriambus choriambi
+chou choux
+chromonema chromonemata
+chrysalis chrysalides
+church churches
+chuvash chuvashes
+ciborium ciboria
+cicada cicadae
+cicala cicale
+cicatrix cicatrices
+cicerone ciceroni
+cicisbeo cicisbei
+cilium cilia
+cimex cimices
+cinerarium cineraria
+cingulum cingula
+circle circles
+cirrocumulus cirrocumuli
+cirrostratus cirrostrati
+cirrus cirri
+cisco ciscoes
+cisterna cisternae
+clam clams
+clarino clani
+clarino clanos
+claro claroes
+clepsydra clepsydrae
+clinandrium clinandria
+clingfish clingfishes
+clitellum clitella
+cloaca cloacae
+clock clocks
+clostridium clostridia
+cloth cloths
+cloud clouds
+clover clovers
+cloverleaf cloverleaves
+club clubs
+clypeus clypei
+coach coaches
+coagulum coagula
+coal coals
+coalfish coalfishes
+coast coasts
+coat coats
+cobweb cobwebs
+coccus cocci
+coccyx coccyges
+cochlea cochleae
+coconut coconuts
+codex codices
+codfish codfishes
+coelenteron coelentera
+coenurus coenuri
+cognomen cognomina
+cognosente cognosenti
+coil coils
+coleorhiza coleorhizae
+collar collars
+collegium collegia
+colloquium colloquia
+colluvium colluvia
+collyrium collyria
+colon cola
+colon colons
+color colors
+colossus colossi
+columbarium columbaria
+columella columellae
+coma comae
+comatula comatulae
+comb combs
+comedo comedones
+comfort comforts
+commando commandoes
+committee committees
+commodity commodities
+company companies
+comparison comparisons
+competition competitions
+computer computers
+concertante concertanti
+concertino concertini
+concerto concerti
+concerto concertos
+concha conchae
+condition conditions
+condottiere condottieri
+condyloma condylomata
+conferva confervae
+confidence confidences
+congius congii
+conidium conidia
+conjunctiva conjunctivae
+connection connections
+connotation connotations
+conquistador conquistadores
+consequence consequences
+consortium consortia
+contagium contagia
+contempt contempt
+continent continents
+continuum continua
+contralto contralti
+control controls
+conversazione conversazioni
+convolvulus convolvuli
+cook cooks
+copper coppers
+copula copulae
+copy copies
+corbicula corbiculae
+cord cords
+corium coria
+cork corks
+corn corns
+cornea corneae
+cornu cornua
+corona coronae
+corpus corpora
+corrigendum corrigenda
+cortex cortices
+cortina cortinae
+corybant corybantes
+coryphaeus coryphaei
+costa costae
+cothurnus cothurni
+cough coughs
+country countries
+couple couples
+couteau couteaux
+cover covers
+cow cows
+cowfish cowfishes
+coxa coxae
+crack cracks
+cracker crackers
+crambo cramboes
+cranium crania
+crasis crases
+crate crates
+crawfish crawfishes
+crayon crayons
+cream creams
+creator creators
+creature creatures
+credendum credenda
+credit credits
+crematorium crematoria
+crescendo crescendi
+crib cribs
+cribellum cribella
+crime crimes
+crisis crises
+crissum crissa
+crista cristae
+criterion criteria
+criterion criteria
+criterion criterions
+crocodile crocodiles
+crook crooks
+crow crows
+crowd crowds
+crown crowns
+crusado crusadoes
+crus crura
+crush crushes
+crux cruces
+cruzado cruzadoes
+cry cries
+ctenidium ctenidia
+cub cubs
+cubiculum cubicula
+cue cues
+culex culices
+culpa culpae
+cultus culti
+cumulonimbus cumulonimbi
+cumulostratus cumulostrati
+cumulus cumuli
+cup cups
+curia curiae
+current currents
+curriculum curricula
+curriculum curriculums
+curtain curtains
+curve curves
+cushion cushions
+custos custodes
+cuticula cuticulae
+cutis cutes
+cuttlefish cuttlefishes
+cyclops cyclopes
+cyclosis cycloses
+cylix cylices
+cylix cylikes
+cyma cymae
+cymatium cymatia
+cypsela cypselae
+cysticercus cysticerci
+dad dads
+dado dadoes
+dago dagoes
+daimio daymio
+daimio daymios
+damselfish damselfishes
+dander dander
+datum data
+daughter daughters
+day days
+dealfish dealfishes
+death deaths
+debt debts
+decemvir decemviri
+decennium decennia
+decidua deciduae
+decision decisions
+deer deer
+deer deers
+definiendum definienda
+definiens definientia
+degree degrees
+delphinium delphinia
+denarius denarii
+dentalium dentalia
+dermatosis dermatoses
+desideratum desiderata
+design designs
+desire desires
+desk desks
+desperado desperadoes
+destruction destruction
+detail details
+development developments
+devilfish devilfishes
+diaeresis diaereses
+diaeresis diaerses
+diagnosis diagnoses
+dialogue dialogues
+dialysis dialyses
+diaphysis diaphyses
+diapophysis diapophyses
+diarthrosis diarthroses
+diastalsis diastalses
+diastasis diastases
+diastema diastemata
+diathesis diathses
+diazo diazoes
+dibbuk dibbukkim
+dice dices
+dice diesaddendum addenda
+dichasium dichasia
+dictum dicta
+dido didoes
+die dice
+die dies
+dieresis diereses
+diesis dieses
+differentia differentiae
+digestion digestions
+dike dikes
+dilettante dilettanti
+diluvium diluvia
+dime dimes
+diner diners
+dingo dingoes
+dinner dinners
+diplococcus diplococci
+direction directions
+dirt dirt
+discobolos discoboli
+discovery discoveries
+discus disci
+discussion discussions
+disdain disdains
+disease diseases
+disgust disgusts
+distance distances
+distribution distributions
+diva dive
+diverticulum diverticula
+divertimento divertimenti
+division divisions
+djinni djinn
+dock docks
+doctor doctors
+dodo dodoes
+dog dogs
+dogfish dogfishes
+dogma dogmata
+dogtooth dogteeth
+dollarfish dollarfishes
+doll dolls
+domatium domatia
+domino dominoes
+donkey donkeys
+door doors
+dormouse dormice
+dorsum dorsa
+downtown downtown
+drachma drachmae
+drain drains
+drawer drawers
+drawknife drawknives
+drink drinks
+driving drivings
+drop drops
+drosophila drosophilae
+drug drugs
+drum drums
+drumfish drumfishes
+dryad dryades
+duck ducks
+duodenum duona
+duodenum duonas
+duo dui
+dupondius dupondii
+dust dusts
+duumvir duumviri
+dwarf dwarfs
+dwarf dwarves
+dybbuk dybbukkim
+ear ears
+earth earths
+earthquake earthquakes
+ecchymosis ecchymoses
+ecclesia ecclesiae
+ecdysis ecdyses
+echidna echidnae
+echinococcus echinococci
+echinus echini
+echo echoes
+ectozoan ectozoa
+eddo eddoes
+edema edemata
+edema oedemata
+edge edges
+education educations
+effect effects
+effluvium effluvia
+egg eggs
+eggnog eggnog
+eidolon eidola
+eisegesis eisegeses
+eisteddfod eisteddfodau
+elbow elbows
+elenchus elenchi
+elf elves
+ellipsis ellipses
+eluvium eluvia
+elytron elytra
+embargo embargoes
+embolus emboli
+emphasis emphases
+emporium emporia
+enarthrosis enarthroses
+encephalitis encephalitides
+encephaloma encephalomata
+encephalon encephala
+enchiridion enchiridia
+enchondroma enchondromata
+encomium encomia
+endameba endamebae
+endamoeba endamoebae
+end ends
+endocardium endocardia
+endocranium endocrania
+endometrium endometria
+endosteum endostea
+endostosis endostoses
+endothecium endothecia
+endothelioma endotheliomata
+endothelium endothelia
+endozoan endozoa
+enema enemata
+engine engines
+enneahedron enneahedra
+ens entia
+entameba entamebae
+entamoeba entamoebae
+entasis entases
+enteron entera
+entozoan entozoa
+epencephalon epencephala
+epenthesis epentheses
+epexegesis epexegeses
+ephemera ephemerae
+ephemeris ephemerides
+ephemeron ephemera
+ephor ephori
+epicalyx epicalyces
+epicanthus epicanthi
+epicardium epicardia
+epicedium epicedia
+epiclesis epicleses
+epididymis epididymides
+epigastrium epigastria
+epiglottis epiglottides
+epimysium epimysia
+epiphenomenon epiphenomena
+epiphysis epiphyses
+episternum episterna
+epithalamion epithalamia
+epithelioma epitheliomata
+epithelium epithelia
+epizoan epizoa
+epyllion epyllia
+equilibrium equilibria
+equisetum equiseta
+eringo eringoes
+erratum errata
+error errors
+eryngo eryngoes
+esophagus esophagi
+esophagus oesophagi
+etiquette etiquette
+etymon etyma
+eucalyptus eucalypti
+eupatrid eupatridae
+euripus euripi
+evangelism evangelism
+event events
+example examples
+exanthema exanthemata
+exchange exchanges
+executrix executrices
+exegesis exegeses
+exemplum exempla
+existence existences
+exordium exordia
+exostosis exostoses
+expansion expansions
+experience experiences
+expert experts
+extremum extrema
+eye eyes
+eyetooth eyeteeth
+eyir aurar
+eyrir aurar
+fabliau fabliaux
+face faces
+facia faciae
+fact facts
+facula faculae
+faeroese faeroese
+fall falls
+fallfish fallfishes
+family families
+famulus famuli
+fan fans
+fang fangs
+farmer farmers
+farm farms
+faroese faroese
+farrago farragoes
+fascia fasciae
+fasciculus fasciculi
+father fathers
+fatso fatsoes
+faucet faucets
+fauna faunae
+fear fears
+feast feasts
+feather feathers
+fecula feculae
+fedayee fedayeen
+feeling feelings
+feet feet
+fellah fellaheen
+fellah fellahin
+femur femora
+fence fences
+fenestella fenestellae
+fenestra fenestrae
+feria feriae
+fermata fermate
+ferula ferulae
+festschrift festschriften
+fetial fetiales
+fez fezes
+fez fezzes
+fiasco fiascoes
+fibrilla fibrillae
+fibroma fibromata
+fibula fibulae
+fico ficoes
+fiction fictions
+fideicommissum fideicommissa
+field fields
+fieldmouse fieldmice
+fifth fifths
+fig figs
+filaria filariiae
+filefish filefishes
+filum fila
+fimbria fimbriae
+finger fingers
+fire fires
+fireman firemen
+fir firs
+fish fish
+fish fishes
+fish fishes
+fishwife fishwives
+fistula fistulae
+flabellum flabella
+flagellum flagella
+flag flags
+flagstaff flagstaves
+flambeau flambeaux
+flame flames
+flamen flamines
+flamingo flamingoes
+flamingo flamingos
+flatfish flatfishes
+flatfoot flatfeet
+flavor flavors
+flesh fleshes
+flick flicks
+flight flights
+flittermouse flittermice
+flocculus flocculi
+floccus flocci
+flock flocks
+floor floors
+flora florae
+floreat floreant
+florilegium florilegia
+flower flowers
+fly flies
+flyleaf flyleaves
+focus foci
+focus focuses
+fog fogs
+fold folds
+folium folia
+food foods
+foot feet
+foot foot
+foot foots
+foramen foramina
+force forces
+forceps forceps
+forefoot forefeet
+foretooth foreteeth
+fork forks
+form forms
+formicarium formicaria
+formula formulae
+formula formulas
+fornix fornices
+fortis fortes
+forum fora
+fossa fossae
+fovea foveae
+foveola foveolae
+fowl fowls
+fowl fowls
+fractocumulus fractocumuli
+fractostratus fractostrati
+fraenum fraena
+frame frames
+frau frauen
+frenulum frenula
+frenum frena
+fresco frescoes
+fricandeau fricandeaux
+fricando fricandoes
+friction frictions
+friend friends
+frijol frijoles
+frogfish frogfishes
+frog frogs
+frons frontes
+front fronts
+fruit fruits
+frustum frusta
+fucus fuci
+fuel fuels
+fulcrum fulcra
+fumatorium fumatoria
+fundus fundi
+fungus fungi
+fungus funguses
+funiculus funiculi
+furcula furculae
+furculum furcula
+furfur furfures
+furniture furniture
+galea galeae
+gambado gambadoes
+game games
+gametangium gametangia
+gametoecium gametoecia
+gammadion gammadia
+ganglion ganglia
+garden gardens
+garfish garfishes
+gas gas
+gas gasses
+gastrula gastrulae
+gateau gateaux
+gate gates
+gavel gavels
+gazebo gazeboes
+gecko geckoes
+geese geese
+gelsemium gelsemia
+gemeinschaft gemeinschaften
+gemma gemmae
+gemsbok gemboks
+gemsbuck gembucks
+gender genders
+generatrix generatrices
+genesis geneses
+genius genii
+gens gentes
+genu genua
+genus genera
+genus genera
+genus genus
+genus genuses
+germen germina
+gesellschaft gesellschaften
+gestalt gestalten
+ghetto ghettoes
+ghost ghosts
+gingiva gingivae
+gingko gingkoes
+ginglymus ginglymi
+ginkgo ginkgoes
+gippo gippoes
+giraffe giraffes
+girl girls
+glabella glabellae
+gladiolus gladioli
+glans glandes
+glioma gliomata
+glissando glissandi
+globefish globefishes
+globigerina globigerinae
+glochidium glochidcia
+glochidium glochidia
+glomerulus glomeruli
+glossa glossae
+glottis glottides
+glove gloves
+glue glues
+glutaeus glutaei
+gluteus glutei
+gnosis gnoses
+goatfish goatfishes
+goat goats
+gobo goboes
+godchild godchildren
+go goes
+goldfish goldfishes
+gold golds
+gomphosis gomphoses
+gonidium gonidia
+gonion gonia
+gonococcus gonococci
+good-bye good-byes
+goodwife goodwives
+goosefish goosefishes
+goose geese
+goose geese
+goose gooses
+gorgoneion gorgoneia
+gospodin gospopoda
+government governments
+governor governors
+goy goyim
+gps gps
+grade grades
+graffito graffiti
+graf grafen
+grain grains
+grandchild grandchildren
+grandfather grandfathers
+grandmother grandmothers
+granuloma granulomata
+grape grapes
+gravamen gravamina
+grip grips
+grosz groszy
+grotto grottoes
+ground grounds
+group groups
+grouse grouse
+grouse grouses
+growth growths
+guide guides
+guilde guilder
+guilde guilders
+guinea guineas
+guinea pig guinea pigs
+guitarfish guitarfishes
+guitar guitars
+gumma gummata
+gun guns
+gurnar gurnard
+gurnar gurnards
+gutta guttae
+guy guys
+gymnasium gymnasia
+gynaeceum gynaecea
+gynaecium gynaecia
+gynecium gynecea
+gynecium gynecia
+gynoecium gynoecea
+gynoecium gynoecia
+gyrus gyri
+hadj hadjes
+haematolysis haematolyses
+haematoma haematomata
+haematozoon haematozoa
+haemodialysis haemodialyses
+haemolysis haemolyses
+haemoptysis haemoptyses
+haeres haeredes
+haftarah haftaroth
+hagfish hagfishes
+haggada haggadas
+haggada haggadoth
+haircut haircuts
+hair hairs
+hajj hajjes
+haler haleru
+half halves
+halfpenny halfpence
+hallah challoth
+hallah hallot
+hallah halloth
+hall halls
+hallux halluces
+halo haloes
+halter halteres
+hammer hammers
+hamulus hamuli
+hand hands
+haphtarah haphtaroth
+harbor harbors
+haredi haredim
+harmony harmonies
+haruspex haruspices
+hasid hasidim
+hassid hassidim
+hate hates
+hat hats
+haustellum haustella
+haustorium haustoria
+hazzan hazzanim
+head heads
+health health
+hearing hearings
+heart hearts
+heat heats
+hectocotylus hectocotyli
+heder hadarim
+heldentenor heldentenore
+heliozoan heliozoa
+helix helices
+help helps
+hematolysis hematolyses
+hematoma hematomata
+hematozoon hematozoa
+hemelytron hemelytra
+hemielytron hemielytra
+hemodialysis hemodialyses
+hemolysis hemolyses
+hemoptysis hemoptyses
+hendecahedron hendecahedra
+hen hens
+heraclid heraclidae
+heraklid heraklidae
+herbarium herbaria
+herma hermai
+herm hermae
+hernia herniae
+hero heroes
+herr herren
+hetaera hetaerae
+hetaira hetairai
+hibernaculum hibernacula
+hieracosphinx hieracosphinges
+hill hills
+hilum hila
+hilus hili
+himation himatia
+hippocampus hippocampi
+hippopotamus hippopotami
+his his
+history histories
+hobo hoboes
+hogfish hogfishes
+hole holes
+holiday holidays
+home homes
+homunculus homunculi
+honey honeys
+honorarium honoraria
+hoof hoofs
+hoof hooves
+hook hooks
+hope hopes
+horn horns
+horologium horologia
+horse horses
+hose hose
+hospital hospitals
+hot hots
+hour hours
+house houses
+housewife housewives
+humerus humeri
+humor humors
+hydra hydrae
+hydrant 	I hydrant 	Is
+hydromedusa hydromedusae
+hydrozoan hydrozoa
+hymenium hynia
+hymenium hyniums
+hymenopteran hymenoptera
+hypanthium hypanthia
+hyperostosis hyperostoses
+hypha hyphae
+hypnosis hypnoses
+hypochondrium hypochondria
+hypogastrium hypogastria
+hypogeum hypogea
+hypophysis hypophyses
+hypostasis hypostases
+hypothalamus hypothalami
+hypothesis hypotheses
+hyrax hyraces
+iamb iambi
+ibex ibices
+ice ices
+ichthyosaur ichthyosauruses
+ichthyosaurus ichthyosauri
+icicle icicles
+iconostas iconostases
+icosahedron icosahedra
+idea ideas
+ideatum ideata
+igbo ibo
+igorrote igorrorote
+ilium ilia
+imago imagines
+imago imagoes
+imperium imperia
+impi impies
+impulse impulses
+incest incests
+income incomes
+increase increases
+incubus incubi
+incus incudes
+index indexes
+index indices
+indigo indigoes
+indumentum indumenta
+indusium indusia
+industry industries
+infundibulum infundibula
+ingush ingushes
+ink inks
+innuendo innuendoes
+inoculum inocula
+insectarium insectaria
+insect insects
+instrument instruments
+insula insulae
+insurance insurances
+intaglio intagli
+interest interests
+interleaf interleaves
+intermezzo intermezzi
+interregnum interregna
+interrex interreges
+intima intimae
+invention inventions
+involucellum involucella
+involucre involucra
+involucrum involucra
+iris irides
+iron irons
+irs irs
+ischium ischia
+is is
+island islands
+isthmus isthmi
+jackaroo jackeroos
+jackfish jackfishes
+jackknife jackknives
+jail jails
+jambeau jambeaux
+jam jams
+jar jars
+jellyfish jellyfishes
+jellyfish jellyfishes
+jelly jellies
+jewelfish jewelfishes
+jewel jewels
+jewfish jewfishes
+jingo jingoes
+jinni jinn
+join joins
+jo joes
+joke jokes
+journey journeys
+judge judges
+juice juices
+jump jumps
+jus jura
+kaddish kaddishim
+kalmuc kalmuck
+kalmuc kalmucks
+katabasis katabases
+keeshond keeshonden
+kettle kettles
+key keys
+kibbutz kibbutzim
+kick kicks
+killifish killifishes
+kingfish kingfishes
+kite kites
+kitten kittens
+kitty kitties
+knee knees
+knife knifes
+knife knives
+knot knots
+knowledge knowledge
+kohlrabi kohlrabies
+krona kronur
+krone kronen
+krone kroner
+kroon krooni
+kylix kylikes
+labarum labara
+labellum labella
+labium labia
+laborer laborers
+labrum labra
+lace laces
+lactobacillus lactobacilli
+lacuna lacunae
+lacunar lacunaria
+ladybug ladybugs
+lake lakes
+lamella lamellae
+lamia lamiae
+lamina laminae
+lamp lamps
+land lands
+language languages
+lapillus lapilli
+lapith lapithae
+larva larvae
+larva larvas
+larynx larynges
+lasso lassoes
+latex latices
+latifundium latifundia
+lat lati
+lat latu
+laugh laughs
+lavabo lavaboes
+lawyer lawyers
+lead leads
+leaf leafs
+leaf leaves
+learning learnings
+leather leathers
+lecythus lecythi
+leg legs
+lemma lemmata
+lemniscus lemnisci
+lemon lemons
+lenis lenes
+lentigo lentigines
+leonid leonides
+lepidopteran lepidoptera
+leprosarium leprosaria
+leptocephalus leptocephali
+lepton lepta
+letter letters
+lettuce lettuces
+leucocytozoan leucocytozoa
+leu lei
+level levels
+lev leva
+lex leges
+libido libidos
+libra librae
+library libraries
+libretto libretti
+libretto librettos
+lied lieder
+life lives
+lift lifts
+light lights
+ligula ligulae
+likuta makuta
+limbus limbi
+limen limina
+limes limites
+limit limits
+limulus limuli
+line lines
+linen linens
+lingo lingoes
+lingua linguae
+lionfish lionfishes
+lip lips
+lipoma lipomata
+liquid liquids
+liquor liquors
+lira lire
+liriodendron liriodendra
+list lists
+litas litu
+lit litai
+lixivium lixivia
+loaf loafs
+loaf loaves
+locket lockets
+lock locks
+loculus loculi
+locus loci
+loggia loggie
+logging logging
+logion logia
+log logs
+lomentum lomenta
+longobard longobardi
+look looks
+lorica loricae
+loti maloti
+louse lice
+love loves
+low lows
+luba luba
+lubritorium lubritoria
+lumber lumbers
+lumbi lumbus
+lumen lumina
+lumpfish lumpfishes
+lunch lunches
+lunchroom lunchrooms
+lungfish lungfishes
+lunula lunulae
+lur lures
+lustre lustra
+lymphangitis lymphangitides
+lymphoma lymphomata
+lymphopoiesis lymphopoieses
+lysis lyses
+lytta lyttae
+maar maare
+macaroni macaronies
+maccaroni maccaronies
+machine machines
+machzor machzorim
+macronucleus macronuclei
+macrosporangium macrosporangia
+macula maculae
+madame mesdames
+mademoiselle mesdemoiselles
+madrono madornos
+maestro maestri
+mafioso mafiosi
+magic magics
+magma magmata
+magnifico magnificoes
+magus magi
+mahzor mahzorim
+maid maids
+mailbox mailboxes
+malleolus malleoli
+malleus mallei
+mamilla mamillae
+mamma mammae
+mammilla mammillae
+manager managers
+mandingo mandingoes
+mango mangoes
+manifesto manifestoes
+man mans
+man men
+man men
+manservant menservants
+manteau manteaux
+mantis mantes
+mantle mantles
+manubrium manubria
+manufacturer manufacturers
+map maps
+marble marbles
+marchesa marchese
+marchese marchesi
+maremma maremme
+market markets
+markka markkaa
+mark marks
+marsupium marsupia
+mask masks
+mass masses
+masterpiece masterpieces
+mast masts
+match matches
+matrix matrices
+matrix matrixes
+matzo matzoth
+mausoleum mausolea
+maxilla maxillae
+maximum maxima
+meal meals
+measure measures
+meat meats
+media mediae
+mediastinum mediastina
+medium media
+medium mediums
+medulla medullae
+medusa medusae
+meeting meetings
+megaron megara
+megasporangium megasporangia
+megillah megilloth
+meiosis meioses
+melanoma melanomata
+melisma melismata
+memento mementoes
+memorandum memoranda
+memorandum memorandums
+memory memories
+meniscus menisci
+men men
+menstruum menstrua
+meow meows
+merchantman merchantmenaccount accounts
+mesenteron mesentera
+mesothorax mesothoraces
+mestizo mestizoes
+metacarpus metacarpi
+metal metals
+metamorphosis metamorphoses
+metanephros metanephroi
+metastasis metastases
+metatarsus metatarsi
+metathesis metatheses
+metathorax metathoraces
+metazoan metazoa
+metempsychosis metempsychoses
+metencephalon metencephala
+mezuzah mezuzoth
+miasma miasmata
+mice mice
+microanalysis microanalyses
+micrococcus micrococci
+micronucleus micronuclei
+microsporangium microsporangia
+middle middles
+midrash midrashim
+midwife midwives
+milieu milieux
+milium milia
+milkfish milkfishes
+milk milks
+millennium millennia
+mina minae
+mind minds
+mine mines
+minimum minima
+ministerium ministeria
+minister ministers
+mint mints
+minute minutes
+minutia minutiae
+minyan minyanim
+miosis mioses
+miracidium miracidia
+mir miri
+mishna mishnayoth
+mist mists
+mitochondrion mitochondria
+mitten mittens
+mitzvah mitzvoth
+modiolus modioli
+modulus moduli
+momentum momenta
+mom moms
+momus momi
+monad monades
+money moneys
+monkey monkeys
+monkfish monkfishes
+monochasium monochasia
+monopodium monopodia
+monopteron monoptera
+monopteros monopteroi
+monseigneur messeigneurs
+monsieur messieurs
+monsignor monsignori
+month months
+mooncalf mooncalves
+moonfish moonfishes
+moon moons
+moose moose
+moose moose
+mora morae
+moratorium moratoria
+morceau morceaux
+moresco morescoes
+morisco moriscoes
+morning mornings
+morphallaxis morphallaxes
+morphosis morphoses
+morse morses
+morula morulae
+mosasaurus mosasauri
+moshav moshavim
+moslem moslim
+moslem moslims
+mosquito mosquitoes
+mother mothers
+motion motions
+motto mottoes
+mountain mountains
+mouse mice
+mousse mousses
+mouth mouths
+mouth mouths
+move moves
+mozzarella mozzarella
+mucosa mucosae
+mucro mucrones
+mudejar mudejares
+mudfish mudfishes
+mulatto mulattoes
+multipara multiparae
+murex murices
+muscle muscles
+music musics
+muskellunge muskallunge
+mustache mustaches
+mycelium mycelia
+mycetoma mycetomata
+mycobacterium mycobacteria
+mycorrhiza mycorrhizae
+myelencephalon myelencephala
+myiasis myiases
+myocardium myocardia
+myofibrilla myofibrillae
+myoma myomata
+myosis myoses
+myrmidon myrmidones
+mythos mythoi
+myxoma myxomata
+naevus naevi
+naiad naiades
+nail nails
+name names
+naos naoi
+narcissus narcissi
+naris nares
+nasopharynx nasopharynges
+natatorium natatoria
+nation nations
+naumachia naumachiae
+nauplius nauplii
+nautilus nautili
+navaho navahoes
+navajo navajoes
+nebula nebulae
+nebula nebulas
+neck necks
+necropolis necropoleis
+needlefish needlefishes
+needle needles
+need needs
+negrillo negrilloes
+negrito negritoes
+negro negroes
+nemesis nemeses
+nephridium nephridia
+nereid nereides
+nerve nerves
+nest nests
+net nets
+neurohypophysis neurohypophyses
+neuroma neuromata
+neuropteron neuroptera
+neurosis neuroses
+nevus nevi
+nibelung nibelungen
+nidus nidi
+niece nieces
+niello nielli
+night nights
+nilgai nilgai
+nimbostratus nimbostrati
+nimbus nimbi
+ninja ninjas
+ninjutsu ninjutsus
+noctiluca noctilucae
+nodus nodi
+nog nogs
+noise noises
+nomen nomina
+no noes
+nose noses
+notebook notebooks
+note notes
+notum nota
+noumenon noumena
+nova novae
+novella novelle
+novena novenae
+nubecula nubeculae
+nucellus nucelli
+nucha nuchae
+nucleolus nucleoli
+nucleus nuclei
+nucleus nucleuses
+nullipara nulliparae
+number numbers
+numbfish numbfishes
+numen numina
+nut nuts
+nympha nymphae
+oarfish oarfishes
+oasis oases
+oasis oases
+oatmeal oat meals
+obelus obeli
+obligato obligati
+obolus oboli
+observation observations
+occiput occipita
+occlusion occlusions
+oceanarium oceanaria
+oceanid oceanides
+ocean oceans
+ocellus ocelli
+ochrea ochreae
+ochrea ocreae
+octahedron octahedra
+octopus octopi
+oculus oculi
+odeum odea
+offer offers
+office offices
+offspring offspring
+offspring offsprings
+oil oils
+oldwife oldwives
+oleum olea
+omasum omasa
+omayyad omayyades
+omentum omenta
+ommatidium ommatidia
+ommiad ommiades
+onager onagri
+oogonium oogonia
+ootheca oothecae
+operation operations
+operculum opercula
+opinion opinions
+optimum optima
+opus opera
+opus opuses
+orange oranges
+order orders
+organa organums
+organization organizations
+organon organa
+ornament ornaments
+orthopteron orthoptera
+osculum oscula
+os ora
+os osar
+os ossa
+osteoma osteomata
+ostium ostia
+othman ottomans
+oven ovens
+ovolo ovoli
+ovotestis ovotestes
+ovum ova
+owl owls
+owner owners
+ox ox
+ox oxen
+oxymoron oxymora
+paddlefish paddlefishes
+page pages
+pail pails
+pain pains
+paint paints
+paisa paise
+palea paleae
+palestra palestrae
+palingenesis palingeneses
+pallium pallia
+palmetto palmettoes
+palpus palpi
+pancake pancakes
+pancratium pancratia
+panettone panettoni
+pangolin pangolins
+pan pans
+pantsu pantsus
+paparazzo paparazzi
+paperknife paperknives
+paper papers
+papilla papillae
+papilloma papillomata
+pappus pappi
+papula papulae
+papyrus papyri
+parabasis parabases
+paraleipsis paraleipses
+paralysis paralyses
+paramecium paramecia
+parament paramenta
+paraphysis paraphyses
+parapodium parapodia
+parapraxis parapraxes
+paraselene paraselenae
+parashah parashoth
+parasyntheton parasyntheta
+parazoan parazoa
+parcel parcels
+parenthesis parentheses
+parenthesis parentheses
+parent parents
+parergon parerga
+parhelion parhelia
+paries parietes
+park parks
+parrotfish parrotfishes
+partner partners
+part parts
+party parties
+parulis parulides
+passenger passengers
+paste pastes
+pastorale pastorali
+patagium patagia
+patch patches
+patella patellae
+paterfamilias patresfamilias
+patina patinae
+payment payments
+peace peaces
+pea pease
+pear pears
+peccadillo peccadilloes
+pecten pectines
+pedalo pedaloes
+pekinese pekingese
+pelvis pelves
+pencil pencils
+penetralia penetralium
+penicillium penicillia
+penis penes
+penknife penknives
+penna pennae
+penni pennia
+penny pence
+pen pens
+pentahedron pentahedra
+pentimento pentimenti
+penumbra penumbrae
+peplum pepla
+pericardium pericardia
+perichondrium perichondria
+pericranium pericrania
+peridium peridia
+perigonium perigonia
+perihelion perihelia
+perinephrium perinephria
+perineum perinea
+perionychium perionychia
+periosteum periostea
+periphrasis periphrases
+peristalsis peristalses
+perithecium perithecia
+peritoneum peritonea
+persona personae
+person persons
+pes pedes
+pest pests
+petechia petechiae
+pet pets
+pfennig pfennige
+phalange phalanges
+phallus phalli
+pharynx pharynges
+phenomenon phenomena
+phenomenon phenomenons
+philodendron philodendra
+phlyctaena phlyctenae
+phyle phylae
+phyllotaxis phyllotaxes
+phylloxera phylloxerae
+phylogenesis phylogeneses
+phylum phyla
+pickle pickles
+picture pictures
+pie pies
+pigeon pigeons
+pigfish pigfishes
+pig pigs
+pileum pilea
+pileus pilei
+pimp pimps
+pinetum pineta
+pinfish pinfishes
+pinkie pinkies
+pinko pinkoes
+pinna pinnae
+pinnula pinnulae
+pin pins
+pipefish pipefishes
+pipe pipes
+pirog pirogi
+piscina piscinae
+pithecanthropus pithecanthropi
+pithos pithoi
+placebo placeboes
+placenta placentae
+place places
+plane planes
+planetarium planetaria
+plan plans
+plantation plantations
+plant plants
+planula planulae
+plasmodesma plasmodesmata
+plasmodium plasmodia
+plastic plastics
+plateau plateaux
+plate plates
+playground playgrounds
+play plays
+pleasure pleasures
+plectron plectra
+plenum plena
+pleura pleurae
+pleuron pleura
+plica plicae
+plot plots
+ploughman ploughmen
+plough ploughs
+plum plums
+pneumobacillus pneumobacilli
+pneumococcus pneumococci
+poacher poachers
+pocketknife pocketknives
+pocket pockets
+podetium podetia
+podium podia
+point points
+poison poisons
+police polices
+polish polish
+polis poleis
+pollex pollices
+pollinium pollinia
+pollution pollution
+polychasium polychasia
+polyhedron polyhedra
+polyparium polyparia
+polypus polypi
+polyzoan polyzoa
+polyzoarium polyzoaria
+pons pontes
+pontifex pontifices
+poop poops
+popcorn popcorn
+portamento portamenti
+porter porters
+portico porticoes
+portmanteau portmanteaux
+position positions
+postliminium postliminia
+potato potatoes
+pot pots
+powder powders
+power powers
+practice practices
+praenomen praenomina
+praxis praxes
+predella predelle
+premaxilla premaxillae
+prenomen prenomina
+preposition prepositions
+presa prese
+price prices
+primigravida primigravidae
+primipara primiparae
+primo primi
+primordium primordia
+principium principia
+print prints
+prison prisons
+proboscis proboscides
+produce produces
+professor professors
+profit profits
+proglottid proglottides
+prognosis prognoses
+prolegomenon prolegomena
+prolepsis prolepses
+promycelium promycelia
+pronephros pronephra
+pronephros pronephroi
+pronucleus pronuclei
+property properties
+propositus propositi
+proptosis proptoses
+propylaeum propylaea
+propylon propyla
+proscenium proscenia
+prosencephalon prosencephala
+prose prose
+prosthesis prostheses
+prostomium prostomia
+protasis protases
+protest protests
+prothalamion prothalamia
+prothallium prothallia
+prothallus prothalli
+prothorax prothoraces
+protonema protonemata
+protozoan protozoa
+proventriculus proventriculi
+proviso provisoes
+prytaneum prytanea
+psalterium psalteria
+pseudopodium pseudopodia
+psychoneurosis psychoneuroses
+psychosis psychoses
+pterygium pterygia
+pteryla pterylae
+ptosis ptoses
+pubis pubes
+pudendum pudenda
+pull pulls
+pul puli
+pulvillus pulvilli
+pulvinus pulvini
+pump pumps
+punchinello punchinelloes
+punishment punishments
+pupa pupae
+puparium puparia
+purpose purposes
+push pushs
+putamen putamina
+putto putti
+pycnidium pycnidia
+pygidium pygidia
+pylorus pylori
+pyxidium pyxidia
+pyxis pyxides
+qaddish qaddishim
+quadrennium quadrennia
+quadriga quadrigae
+quale qualia
+quantum quanta
+quarter quarters
+quarterstaff quarterstaves
+quartz quartz
+queen queens
+question questions
+quezal quezales
+quicksand quicksands
+quiet quiets
+quill quills
+quilt quilts
+quince quinces
+quinquennium quinquennia
+quiver quivers
+quiz quizzes
+quiz quizzes
+rabato rabatos
+rabbitfish rabbitfishes
+rabbit rabbits
+rachis rhachises
+radius radii
+radius radiuses
+radix radices
+radula radulae
+rail rails
+railway railways
+rain rains
+rainstorm rainstorms
+rake rakes
+ramentum ramenta
+ramus rami
+range ranges
+ranula ranulae
+ranunculus ranunculi
+raphe raphae
+raphide raphides
+rate rates
+ratfish ratfishes
+rat rats
+ray rays
+reaction reactions
+reading readings
+real reales
+real reis
+rearmouse rearmice
+rearmouse reremice
+reason reasons
+receipt receipts
+record records
+rectrix rectrices
+rectum recta
+rectus recti
+redfish redfishes
+redia rediae
+referendum referenda
+referendum referendums
+refugium refugia
+regret regrets
+regulus reguli
+relation relations
+relationship relationships
+relatum relata
+religion religions
+remex remiges
+representative representatives
+request requests
+reseau reseaux
+residuum residua
+respect respects
+responsum responsa
+rest rests
+rete retia
+retiarius retiarii
+reticulum reticula
+retinaculum retinacula
+retina retinae
+reward rewards
+rhabdomyoma rhabdomyomata
+rhachis rachides
+rhachis rhachides
+rhinencephalon rhinencephala
+rhizobium rhizobia
+rhombus rhombi
+rhonchus rhonchi
+rhyme rhymes
+rhythm rhythms
+rhyton rhyta
+ribbonfish ribbonfishes
+ricercare ricercacari
+ricercare ricercari
+rice rices
+rickettsia rickettsiae
+riddle riddles
+rifle rifles
+rilievo rilievi
+rima rimae
+ring rings
+river rivers
+road roads
+robin robins
+rockfish rockfishes
+rock rocks
+rod rods
+roll rolls
+rom roma
+rondeau rondeaux
+roof roofs
+room rooms
+root roots
+rort rorts
+rosarium rosaria
+rosefish rosefishes
+rose roses
+rostellum rostella
+rostrum rostra
+rotl artal
+rotl artel
+rouleau rouleaux
+route routes
+rub rubs
+ruga rugae
+rule rules
+rumen rumina
+run runs
+sack sacks
+sacrarium sacraria
+sacrum sacra
+saguaro saguaros
+sailfish sailfishes
+sail sails
+salesperson salespeople
+salmonella salmonellae
+salmon salmon
+salmon salmons
+salpa salpae
+salpinx salpinges
+saltarello saltarelli
+salt salts
+salvo salvoes
+sanctum sancta
+sand sands
+sanitarium sanitaria
+santims santimi
+saphena saphenae
+sarcophagus sarcophagi
+sartorius sartorii
+sassanid sassanidae
+sawfish sawfishes
+scaldfish scaldfishes
+scalenus scaleni
+scale scales
+scapula scapulae
+scarabaeus scarabaei
+scarecrow scarecrows
+scarf scarfs
+scarf scarves
+scarf scarves
+scene scenes
+scent scents
+schatchen schatchonim
+schatchen shadchans
+schema schemata
+scherzando scherzandi
+scherzo scherzi
+schmo schmoes
+scholium scholia
+school schools
+schul schuln
+schutzstaffel schutzstaffeln
+science sciences
+scirrhus scirrhi
+scleroma scleromata
+sclerosis scleroses
+sclerotium sclerotia
+scolex scoleces
+scolex scolices
+scopula scopulae
+scoria scoriae
+scotoma scotomata
+screw screws
+scriptorium scriptoria
+scrotum scrota
+scudo scudi
+scutellum scutella
+scutum scuta
+scyphistoma scyphistomae
+scyphozoan scyphozoa
+scyphus scyphi
+sea seas
+seashore seashores
+seat seats
+secondo secondi
+secretary secretaries
+seed seeds
+segno segni
+selection selections
+seleucid seleucidae
+self selves
+senor senores
+sense senses
+sensillum sensilla
+sente lisente
+sente listente
+sent senti
+senusi senussis
+separatrix separatrices
+sephardi sephardim
+septarium septaria
+septennium septennia
+septum septa
+sequela sequelae
+sequestrum sequestra
+seraph seraphim
+series series
+serum sera
+servant servants
+sestertium sestertia
+seta setae
+sgraffito sgraffiti
+shabbas shabbasim
+shabbat shabbatim
+shacko shackoes
+shadchan shadchanim
+shade shades
+shake shakes
+shako shakoes
+shame shames
+shammas shammosim
+shape shapes
+sheaf sheaves
+sheatfish sheatfishes
+sheep sheep
+sheet sheets
+shelf shelves
+shellfish shellfishes
+sheriff sheriffs
+shinleaf shinleaves
+ship ships
+shirt shirts
+shittah shittim
+shmo shmoes
+shock shocks
+shoe shoes
+shofar shofroth
+shophar shophroth
+shop shops
+show shows
+shrewmouse shrewmice
+shrimp shrimp
+shrimp shrimps
+shul shuln
+siddur siddurim
+side sides
+sidewalk sidewalks
+siglos sigloi
+signior signori
+signora signore
+signorina signorine
+sign signs
+siliqua siliquae
+silk silks
+silva silvae
+silverfish silverfishes
+silver silvers
+simulacrum simulacra
+sinciput sincipita
+sinfonia sinfonie
+sink sinks
+sister sisters
+sistrum sistra
+situation situations
+situla situlae
+size sizes
+skate skates
+skin skins
+skirt skirts
+sky skies
+slave slaves
+sleet sleets
+slip slips
+slope slopes
+smalto smalti
+smash smashes
+smell smells
+smile smiles
+smoke smokes
+snaggletooth snaggleteeth
+snailfish snailfishes
+snail snails
+snake snakes
+sneeze sneezes
+snipefish snipefishes
+snow snows
+soap soaps
+society societies
+sock socks
+socman socmen
+soda sodas
+sofa sofas
+solarium solaria
+solatium solatia
+soldo soldi
+solfeggio solfeggi
+solidus solidi
+solo soli
+sol soles
+solum sola
+soma somata
+song songs
+son sons
+soprano soprani
+sordino sordini
+sorosis soroses
+sort sorts
+sorus sori
+sound sounds
+soup soups
+sovkhoz sovkhozy
+space spaces
+spadefish spadefishes
+spade spades
+spadix spadices
+spaghetti spaghetti
+spark sparks
+speaker speakers
+spearfish spearfishes
+species species
+spectrum spectra
+speculum specula
+speed speeds
+spermatium spermatia
+spermatogonium spermatogonia
+spermatozoon spermatozoa
+spermogonium spermogonia
+sphinx sphinges
+spica spicae
+spiculum spicula
+spirillum spirilla
+splayfoot splayfeet
+splenius splenii
+sponge sponges
+spoon spoons
+sporangium sporangia
+sporogonium sporogonia
+sporozoan sporozoa
+spot spots
+springhaas springhase
+spring springs
+spumone spumoni
+sputum sputa
+spy spies
+squama squamae
+square squares
+squash squashes
+squeal squeals
+squilla squillae
+squirrelfish squirrelfishes
+squirrel squirrels
+squiz squizzes
+stadium stadia
+stage stages
+stamen stamina
+staminodium staminodia
+stamp stamps
+stanza stanzas
+stapes stapedes
+staphylococcus staphylococci
+starets staretsy
+starets startsy
+starfish starfishes
+star stars
+start starts
+statement statements
+station stations
+steam steams
+steel steels
+stele stelae
+stemma stemmata
+stem stems
+stenosis stenoses
+stepchild stepchildren
+step steps
+sternum sterna
+stew stews
+stick sticks
+stigma stigmata
+stimulus stimuli
+stimulus stimuli
+stipes stipites
+stirps stirpes
+stitch stitches
+stoa stoae
+stockfish stockfishes
+stocking stockings
+stomach stomachs
+stoma stomata
+stomodaeum stomodaea
+stomodeum stomodea
+stonefish stonefishes
+stone stones
+stone stones
+stop stops
+store stores
+story stories
+stotinka stotinki
+stotinka stotkini
+stove stoves
+stranger strangers
+strappado strappadoes
+stratocumulus stratocumuli
+stratum strata
+stratum strata
+stratus strati
+straw straws
+streaking streakingXXX
+stream streams
+street streets
+streptococcus streptococci
+stretch stretches
+stretto stretti
+stria striae
+string strings
+strobilus strobili
+stroma stromata
+structure structures
+struma strumae
+stucco stuccoes
+study studies
+stylopodium stylopodia
+stylops stylopes
+stylus styli
+subcortex subcortices
+subdelirium subdeliria
+subgenus subgenera
+subindex subindices
+submucosa submucosae
+subphylum subphyla
+substance substances
+substratum substrasta
+succedaneum succedanea
+succubus succubi
+suckerfish suckerfishes
+suckfish suckfishes
+sudarium sudaria
+sudatorium sudatoria
+sugar sugars
+suggestion suggestions
+suit suits
+sulcus sulci
+summa summae
+summer summers
+sunfish sunfishes
+sun suns
+supercargo supercargoes
+superhero superheroes
+supernova supernovae
+superstratum superstrata
+support supports
+surgeonfish surgeonfishes
+surgery surgeries
+surprise surprises
+swami swamies
+sweater sweaters
+sweetiewife sweetiewives
+swellfish swellfishes
+swim swims
+swine swine
+swing swings
+switch switches
+swordfish swordfishes
+syconium syconia
+syllabus syllabi
+syllabus syllabuses
+syllepsis syllepses
+symphysis symphyses
+sympodium sympodia
+symposium symposia
+symposium symposiums
+synapsis synapses
+synarthrosis synarthroses
+synclinorium synclinoria
+syncytium syncytia
+syndesmosis syndesmoses
+synopsis synopses
+syntagma syntagmata
+synthesis syntheses
+syphiloma syphilomata
+syrinx syringes
+syssarcosis syssarcoses
+system systems
+tableau tableaus
+tableau tableaux
+tableau tableaux
+table tables
+tackle tackles
+taenia taeniae
+tail tails
+talk talks
+tallith tallaisim
+tallith tallithes
+tallith tallitoth
+talus tali
+tank tanks
+tapetum tapeta
+tarantula tarantulae
+tarsometatarsus tarsometatarsi
+tarsus tarsi
+taste tastes
+taxi taxies
+taxon taxa
+tax taxes
+tax taxes
+team teams
+tectrix tectrices
+teeth teeth
+tegmen tegmina
+telamon telamones
+telangiectasia telangiectases
+tela telae
+telium telia
+temper tempers
+tempo tempi
+tenaculum tenacula
+tendency tendencies
+tenderfoot tenderfeet
+tenia teniae
+tent tents
+tenuis tenues
+teraph teraphim
+teras terata
+teredo teredines
+tergum terga
+terminus termini
+terrarium terraria
+territory territories
+terzetto terzetti
+tessera tesserae
+testa testae
+testis testes
+test tests
+testudo testudines
+tetrahedron tetrahedra
+tetraskelion tetraskelia
+texture textures
+thalamencephalon thalamencephala
+thalamus thalami
+thallus thalli
+theca thecae
+theory theories
+thesaurus thesauri
+thesis theses
+thesis theses
+thickleaf thickleaves
+thief thieves
+thing things
+tholos tholoi
+thorax thoraces
+thought thoughts
+thread threads
+thrill thrills
+throat throats
+thrombus thrombi
+throne thrones
+thumb thumbs
+thunder thunders
+thymus thymi
+thyrse therses
+thyrsus thyrsi
+tibia tibiae
+ticket tickets
+tiger tigers
+tilefish tilefishes
+time times
+tintinnabulum tintinnabula
+tin tins
+tiro tyros
+title titles
+titmouse titmice
+toadfish toadfishes
+toad toads
+tobacco tobaccoes
+toe toes
+tomato tomatoes
+tomentum tomenta
+tondo tondi
+tongue tongues
+tonneau tonneaux
+toothbrush toothbrushes
+toothpaste toothpastes
+tooth teeth
+tooth teeth
+tophus tophi
+topos topoi
+top tops
+tornado tornadoes
+torpedo torpedoes
+torso torsi
+torus tori
+touch touches
+touraco touracos
+town towns
+toy toys
+trabecula trabeculae
+trachea tracheae
+trade trades
+traditor traditores
+tragus tragi
+trail trails
+train trains
+tramp tramps
+transport transports
+trapezium trapezia
+trapezohedron trapezohedra
+trauma traumata
+tray trays
+treatment treatments
+tree trees
+treponema treponemata
+trichina trichinae
+trick tricks
+triclinium triclinia
+triennium triennia
+triforium triforia
+triggerfish triggerfishes
+trihedron trihedra
+trip trips
+triskelion triskelia
+trisoctahedron trisoctahedra
+triumvir triumviri
+trivium trivia
+trochlea trochleae
+tropaeolum tropaeola
+trouble troubles
+trousseau trousseaux
+trout trout
+trout trouts
+truck trucks
+trunkfish trunkfishes
+tryma trymata
+tuba tubae
+tub tubs
+tuna tuna
+tuna tunas
+turf turves
+turkey turkeys
+turn turns
+twig twigs
+twist twists
+tympanum tympana
+ubermensch ubermenschen
+ugli uglies
+uighur uigurs
+ulna ulnae
+ultimatum ultimata
+umbilicus umbilici
+umbo umbones
+umbra umbrae
+umbrella umbrellas
+uncle uncles
+uncus unci
+underwear under-wears
+unit units
+uredinium uredinia
+uredium uncidia
+uredosorus uredosori
+uredo uredines
+urethra urethrae
+urinalysis urinalyses
+use uses
+uterus uteri
+utriculus utriculi
+uvula uvulae
+vacation vacations
+vacuum vacua
+vagina vaginae
+vagus vagi
+vallecula valleculae
+value values
+van vans
+vaporetto vaporetti
+varix varices
+vasculum vascula
+vase vases
+vas vasa
+vegetable vegetables
+veil veils
+vein veins
+velamen velamina
+velarium velaria
+velum vela
+vena venae
+ventriculus ventriculi
+vermis vermes
+verruca verrucae
+verse verses
+vertebra vertebrae
+vertebra vertebras
+vertex vertexes
+vertex vertices
+vertigo vertigines
+vertigo vertigoes
+vesica vesicae
+vessel vessels
+vest vests
+veto vetoes
+vexillum vexilla
+viaticum viatica
+viator viatores
+vibraculum vibracula
+vibrissa vibrissae
+view views
+villain villains
+villus villi
+vimen vimina
+vinculum vincula
+virago viragoes
+virtuoso virtuosi
+visitor visitors
+vis vires
+vita vitae
+vitellus vitelli
+vitriol vitriol
+vitta vittae
+vivarium vivaria
+voice voices
+volcano volcanoes
+volkslied volkslieder
+volleyball volleyballs
+volta volte
+volva volvae
+vortex vortexes
+vortex vortices
+vorticella vorticellae
+vox voces
+voyage voyages
+vulva vulvae
+wahabi wahhabis
+wail wails
+wale wales
+walk walks
+wall walls
+wanderjahr wanderjahre
+war wars
+wash washes
+waste wastes
+watch watches
+water waters
+wave waves
+wax waxes
+way ways
+weakfish weakfishes
+wealth wealth
+weather weathers
+week weeks
+weight weights
+werewolf werewolves
+wharf wharfs
+wharf wharves
+wheel wheels
+whip whips
+whistle whistles
+whitefish whitefishes
+whore whores
+wife wives
+window windows
+wind winds
+wine wines
+wing wings
+winter winters
+wire wires
+wish wishes
+wolffish wolffishes
+wolf wolves
+woman women
+women women
+woodlouse woodlice
+wood woods
+wool wools
+word words
+work works
+worm worms
+wound wounds
+wreckfish wreckfishes
+wrench wrenches
+wren wrens
+wrist wrists
+writer writers
+writing writings
+wunderkind wunderkinder
+xiphisternum xiphisterna
+yak yaks
+yam yams
+yard yards
+yarn yarns
+year years
+yeshiva yeshivahs
+yeshiva yeshivoth
+yogi yogin
+yoke yokes
+yourself yourselves
+zamindari zamindaris
+zebra zebras
+zecchino zecchini
+zephyr zephyrs
+zero zeroes
+zinc zincs
+zipper zippers
+zoaea zoaeae
+zoaea zoeas
+zoea zoeae
+zoonosis zoonoses
+zoon zoa
+zoosporangium zoosporangia
+zoo zoos
