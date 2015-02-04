@@ -181,43 +181,19 @@ function sayTitle(context, uri, length, imgur, old, record) {
 			return;
 		}
 		title = lib.singleSpace(lib.decode(result.title));
-		if (imgur && title === "imgur: the simple image sharer")
-			return;
+		if (imgur) {
+			if (title === "imgur: the simple image sharer")
+				return;
+			if (title.slice(-8) === " - Imgur")
+				title = title.slice(0, -8);
+		} else if (title.toLowerCase().indexOf(uri.host) > -1) {
+			title = title.replace(new RegExp(" " + uri.host + " ?", "ig"), "");
+		}
 		irc.say(context, title + " ~ " + uri.host.replace("www.", "")+(old ? " (" + old + ")" : ""), false);
 		if (record)
 			recordURL(record[0], record[1], record[2], title);
 	});
 }
-
-/*function sayTitle(context, uri, length, imgur, old, record) {
-	var reg, title;
-	web.get(uri.href, function (error, response, body) {
-		if (error) {
-			logger.warn("error fetching "+uri.href+": "+error);
-			return;
-		}
-		if (!body) {
-			logger.warn(uri.href + " - returned no body.");
-			return;
-		}
-		reg = titleReg.exec(body.replace(/\n|\t|\r/g, ""));
-		if (!reg || !reg[1]) return;
-		title = lib.singleSpace(lib.decode(reg[1]));
-		if (title.toLowerCase().indexOf(uri.host) > -1) {
-			reg = new RegExp(" "+uri.host+" ?", "ig");
-			title = title.replace(reg, "");
-		}
-		if (title.slice(-8) === " - Imgur") title = title.slice(0,-8);
-		if (imgur) { // I know there are a lot of imgur corner cases, but it's really common.
-			if (title === "imgur: the simple image sharer") return; // deal with it
-		}
-		irc.say(context, title+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""), false);
-		if (record) {
-			recordURL(record[0], record[1], record[2], title);
-		}
-		reg = null; title = null; body = null; response = null; error = null;
-	}, length);
-}*/
 
 evListen({
 	handle: "titleSnarfer",
@@ -226,7 +202,8 @@ evListen({
 	callback: function (input) {
 		var uri, ext, allow, old, record, length = 10000;
 		
-		if (input.args) return; // don't process urls in commands
+		if (input.args)
+			return; // don't process urls in commands
 		old = getURL(input.channel, input.match[1]) || false;
 		if (!old)
 			record = [ input.nick, input.channel, input.match[1] ];
@@ -250,7 +227,7 @@ evListen({
 		}
 		if (uri.path.length > 1 && uri.path.indexOf(".") > -1) {
 			ext = uri.path.slice(uri.path.lastIndexOf(".")+1);
-			if (!ext.match(/htm|html|asp|aspx|php|php3|php5/i))
+			if (ext.length <= 4 && !ext.match(/htm|html|asp|aspx|php|php3|php5/i))
 				return; // avoid trying to grab mp4s etc.
 		}
 		// ton of garbage in the first 15000 characters. o_O
