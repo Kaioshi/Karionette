@@ -36,7 +36,7 @@ cmdListen({
 			date = zero(date.getDate()) + "/" + zero(date.getMonth() + 1) + "/" + date.getYear().toString().slice(1);
 			duration = dura(parseInt(body.entry[0].media$group.yt$duration.seconds, 10));
 			views = body.entry[0].yt$statistics.viewCount;
-			if (body.entry[0].gd$rating.numRaters > views)
+			if (body.entry[0].gd$rating && body.entry[0].gd$rating.numRaters && body.entry[0].gd$rating.numRaters > views)
 				views = lib.commaNum(views)+"+";
 			else
 				views = lib.commaNum(views)
