@@ -144,11 +144,11 @@ function youtubeIt(context, id, host, old, record) {
 		try {
 			body = JSON.parse(body).entry;
 			if (body["yt$statistics"] && body["yt$statistics"].viewCount) {
-				views = body.yt$statistics.viewCount;
-				if (body.gd$rating.numRaters > views)
-					views = " - " + lib.commaNum(views) + "+ views";
+				views = " - " + lib.commaNum(body.yt$statistics.viewCount);
+				if (body.gd$rating && body.gd$rating.numRaters && body.gd$rating.numRaters > body.yt$statistics.viewCount)
+					views = views + "+ views";
 				else
-					views = " - " + lib.commaNum(views) + " views";
+					views = views + " views";
 			}
 			duration = dura(parseInt(body.media$group.yt$duration.seconds, 10));
 			date = new Date(body["media$group"]["yt$uploaded"]["$t"]);
@@ -156,11 +156,11 @@ function youtubeIt(context, id, host, old, record) {
 			title = body.title["$t"]+" - ["+duration+"] "+date+views;
 			irc.say(context, title+(old ? " ("+old+")" : ""), false);
 		} catch (err) { // failed to JSON.parse
-			if (body.indexOf("Private video") > -1) {
+			if (typeof body === "string" && body.indexOf("Private video") > -1) {
 				title = "Private video.";
 				irc.say(context, title);
 			} else {
-				logger.warn("Failed to JSON.parse youtube result and it wasn't private.");
+				logger.error("Parsed youtube response but something wasn't right -> " + err);
 			}
 		}
 		if (record) {
