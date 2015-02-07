@@ -170,7 +170,7 @@ function youtubeIt(context, id, host, old, record) {
 	});
 }
 
-function sayTitle(context, uri, length, imgur, old, record) {
+function sayTitle(context, uri, imgur, old, record) {
 	var title, result;
 	web.get("http://felt.ninja:5036/?uri="+uri.href, function (error, response, body) {
 		result = JSON.parse(body);
@@ -200,7 +200,7 @@ evListen({
 	event: "PRIVMSG",
 	regex: /^:[^ ]+ PRIVMSG #[^ ]+ :.*((?:https?:\/\/)[^\x01 ]+)/i,
 	callback: function (input) {
-		var uri, ext, allow, old, record, length = 10000;
+		var uri, ext, allow, old, record;
 		
 		if (input.args)
 			return; // don't process urls in commands
@@ -222,7 +222,7 @@ evListen({
 				uri.href = uri.href.slice(0, -ext.length);
 			}
 		case "imgur.com":
-			sayTitle(input.context, uri, length, true, old, record);
+			sayTitle(input.context, uri, true, old, record);
 			return;
 		}
 		if (uri.path.length > 1 && uri.path.indexOf(".") > -1) {
@@ -230,10 +230,7 @@ evListen({
 			if (ext.length <= 4 && !ext.match(/htm|html|asp|aspx|php|php3|php5/i))
 				return; // avoid trying to grab mp4s etc.
 		}
-		// ton of garbage in the first 15000 characters. o_O
-		if (uri.host.indexOf("kotaku") > -1)
-			length = 20000;
-		sayTitle(input.context, uri, length, false, old, record);
+		sayTitle(input.context, uri, false, old, record);
 	}
 });
 
