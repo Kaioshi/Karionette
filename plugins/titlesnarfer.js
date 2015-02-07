@@ -172,7 +172,7 @@ function youtubeIt(context, id, host, old, record) {
 
 function sayTitle(context, uri, imgur, old, record) {
 	var title, result;
-	web.get("http://felt.ninja:5036/?uri="+uri.href, function (error, response, body) {
+	web.get("http://felt.ninja:5036/?singlespace=1&uri="+uri.href, function (error, response, body) {
 		result = JSON.parse(body);
 		if (result.error) {
 			logger.error("titleSnarfer (sayTitle) API error: " + result.error);
@@ -180,7 +180,7 @@ function sayTitle(context, uri, imgur, old, record) {
 				recordURL(record[0], record[1], record[2]);
 			return;
 		}
-		title = lib.singleSpace(lib.decode(result.title));
+		title = lib.decode(result.title);
 		if (imgur) {
 			if (title === "imgur: the simple image sharer")
 				return;
