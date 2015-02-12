@@ -34,7 +34,7 @@ module.exports = function () {
 	}
 	
 	// Send a message via the open socket
-	function send(data, silent) {
+	function send(data, opts) {
 		if (!data || data.length === 0) {
 			logger.error("Tried to send no data");
 			return;
@@ -43,7 +43,14 @@ module.exports = function () {
 			logger.error("Tried to send data > 510 chars in length: " + data);
 			return;
 		}
-		socket.write(data+"\r\n", "utf8", logger.sent(data, silent));
+		if (opts) {
+			if (opts.nolog)
+				socket.write(data+"\r\n", "utf8");
+			else if (opts.silent)
+				socket.write(data+"\r\n", "utf8", logger.sent(data, true));
+		} else {
+			socket.write(data+"\r\n", "utf8", logger.sent(data));
+		}
 	}
 	
 	// Configure the socket appropriately
@@ -159,7 +166,7 @@ module.exports = function () {
 		},
 		// IRC COMMANDS
 		pong: function (server) {
-			send("PONG :" + server, true);
+			send("PONG :" + server, { nolog: true });
 		},
 		join: function (channel, key) {
 			if (key) {
