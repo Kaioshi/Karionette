@@ -175,7 +175,6 @@ function sayTitle(context, uri, imgur, old, record) {
 	web.get("http://felt.ninja:5036/?singlespace=1&uri="+uri.href, function (error, response, body) {
 		result = JSON.parse(body);
 		if (result.error) {
-			logger.error("titleSnarfer (sayTitle) API error: " + result.error);
 			if (record)
 				recordURL(record[0], record[1], record[2]);
 			return;
