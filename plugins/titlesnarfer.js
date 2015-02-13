@@ -3,8 +3,66 @@
 var url = require("url"),
 	fs = require('fs'),
 	ytReg = /v=([^ &\?]+)/i,
-	ytBReg = /^\/([^ &\?]+)/;
-//	titleReg = /<title?[^>]+>([^<]+)<\/title>/i;
+	ytBReg = /^\/([^ &\?]+)/,
+	titleReg = /<title?[^>]+>([^<]+)<\/title>/i,
+	sayTitle;
+
+if (config.titlesnarfer_inline) {
+	sayTitle = function (context, uri, imgur, old, record, length) {
+		var reg, title;
+		web.get(uri.href, function (error, response, body) {
+			if (error) {
+				logger.warn("error fetching "+uri.href+": "+error);
+				return;
+			}
+			if (!body) {
+				logger.warn(uri.href + " - returned no body.");
+				return;
+			}
+			reg = titleReg.exec(body.replace(/\n|\t|\r/g, ""));
+			if (!reg || !reg[1]) return;
+			title = lib.singleSpace(lib.decode(reg[1]));
+			if (title.toLowerCase().indexOf(uri.host) > -1) {
+				reg = new RegExp(" "+uri.host+" ?", "ig");
+				title = title.replace(reg, "");
+			}
+			if (imgur) { // I know there are a lot of imgur corner cases, but it's really common.
+				if (title.slice(-8) === " - Imgur") // deal with it
+					title = title.slice(0,-8);
+				if (title === "imgur: the simple image sharer")
+					return;
+			}
+			irc.say(context, title+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""), false);
+			if (record)
+				recordURL(record[0], record[1], record[2], title);
+			reg = null; title = null; body = null; response = null; error = null;
+		}, length);
+	};
+} else {
+	sayTitle = function (context, uri, imgur, old, record) {
+		var title, result;
+		web.get("http://felt.ninja:5036/?singlespace=1&uri="+uri.href, function (error, response, body) {
+			result = JSON.parse(body);
+			if (result.error) {
+				if (record)
+					recordURL(record[0], record[1], record[2]);
+				return;
+			}
+			title = lib.decode(result.title);
+			if (imgur) {
+				if (title === "imgur: the simple image sharer")
+					return;
+				if (title.slice(-8) === " - Imgur")
+					title = title.slice(0, -8);
+			} else if (title.toLowerCase().indexOf(uri.host) > -1) {
+				title = title.replace(new RegExp(" " + uri.host + " ?", "ig"), "");
+			}
+			irc.say(context, title + " ~ " + uri.host.replace("www.", "")+(old ? " (" + old + ")" : ""), false);
+			if (record)
+				recordURL(record[0], record[1], record[2], title);
+		});
+	};
+}
 
 if (fs.existsSync("data/urls.json")) {
 	convertUrls();
@@ -170,30 +228,6 @@ function youtubeIt(context, id, host, old, record) {
 	});
 }
 
-function sayTitle(context, uri, imgur, old, record) {
-	var title, result;
-	web.get("http://felt.ninja:5036/?singlespace=1&uri="+uri.href, function (error, response, body) {
-		result = JSON.parse(body);
-		if (result.error) {
-			if (record)
-				recordURL(record[0], record[1], record[2]);
-			return;
-		}
-		title = lib.decode(result.title);
-		if (imgur) {
-			if (title === "imgur: the simple image sharer")
-				return;
-			if (title.slice(-8) === " - Imgur")
-				title = title.slice(0, -8);
-		} else if (title.toLowerCase().indexOf(uri.host) > -1) {
-			title = title.replace(new RegExp(" " + uri.host + " ?", "ig"), "");
-		}
-		irc.say(context, title + " ~ " + uri.host.replace("www.", "")+(old ? " (" + old + ")" : ""), false);
-		if (record)
-			recordURL(record[0], record[1], record[2], title);
-	});
-}
-
 evListen({
 	handle: "titleSnarfer",
 	event: "PRIVMSG",
@@ -221,7 +255,7 @@ evListen({
 				uri.href = uri.href.slice(0, -ext.length);
 			}
 		case "imgur.com":
-			sayTitle(input.context, uri, true, old, record);
+			sayTitle(input.context, uri, true, old, record, 10000);
 			return;
 		}
 		if (uri.path.length > 1 && uri.path.indexOf(".") > -1) {
@@ -229,7 +263,7 @@ evListen({
 			if (ext.length <= 4 && !ext.match(/htm|html|asp|aspx|php|php3|php5/i))
 				return; // avoid trying to grab mp4s etc.
 		}
-		sayTitle(input.context, uri, false, old, record);
+		sayTitle(input.context, uri, false, old, record, 10000);
 	}
 });
 

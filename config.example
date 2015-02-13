@@ -40,3 +40,8 @@ local whippingboys: Deide, ranma, Lumi
 
 # disabled plugins - put in whatever the filename is in plugins, minus ".js" - comma separated.
 # disabled plugins: lfm, manga, dict
+
+# plugin specific options
+# use built in html fondling to find page <title> - will use more memory over time
+# titlesnarfer inline: true
+
