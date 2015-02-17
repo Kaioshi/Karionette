@@ -233,7 +233,7 @@ evListen({
 	event: "PRIVMSG",
 	regex: /^:[^ ]+ PRIVMSG #[^ ]+ :.*((?:https?:\/\/)[^\x01 ]+)/i,
 	callback: function (input) {
-		var uri, ext, allow, old, record;
+		var uri, ext, allow, old, record, videoID;
 		
 		if (input.args)
 			return; // don't process urls in commands
@@ -243,11 +243,19 @@ evListen({
 		uri = url.parse(input.match[1]);
 		switch (uri.host.replace(/www\./gi, "")) {
 		case "youtube.com":
-			youtubeIt(input.context, ytReg.exec(uri.path)[1], uri.host, old, record);
-			return;
+			videoID = ytReg.exec(uri.path);
+			if (videoID) {
+				youtubeIt(input.context, videoID[1], uri.host, old, record);
+				return;
+			}
+			break;
 		case "youtu.be":
-			youtubeIt(input.context, ytBReg.exec(uri.path)[1], uri.host, old, record);
-			return;
+			videoID = ytBReg.exec(uri.path);
+			if (videoID) {
+				youtubeIt(input.context, videoID[1], uri.host, old, record);
+				return;
+			}
+			break;
 		case "i.imgur.com":
 			ext = uri.href.slice(uri.href.lastIndexOf("."));
 			if (ext.match(/\.gif|\.gifv|\.jpg|\.jpeg|\.png|\.webm/i)) {
