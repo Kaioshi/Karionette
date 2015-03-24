@@ -35,7 +35,7 @@ function timeAgo(then, now) {
 
 // Last.fm
 cmdListen({
-	command: "lfm",
+	command: [ "lfm", "lastfm" ],
 	help: "Gets your last played track. Use -bind to bind your nick to your lfm account, "+
 		"allowing you to not have to supply an account name. Else just supply your account name.",
 	syntax: config.command_prefix+"lfm [-bind / -prev / -top / -artist] [<account>|<artist>] - Example: "+
@@ -80,10 +80,10 @@ cmdListen({
 					tags = (tags.length > 0 ? " ~ ["+tags.join(", ")+"]" : "");
 					irc.say(input.context,"Artist: "+result.artist.name+formed+from+tags+
 						" ~ Total Plays: "+lib.commaNum(result.artist.stats.playcount)+
-						", Listeners: "+lib.commaNum(result.artist.stats.listeners));
+						", Listeners: "+lib.commaNum(result.artist.stats.listeners), false);
 					summary = lib.decode(lib.stripHtml(result.artist.bio.summary));
 					summary = (summary.length > 0 ? summary : "There was no artist summary. Did you spell it correctly?");
-					irc.say(input.context, summary, true, 1);
+					irc.say(input.context, summary, false, 1);
 				});
 				return;
 			case "-bind":
@@ -119,7 +119,7 @@ cmdListen({
 									" (Playcount: "+lib.commaNum(track.playcount)+")");
 							}
 						}
-						irc.say(input.context, ret.join(", "));
+						irc.say(input.context, ret.join(", "), false);
 					});
 					return;
 				}
@@ -140,7 +140,7 @@ cmdListen({
 						ret.push("#"+(i+1)+" "+track.artist.name+" ~ "+track.name+
 							" (Playcount: "+lib.commaNum(track.playcount)+")");
 					}
-					irc.say(input.context, ret.join(", "));
+					irc.say(input.context, ret.join(", "), false);
 				});
 				return;
 			case "-prev":
@@ -185,13 +185,13 @@ cmdListen({
 				} catch (e) {
 					body = body.replace(/\n/g, " ");
 					logger.error("Couldn't parse Lastfm's response: "+body);
-					irc.say(input.context, "Couldn't JSON.parse Lastfm's response: "+body);
+					irc.say(input.context, "Couldn't JSON.parse Lastfm's response: "+body, false);
 					return;
 				}
 				if (result.error) {
-					irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+"\" "+song.date);
+					irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+"\" "+song.date, false);
 					irc.say(input.context, "Lastfm couldn't find detailed track info - \""+result.message+
-						"\" (Code: "+result.error+"). Pantsu.");
+						"\" (Code: "+result.error+"). Pantsu.", false);
 					return;
 				}
 				song.userplays = (result.track.userplaycount ? " - User Plays: "+lib.commaNum(result.track.userplaycount) : "");
@@ -219,7 +219,7 @@ cmdListen({
 					irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+
 						"\" ["+song.tags.join(", ")+"] ("+song.duration+") ~ "+lib.commaNum(song.date+song.userplays)+
 						" - Total Plays: "+lib.commaNum(song.playcount)+
-						" - Current Listeners: "+lib.commaNum(song.listeners));
+						" - Current Listeners: "+lib.commaNum(song.listeners), false);
 				});
 			});
 		});
