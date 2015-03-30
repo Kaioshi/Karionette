@@ -3,7 +3,7 @@ cmdListen({
 	help: "Defines words or phrases using wordnik.",
 	syntax: config.command_prefix+"define <word/phrase> - Example: "+config.command_prefix+"define butt",
 	callback: function (input) {
-		var uri, i, definitions, example, query;
+		var uri, i, l, definitions, example, query;
 		if (!input.args) {
 			irc.say(input.context, cmdHelp("define", "syntax"));
 			return;
@@ -18,7 +18,7 @@ cmdListen({
 			"/definitions?limit=3&includeRelated=true&sourceDictionaries=wordnet,wiktionary&useCanonical=false&includeTags=false&api_key="
 			+config.api.wordnik;
 		web.get(uri, function (error, response, body) {
-			globals.lastWordnik = body;
+			//globals.lastWordnik = body;
 			body = JSON.parse(body);
 			if (body.length === 0) {
 				irc.say(input.context, "Couldn't find it. "+lib.randSelect([
@@ -32,14 +32,14 @@ cmdListen({
 				]));
 				return;
 			}
-			for (definitions = " -", i = 0; i < body.length; i++)
+			for (definitions = " -", i = 0, l = body.length; i < l; i++)
 				definitions += " "+(i+1)+") ["+body[i].partOfSpeech+"] "+body[i].text;
 			uri = "http://api.wordnik.com:80/v4/word.json/"+query+"/topExample?useCanonical=false&api_key="+config.api.wordnik;
 			web.get(uri, function (error, response, body) {
 				body = JSON.parse(body);
 				irc.say(input.context, lib.singleSpace(query+definitions), false);
 				if (body.text && body.title)
-					irc.say(input.context, lib.singleSpace(body.text+" - "+body.title), false);
+					irc.say(input.context, lib.decode(lib.singleSpace(body.text+" - "+body.title)), false);
 			});
 		});
 	}
