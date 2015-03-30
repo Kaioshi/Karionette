@@ -5,9 +5,6 @@ var	mangaDB = { mangafox: new fragDB("mangafox", "data/mangafox.json"), mangastr
 	check = {
 		mangafox: function (notify) {
 			if (Object.keys(watched.mangafox).length > 0) {
-				/*web.get("http://feeds.feedburner.com/mangafox/latest_manga_chapters?format=xml", function (error, response, body) {
-					findUpdates(rssToJson(body, "Mangafox"), "mangafox", notify);
-				});*/
 				web.get("http://felt.ninja:5667/?source=mangafox", function (error, response, body) {
 					findUpdates(JSON.parse(body), "mangafox", notify);
 				});
@@ -15,9 +12,6 @@ var	mangaDB = { mangafox: new fragDB("mangafox", "data/mangafox.json"), mangastr
 		},
 		mangastream: function (notify) {
 			if (Object.keys(watched.mangastream).length > 0) {
-				/*web.get("http://mangastream.com/rss", function (error, response, body) {
-					findUpdates(rssToJson(body, "MangaStream"), "mangastream", notify);
-				});*/
 				web.get("http://felt.ninja:5667/?source=mangastream", function (error, response, body) {
 					findUpdates(JSON.parse(body), "mangastream", notify);
 				});
@@ -30,28 +24,6 @@ var	mangaDB = { mangafox: new fragDB("mangafox", "data/mangafox.json"), mangastr
 	};
 
 timers.startTick(300); // start a 5 minute ticker
-
-/*function rssToJson(rss, type) {
-	var ret = [], i, l, link;
-	rss = lib.decode(rss.replace(/\n|\t|\r/g, "")).split("<item>").slice(1);
-	i = 0; l = rss.length;
-	switch (type) {
-		case "Mangafox":
-			link = [ "<feedburner:origLink>", "</feedburner:origLink>" ];
-			break;
-		default:
-			link = [ "<link>", "</link>" ];
-			break;
-	}
-	for (; i < l; i++) {
-		ret.push({
-			title: lib.decode(rss[i].slice(rss[i].indexOf("<title>")+7, rss[i].indexOf("</title>"))),
-			link: rss[i].slice(rss[i].indexOf(link[0])+link[0].length, rss[i].indexOf(link[1])),
-			date: new Date(rss[i].slice(rss[i].indexOf("<pubDate>")+9, rss[i].indexOf("</pubDate>"))).valueOf()
-		});
-	}
-	return ret;
-}*/
 
 function findUpdates(releases, type, notify) {
 	var i = 0, l = releases.length, updates, hits = [],
@@ -80,7 +52,7 @@ function findUpdates(releases, type, notify) {
 						date: date
 					};
 					mangaDB[type].saveOne(title, watched[type][title]);
-					msg = releases[i].title+" is out! \\o/ ~ "+watched[type][title].latest.link;
+					msg = lib.decode(releases[i].title)+" is out! \\o/ ~ "+watched[type][title].latest.link;
 					watched[type][title].announce.forEach(function (target) {
 						if (target[0] === "#") {
 							if (lib.hasElement(ial.Channels(), target)) {
