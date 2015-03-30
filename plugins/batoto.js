@@ -25,9 +25,8 @@ function extractRelease(chapter) {
 
 function htmlToJson(body) {
 	var titleReg = /font-weight:bold;\">([^<]+)/,
-		timeReg = /11px;\"> ([^<]+) <\/td>/,
 		reg = /<a href=\"(http:\/\/bato\.to\/read\/[^\"]+)\"><img src=\"http:\/\/bato\.to\/[^>]+\"\/> ([^<]+)<\/a>/,
-		i, l, eng, tmp, results, title, chapter, time;
+		i, l, eng, tmp, results, title, chapter;
 	tmp = lib.singleSpace(body).replace(/\n|\t|\r/g, "").split("</tr>");
 	i = 0; l = tmp.length; eng = [];
 	for (; i < l; i++) {
@@ -42,12 +41,10 @@ function htmlToJson(body) {
 			i++;
 			chapter = reg.exec(eng[i]);
 			chapter[2] = chapter[2].replace(/ read online/i, "");
-			time = timeReg.exec(eng[i]);
 			results.push({
 				title: title[1],
 				chapter: chapter[2],
 				release: extractRelease(chapter[2]),
-				time: time[1],
 				link: chapter[1]
 			});
 		}
@@ -74,7 +71,7 @@ function findUpdates(releases, notify) {
 						watched[title].title = releases[i].title;
 					watched[title].latest = releases[i];
 					batotoDB.saveOne(title, watched[title]);
-					msg = releases[i].title+" - "+releases[i].chapter+" was released "+releases[i].time+" \\o/ ~ "+releases[i].link;
+					msg = releases[i].title+" - "+releases[i].chapter+" is out \\o/ ~ "+releases[i].link;
 					watched[title].announce.forEach(function (target) {
 						if (target[0] === "#") {
 							if (lib.hasElement(ial.Channels(), target)) {
