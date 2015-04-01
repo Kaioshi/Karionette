@@ -18,8 +18,13 @@ cmdListen({
 			"/definitions?limit=3&includeRelated=true&sourceDictionaries=wordnet,wiktionary&useCanonical=false&includeTags=false&api_key="
 			+config.api.wordnik;
 		web.get(uri, function (error, response, body) {
-			//globals.lastWordnik = body;
-			body = JSON.parse(body);
+			try {
+				body = JSON.parse(body);
+			} catch (e) {
+				globals.lastFailedWordnik = body;
+				logger.warn("Wordnik returned non-JSON");
+				return;
+			}
 			if (body.length === 0) {
 				irc.say(input.context, "Couldn't find it. "+lib.randSelect([
 					"You only have yourself to blame.",
@@ -36,7 +41,13 @@ cmdListen({
 				definitions += " "+(i+1)+") ["+body[i].partOfSpeech+"] "+body[i].text;
 			uri = "http://api.wordnik.com:80/v4/word.json/"+query+"/topExample?useCanonical=false&api_key="+config.api.wordnik;
 			web.get(uri, function (error, response, body) {
-				body = JSON.parse(body);
+				try {
+					body = JSON.parse(body);
+				} catch (e) {
+					globals.lastFailedWordnik = body;
+					logger.warn("Wordnik returned non-JSON");
+					return;
+				}
 				irc.say(input.context, lib.singleSpace(query+definitions), false);
 				if (body.text && body.title)
 					irc.say(input.context, lib.decode(lib.singleSpace(body.text+" - "+body.title)), false);
