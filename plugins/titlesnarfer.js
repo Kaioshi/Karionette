@@ -42,7 +42,13 @@ if (config.titlesnarfer_inline) {
 	sayTitle = function (context, uri, imgur, old, record) {
 		var title, result;
 		web.get("http://felt.ninja:5036/?singlespace=1&uri="+uri.href, function (error, response, body) {
-			result = JSON.parse(body);
+			try {
+				result = JSON.parse(body);
+			} catch (e) {
+				logger.warn("Couldn't parse titlesnarfer JSON, saved body to globals.lastTitleFail - " + e.error);
+				globals.lastTitleFail = body;
+				return;
+			}
 			if (result.error) {
 				if (record)
 					recordURL(record[0], record[1], record[2]);
