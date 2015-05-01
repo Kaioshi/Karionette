@@ -31,7 +31,7 @@ function htmlToJson(body) {
 	i = 0; l = tmp.length; eng = [];
 	for (; i < l; i++) {
 		if (tmp[i].indexOf("lang_English") > -1) {
-			eng.push(lib.decode(tmp[i]));
+			eng.push(tmp[i]);
 		}
 	}
 	i = 0; l = eng.length; results = [];
@@ -39,18 +39,14 @@ function htmlToJson(body) {
 		title = titleReg.exec(eng[i]);
 		if (title) {
 			i++;
-			try {
-				chapter = reg.exec(eng[i]);
-				chapter[2] = chapter[2].replace(/ read online/i, "");
-				results.push({
-					title: title[1],
-					chapter: chapter[2],
-					release: extractRelease(chapter[2]),
-					link: chapter[1]
-				});
-			} catch (e) { // regex probably failed
-				logger.error("Batoto regex failed on a chapter. Probably had a < character in the name: " + e);
-			}
+			chapter = reg.exec(eng[i]);
+			chapter[2] = chapter[2].replace(/ read online/i, "");
+			results.push({
+				title: lib.decode(title[1]),
+				chapter: lib.decode(chapter[2]),
+				release: lib.decode(extractRelease(chapter[2])),
+				link: lib.decode(chapter[1])
+			});
 		}
 	}
 	return results;
