@@ -39,14 +39,18 @@ function htmlToJson(body) {
 		title = titleReg.exec(eng[i]);
 		if (title) {
 			i++;
-			chapter = reg.exec(eng[i]);
-			chapter[2] = chapter[2].replace(/ read online/i, "");
-			results.push({
-				title: title[1],
-				chapter: chapter[2],
-				release: extractRelease(chapter[2]),
-				link: chapter[1]
-			});
+			try {
+				chapter = reg.exec(eng[i]);
+				chapter[2] = chapter[2].replace(/ read online/i, "");
+				results.push({
+					title: title[1],
+					chapter: chapter[2],
+					release: extractRelease(chapter[2]),
+					link: chapter[1]
+				});
+			} catch (e) { // regex probably failed
+				logger.error("Batoto regex failed on a chapter. Probably had a < character in the name: " + e);
+			}
 		}
 	}
 	return results;
