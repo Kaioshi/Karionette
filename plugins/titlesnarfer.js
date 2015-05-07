@@ -195,42 +195,20 @@ function getURL(channel, url) {
 	urls = null;
 }
 
-function youtubeIt(context, id, host, old, record) {
-	var uri = "https://gdata.youtube.com/feeds/api/videos/"+id+"?v=2&alt=json";
-	web.get(uri, function (error, response, body) {
-		var date, duration, title,
-			views = "";
-		if (error) {
-			logger.error("[titlesnarfer[youtubeIt("+id+")]] error: "+error);
-			irc.say(context, "Something has gone awry.");
+function youtubeIt(context, id, old, record) {
+	var resp;
+	web.youtube(id, function (yt) {
+		if (yt.error) {
+			if (yt.error.reason === "keyInvalid")
+				irc.say(context, "You need a youtube API key in the config. See https://developers.google.com/youtube/v3/getting-started");
+			else
+				irc.say(context, yt.error.message+": "+yt.error.reason);
 			return;
 		}
-		try {
-			body = JSON.parse(body).entry;
-			if (body["yt$statistics"] && body["yt$statistics"].viewCount) {
-				views = " - " + lib.commaNum(body.yt$statistics.viewCount);
-				if (body.gd$rating && body.gd$rating.numRaters && body.gd$rating.numRaters > body.yt$statistics.viewCount)
-					views = views + "+ views";
-				else
-					views = views + " views";
-			}
-			duration = dura(parseInt(body.media$group.yt$duration.seconds, 10));
-			date = new Date(body["media$group"]["yt$uploaded"]["$t"]);
-			date = zero(date.getDate())+"/"+zero(date.getMonth()+1)+"/"+date.getYear().toString().slice(1);
-			title = body.title["$t"]+" - ["+duration+"] "+date+views;
-			irc.say(context, title+(old ? " ("+old+")" : ""), false);
-		} catch (err) { // failed to JSON.parse
-			if (typeof body === "string" && body.indexOf("Private video") > -1) {
-				title = "Private video.";
-				irc.say(context, title);
-			} else {
-				logger.error("Parsed youtube response but something wasn't right -> " + err);
-			}
-		}
-		if (record) {
-			recordURL(record[0], record[1], record[2], title);
-		}
-		date = null; views = null; body = null; response = null; error = null;
+		resp = yt.title+" - ["+yt.duration+"] "+yt.date.split("T")[0]+" - "+lib.commaNum(yt.views)+" views";
+		irc.say(context, resp+(old ? " ("+old+")" : ""), false);
+		if (record)
+			recordURL(record[0], record[1], record[2], yt.title);
 	});
 }
 
@@ -251,14 +229,14 @@ evListen({
 		case "youtube.com":
 			videoID = ytReg.exec(uri.path);
 			if (videoID) {
-				youtubeIt(input.context, videoID[1], uri.host, old, record);
+				youtubeIt(input.context, videoID[1], old, record);
 				return;
 			}
 			break;
 		case "youtu.be":
 			videoID = ytBReg.exec(uri.path);
 			if (videoID) {
-				youtubeIt(input.context, videoID[1], uri.host, old, record);
+				youtubeIt(input.context, videoID[1], old, record);
 				return;
 			}
 			break;
