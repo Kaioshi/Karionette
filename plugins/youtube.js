@@ -16,39 +16,35 @@ function dura(secs) {
 	return ret.join(":");
 }
 
+
 cmdListen({
 	command: [ "yt", "youtube", "y" ],
 	help: "Searches youtube!",
 	syntax: config.command_prefix + "yt <search terms> - Example: "+config.command_prefix+
 		"yt we like big booty mitches",
 	callback: function (input) {
-		function ytCB(error, response, body) {
-			var link, title, views, date, duration;
-			body = JSON.parse(body).feed;
-			if (body.openSearch$totalResults.$t === 0 || !body.entry) {
-				irc.say(input.context, input.data + " is not a thing on youtube. :<");
-				body = null;
-				return;
-			}
-			link = "https://youtu.be/" + body.entry[0].link[0].href.split("&")[0].split("=")[1];
-			title = body.entry[0].media$group.media$title.$t;
-			date = new Date(body.entry[0].media$group.yt$uploaded.$t);
-			date = zero(date.getDate()) + "/" + zero(date.getMonth() + 1) + "/" + date.getYear().toString().slice(1);
-			duration = dura(parseInt(body.entry[0].media$group.yt$duration.seconds, 10));
-			views = body.entry[0].yt$statistics.viewCount;
-			if (body.entry[0].gd$rating && body.entry[0].gd$rating.numRaters && body.entry[0].gd$rating.numRaters > views)
-				views = lib.commaNum(views)+"+";
-			else
-				views = lib.commaNum(views)
-			irc.say(input.context, title + " - ["+duration+"] " + date + " - " + views + " views ~ " + link, false);
-			body = null; date = null; title = null; date = null; views = null; link = null;
-		}
-		
-		if (!input.args || !input.args[0]) {
+		var id;
+		if (!input.args) {
 			irc.say(input.context, cmdHelp("yt", "syntax"));
 			return;
 		}
-		web.get("https://gdata.youtube.com/feeds/api/videos?q="+input.data+"&max-results=1&v=2&alt=json", ytCB);
+		web.google("site:youtube.com "+input.data, function (error, results, ret) {
+			if (results === 0) {
+				irc.say(input.context, "\""+input.data+"\" is not a thing on YouTube.", false);
+				return;
+			}
+			id = /v=([^ &\?]+)/i.exec(ret[0].url);
+			web.youtube(id[1], function (yt) {
+				if (yt.error) {
+					if (yt.error.reason === "keyInvalid")
+						irc.say(input.context, "You need a YouTube API key in the config. See https://developers.google.com/youtube/v3/getting-started");
+					else
+						irc.say(input.context, yt.error.message+": "+yt.error.reason);
+					return;
+				}
+				irc.say(input.context, yt.title+" - ["+yt.duration+"] "+yt.date.split("T")[0]+" - "+lib.commaNum(yt.views)+" views", false);
+			});
+		});
 	}
 });
 
