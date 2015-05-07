@@ -17,11 +17,11 @@ autojoin: #anime, #pyoshi
 #nickserv hostname: NickServ@services\.
 #nickserv password: password
 
-#api wordnik: <your key here> - needed for word discovery
+#api wordnik: <your key here> - needed for word discovery and ;define
 #api lfm: <your key here> - needed for ;lfm lookups
 #api wordreference: <your key here> - needed for ;trans(late)
-#api googleurlshortener: <your key here> - needed for ;shorten
 #api googlesearch: <your key here> - go to https://developers.google.com/custom-search/ to get one
+#api youtube: <your key here> - go to https://developers.google.com/youtube/v3/getting-started#before-you-start to get one
 
 # Pass to become admin
 secret: HuHu74Kfj&
