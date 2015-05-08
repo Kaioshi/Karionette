@@ -205,7 +205,7 @@ function youtubeIt(context, id, old, record) {
 				irc.say(context, yt.error.message+": "+yt.error.reason);
 			return;
 		}
-		resp = yt.title+" - ["+yt.duration+"] "+yt.date.split("T")[0]+" - "+lib.commaNum(yt.views)+" views";
+		resp = yt.title+" - ["+yt.duration+"] "+yt.date.split("T")[0]+" - "+yt.channel+" - "+lib.commaNum(yt.views)+" views";
 		irc.say(context, resp+(old ? " ("+old+")" : ""), false);
 		if (record)
 			recordURL(record[0], record[1], record[2], yt.title);
