@@ -47,7 +47,7 @@ cmdListen({
 						irc.say(input.context, yt.error.message+": "+yt.error.reason);
 					return;
 				}
-				irc.say(input.context, yt.title+" - ["+yt.duration+"] "+yt.date.split("T")[0]+" - "+lib.commaNum(yt.views)+" views", false);
+				irc.say(input.context, yt.title+" - ["+yt.duration+"] "+yt.date.split("T")[0]+" - "+lib.commaNum(yt.views)+" views ~ "+yt.link, false);
 			});
 		});
 	}
