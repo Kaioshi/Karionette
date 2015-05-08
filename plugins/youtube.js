@@ -59,7 +59,7 @@ cmdListen({
 					desc = (resp.items[0].snippet.description.length ? ": "+resp.items[0].snippet.description : "");
 					irc.say(input.context, resp.items[0].snippet.title+desc+
 						" - Channel launched on "+resp.items[0].snippet.publishedAt.split("T")[0]+
-						" ~ https://youtube.com/user/"+resp.items[0].snippet.title, false);
+						" ~ https://youtube.com/channel/"+resp.items[0].id, false);
 				});
 			} else {
 				irc.say(input.context, "YouTube returned a "+resp.items[0].id.kind+" response which I don't handle.");
