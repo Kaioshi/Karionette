@@ -23,21 +23,26 @@ cmdListen({
 	syntax: config.command_prefix + "yt <search terms> - Example: "+config.command_prefix+
 		"yt we like big booty mitches",
 	callback: function (input) {
-		var id;
+		var uri;
 		if (!input.args) {
 			irc.say(input.context, cmdHelp("yt", "syntax"));
 			return;
 		}
-		web.google("site:youtube.com "+input.data, function (error, results, ret) {
-			if (results === 0) {
+		if (config.api.youtube === undefined) {
+			irc.say(input.context, "You need a YouTube API key in the config. Get one: https://developers.google.com/youtube/v3/getting-started");
+			return;
+		}
+		uri = "https://www.googleapis.com/youtube/v3/search?part=id&maxResults=1&q="+input.data+"&safeSearch=none&key="+config.api.youtube;
+		web.get(uri, function (error, response, body) {
+			var resp = JSON.parse(body);
+			if (!resp.items.length) {
 				irc.say(input.context, "\""+input.data+"\" is not a thing on YouTube.", false);
 				return;
 			}
-			id = /v=([^ &\?]+)/i.exec(ret[0].url);
-			web.youtube(id[1], function (yt) {
+			web.youtube(resp.items[0].id.videoId, function (yt) {
 				if (yt.error) {
 					if (yt.error.reason === "keyInvalid")
-						irc.say(input.context, "You need a YouTube API key in the config. See https://developers.google.com/youtube/v3/getting-started");
+						irc.say(input.context, "Your YouTube API key is invalid. Get another: https://developers.google.com/youtube/v3/getting-started");
 					else
 						irc.say(input.context, yt.error.message+": "+yt.error.reason);
 					return;
