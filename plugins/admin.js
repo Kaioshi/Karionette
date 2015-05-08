@@ -9,6 +9,71 @@
 var fs = require('fs');
 
 cmdListen({
+	command: "errors",
+	help: "Add/remove yourself to/from the error announcer. Admin only.",
+	syntax: config.command_prefix+"errors announce/unannounce",
+	admin: true,
+	callback: function (input) {
+		var user;
+		if (!input.args) {
+			irc.say(input.context, cmdHelp("errors", "syntax"));
+			return;
+		}
+		switch (input.args[0].toLowerCase()) {
+		case "announce":
+			user = userLogin.Check(input.user);
+			userLogin.setAttribute(user, "errorAnnounce", true);
+			irc.say(input.context, "k.");
+			break;
+		case "unannounce":
+			user = userLogin.Check(input.user);
+			userLogin.unsetAttribute(user, "errorAnnounce");
+			irc.say(input.context, "k.");
+			break;
+		default:
+			irc.say(input.context, cmdHelp("errors", "syntax"));
+			break;
+		}
+	}
+});
+
+function getErrorAnnounceList() {
+	var i = 0, announceTo = userLogin.List(true), l = announceTo.length;
+	for (; i < l; i++) {
+		if (!userLogin.getAttribute(announceTo[i], "errorAnnounce")) {
+			announceTo.splice(i,1); i--;
+		}
+	}
+	return announceTo;
+}
+
+evListen({
+	handle: "errorAnnouncer",
+	event: "Error",
+	callback: function (error) {
+		getErrorAnnounceList().forEach(function (user) {
+			irc.notice(userLogin.getNick(user), "\x02Error\x02: "+error);
+		});
+	}
+});
+
+evListen({
+	handle: "errorStackAnnouncer",
+	event: "Error Stack",
+	callback: function (error) {
+		var announceTo = getErrorAnnounceList(), i, l,
+			messages;
+		error = error.split("\n");
+		announceTo.forEach(function (user) {
+			messages = [];
+			for (i = 0, l = error.length; i < l; i++)
+				messages.push([ "notice", user, error[i], false ]);
+			irc.rated(messages);
+		});
+	}
+});
+
+cmdListen({
 	command: "ignore",
 	help: "Ignores people!",
 	syntax: config.command_prefix+"ignore <mask> - Example: "+config.command_prefix+
