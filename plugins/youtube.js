@@ -65,8 +65,13 @@ cmdListen({
 							irc.say(input.context, yt.error.message+": "+yt.error.reason);
 						return;
 					}
-					irc.say(input.context, yt.title+" - ["+yt.duration+"] "+yt.date.split("T")[0]+
-						" - "+yt.channel+" - "+lib.commaNum(yt.views)+" views ~ "+yt.link, false);
+					yt.nick = input.nick;
+					yt.date = yt.date.split("T")[0];
+					yt.views = lib.commaNum(yt.views);
+					if (config.youtube_format !== undefined)
+						irc.say(input.context, lib.formatOutput(config.youtube_format, yt), false);
+					else
+						irc.say(input.context, lib.formatOutput("{title} - [{duration}] {date} - {channel} - {views} views ~ {link}", yt), false);
 				});
 			});
 			break;
