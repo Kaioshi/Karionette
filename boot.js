@@ -16,13 +16,8 @@ var fs = require('fs'),
 	gc = true, gcInterval = 5000, mwInterval = 30000, repl = true;
 
 if (!fs.existsSync("config")) {
-	if (fs.existsSync("config.js")) {
-		console.error(" * USING OLD config.js CONFIG, PLEASE UPDATE TO \"config\" - SEE config.example");
-		require("./config.js");
-	} else {
-		console.error(" * NO CONFIG FOUND~ SEE config.example");
-		process.exit();
-	}
+	console.error(" * NO CONFIG FOUND~ SEE config.example");
+	process.exit();
 } else {
 	require("./lib/config.js");
 }
