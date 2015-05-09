@@ -45,3 +45,10 @@ local whippingboys: Deide, ranma, Lumi
 # use built in html fondling to find page <title> - will use more memory over time
 # titlesnarfer inline: true
 
+# youtube output format - available sections: {nick} {title} {duration} {date} {channel} {views} {link}
+# if undefined the default is: {title} - [{duration}] {date} - {channel} - {views} views ~ {link}
+#youtube format: {title} - [{duration}] {date} - {views} views ~ {link}
+
+# titlesnarfer youtube output format - available sections: {title} {duration} {date} {channel} {views}
+# if undefined the default is: {title} - [{duration}] {date} - {channel} - {views} views
+#titlesnarfer youtube format: {title} - [{duration}] {date} - {channel} - {views} views
