@@ -38,13 +38,12 @@ cmdListen({
 });
 
 function getErrorAnnounceList() {
-	var i = 0, announceTo = userLogin.List(true), l = announceTo.length;
-	for (; i < l; i++) {
-		if (!userLogin.getAttribute(announceTo[i], "errorAnnounce")) {
-			announceTo.splice(i,1); i--;
-		}
-	}
-	return announceTo;
+	var ret = [];
+	userLogin.List(true).forEach(function (user) {
+		if (userLogin.getAttribute(user, "errorAnnounce"))
+			ret.push(user);
+	});
+	return ret;
 }
 
 evListen({
