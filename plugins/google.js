@@ -12,7 +12,10 @@ cmdListen({
 		}
 		web.google(input.data.trim(), function (error, hits, results) {
 			if (hits > 0) {
-				irc.say(input.context, results[0].title+" ~ "+results[0].url+" ~ "+results[0].content, false, 1);
+				if (config.google_format)
+					irc.say(input.context, lib.formatOutput(config.google_format, results[0]), false, 1);
+				else
+					irc.say(input.context, lib.formatOutput("{title} ~ {url} ~ {content}", results[0]), false, 1);
 			} else {
 				irc.say(input.context, "Couldn't find it. :<");
 			}

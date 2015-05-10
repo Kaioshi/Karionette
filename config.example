@@ -52,3 +52,7 @@ local whippingboys: Deide, ranma, Lumi
 # titlesnarfer youtube output format - available sections: {title} {duration} {date} {channel} {views}
 # if undefined the default is: {title} - [{duration}] {date} - {channel} - {views} views
 #titlesnarfer youtube format: {title} - [{duration}] {date} - {channel} - {views} views
+
+# google output format - available sections: {title} {url} {content}
+# if undefined the default is: {title} ~ {url} ~ {content}
+#google format: {title} ~ {url} ~ {content}
