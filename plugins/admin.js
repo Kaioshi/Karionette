@@ -9,16 +9,56 @@
 var fs = require('fs');
 
 cmdListen({
+	command: "config",
+	help: "Edits the config. Don't touch this unless you know what you're doing.",
+	syntax: config.command_prefix+"config TBD",
+	admin: true,
+	callback: function (input) {
+		if (!lib.checkArgs(input.context, "config", input.args, 1))
+			return;
+		if (input.context[0] === "#") {
+			irc.say(input.context, "You can only fondle the config via query.");
+			return;
+		}
+		switch (input.args[0].toLowerCase()) {
+		case "find":
+			if (!input.args[1]) {
+				irc.say(input.nick, "[Help] Syntax: "+config.command_prefix+"config find <term> - Example: "
+					+config.command_prefix+"config find youtube");
+				return;
+			}
+			var term = input.args.slice(1).join(" ").toLowerCase();
+			var entries = Object.keys(config), ret = [], send = [];
+			entries.forEach(function (entry) {
+				if (entry.indexOf(term) > -1)
+					ret.push(entry+": "+config[entry]);
+			});
+			if (ret.length) {
+				if (ret.length === 1) {
+					irc.say(input.nick, ret[0], false);
+				} else {
+					ret.forEach(function (entry) {
+						send.push([ "say", input.nick, entry, false ]);
+					});
+					irc.rated(send);
+				}
+			} else {
+				irc.say(input.nick, "No config entry matched \""+term+"\".", false);
+			}
+			break;
+		}
+	}
+});
+
+cmdListen({
 	command: "errors",
 	help: "Add/remove yourself to/from the error announcer. Admin only.",
 	syntax: config.command_prefix+"errors announce/unannounce",
 	admin: true,
 	callback: function (input) {
 		var user;
-		if (!input.args) {
-			irc.say(input.context, cmdHelp("errors", "syntax"));
+		if (!lib.checkArgs(input.context, "errors", input.args, 1))
 			return;
-		}
 		switch (input.args[0].toLowerCase()) {
 		case "announce":
 			user = userLogin.Check(input.user);
@@ -79,10 +119,8 @@ cmdListen({
 		"ignore mitch*!*@is.annoying.com",
 	admin: true,
 	callback: function (input) {
-		if (!input.args) {
-			irc.notice(input.nick, cmdHelp("ignore", "syntax"));
+		if (!lib.checkArgs(input.nick, "ignore", input.args, 1))
 			return;
-		}
 		irc.say(input.context, ignore(input.args[0]));
 	}
 });
@@ -95,10 +133,8 @@ cmdListen({
 	syntax: config.command_prefix+"unignore <mask> - Example: "+config.command_prefix+
 		"unignore mitch*!*@is.annoying.com",
 	callback: function (input) {
-		if (!input.args) {
-			irc.notice(input.nick, cmdHelp("unignore", "syntax"));
+		if (!lib.checkArgs(input.nick, "unignore", input.args, 1))
 			return;
-		}
 		irc.say(input.context, unignore(input.args[0]));
 	}
 });
@@ -142,7 +178,8 @@ cmdListen({
 	help: "Sends raw text to the server.",
 	admin: true,
 	callback: function (input) {
-		if (!input.data) return;
+		if (!input.data)
+			return;
 		irc.raw(input.data);
 	}
 });
@@ -154,10 +191,8 @@ cmdListen({
 		+config.command_prefix+"act #anime whips Deide's behind.",
 	admin: true,
 	callback: function (input) {
-		if (!input.args || !input.args[1]) {
-			irc.say(input.context, cmdHelp("act", "syntax"));
+		if (!lib.checkArgs(input.context, "act", input.args, 2))
 			return;
-		}
 		irc.say(input.args[0], "\x01ACTION "+input.args.slice(1).join(" ")+"\x01", false);
 	}
 });
@@ -168,10 +203,8 @@ cmdListen({
 	syntax: config.command_prefix+"join <channel> [<key>] - Example: "+config.command_prefix+"join #anime",
 	admin: true,
 	callback: function (input) {
-		if (!input.args) {
-			irc.say(input.context, cmdHelp("join", "syntax"));
+		if (!lib.checkArgs(input.context, "join", input.args, 1))
 			return;
-		}
 		if (input.args[1]) {
 			irc.join(input.args[0], input.args[1]);
 		} else {
@@ -186,12 +219,10 @@ cmdListen({
 	admin: true,
 	callback: function (input) {
 		if (input.args) {
-			if (input.args[1]) {
-				//irc.raw("PART "+input.args[0]+" :"+input.args.slice(1).join(" "));
+			if (input.args[1])
 				irc.part(input.args[0], input.args.slice(1).join(" "));
-			} else {
+			else
 				irc.part(input.args[0]);
-			}
 		} else {
 			irc.part(input.context);
 		}
