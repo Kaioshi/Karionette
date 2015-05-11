@@ -5,10 +5,9 @@ cmdListen({
 	syntax: config.command_prefix + "last <warning/error> [clear]",
 	admin: true,
 	callback: function (input) {
-		if (!input.args || !input.args[0]) {
-			irc.say(input.context, cmdHelp("last", "syntax"));
+		var messages;
+		if (!lib.checkArgs(input.context, "last", input.args, 1))
 			return;
-		}
 		switch (input.args[0]) {
 			case "err":
 			case "error":
@@ -21,7 +20,11 @@ cmdListen({
 					}
 					irc.say(input.context, "The last recorded error was: "+globals.lastError);
 					if (globals.lastErrstack) {
-						irc.say(input.context, "There's also a recorded error stack - type globals.lastErrstack in the console.");
+						messages = [];
+						globals.lastErrstack.split("\n").forEach(function (err) {
+							messages.push([ "say", input.context, err, false ]);
+						});
+						irc.rated(messages);
 					}
 					break;
 				}
