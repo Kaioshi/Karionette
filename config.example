@@ -45,14 +45,17 @@ local whippingboys: Deide, ranma, Lumi
 # use built in html fondling to find page <title> - will use more memory over time
 # titlesnarfer inline: true
 
-# youtube output format - available sections: {nick} {title} {duration} {date} {channel} {views} {link}
+# youtube output format - available sections: {nick} {title} {duration} {date} {channel} {views} {link} {b}
+# {b} is the bold character, put it on either side of the word you want in bold like so: {b}{channel}{b}
 # if undefined the default is: {title} - [{duration}] {date} - {channel} - {views} views ~ {link}
 #youtube format: {title} - [{duration}] {date} - {views} views ~ {link}
 
-# titlesnarfer youtube output format - available sections: {title} {duration} {date} {channel} {views}
+# titlesnarfer youtube output format - available sections: {title} {duration} {date} {channel} {views} {b}
+# {b} is the bold character, put it on either side of the word you want in bold like so: {b}{channel}{b}
 # if undefined the default is: {title} - [{duration}] {date} - {channel} - {views} views
 #titlesnarfer youtube format: {title} - [{duration}] {date} - {channel} - {views} views
 
-# google output format - available sections: {title} {url} {content}
+# google output format - available sections: {title} {url} {content} {b}
+# {b} is the bold character, put it on either side of the word you want in bold like so: {b}{title}{b}
 # if undefined the default is: {title} ~ {url} ~ {content}
 #google format: {title} ~ {url} ~ {content}
