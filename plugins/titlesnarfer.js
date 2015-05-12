@@ -20,7 +20,8 @@ if (config.titlesnarfer_inline) {
 				return;
 			}
 			reg = titleReg.exec(body.replace(/\n|\t|\r/g, ""));
-			if (!reg || !reg[1]) return;
+			if (!reg || !reg[1])
+				return;
 			title = lib.singleSpace(lib.decode(reg[1]));
 			if (title.toLowerCase().indexOf(uri.host) > -1) {
 				reg = new RegExp(" "+uri.host+" ?", "ig");
@@ -207,10 +208,12 @@ function youtubeIt(context, id, old, record) {
 		}
 		yt.date = yt.date.split("T")[0];
 		yt.views = lib.commaNum(yt.views);
-		if (config.titlesnarfer_youtube_format !== undefined)
+		if (config.titlesnarfer_youtube_format !== undefined) {
+			yt.b = '\x02';
 			resp = lib.formatOutput(config.titlesnarfer_youtube_format, yt);
-		else
+		} else {
 			resp = lib.formatOutput("{title} - [{duration}] {date} - {channel} - {views} views", yt);
+		}
 		irc.say(context, resp+(old ? " ("+old+")" : ""), false);
 		if (record)
 			recordURL(record[0], record[1], record[2], yt.title);
