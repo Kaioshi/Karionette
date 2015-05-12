@@ -9,48 +9,6 @@
 var fs = require('fs');
 
 cmdListen({
-	command: "config",
-	help: "Edits the config. Don't touch this unless you know what you're doing.",
-	syntax: config.command_prefix+"config TBD",
-	admin: true,
-	callback: function (input) {
-		if (!lib.checkArgs(input.context, "config", input.args, 1))
-			return;
-		if (input.context[0] === "#") {
-			irc.say(input.context, "You can only fondle the config via query.");
-			return;
-		}
-		switch (input.args[0].toLowerCase()) {
-		case "find":
-			if (!input.args[1]) {
-				irc.say(input.nick, "[Help] Syntax: "+config.command_prefix+"config find <term> - Example: "
-					+config.command_prefix+"config find youtube");
-				return;
-			}
-			var term = input.args.slice(1).join(" ").toLowerCase();
-			var entries = Object.keys(config), ret = [], send = [];
-			entries.forEach(function (entry) {
-				if (entry.indexOf(term) > -1)
-					ret.push(entry+": "+config[entry]);
-			});
-			if (ret.length) {
-				if (ret.length === 1) {
-					irc.say(input.nick, ret[0], false);
-				} else {
-					ret.forEach(function (entry) {
-						send.push([ "say", input.nick, entry, false ]);
-					});
-					irc.rated(send);
-				}
-			} else {
-				irc.say(input.nick, "No config entry matched \""+term+"\".", false);
-			}
-			break;
-		}
-	}
-});
-
-cmdListen({
 	command: "errors",
 	help: "Add/remove yourself to/from the error announcer. Admin only.",
 	syntax: config.command_prefix+"errors announce/unannounce",
