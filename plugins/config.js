@@ -26,6 +26,8 @@ function changeConfig(field, entry) { // for user input to config
 	// these are auto generated or a function.
 	if (field.match(/nick$|saveChanges|address/i))
 		return false;
+	if (entry === undefined || entry.length === 0)
+		return false;
 	// new entry!? need a validator for this in future
 	if (config[field] === undefined) {
 		config[field] = entry;
