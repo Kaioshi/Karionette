@@ -36,12 +36,9 @@ cmdListen({
 });
 
 function getErrorAnnounceList() {
-	var ret = [];
-	userLogin.List(true).forEach(function (user) {
-		if (userLogin.getAttribute(user, "errorAnnounce"))
-			ret.push(user);
+	return userLogin.List(true).filter(function (user) {
+		return userLogin.getAttribute(user, "errorAnnounce");
 	});
-	return ret;
 }
 
 evListen({
