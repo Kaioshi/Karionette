@@ -1,14 +1,14 @@
+"use strict";
 // config fondler
 
 function configEntryToString(entry) {
-	var entries;
 	switch (typeof entry) {
 	case 'string':
 		return entry;
 	case 'number':
 		return entry.toString();
 	case 'object':
-		if (entry.length !== undefined)
+		if (Array.isArray(entry))
 			return entry.join(", ");
 		// must be the api object
 		return "you have to edit the config directly to mess with APIs.";
