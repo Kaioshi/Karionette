@@ -123,6 +123,7 @@ function createSandbox() {
 		cmdHelp: caveman.cmdHelp,
 		cmdList: caveman.cmdList,
 		cmdExists: caveman.cmdExists,
+		getAliasHelp: caveman.getAliasHelp,
 		ignore: caveman.ignore,
 		unignore: caveman.unignore,
 		ignoreList: caveman.ignoreList,
