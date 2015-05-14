@@ -150,6 +150,8 @@ cmdListen({
 				return;
 			}
 			aliasDB.removeOne(cmd);
+			if (helpDB.getOne(cmd))
+				helpDB.removeOne(cmd);
 			perms.Action(input.user, "delete all", "alias", cmd);
 			irc.say(input.context, "Removed :)");
 			break;
