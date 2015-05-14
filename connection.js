@@ -97,7 +97,7 @@ module.exports = function () {
 		configureSocket();
 		socket.connect(params.port, params.server, function () {
 			send("NICK " + sanitise(params.nickname));
-			send("USER " + sanitise(params.username) + " localhost * " + sanitise(params.realname));
+			send("USER " + sanitise(params.username) + " localhost * :" + sanitise(params.realname));
 			connected = true;
 			if (connectInterval) {
 				clearInterval(connectInterval);
