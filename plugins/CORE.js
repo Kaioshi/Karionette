@@ -13,7 +13,7 @@ evListen({
 	callback: function (input) {
 		var i;
 		/*
-		 * must be the one we set in config.js, and we're not connected yet.
+		 * must be the one we set in config, and we're not connected yet.
 		 * since it's tracked after that point, and only when it's changed
 		 * successfully.
 		 */
@@ -210,27 +210,35 @@ cmdListen({
 cmdListen({
 	command: "help",
 	help: "Seriously?",
-	syntax: config.command_prefix+"help [<command you want help with>] - supply no command in order to list commands.",
+	syntax: config.command_prefix+"help [<command or alias you want help with>] - supply no command in order to list commands (does not list aliases).",
 	callback: function (input) {
-		var found, cmd, cmdArr, i, help, syntax, options, commandList;
+		var cmd, cmdArr, i, help, syntax, options;
 		if (!input.args || !input.args[0]) {
 			// show all commands
-			commandList = cmdList();
-			irc.say(input.context, "Available commands: "+commandList.sort().join(", "));
+			irc.say(input.context, "Available commands: "+cmdList().sort().join(", "));
 			return;
 		}
-		found = false;
 		cmd = input.args[0].toLowerCase();
 		help = cmdHelp(cmd, "help");
 		if (help) {
 			syntax = cmdHelp(cmd, "syntax");
 			options = cmdHelp(cmd, "options");
 			irc.say(input.context, help);
-			if (syntax) irc.say(input.context, syntax);
-			if (options) irc.say(input.context, options);
-			found = true;
+			if (syntax)
+				irc.say(input.context, syntax);
+			if (options)
+				irc.say(input.context, options);
 		} else {
-			irc.say(input.context, "\""+cmd+"\" either has no help or isn't a command.");
+			// maybe it's an alias! with alias help set!
+			help = getAliasHelp(cmd);
+			if (help && (help.help || help.syntax)) {
+				if (help.help)
+					irc.say(input.context, "[Help] "+help.help, false);
+				if (help.syntax)
+					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+cmd+" "+help.syntax);
+			} else {
+				irc.say(input.context, "\""+cmd+"\" either has no help set, or isn't a command or alias.");
+			}
 		}
 	}
 });
