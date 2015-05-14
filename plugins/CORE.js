@@ -212,7 +212,7 @@ cmdListen({
 	help: "Seriously?",
 	syntax: config.command_prefix+"help [<command or alias you want help with>] - supply no command in order to list commands (does not list aliases).",
 	callback: function (input) {
-		var cmd, cmdArr, i, help, syntax, options;
+		var cmd, cmdArr, help, syntax, options;
 		if (!input.args || !input.args[0]) {
 			// show all commands
 			irc.say(input.context, "Available commands: "+cmdList().sort().join(", "));
@@ -235,7 +235,7 @@ cmdListen({
 				if (help.help)
 					irc.say(input.context, "[Help] "+help.help, false);
 				if (help.syntax)
-					irc.say(input.context, "[Help] Syntax: "+config.command_prefix+cmd+" "+help.syntax);
+					irc.say(input.context, "[Help] Alias syntax: "+config.command_prefix+cmd+" "+help.syntax);
 			} else {
 				irc.say(input.context, "\""+cmd+"\" either has no help set, or isn't a command or alias.");
 			}
