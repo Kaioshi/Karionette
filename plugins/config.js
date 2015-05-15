@@ -15,7 +15,7 @@ var configHelp = {
 	"logging debug": "Shows debug lines. You probably don't want this on. Currently: "+config.logging_debug,
 	"logging chat": "Shows user chat lines. Currently: "+config.logging_chat,
 	"logging serv": "Shows server output. Currently: "+config.logging_serv,
-	"logging_traffic": "Shows user join/part/mode/topic etc. Currently: "+config.traffic,
+	"logging traffic": "Shows user join/part/mode/topic etc. Currently: "+config.logging_traffic,
 	"api wordnik": "The API Key needed for the Wordnik plugin. Provides "+config.command_prefix+"define - You must edit the config directly to \
 		enter/change API keys. Source: http://developer.wordnik.com",
 	"api lfm": "The API Key needed for the last.fm plugin. You must edit the config directly to enter/change API keys. Source: http://last.fm",
