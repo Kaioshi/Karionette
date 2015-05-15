@@ -17,9 +17,8 @@ autojoin: #anime, #pyoshi
 #nickserv hostname: NickServ@services\.
 #nickserv password: password
 
-#api wordnik: <your key here> - needed for word discovery and ;define
-#api lfm: <your key here> - needed for ;lfm lookups
-#api wordreference: <your key here> - needed for ;trans(late)
+#api wordnik: <your key here> - needed for word discovery and ;define - go to http://developer.wordnik.com to get one
+#api lfm: <your key here> - needed for ;lfm lookups - go to http://last.fm to get one
 #api googlesearch: <your key here> - go to https://developers.google.com/custom-search/ to get one
 #api youtube: <your key here> - go to https://developers.google.com/youtube/v3/getting-started#before-you-start to get one
 
