@@ -1,6 +1,36 @@
 "use strict";
 // config fondler
 
+var configHelp = {
+	"command prefix": "Character used before commands. Currently: "+config.command_prefix,
+	"server": "Server the bot connects to. Currently: "+config.server,
+	"port": "Port the bot connects on. Currently: "+config.port,
+	"realname": "Bot's \"realname\", shows up in /whois. Currently: "+config.realname,
+	"nickname": "Comma separated list of nicks for the bot. Uses the first one by default, switches if it's taken. Currently: "+config.nickname.join(", "),
+	"username": "Bot's username, shows up in /whois and join/part etc. Currently: "+config.username,
+	"autojoin": "Comma separated list of channels for the bot to join after connecting. Currently: "+config.autojoin.join(", "),
+	"secret": "Secret password to become admin.",
+	"logging timestamp": "Timestamps the bot's output. Currently: "+config.logging_timestamp,
+	"logging info": "Shows writes and things in the bot's output. Currently: "+config.logging_info,
+	"logging debug": "Shows debug lines. You probably don't want this on. Currently: "+config.logging_debug,
+	"logging chat": "Shows user chat lines. Currently: "+config.logging_chat,
+	"logging serv": "Shows server output. Currently: "+config.logging_serv,
+	"logging_traffic": "Shows user join/part/mode/topic etc. Currently: "+config.traffic,
+	"api wordnik": "The API Key needed for the Wordnik plugin. Provides "+config.command_prefix+"define - Source: http://developer.wordnik.com",
+	"api lfm": "The API Key needed for the last.fm plugin. Source: http://last.fm",
+	"api googlesearch": "The API Key needed for Google plugin. Source: https://developers.google.com/custom-search/",
+	"api youtube": "The API Key needed for the YouTube plugin. Source: https://developers.google.com/youtube/v3/getting-started#before-you-start",
+	"local whippingboys": "Comma separated list of nicks / names to be used in comical replies by the bot.",
+	"disabled plugins": "Comma separated list of plugins to not load. Currently: "+config.disabled_plugins.join(", "),
+	"titlesnarfer inline": "Use inline html regex to find page titles, rather than the felt.ninja tool. Currently: "+config.titlesnarfer_inline,
+	"youtube format": "Defines the format used in "+config.command_prefix+"yt search responses. Available fields are {title} {duration} {date} {channel} \
+		{views} {link} {b}. {b} is the bold character, surround a word with it to make it bold. Currently: "+config.youtube_format,
+	"titlesnarfer youtube format": "Defines the format used by titlesnarfer when it encounters YouTube links. Available fields are {title} {duration} {date} \
+		{channel} {views} {b}. {b} is the bold character, surround a word with it to make it bold. Currently: "+config.titlesnarfer_youtube_format,
+	"google format": "Defines the format used in "+config.command_prefix+"g search responses. Available fields are {title} {url} {content} {b}. {b} is \
+		the bold character, surround a word with it to make it bold. Currently: "+config.google_format
+};
+
 function configEntryToString(entry) {
 	switch (typeof entry) {
 	case 'string':
@@ -166,7 +196,13 @@ cmdListen({
 			else
 				irc.say(input.context, "Nope.");
 			break;
-		case "help": // REMINDER: add this.
+		case "help":
+			term = input.args.slice(1).join(" ").toLowerCase();
+			if (!configHelp[term])
+				irc.say(input.context, "That isn't a valid config entry.");
+			else
+				irc.say(input.context, term+" - "+configHelp[term].replace(/undefined$/, "Not set"), false);
+			break;
 		default:
 			irc.say(input.context, cmdHelp("config", "syntax"));
 			break;
