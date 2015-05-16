@@ -64,12 +64,9 @@ cmdListen({
 		returns that result, so you may get something random sometimes, if it didn't know about the show.",
 	syntax: config.command_prefix+"tvrage <show name> - Example: "+
 		config.command_prefix+"tvrage Sherlock",
+	arglen: 1,
 	callback: function (input) {
 		var uri;
-		if (!input.args) {
-			irc.say(input.context, cmdHelp("tvrage", "syntax"));
-			return;
-		}
 		uri = "http://services.tvrage.com/tools/quickinfo.php?show="+input.data;
 		web.get(uri, function (error, response, body) {
 			if (body.indexOf("\n") === -1) { // this is tvrage's version of an error.
