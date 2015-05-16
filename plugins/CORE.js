@@ -133,11 +133,8 @@ cmdListen({
 	command: "say",
 	help: "Makes me say something. Duh!",
 	syntax: config.command_prefix+"say <what you want me to say>",
+	arglen: 1,
 	callback: function (input) {
-		if (!input.args) {
-			irc.say(input.context, cmdHelp("say", "syntax"));
-			return;
-		}
 		irc.say(input.context, input.data);
 	}
 });
@@ -146,11 +143,8 @@ cmdListen({
 	command: "sayuni",
 	help: "Makes me say something, Unicode-style. Represent!",
 	syntax: config.command_prefix+"sayuni <what you want me to say>",
+	arglen: 1,
 	callback: function (input) {
-		if (!input.args) {
-			irc.say(input.context, cmdHelp("sayuni", "syntax"));
-			return;
-		}
 		irc.say(input.context, input.data, false);
 	}
 });
@@ -159,11 +153,8 @@ cmdListen({
 	command: "action",
 	help: "Makes me do something. Probably erotic.",
 	syntax: config.command_prefix+"action <what you want me to do>",
+	arglen: 1,
 	callback: function (input) {
-		if (!input.args) {
-			irc.say(input.context, cmdHelp("action", "syntax"));
-			return;
-		}
 		irc.action(input.context, input.data);
 	}
 });
@@ -172,11 +163,8 @@ cmdListen({
 	command: "actionuni",
 	help: "Makes me do stuff in a Unicode-kinda way.",
 	syntax: config.command_prefix+"actionuni <what you want me to do>",
+	arglen: 1,
 	callback: function (input) {
-		if (!input.args) {
-			irc.say(input.context, cmdHelp("actionuni", "syntax"));
-			return;
-		}
 		irc.action(input.context, input.data, false);
 	}
 });
@@ -185,6 +173,7 @@ cmdListen({
 	command: "notice",
 	help: "Makes me notice things. Like your new shoes!",
 	syntax: config.command_prefix+"notice <target> <what you want me to notice them>",
+	arglen: 1,
 	callback: function (input) {
 		if (input.args[0][0] === "#" && !userLogin.isAdmin(input.user)) {
 			irc.notice(input.nick, "No. Only admins can make me notice an entire channel.");
@@ -198,6 +187,7 @@ cmdListen({
 	command: "noticeuni",
 	help: "Makes me notice things in a Unicode-kinda way.",
 	syntax: config.command_prefix+"noticeuni <target> <what you want me to notice them>",
+	arglen: 1,
 	callback: function (input) {
 		if (input.args[0][0] === "#" && !userLogin.isAdmin(input.user)) {
 			irc.notice(input.nick, "No. Only admins can make me notice an entire channel.");
@@ -213,8 +203,7 @@ cmdListen({
 	syntax: config.command_prefix+"help [<command or alias you want help with>] - supply no command in order to list commands (does not list aliases).",
 	callback: function (input) {
 		var cmd, cmdArr, help, syntax, options;
-		if (!input.args || !input.args[0]) {
-			// show all commands
+		if (!input.args) { // show all commands
 			irc.say(input.context, "Available commands: "+cmdList().sort().join(", "));
 			return;
 		}
