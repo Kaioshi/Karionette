@@ -5,12 +5,9 @@ cmdListen({
 	help: "Identifies you with "+config.nick+". See also: unidentify, whoami, adduser, deluser",
 	syntax: config.command_prefix+"identify <username> <password> - via query. \
 		You can supply the bot's secret code as the password, if need be.",
+	arglen: 2,
 	callback: function (input) {
 		var result, user;
-		if (!input.args || !input.args[0] || !input.args[1]) {
-			irc.say(input.context, cmdHelp("identify", "syntax"));
-			return;
-		}
 		if (input.channel) {
 			irc.say(input.context, "You need to identify via query. -.-");
 			return;
@@ -136,12 +133,9 @@ cmdListen({
 	help: "Adds a user to the bot. See also: deluser, whoami, identify, unidentify",
 	syntax: config.command_prefix+"adduser <username> <password> [<secret>] - \
 		via query. Supply the bot's secret code to be recognised as an admin.",
+	arglen: 2,
 	callback: function (input) {
 		var result;
-		if (!input.args || !input.args[0] || !input.args[1]) {
-			irc.say(input.context, cmdHelp("register", "syntax"));
-			return;
-		}
 		if (input.channel) {
 			irc.say(input.context, "Why would you do this here? Try again via query. \
 				Hopefully with a different password!");
@@ -172,12 +166,9 @@ cmdListen({
 	help: "Removes a user from the bot. See also: adduser, whoami, identify, unidentify",
 	syntax: config.command_prefix+"deluser <username> [<password>] - via query. \
 		Admins don't need the password if it's another user.",
+	arglen: 1,
 	callback: function (input) {
 		var result;
-		if (!input.args || !input.args[0]) {
-			irc.say(input.context, cmdHelp("deluser", "syntax"));
-			return;
-		}
 		result = userLogin.Remove(input.user, input.args[0], input.args[1]);
 		if (result === -1) {
 			irc.say(input.context, "There is no "+input.data+".");
