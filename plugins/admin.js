@@ -13,10 +13,9 @@ cmdListen({
 	help: "Add/remove yourself to/from the error announcer. Admin only.",
 	syntax: config.command_prefix+"errors announce/unannounce",
 	admin: true,
+	arglen: 1,
 	callback: function (input) {
 		var user;
-		if (!lib.checkArgs(input.context, "errors", input.args, 1))
-			return;
 		switch (input.args[0].toLowerCase()) {
 		case "announce":
 			user = userLogin.Check(input.user);
@@ -73,9 +72,8 @@ cmdListen({
 	syntax: config.command_prefix+"ignore <mask> - Example: "+config.command_prefix+
 		"ignore mitch*!*@is.annoying.com",
 	admin: true,
+	arglen: 1,
 	callback: function (input) {
-		if (!lib.checkArgs(input.nick, "ignore", input.args, 1))
-			return;
 		irc.say(input.context, ignore(input.args[0]));
 	}
 });
@@ -84,9 +82,10 @@ cmdListen({
 cmdListen({
 	command: "unignore",
 	help: "Unignores!",
-	admin: true,
 	syntax: config.command_prefix+"unignore <mask> - Example: "+config.command_prefix+
 		"unignore mitch*!*@is.annoying.com",
+	admin: true,
+	arglen: 1,
 	callback: function (input) {
 		if (!lib.checkArgs(input.nick, "unignore", input.args, 1))
 			return;
@@ -131,10 +130,10 @@ cmdListen({
 cmdListen({
 	command: "raw",
 	help: "Sends raw text to the server.",
+	syntax: config.command_prefix+"raw <text to send to server>",
 	admin: true,
+	arglen: 1,
 	callback: function (input) {
-		if (!input.data)
-			return;
 		irc.raw(input.data);
 	}
 });
@@ -145,9 +144,8 @@ cmdListen({
 	syntax: config.command_prefix+"act <target> <action to do> - Example: "
 		+config.command_prefix+"act #anime whips Deide's behind.",
 	admin: true,
+	arglen: 1,
 	callback: function (input) {
-		if (!lib.checkArgs(input.context, "act", input.args, 2))
-			return;
 		irc.say(input.args[0], "\x01ACTION "+input.args.slice(1).join(" ")+"\x01", false);
 	}
 });
@@ -157,9 +155,8 @@ cmdListen({
 	help: "Joins channels. Admin only.",
 	syntax: config.command_prefix+"join <channel> [<key>] - Example: "+config.command_prefix+"join #anime",
 	admin: true,
+	arglen: 1,
 	callback: function (input) {
-		if (!lib.checkArgs(input.context, "join", input.args, 1))
-			return;
 		if (input.args[1]) {
 			irc.join(input.args[0], input.args[1]);
 		} else {
@@ -188,8 +185,9 @@ cmdListen({
 	command: "autojoin",
 	help: "Adds channels to the autojoin list.",
 	admin: true,
+	arglen: 1,
 	callback: function (input) {
-		if (input.args && input.args[0][0] === "#") {
+		if (input.args[0][0] === "#") {
 			config.autojoin = config.autojoin || [];
 			if (lib.hasElement(config.autojoin, input.args[0])) {
 				irc.say(input.context, input.args[0]+" is already on the autojoin list.");
@@ -208,8 +206,9 @@ cmdListen({
 	command: "unautojoin",
 	help: "Removes channels from the autojoin list.",
 	admin: true,
+	arglen: 1,
 	callback: function (input) {
-		if (input.args && input.args[0][0] === "#") {
+		if (input.args[0][0] === "#") {
 			if (config.autojoin && config.autojoin.length > 0 && lib.hasElement(config.autojoin, input.args[0])) {
 				input.args[0] = input.args[0].toLowerCase();
 				config.autojoin = config.autojoin.filter(function (element) {
