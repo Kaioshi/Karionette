@@ -45,40 +45,39 @@ cmdListen({
 			ret = [];
 		if (!input.args || !input.args[0]) {
 			memories = Object.keys(memDB.getAll());
-			if (memories.length > 0) {
+			if (memories.length > 0)
 				irc.say(input.context, "I have "+memories.length+" memories: "+lib.sort(memories).join(", "), false);
-			} else {
+			else
 				irc.say(input.context, "I..I don't remember anything. ;~;");
-			}
 			return;
 		}
 		switch (input.args[0]) {
-			case "-f":
-			case "-find":
-				if (!input.args[1]) {
-					irc.say(input.context, cmdHelp("memories", "syntax"));
-					return;
-				}
-				term = input.args.slice(1).join(" ");
-				memories = memDB.getAll();
-				Object.keys(memories).forEach(function (memory) {
-					if (memory.indexOf(term) > -1) handles.push(memory);
-					else if (memories[memory][1].indexOf(term) > -1) ret.push(memory);
-				});
-				if (handles.length === 0 && ret.length === 0) {
-					irc.say(input.context, "No matches. :<");
-				} else {
-					if (handles.length > 0) {
-						irc.say(input.context, "Memory handles matching \""+term+"\": "+lib.sort(handles).join(", "), false);
-					}
-					if (ret.length > 0) {
-						irc.say(input.context, "Memories matching \""+term+"\": "+lib.sort(ret).join(", "), false);
-					}
-				}
-				break;
-			default:
+		case "-f":
+		case "-find":
+			if (!input.args[1]) {
 				irc.say(input.context, cmdHelp("memories", "syntax"));
-				break;
+				return;
+			}
+			term = input.args.slice(1).join(" ");
+			memories = memDB.getAll();
+			Object.keys(memories).forEach(function (memory) {
+				if (memory.indexOf(term) > -1) handles.push(memory);
+				else if (memories[memory][1].indexOf(term) > -1) ret.push(memory);
+			});
+			if (handles.length === 0 && ret.length === 0) {
+				irc.say(input.context, "No matches. :<");
+			} else {
+				if (handles.length > 0) {
+					irc.say(input.context, "Memory handles matching \""+term+"\": "+lib.sort(handles).join(", "), false);
+				}
+				if (ret.length > 0) {
+					irc.say(input.context, "Memories matching \""+term+"\": "+lib.sort(ret).join(", "), false);
+				}
+			}
+			break;
+		default:
+			irc.say(input.context, cmdHelp("memories", "syntax"));
+			break;
 		}
 	}
 });
@@ -87,11 +86,8 @@ cmdListen({
 	command: "forget",
 	help: "forgets .. what was I doing? See also: remember, memories, wtf",
 	syntax: config.command_prefix+"forget <memory handle>",
+	arglen: 1,
 	callback: function (input) {
-		if (!input.args || !input.args[0]) {
-			irc.say(input.context, cmdHelp("forget", "syntax"));
-			return;
-		}
 		if (memDB.getOne(input.data)) {
 			memDB.removeOne(input.data);
 			irc.say(input.context, "I've forgotten all about "+input.data, false);
@@ -107,12 +103,9 @@ cmdListen({
 	help: "wtf is wtf? See also: remember, memories, forget",
 	syntax: config.command_prefix+"wtf <is/are/was/were> <memory handle> - Example: "
 			+config.command_prefix+"wtf is the colour of ranma's pantsu",
+	arglen: 2,
 	callback: function (input) {
 		var reg, memory;
-		if (!input.args || !input.args[0] || !input.args[1]) {
-			irc.say(input.context, cmdHelp("wtf", "syntax"));
-			return;
-		}
 		reg = /(were|are|was|is) (.*)/.exec(input.data);
 		memory = memDB.getOne(reg[2]);
 		if (!memory) {
