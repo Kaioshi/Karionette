@@ -58,14 +58,11 @@ cmdListen({
 	syntax: config.command_prefix+"hottie <add/remove/find/random/tag/stats> - Example: "
 		+config.command_prefix+"hottie find <tag> - "
 		+config.command_prefix+"hottie add https://i.imgur.com/tdGsifl.gif Spongebob",
+	arglen: 1,
 	callback: function (input) {
 		var i, l, k, n, hottie, hotties, tmp, first, ptagMatch, tagMatch, urlMatch, time, addTag, remTag;
 		if (!input.channel) {
 			irc.say(input.context, "You can only use this in a channel.");
-			return;
-		}
-		if (!input.args || !input.args[0]) {
-			irc.say(input.context, cmdHelp("hottie", "syntax"));
 			return;
 		}
 		switch (input.args[0]) {
