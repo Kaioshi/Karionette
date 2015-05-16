@@ -4,10 +4,9 @@ cmdListen({
 	help: "Shows the last error/warning, if there is one.",
 	syntax: config.command_prefix + "last <warning/error> [clear]",
 	admin: true,
+	arglen: 1,
 	callback: function (input) {
 		var messages;
-		if (!lib.checkArgs(input.context, "last", input.args, 1))
-			return;
 		switch (input.args[0]) {
 			case "err":
 			case "error":
