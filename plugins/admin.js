@@ -184,6 +184,7 @@ cmdListen({
 cmdListen({
 	command: "autojoin",
 	help: "Adds channels to the autojoin list.",
+	syntax: config.command_prefix+"autojoin <channel>",
 	admin: true,
 	arglen: 1,
 	callback: function (input) {
@@ -205,6 +206,7 @@ cmdListen({
 cmdListen({
 	command: "unautojoin",
 	help: "Removes channels from the autojoin list.",
+	syntax: config.command_prefix+"unautojoin <channel>",
 	admin: true,
 	arglen: 1,
 	callback: function (input) {
