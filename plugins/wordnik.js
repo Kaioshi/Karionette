@@ -2,12 +2,9 @@ cmdListen({
 	command: "define",
 	help: "Defines words or phrases using wordnik.",
 	syntax: config.command_prefix+"define <word/phrase> - Example: "+config.command_prefix+"define butt",
+	arglen: 1,
 	callback: function (input) {
 		var uri, i, l, definitions, example, query;
-		if (!input.args) {
-			irc.say(input.context, cmdHelp("define", "syntax"));
-			return;
-		}
 		if (!config.api.wordnik) {
 			irc.say(input.context, "The wordnik plugin requires an API key to be present in config, \
 				go to http://developer.wordnik.com to get one.");
