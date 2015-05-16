@@ -40,6 +40,7 @@ function htmlToJson(body) {
 		if (title) {
 			i++;
 			chapter = reg.exec(eng[i]);
+			globals.lastChapter = { reg: reg, eng: eng[i] };
 			chapter[2] = chapter[2].replace(/ read online/i, "");
 			results.push({
 				title: lib.decode(title[1]),
@@ -134,12 +135,9 @@ cmdListen({
 	help: "You say botato, I say batoto.",
 	syntax: config.command_prefix+"batoto <add/remove/check/list> [<manga title>] - Example:"
 		+config.command_prefix+"batoto add One Piece",
+	arglen: 1,
 	callback: function (input) {
 		var titles, title, ltitle;
-		if (!input.args) {
-			irc.say(input.context, cmdHelp("batoto", "syntax"));
-			return;
-		}
 		switch (input.args[0]) {
 		case "add":
 			if (!input.args[1]) {
@@ -196,18 +194,4 @@ cmdListen({
 		}
 	}
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
