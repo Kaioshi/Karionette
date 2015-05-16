@@ -85,12 +85,9 @@ cmdListen({
 	command: "claim",
 	help: "Allows you to claim ownership of an unclaimed alias, variable or command. See also: perms, inspect",
 	syntax: config.command_prefix+"claim <alias/variable/command> <name of alias/variable/command>",
+	arglen: 2,
 	callback: function (input) {
 		var reg, result, admin, user;
-		if (!input.args || !input.args[0] || !input.args[1]) {
-			irc.say(input.context, cmdHelp("claim", "syntax"));
-			return;
-		}
 		reg = /^(alias|variable|command) ([^ ]+)/.exec(input.data.toLowerCase());
 		if (!reg) {
 			irc.say(input.context, cmdHelp("claim", "syntax"));
