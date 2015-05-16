@@ -140,10 +140,9 @@ cmdListen({
 	help: "Edits the config. Don't touch this unless you know what you're doing.",
 	syntax: config.command_prefix+"config set <field>: <new setting> / "+config.command_prefix+"config find <term>",
 	admin: true,
+	arglen: 1,
 	callback: function (input) {
 		var line, field, entry, index, entries, term;
-		if (!lib.checkArgs(input.context, "config", input.args, 1))
-			return;
 		switch (input.args[0].toLowerCase()) {
 		case "find":
 			if (!input.args[1]) {
