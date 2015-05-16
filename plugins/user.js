@@ -248,12 +248,9 @@ cmdListen({
 	command: "seen",
 	help: "Displays the last known time {person} was seen, and what they last said.",
 	syntax: config.command_prefix+"seen <nick>",
+	arglen: 1,
 	callback: function (input) {
 		var user, chan, target, seen;
-		if (!input.args || !input.args[0]) {
-			irc.say(input.context, cmdHelp("seen", "syntax"));
-			return;
-		}
 		if (input.channel && input.args[1]) {
 			chan = input.args[0];
 			target = input.args[1].replace("?", "");
