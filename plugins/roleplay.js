@@ -108,103 +108,98 @@ cmdListen({
 	command: "setchar",
 	help: "Sets various character attributes. #roleplay",
 	syntax: config.command_prefix+"setchar <age/race/ethnicity/gender/description>",
+	arglen: 1,
 	callback: function (input) {
 		var player, age, race, gender, ethnicity, ages, valid;
-		if (!input.args) {
-			irc.say(input.context, cmdHelp("setchar", "syntax"));
-			return;
-		}
 		player = playerDB.getOne(input.nick.toLowerCase());
-		if (!player) {
+		if (!player)
 			return "I'm not familiar with your character. Is your nick correct?";
-		}
-		switch (input.args[0]) {
-			case "age":
-				age = parseInt(input.args[1], 10);
-				ages = "";
-				races.forEach(function (race) {
-					valid = getRaceAges(race);
-					ages += race+": "+valid[0]+"-"+lib.commaNum(valid[1])+", ";
-				});
-				if (!age) {
-					irc.say(input.context, "Valid ages per race:");
-					irc.say(input.context, ages.slice(0,-2)+".");
-					return;
-				}
-				if (validAge(player.race, age)) {
-					player.age = age;
+		switch (input.args[0].toLowerCase()) {
+		case "age":
+			age = parseInt(input.args[1], 10);
+			ages = "";
+			races.forEach(function (race) {
+				valid = getRaceAges(race);
+				ages += race+": "+valid[0]+"-"+lib.commaNum(valid[1])+", ";
+			});
+			if (!age) {
+				irc.say(input.context, "Valid ages per race:");
+				irc.say(input.context, ages.slice(0,-2)+".");
+				return;
+			}
+			if (validAge(player.race, age)) {
+				player.age = age;
+				playerDB.saveOne(input.nick.toLowerCase(), player);
+				irc.say(input.context, input.nick+"'s age is now "+age+".");
+				break;
+			}
+			irc.say(input.context, age+" is not a valid age for your race. Valid ages per race are "+ages.slice(0,-2)+".");
+			break;
+		case "race":
+			race = validateRace(input.args.slice(1).join("-"));
+			if (!race) {
+				irc.say(input.context, "Invalid race. Available: "+races.join(", ")+".");
+				break;
+			}
+			player.race = race;
+			irc.say(input.context, input.nick.toLowerCase()+"'s race is now "+player.race+".");
+			// adjust age if needed
+			age = adjustAge(race, player.age);
+			if (age !== player.age) {
+				irc.say(input.context, input.nick+"'s age was adjusted to "+age+" from "+player.age+", according to the new race's age limits.");
+				player.age = age;
+			}
+			playerDB.saveOne(input.nick.toLowerCase(), player);
+			break;
+		case "ethnicity":
+			ethnicity = validateEthnicity(input.args.slice(1).join(" "));
+			if (!ethnicity) {
+				irc.say(input.context, "Available ethnicities: "+ethnicities.join(", ")+".");
+				break;
+			}
+			player.ethnicity = ethnicity;
+			irc.say(input.context, input.nick+"'s ethnicity is now "+player.ethnicity+".");
+			playerDB.saveOne(input.nick.toLowerCase(), player);
+			break;
+		case "gender":
+			gender = input.args.slice(1).join(" ").toLowerCase();
+			if (!gender) {
+				irc.say(input.context, "You can be Male or Female.");
+				return;
+			}
+			switch (gender) {
+				case "male":
+					if (player.gender === "Male") {
+						irc.say(input.context, input.nick+" is already Male.");
+						break;
+					}
+					player.gender = "Male";
 					playerDB.saveOne(input.nick.toLowerCase(), player);
-					irc.say(input.context, input.nick+"'s age is now "+age+".");
+					irc.say(input.context, input.nick+" is now Male.");
 					break;
-				}
-				irc.say(input.context, age+" is not a valid age for your race. Valid ages per race are "+ages.slice(0,-2)+".");
-				break;
-			case "race":
-				race = validateRace(input.args.slice(1).join("-"));
-				if (!race) {
-					irc.say(input.context, "Invalid race. Available: "+races.join(", ")+".");
+				case "female":
+					if (player.gender === "Female") {
+						irc.say(input.context, input.nick+" is already Female.");
+						break;
+					}
+					player.gender = "Female";
+					playerDB.saveOne(input.nick.toLowerCase(), player);
+					irc.say(input.context, input.nick+" is now Female.");
 					break;
-				}
-				player.race = race;
-				irc.say(input.context, input.nick.toLowerCase()+"'s race is now "+player.race+".");
-				// adjust age if needed
-				age = adjustAge(race, player.age);
-				if (age !== player.age) {
-					irc.say(input.context, input.nick+"'s age was adjusted to "+age+" from "+player.age+", according to the new race's age limits.");
-					player.age = age;
-				}
-				playerDB.saveOne(input.nick.toLowerCase(), player);
-				break;
-			case "ethnicity":
-				ethnicity = validateEthnicity(input.args.slice(1).join(" "));
-				if (!ethnicity) {
-					irc.say(input.context, "Available ethnicities: "+ethnicities.join(", ")+".");
+				default:
+					irc.say(input.context, gender+" hasn't been added yet, sorry. Blame Lumi.");
 					break;
-				}
-				player.ethnicity = ethnicity;
-				irc.say(input.context, input.nick+"'s ethnicity is now "+player.ethnicity+".");
-				playerDB.saveOne(input.nick.toLowerCase(), player);
-				break;
-			case "gender":
-				gender = input.args.slice(1).join(" ").toLowerCase();
-				if (!gender) {
-					irc.say(input.context, "You can be Male or Female.");
-					return;
-				}
-				switch (gender) {
-					case "male":
-						if (player.gender === "Male") {
-							irc.say(input.context, input.nick+" is already Male.");
-							break;
-						}
-						player.gender = "Male";
-						playerDB.saveOne(input.nick.toLowerCase(), player);
-						irc.say(input.context, input.nick+" is now Male.");
-						break;
-					case "female":
-						if (player.gender === "Female") {
-							irc.say(input.context, input.nick+" is already Female.");
-							break;
-						}
-						player.gender = "Female";
-						playerDB.saveOne(input.nick.toLowerCase(), player);
-						irc.say(input.context, input.nick+" is now Female.");
-						break;
-					default:
-						irc.say(input.context, gender+" hasn't been added yet, sorry. Blame Lumi.");
-						break;
-				}
-				break;
-			case "description":
-				player.description = input.args.slice(1).join(" ");
-				playerDB.saveOne(input.nick.toLowerCase(), player);
-				irc.say(input.context, input.nick+"'s description was updated.");
-				break;
-			default:
-				irc.say(input.context, cmdHelp("setchar", "syntax"));
-				break;
+			}
+			break;
+		case "description":
+			player.description = input.args.slice(1).join(" ");
+			playerDB.saveOne(input.nick.toLowerCase(), player);
+			irc.say(input.context, input.nick+"'s description was updated.");
+			break;
+		default:
+			irc.say(input.context, cmdHelp("setchar", "syntax"));
+			break;
 		}
-		player = null;
 	}
 });
 
@@ -212,12 +207,9 @@ cmdListen({
 	command: "look",
 	help: "Looks at a character. #roleplay",
 	syntax: config.command_prefix+"look <nick>",
+	arglen: 1,
 	callback: function (input) {
 		var player;
-		if (!input.args) {
-			irc.say(input.context, cmdHelp("look", "syntax"));
-			return;
-		}
 		player = playerDB.getOne(input.args[0].toLowerCase());
 		if (!player) {
 			irc.say(input.context, "I don't see a character associated with the nick "+input.args[0]+".");
@@ -225,6 +217,5 @@ cmdListen({
 		}
 		irc.say(input.context, "You see a "+lib.commaNum(player.age)+" year old "+player.gender+" "+player.ethnicity+" "+player.race+".");
 		irc.say(input.context, player.description, false, 1);
-		player = null;
 	}
 });
