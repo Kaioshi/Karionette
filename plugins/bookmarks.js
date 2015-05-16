@@ -74,13 +74,10 @@ cmdListen({
 	syntax: config.command_prefix+
 		"bm [-a(dd) / -r(emove) / -l(ist) / -f(ind) / -h(elp)] [<handle>] [<url>] - Example: "
 		+config.command_prefix+"bm -a ranma's dodgy undies http://imgur.com/dodgy_undies.png",
+	arglen: 1,
 	callback: function (input) {
 		var bookmarks, bookmark, i, keys, overwrite, dupes, url, removed, result, reg,
 			handle, target, matchedUrl, matchedHandle;
-		if (!input.args) {
-			irc.say(input.context, cmdHelp("bm", "syntax"));
-			return;
-		}
 		switch (input.args[0].toLowerCase()) {
 			case "-a":
 			case "-add":
