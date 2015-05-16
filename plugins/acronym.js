@@ -37,12 +37,9 @@ cmdListen({
 	help: "Tries to guess your acronym.",
 	syntax: config.command_prefix+"acronym <ACRONYM> - Example: "
 		+config.command_prefix+"acronym ENB",
+	arglen: 1,
 	callback: function (input) {
 		var i, line, types, letters;
-		if (!input.args) {
-			irc.say(input.context, cmdHelp("acronym", "syntax"));
-			return;
-		}
 		if (input.args[0].length > 10) {
 			irc.say(input.context, "Nope. Too long.");
 			return;
