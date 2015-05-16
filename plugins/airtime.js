@@ -1,9 +1,10 @@
-// Commie airtimes
+// Commie airtimes - this command is poorly named.
 "use strict";
 cmdListen({
 	command: "airtime",
 	help: "Hopefully shows airtimes of Commie things.",
 	syntax: config.command_prefix+"airtime <show name>",
+	arglen: 1,
 	callback: function(input) {
 		web.get("http://c.milkteafuzz.com/api/1/search.json?q="+input.data.trim(), function (error, resp, body) {
 			body = JSON.parse(body);
