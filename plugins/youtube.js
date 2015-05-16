@@ -1,3 +1,4 @@
+"use strict";
 // youtubes!
 function zero(n) {
 	return (n > 9 ? n : "0" + n);
@@ -21,12 +22,9 @@ cmdListen({
 	help: "Searches YouTube!",
 	syntax: config.command_prefix + "yt [-c|--channel] <search terms> - Example: "+config.command_prefix+
 		"yt we like big booty mitches",
+	arglen: 1,
 	callback: function (input) {
 		var uri, resp, desc, searchTerm;
-		if (!input.args) {
-			irc.say(input.context, cmdHelp("yt", "syntax"));
-			return;
-		}
 		if (config.api.youtube === undefined) {
 			irc.say(input.context, "You need a YouTube API key in the config. Get one: https://developers.google.com/youtube/v3/getting-started");
 			return;
