@@ -18,10 +18,9 @@ cmdListen({
 		"mal becomes google site:myanimelist.net). Vars can be used- see var help for more information",
 	syntax: config.command_prefix+"alias <add/remove/info/list/help/syntax/arglen> <alias name> - \
 		Example: "+config.command_prefix+"alias add mal g site:myanimelist.net {args*}",
+	arglen: 1,
 	callback: function (input) {
 		var aliasList, alias, permission, cmd, aliasString, help;
-		if (!lib.checkArgs(input.context, "alias", input.args, 1))
-			return;
 		if (input.args[1])
 			cmd = input.args[1].toLowerCase();
 		aliasString = input.args.slice(2).join(" ");
@@ -181,10 +180,9 @@ cmdListen({
 		"{args1} (first argument) - {variableName} for your custom vars.",
 	syntax: config.command_prefix+"var <add/remove/append/seppend/seprem/seprand/info> - "+
 		"try each command on it's own for further help.",
+	arglen: 1,
 	callback: function (input) {
 		var lcVarname, list, variable, varName, permission, arr, varString, sep;
-		if (!lib.checkArgs(input.context, "var", input.args, 1))
-			return;
 		input.user = input.nick+"!"+input.address;
 		varString = input.args.slice(2).join(" ").trim();
 		switch (input.args[0]) {
