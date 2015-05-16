@@ -16,41 +16,41 @@ function makeKey(len) {
 function makeUrl(url) {
 	var word, ext = url.slice(url.lastIndexOf("."));
 	switch (ext) {
-		case ".png":
-		case ".gif":
-		case ".jpeg":
-		case ".jpg":
-		case ".bmp":
-			word = "img_";
-			break;
-		case ".txt":
-			word = "txt_";
-			break;
-		case ".avi":
-		case ".mp4":
-		case ".mkv":
-		case ".wmv":
-		case ".rm":
-		case ".rmvb":
-		case ".mov":
-		case ".mpg":
-		case ".mpeg":
-		case ".m2v":
-		case ".webm":
-			word = "vid_";
-			break;
-		case ".mp3":
-		case ".ogg":
-		case ".wav":
-		case ".flac":
-		case ".m4a":
-			word = "snd_";
-			break;
-		default:
-			word = lib.randSelect([ "wat", "drp", "hrp", "lel", "wot", "dckbtt", "pnis",
-				"hey", "sup", "heh", "fsrs", "srs", "yep", "tchit" ]);
-			word = word+"_";
-			break;
+	case ".png":
+	case ".gif":
+	case ".jpeg":
+	case ".jpg":
+	case ".bmp":
+		word = "img_";
+		break;
+	case ".txt":
+		word = "txt_";
+		break;
+	case ".avi":
+	case ".mp4":
+	case ".mkv":
+	case ".wmv":
+	case ".rm":
+	case ".rmvb":
+	case ".mov":
+	case ".mpg":
+	case ".mpeg":
+	case ".m2v":
+	case ".webm":
+		word = "vid_";
+		break;
+	case ".mp3":
+	case ".ogg":
+	case ".wav":
+	case ".flac":
+	case ".m4a":
+		word = "snd_";
+		break;
+	default:
+		word = lib.randSelect([ "wat", "drp", "hrp", "lel", "wot", "dckbtt", "pnis",
+			"hey", "sup", "heh", "fsrs", "srs", "yep", "tchit" ]);
+		word = word+"_";
+		break;
 	}
 	return word+makeKey(4);
 }
@@ -59,13 +59,10 @@ cmdListen({
 	command: "shorten",
 	help: "Shortens URLs!",
 	syntax: config.command_prefix+"shorten [-p(review)] <url> - Example: "
-		+config.command_prefix+"shorten http://mitch_.likesbuttse.xxx",
+		+config.command_prefix+"shorten http://some.really.long.url/with-a-bunch-of-crap-at-the-end",
+	arglen: 1,
 	callback: function (input) {
 		var gd, url;
-		if (!input.args) {
-			irc.say(input.context, cmdHelp("shorten", "syntax"));
-			return;
-		}
 		switch (input.args[0].toLowerCase()) {
 		case "-p":
 		case "-preview":
