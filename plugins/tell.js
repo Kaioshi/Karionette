@@ -79,13 +79,10 @@ cmdListen({
 	help: "Passes along a message when the person person in question is spotted next.",
 	syntax: config.command_prefix+"tell <nick> <message> - Example: "+config.command_prefix+
 		"tell ranma your pantsu are lovely 1/2 the time.",
+	arglen: 2,
 	callback: function (input) {
 		if (!input.channel) {
 			irc.say(input.context, "tell can only be used in channels.");
-			return;
-		}
-		if (!input.args || !input.args[1]) {
-			irc.say(input.context, cmdHelp("tell", "syntax"));
 			return;
 		}
 		if (new RegExp(config.nick+"|"+input.nick, "i").test(input.args[0])) {
