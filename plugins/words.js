@@ -33,13 +33,9 @@ cmdListen({
 	syntax: config.command_prefix+"word verb/adverb/noun/adjective/pronoun add/remove/get/count/random/correct(verbs only) \
 		[word] - Example: "+config.command_prefix+"word noun add apple - "+config.command_prefix+"word adjective remove \
 		overconfident - "+config.command_prefix+"word verb correct fondle fondles fondled fondling",
+	arglen: 1,
 	callback: function (input) {
 		var entry, reg, verb;
-		if (!input.args || !input.args[0]) {
-			irc.say(input.context, cmdHelp("word", "syntax"));
-			return;
-		}
-		input.user = input.nick+"!"+input.address;
 		if (input.args[0] === "personalpronoun") input.args[0] = "personalPronoun";     // ugliest hack
 		if (input.args[0] === "possessivepronoun") input.args[0] = "possessivePronoun"; // ever.
 		if (input.args[0].match(/^adjective$|^adverb$|^pronoun$|^possessivePronoun$|^personalPronoun$/)) {
