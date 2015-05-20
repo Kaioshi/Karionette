@@ -30,7 +30,7 @@ function htmlToJson(body) {
 	tmp = lib.singleSpace(body).replace(/\n|\t|\r/g, "").split("</tr>");
 	i = 0; l = tmp.length; eng = [];
 	for (; i < l; i++) {
-		if (tmp[i].indexOf("lang_English") > -1) {
+		if (tmp[i].indexOf("lang_English\"> <td") > -1) {
 			eng.push(tmp[i]);
 		}
 	}
