@@ -30,9 +30,8 @@ function htmlToJson(body) {
 	tmp = lib.singleSpace(body).replace(/\n|\t|\r/g, "").split("</tr>");
 	i = 0; l = tmp.length; eng = [];
 	for (; i < l; i++) {
-		if (tmp[i].indexOf("lang_English\"> <td") > -1) {
+		if (tmp[i].indexOf("lang_English\"> <td") > -1)
 			eng.push(tmp[i]);
-		}
 	}
 	i = 0; l = eng.length; results = [];
 	for (; i < l; i++) {
@@ -40,14 +39,19 @@ function htmlToJson(body) {
 		if (title) {
 			i++;
 			chapter = reg.exec(eng[i]);
-			globals.lastChapter = { reg: reg, eng: eng[i] };
-			chapter[2] = chapter[2].replace(/ read online/i, "");
-			results.push({
-				title: lib.decode(title[1]),
-				chapter: lib.decode(chapter[2]),
-				release: lib.decode(extractRelease(chapter[2])),
-				link: lib.decode(chapter[1])
-			});
+			try {
+				chapter[2] = chapter[2].replace(/ read online/i, "");
+				results.push({
+					title: lib.decode(title[1]),
+					chapter: lib.decode(chapter[2]),
+					release: lib.decode(extractRelease(chapter[2])),
+					link: lib.decode(chapter[1])
+				});
+			} catch (e) {
+				logger.error("[batoto] Eng chapter regex failed");
+				logger.error("Chapter regx: "+reg);
+				logger.error("Chapter text: \""+eng[i]+"\"");
+			}
 		}
 	}
 	return results;
