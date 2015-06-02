@@ -24,7 +24,7 @@ var configHelp = {
 	"api youtube": "The API Key needed for the YouTube plugin. You must edit the config directly to enter/change API keys. \
 		Source: https://developers.google.com/youtube/v3/getting-started#before-you-start",
 	"local whippingboys": "Comma separated list of nicks / names to be used in comical replies by the bot.",
-	"disabled plugins": "Comma separated list of plugins to not load. Currently: "+config.disabled_plugins.join(", "),
+	"disabled plugins": "Comma separated list of plugins to not load. Currently: "+(config.disabled_plugins ? config.disabled_plugins.join(", ") : "None disabled"),
 	"titlesnarfer inline": "Use inline html regex to find page titles, rather than the felt.ninja tool. Currently: "+config.titlesnarfer_inline,
 	"youtube format": "Defines the format used in "+config.command_prefix+"yt search responses. Available fields are {title} {duration} {date} {channel} \
 		{views} {link} {b}. {b} is the bold character, surround a word with it to make it bold. Currently: "+config.youtube_format,
