@@ -96,12 +96,12 @@ cmdListen({
 			// parse tags
 			addTag = []; remTag = [];
 			input.args.slice(2).forEach(function (tag) {
-				console.log(tag);
+				logger.debug(tag);
 				if (tag[0] === "+") {
-					console.log("Adding tag "+tag.slice(1));
+					logger.debug("Adding tag "+tag.slice(1));
 					addTag.push(tag.slice(1));
 				} else if (tag[0] === "-") {
-					console.log("Remming tag "+tag.slice(1));
+					logger.debug("Remming tag "+tag.slice(1));
 					remTag.push(tag.slice(1));
 				}
 				// else ignore it

@@ -27,7 +27,7 @@ evListen({
 				}, 1000);
 			} else {
 				for (i = 0; i < config.nickname.length; i++) {
-					console.log(config.nickname[i]+" - "+i);
+					logger.debug(config.nickname[i]+" - "+i);
 					if (config.nickname[i] === config.nick) {
 						config.nickname.splice(i, 1);
 					} else {
