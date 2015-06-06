@@ -1,3 +1,4 @@
+// this file is so goddamn messy.
 "use strict";
 global.globals = {
 	os: process.platform,
@@ -10,10 +11,10 @@ var fs = require('fs'),
 	fragDB = require("./lib/fragStorage.js"),
 	web = require("./lib/web.js"),
 	regexFactory = require("./lib/regexFactory.js"),
-	Connection = require("./connection.js"),
-	Plugin = require("./plugin.js"),
-	prompt = "",
-	gc = true, gcInterval = 5000, mwInterval = 30000, repl = true;
+	Plugin = require("./lib/plugin.js"),
+	prompt = "", gc = true, gcInterval = 5000, mwInterval = 30000, repl = true;
+
+global.irc = new require('./lib/irc.js')();
 
 if (!fs.existsSync("config")) {
 	console.error(" * NO CONFIG FOUND~ SEE config.example");
@@ -104,7 +105,7 @@ if (gc) {
 
 function createSandbox() {
 	return {
-		irc: IRC,
+		irc: global.irc,
 		config: irc_config,
 		console: console,
 		setTimeout: setTimeout,
@@ -134,8 +135,7 @@ function createSandbox() {
 	};
 }
 
-var IRC = global.mari = new Connection();
-IRC.reload = function (plugin) {
+irc.reload = function (plugin) {
 	if (!plugin) {
 		Plugin.loadAll(createSandbox());
 	} else {
@@ -149,7 +149,7 @@ process.on('uncaughtException', function (err) {
 
 Plugin.loadAll(createSandbox());
 
-IRC.open({
+irc.open({
 	server: irc_config.server,
 	port: irc_config.port,
 	nickname: irc_config.nickname[0],
