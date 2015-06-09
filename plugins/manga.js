@@ -33,13 +33,17 @@ var	mangaDB = {
 					rss = rss.slice(rss.indexOf("<item>"), rss.lastIndexOf("</item>")).replace(/<item>/g, "").split("</item>");
 					engReleases = [];
 					for (i = 0, l = rss.length; i < l; i++) {
-						rss[i] = JSON.parse("{"+rss[i].replace(/<\/([^<]+)>/g, "").replace(/<([^<]+)>([^<]+)/g, "\"$1\":\"$2\",").slice(0,-1)+"}");
-						if (rss[i].title.indexOf("- English -") > -1) {
-							rss[i].title = rss[i].title.replace("- English - ", "").trim();
-							rss[i].pubDate = new Date(rss[i].pubDate).valueOf();
-							delete rss[i].guid;
-							delete rss[i].description;
-							engReleases.push(rss[i]);
+						try {
+							rss[i] = JSON.parse("{"+rss[i].replace(/\"/g, "'").replace(/<\/([^<]+)>/g, "").replace(/<([^<]+)>([^<]+)/g, "\"$1\":\"$2\",").slice(0,-1)+"}");
+							if (rss[i].title.indexOf("- English -") > -1) {
+								rss[i].title = rss[i].title.replace("- English - ", "").trim();
+								rss[i].pubDate = new Date(rss[i].pubDate).valueOf();
+								delete rss[i].guid;
+								delete rss[i].description;
+								engReleases.push(rss[i]);
+							}
+						} catch (e) {
+							logger.debug("Batoto failed on "+rss[i]);
 						}
 					}
 					findUpdates(engReleases, "batoto", notify);
