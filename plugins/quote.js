@@ -14,12 +14,12 @@ function makeTime(time) {
 cmdListen({
 	command: "quote",
 	help: "Quote added by mitchplz on 24/07/13: <mitch_> should I into quotes",
-	syntax: config.command_prefix+"quote <add/remove/find/get/random/stats> - Example: "
-		+config.command_prefix+"quote find <search term> - "
-		+config.command_prefix+"quote add <Mari> mitches be like, \">implying\"",
+	syntax: config.command_prefix+"quote <add/remove/find/get/random/stats> - Example: "+
+		config.command_prefix+"quote find <search term> - "+
+		config.command_prefix+"quote add <Mari> mitches be like, \">implying\"",
 	arglen: 1,
 	callback: function (input) {
-		var i, k, quote, quotes, tmp, first, matches, time;
+		var i, k, quote, quotes, tmp, matches, time, removeQuoteByIndex;
 		if (!input.channel) {
 			irc.say(input.context, "You can only use this in a channel for now, sorry.");
 			return;
@@ -46,14 +46,25 @@ cmdListen({
 					}
 				}
 			}
-			quote.from = input.nick+"!"+input.address;
+			quote.from = input.user;
 			quote.date = new Date();
 			quotes.push(quote);
 			quoteDB.saveOne(input.context, quotes);
 			irc.say(input.context, "Added o7");
 			break;
 		case "remove":
-			if (!input.args[1]) { 
+			removeQuoteByIndex = function (quotes, index) {
+				var i;
+				quotes.splice(index,1);
+				if (!quotes.length)
+					quoteDB.removeOne(input.context);
+				else {
+					for (i = 0; i < quotes.length; i++) // renumber
+						quotes[i].num = i+1;
+					quoteDB.saveOne(input.context, quotes);
+				}
+			};
+			if (!input.args[1]) {
 				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
 					"quote remove <quote ID/actual quote text> - Example: "+config.command_prefix+
 					"quote remove <mitch_> I loooove me some memes. / "+config.command_prefix+
@@ -66,37 +77,30 @@ cmdListen({
 				return;
 			}
 			if (input.args[1].match(/[0-9]+/) && !input.args[2]) {
-				input.args[1] = parseInt(input.args[1]);
+				input.args[1] = parseInt(input.args[1], 10);
 				if (input.args[1] > quotes.length) {
 					irc.say(input.context, "There are only "+quotes.length+" quotes in here.");
 					return;
 				}
-				tmp = [];
-				
+
 				for (i = 0, k = 0; i < quotes.length; i++) {
 					if (quotes[i].num === input.args[1]) {
 						irc.say(input.context, "Removed quote: \""+quotes[i].quote+
 							"\" ~ which was added by "+quotes[i].from+" on "+makeTime(quotes[i].date)+".");
-					} else {
-						k++;
-						quotes[i].num = k; // renumber entries
-						tmp.push(quotes[i]);
+						removeQuoteByIndex(quotes, i);
+						return;
 					}
 				}
-				if (tmp.length === 0) quoteDB.removeOne(input.context);
-				else quoteDB.saveOne(input.context, tmp);
+				irc.say(input.context, "No match.");
 				return;
 			}
+
 			quote = input.args.slice(1).join(" ");
 			for (i = 0; i < quotes.length; i++) {
 				if (quotes[i].quote === quote) {
-					tmp = [];
-					quotes.forEach(function (entry) {
-						if (entry.quote !== quote) tmp.push(entry);
-					});
-					if (tmp.length === 0) quoteDB.removeOne(input.context);
-					else quoteDB.saveOne(input.context, tmp);
-					irc.say(input.context, "Removed o7");
+					irc.say(input.context, "Removed quote: \""+quotes[i].quote+
+						"\" ~ which was added by "+quotes[i].from+" on "+makeTime(quotes[i].date)+".");
+					removeQuoteByIndex(quotes, i);
 					return;
 				}
 			}
@@ -180,4 +184,3 @@ cmdListen({
 		}
 	}
 });
-
