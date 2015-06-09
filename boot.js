@@ -12,7 +12,7 @@ var fs = require('fs'),
 	web = require("./lib/web.js"),
 	regexFactory = require("./lib/regexFactory.js"),
 	Plugin = require("./lib/plugin.js"),
-	prompt = "", gc = true, gcInterval = 5000, mwInterval = 30000, repl = true;
+	replPrompt = "", gc = true, gcInterval = 5000, mwInterval = 30000, repl = true;
 
 global.irc = new require('./lib/irc.js')();
 
@@ -34,7 +34,9 @@ require("./lib/login.js");
 
 function processArgs(args) {
 	var slicelen,
-		args = process.argv.slice(2);
+		memWatch = function () {
+			lib.memReport();
+		};
 	while (args.length > 0) {
 		slicelen = 1;
 		switch (args[0]) {
@@ -58,14 +60,12 @@ function processArgs(args) {
 					slicelen = 2;
 				}
 			}
-			setInterval(function () {
-				lib.memReport();
-			}, mwInterval);
+			setInterval(memWatch, mwInterval);
 			break;
 		case "prompt":
 			if (args[1]) {
 				slicelen = 2;
-				prompt = args[1];
+				replPrompt = args[1];
 			}
 			break;
 		case "gc-interval":
@@ -90,7 +90,7 @@ function processArgs(args) {
 	}
 }
 
-processArgs(process.argv);
+processArgs(process.argv.slice(2));
 
 if (gc) {
 	if (!global.gc) {
@@ -159,5 +159,5 @@ irc.open({
 
 if (repl) {
 	repl = require("repl");
-	repl.start({ prompt: prompt, ignoreUndefined: true });
+	repl.start({ prompt: replPrompt, ignoreUndefined: true });
 }
