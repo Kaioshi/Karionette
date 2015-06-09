@@ -3,7 +3,7 @@
 var reminders,
 	reminderDB = new DB.List({filename: "reminders", queue: true});
 
-﻿function transformTime(timeUnits, time) {
+function transformTime(timeUnits, time) {
 	if (timeUnits.indexOf("second") > -1) { time = time * 1000; }
 	if (timeUnits.indexOf("minute") > -1) { time = time * 1000 * 60; }
 	if (timeUnits.indexOf("hour") > -1) { time = time * 1000 * 60 * 60; }
@@ -83,7 +83,7 @@ cmdListen({
 	syntax: config.command_prefix+"remind me in <N seconds/minutes/hours> to/that <reminder here>",
 	callback: function (input) {
 		var time, timeUnits, what, rMatch;
-		
+
 		rMatch = /^me in (\d*) (seconds?|minutes?|hours?) (to|that) (.*)$/i.exec(input.data);
 		if (rMatch) {
 			time = parseInt(rMatch[1], 10);
@@ -109,4 +109,3 @@ cmdListen({
 		}
 	}
 });
-

@@ -49,12 +49,11 @@ cmdListen({ // this will stop working soon~
 			body = JSON.parse(body);
 			if (body && body.responseData && body.responseData.results && body.responseData.results[0]) {
 				body = body.responseData.results;
-				irc.say(input.context, lib.decode(body[0].titleNoFormatting)
-					+" ("+body[0].width+"x"+body[0].height+"): "+body[0].url);
+				irc.say(input.context, lib.decode(body[0].titleNoFormatting)+
+					" ("+body[0].width+"x"+body[0].height+"): "+body[0].url);
 			} else {
 				irc.say(input.context, "No image found. :<");
 			}
 		});
 	}
 });
-

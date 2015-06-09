@@ -1,4 +1,5 @@
-﻿var randDB = new DB.List({filename: "randomThings"});
+"use strict";
+var randDB = new DB.List({filename: "randomThings"});
 
 cmdListen({
 	command: "random",

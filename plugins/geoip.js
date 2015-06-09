@@ -1,3 +1,4 @@
+"use strict";
 var url = require('url');
 
 cmdListen({
@@ -6,7 +7,7 @@ cmdListen({
 	syntax: config.command_prefix + "geoip <nick/hostname/IP/url>",
 	arglen: 1,
 	callback: function (input) {
-		var uri, target, resp, nick, area, blame;
+		var uri, target, resp, nick, blame;
 		if (input.args[0].match(/\.|\:/)) {
 			if (input.args[0].match(/https?:\/\/[^ ]+/))
 				target = url.parse(input.args[0]).host;

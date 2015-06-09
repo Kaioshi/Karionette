@@ -1,8 +1,7 @@
 // word motherflipper!
 "use strict";
 function tokenizeLine(line) {
-	var i,
-		ret = [], hit = false,
+	var ret = [], hit = false,
 		type = [
 			"noun", "verb", "adjective", "adverb", "preposition",
 			"pronoun", "possessivePronoun", "personalPronoun"
@@ -30,12 +29,12 @@ function tokenizeLine(line) {
 cmdListen({
 	command: "word",
 	help: "Word list management",
-	syntax: config.command_prefix+"word verb/adverb/noun/adjective/pronoun add/remove/get/count/random/correct(verbs only) \
-		[word] - Example: "+config.command_prefix+"word noun add apple - "+config.command_prefix+"word adjective remove \
-		overconfident - "+config.command_prefix+"word verb correct fondle fondles fondled fondling",
+	syntax: config.command_prefix+"word verb/adverb/noun/adjective/pronoun add/remove/get/count/random/correct(verbs only) "+
+		"[word] - Example: "+config.command_prefix+"word noun add apple - "+config.command_prefix+"word adjective remove overconfident - "+
+		config.command_prefix+"word verb correct fondle fondles fondled fondling",
 	arglen: 1,
 	callback: function (input) {
-		var entry, reg, verb;
+		var entry;
 		if (input.args[0] === "personalpronoun") input.args[0] = "personalPronoun";     // ugliest hack
 		if (input.args[0] === "possessivepronoun") input.args[0] = "possessivePronoun"; // ever.
 		if (input.args[0].match(/^adjective$|^adverb$|^pronoun$|^possessivePronoun$|^personalPronoun$/)) {
@@ -106,8 +105,8 @@ cmdListen({
 				}
 				entry = input.args.slice(2);
 				if (entry.length !== 2) {
-					irc.say(input.context, "[Help] "+config.command_prefix+"word noun add <noun> <plural> - Example: "
-						+config.command_prefix+"word noun add banana bananas");
+					irc.say(input.context, "[Help] "+config.command_prefix+"word noun add <noun> <plural> - Example: "+
+						config.command_prefix+"word noun add banana bananas");
 					break;
 				}
 				irc.say(input.context, words.noun.add(entry.join(" ")));
@@ -115,7 +114,6 @@ cmdListen({
 			default:
 				irc.say(input.context, cmdHelp("word", "syntax"));
 				break;
-			break;
 			}
 			break;
 		case "verb":
@@ -164,4 +162,3 @@ cmdListen({
 		}
 	}
 });
-

@@ -1,4 +1,5 @@
 // Unofficial MAL-API (clone) Fondler
+"use strict";
 function getGenres(genres) {
 	var ret = [];
 	genres.forEach(function (item) {
@@ -95,4 +96,3 @@ cmdListen({
 		}
 	}
 });
-

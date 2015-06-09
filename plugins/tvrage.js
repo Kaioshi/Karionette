@@ -1,7 +1,9 @@
 // TvRage fondler
+"use strict";
 function parseTvRage(resp) {
-	var resp = resp.replace("<pre>", "").split("\n").slice(0, -1),
-		data, i = 0, l = resp.length, ret = {};
+	var i, l, data, ret = {};
+	resp = resp.replace("<pre>", "").split("\n").slice(0, -1);
+	i = 0; l = resp.length;
 	for (; i < l; i++) {
 		data = parseEntry(resp[i].split("@"));
 		if (data)
@@ -29,41 +31,35 @@ function parseEntry(entry) {
 
 function getShowDuration(show) {
 	var years;
-	if (show["Started"] && show["Ended"]) {
-		years = (parseInt(show["Ended"].slice(show["Ended"].length-4), 10) -
-			parseInt(show["Started"].slice(show["Started"].length-4), 10));
+	if (show.Started && show.Ended) {
+		years = (parseInt(show.Ended.slice(show.Ended.length-4), 10) -
+			parseInt(show.Started.slice(show.Started.length-4), 10));
 		years = years || 1;
 		return " ~ Ran for "+years+" "+(years > 1 ? "years" : "year");
 	}
 	return "";
 }
 
-function consolidateStatusTypes(type) {
-	if (/Ended/i.test(type)) return "Ended";
-	return type;
-}
-
 function getShowtime(show) {
 	var type = (show["Next Episode"] ? "Next Episode" : "Latest Episode");
 	if (!show[type] || !show[type].title)
-		return (show['Premiered'] ? "Premiered in "+show['Premiered'] : show['Started']+"->"+show['Ended']);
+		return (show.Premiered ? "Premiered in "+show.Premiered : show.Started+"->"+show.Ended);
 	return show[type].title+" ~ "+show[type].release;
 }
 
 function getGenres(show) {
-	return (show['Genres'] ? " - ["+show['Genres']+"]" : "");
+	return (show.Genres ? " - ["+show.Genres+"]" : "");
 }
 
 function getShowInfo(show) {
-	return show["Show Name"]+" - "+getShowtime(show)+getShowDuration(show)+getGenres(show)+" ~ Status: "+show["Status"];
+	return show["Show Name"]+" - "+getShowtime(show)+getShowDuration(show)+getGenres(show)+" ~ Status: "+show.Status;
 }
 
 cmdListen({
 	command: "tvrage",
-	help: "Shows the next airtime for a show. Note that TvRage does a search based on your input and \
-		returns that result, so you may get something random sometimes, if it didn't know about the show.",
-	syntax: config.command_prefix+"tvrage <show name> - Example: "+
-		config.command_prefix+"tvrage Sherlock",
+	help: "Shows the next airtime for a show. Note that TvRage does a search based on your input and returns that result, "+
+		"so you may get something random sometimes, if it didn't know about the show.",
+	syntax: config.command_prefix+"tvrage <show name> - Example: "+config.command_prefix+"tvrage Sherlock",
 	arglen: 1,
 	callback: function (input) {
 		var uri;

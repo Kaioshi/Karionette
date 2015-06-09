@@ -1,3 +1,4 @@
+"use strict";
 var run = require('child_process').exec;
 
 cmdListen({
@@ -33,4 +34,3 @@ cmdListen({
 		}
 	}
 });
-

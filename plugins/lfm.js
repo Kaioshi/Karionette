@@ -1,4 +1,5 @@
-﻿var lfmBindingsDB = new DB.Json({filename: "lfm"});
+"use strict";
+var lfmBindingsDB = new DB.Json({filename: "lfm"});
 
 function dura(ms) {
 	var secs = Math.floor(ms/1000),
@@ -12,7 +13,7 @@ function dura(ms) {
 	if (mins) ret.push(mins);
 	ret.push((secs > 9 ? secs : "0"+secs));
 	return ret.join(":");
-	
+
 }
 
 function timeAgo(then, now) {
@@ -44,13 +45,13 @@ cmdListen({
 		var uri, user, i, method, artist, track, formed, summary,
 			result, keys, ret, song, then, now, tags, from,
 			max, tn = 0;
-		
+
 		if (config.api.lfm.length < 1) {
 			irc.say(input.context, "I.. I don't have a lastfm api key. ;<");
 			logger.warn("No lfm API key.");
 			return;
 		}
-		
+
 		if (input.args && input.args[0]) {
 			switch (input.args[0]) {
 			case "-a":
@@ -225,4 +226,3 @@ cmdListen({
 		});
 	}
 });
-

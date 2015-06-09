@@ -1,4 +1,5 @@
 // rp thing
+"use strict";
 var playerDB = new DB.Json({filename: "rp-players"}),
 	ethnicities = [ "Harikki", "Draskan", "Satlani", "Nasikan", "Atrisian", "Merekese" ],
 	races = [
@@ -99,8 +100,8 @@ cmdListen({
 	callback: function (input) {
 		var player = createPlayer(input.nick);
 		playerDB.saveOne(input.nick.toLowerCase(), player);
-		irc.say(input.context, "Random character created! "+input.nick+" is a "
-			+player.age+" year old "+player.gender+" "+player.ethnicity+" "+player.race+".");
+		irc.say(input.context, "Random character created! "+input.nick+" is a "+
+			player.age+" year old "+player.gender+" "+player.ethnicity+" "+player.race+".");
 	}
 });
 

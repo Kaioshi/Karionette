@@ -6,7 +6,8 @@ cmdListen({
 	syntax: config.command_prefix+"roll NdN+N - Example: "+config.command_prefix+"roll 1d20+5 \"1 dice, 20 sides, bonus 5 modifier (optional)\"",
 	callback: function (input) {
 		var reg, i, k, rolls, roll, total, summary, rollDesc;
-		if (!input.args) input.args = [ "1d20" ];
+		if (!input.args)
+			input.args = [ "1d20" ];
 		reg = /(\d+)d(\d+)\+?(\d+)?/i.exec(input.args[0].trim());
 		if (!reg) {
 			irc.say(input.context, cmdHelp("roll", "syntax"));

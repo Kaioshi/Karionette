@@ -8,8 +8,8 @@ cmdListen({
 	callback: function(input) {
 		web.get("http://c.milkteafuzz.com/api/1/search.json?q="+input.data.trim(), function (error, resp, body) {
 			body = JSON.parse(body);
-			if (body[0] && body[0]._id["$oid"]) {
-				web.get("https://c.milkteafuzz.com/api/1/shows/"+body[0]._id["$oid"]+".json", function (error, resp, body) {
+			if (body[0] && body[0]._id.$oid) {
+				web.get("https://c.milkteafuzz.com/api/1/shows/"+body[0]._id.$oid+".json", function (error, resp, body) {
 					var status = "",
 						title = "",
 						airtime = "",
@@ -22,7 +22,7 @@ cmdListen({
 					}
 					if (body.status) status = " - "+body.status+" - ";
 					if (body.airtime) {
-						date = new Date(body.airtime["$date"]).valueOf();
+						date = new Date(body.airtime.$date).valueOf();
 						now = new Date().valueOf();
 						if (date > now) airtime = "- The next episode airs in "+lib.duration(now, date)+".";
 						else {
@@ -45,4 +45,3 @@ cmdListen({
 		});
 	}
 });
-

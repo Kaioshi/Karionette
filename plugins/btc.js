@@ -1,4 +1,5 @@
 ﻿// gets BTC
+"use strict";
 var CURRENCY = {
 		"AUD": "https://api.bitcoinaverage.com/exchanges/AUD",
 		"BRL": "https://api.bitcoinaverage.com/exchanges/BRL",
@@ -38,7 +39,7 @@ cmdListen({
 	syntax: config.command_prefix+"btc [<currency code>] - Example: "+config.command_prefix+
 		"btc AUD",
 	callback: function (input) {
-		var uri, provider, rate, cur, time, avg, high, low, i, l;
+		var provider, rate, cur, time, avg, high, low, btc;
 		if (input.args && input.args[0] !== undefined)
 			cur = input.args[0].toUpperCase();
 		else
@@ -59,15 +60,17 @@ cmdListen({
 			high = { val: 0 };
 			low = { val: 0 };
 			for (provider in btc) {
-				rate = btc[provider].rates.last;
-				avg += rate;
-				if (rate > high.val || !high.val) {
-					high.val = rate;
-					high.from = btc[provider].display_name;
-				}
-				if (rate < low.val || !low.val) {
-					low.val = rate;
-					low.from = btc[provider].display_name;
+				if (btc.hasOwnProperty(provider)) {
+					rate = btc[provider].rates.last;
+					avg += rate;
+					if (rate > high.val || !high.val) {
+						high.val = rate;
+						high.from = btc[provider].display_name;
+					}
+					if (rate < low.val || !low.val) {
+						low.val = rate;
+						low.from = btc[provider].display_name;
+					}
 				}
 			}
 			avg = avg / Object.keys(btc).length;
@@ -76,4 +79,3 @@ cmdListen({
 		});
 	}
 });
-

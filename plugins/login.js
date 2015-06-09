@@ -3,8 +3,7 @@
 cmdListen({
 	command: "identify",
 	help: "Identifies you with "+config.nick+". See also: unidentify, whoami, adduser, deluser",
-	syntax: config.command_prefix+"identify <username> <password> - via query. \
-		You can supply the bot's secret code as the password, if need be.",
+	syntax: config.command_prefix+"identify <username> <password> - via query. You can supply the bot's secret code as the password, if need be.",
 	arglen: 2,
 	callback: function (input) {
 		var result, user;
@@ -54,9 +53,8 @@ cmdListen({
 		var user = userLogin.Check(input.user);
 		if (user) irc.say(input.context, "I recognize you as \""+user+"\".");
 		else {
-			irc.say(input.context, "I don't recognize you. Try identifying! "
-				+config.command_prefix+"identify <username> <password> - if not, add a user: "
-				+config.command_prefix+"adduser <username> <password>");
+			irc.say(input.context, "I don't recognize you. Try identifying! "+config.command_prefix+
+				"identify <username> <password> - if not, add a user: "+config.command_prefix+"adduser <username> <password>");
 		}
 	}
 });
@@ -64,8 +62,7 @@ cmdListen({
 cmdListen({
 	command: "set",
 	help: "Sets or shows per-user attributes. See also: unset",
-	syntax: config.command_prefix+"set [<attribute>] [<value>] - Supply a value to set it, none to show it, \
-		or no args to see all attributes.",
+	syntax: config.command_prefix+"set [<attribute>] [<value>] - Supply a value to set it, none to show it, or no args to see all attributes.",
 	callback: function (input) {
 		var username, entry;
 		username = userLogin.Check(input.user);
@@ -75,13 +72,13 @@ cmdListen({
 		}
 		if (!input.args) {
 			entry = userLogin.getAttribute(username);
-			irc.say(input.context, (entry ? "You have the following attributes set, "+entry : 
+			irc.say(input.context, (entry ? "You have the following attributes set, "+entry :
 				"You have no attributes set."));
 			return;
 		}
 		if (!input.args[1]) {
 			entry = userLogin.getAttribute(username, input.args[0]);
-			irc.say(input.context, (entry ? "Your "+input.args[0]+" attribute is set to: \""+entry+"\"" : 
+			irc.say(input.context, (entry ? "Your "+input.args[0]+" attribute is set to: \""+entry+"\"" :
 				"No such thing is set."));
 			return;
 		}
@@ -131,14 +128,12 @@ cmdListen({
 cmdListen({
 	command: "adduser",
 	help: "Adds a user to the bot. See also: deluser, whoami, identify, unidentify",
-	syntax: config.command_prefix+"adduser <username> <password> [<secret>] - \
-		via query. Supply the bot's secret code to be recognised as an admin.",
+	syntax: config.command_prefix+"adduser <username> <password> [<secret>] - via query. Supply the bot's secret code to be recognised as an admin.",
 	arglen: 2,
 	callback: function (input) {
 		var result;
 		if (input.channel) {
-			irc.say(input.context, "Why would you do this here? Try again via query. \
-				Hopefully with a different password!");
+			irc.say(input.context, "Why would you do this here? Try again via query. Hopefully with a different password!");
 			return;
 		}
 		if (input.args[2]) {
@@ -164,8 +159,7 @@ cmdListen({
 cmdListen({
 	command: "deluser",
 	help: "Removes a user from the bot. See also: adduser, whoami, identify, unidentify",
-	syntax: config.command_prefix+"deluser <username> [<password>] - via query. \
-		Admins don't need the password if it's another user.",
+	syntax: config.command_prefix+"deluser <username> [<password>] - via query. Admins don't need the password if it's another user.",
 	arglen: 1,
 	callback: function (input) {
 		var result;
@@ -210,4 +204,3 @@ evListen({
 		}
 	}
 });
-

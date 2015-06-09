@@ -5,7 +5,7 @@ function makeKey(len) {
 	len = len || 8;
 	for (; i < len; i++) {
 		n = Math.floor(Math.random()*9);
-		if (n >= 5) 
+		if (n >= 5)
 			ret += lib.randSelect([ "A", "a", "B", "b", "C", "c", "D", "d", "E", "e", "F", "f" ]);
 		else
 			ret += n;
@@ -58,8 +58,8 @@ function makeUrl(url) {
 cmdListen({
 	command: "shorten",
 	help: "Shortens URLs!",
-	syntax: config.command_prefix+"shorten [-p(review)] <url> - Example: "
-		+config.command_prefix+"shorten http://some.really.long.url/with-a-bunch-of-crap-at-the-end",
+	syntax: config.command_prefix+"shorten [-p(review)] <url> - Example: "+
+		config.command_prefix+"shorten http://some.really.long.url/with-a-bunch-of-crap-at-the-end",
 	arglen: 1,
 	callback: function (input) {
 		var gd, url;

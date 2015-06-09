@@ -1,3 +1,4 @@
+"use strict";
 function upperFirst(word) {
 	return word[0].toUpperCase()+word.slice(1);
 }
@@ -35,8 +36,8 @@ function getWord(letter, type) {
 cmdListen({
 	command: "acronym",
 	help: "Tries to guess your acronym.",
-	syntax: config.command_prefix+"acronym <ACRONYM> - Example: "
-		+config.command_prefix+"acronym ENB",
+	syntax: config.command_prefix+"acronym <ACRONYM> - Example: "+
+		config.command_prefix+"acronym ENB",
 	arglen: 1,
 	callback: function (input) {
 		var i, line, types, letters;

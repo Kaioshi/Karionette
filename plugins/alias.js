@@ -16,11 +16,11 @@ cmdListen({
 	command: "alias",
 	help: "Allows user defined 'commands' (Eg: The alias "+config.command_prefix+
 		"mal becomes google site:myanimelist.net). Vars can be used- see var help for more information",
-	syntax: config.command_prefix+"alias <add/remove/info/list/help/syntax/arglen> <alias name> - \
-		Example: "+config.command_prefix+"alias add mal g site:myanimelist.net {args*}",
+	syntax: config.command_prefix+"alias <add/remove/info/list/help/syntax/arglen> <alias name> - Example: "+
+		config.command_prefix+"alias add mal g site:myanimelist.net {args*}",
 	arglen: 1,
 	callback: function (input) {
-		var aliasList, alias, permission, cmd, aliasString, help;
+		var aliasList, alias, cmd, aliasString, help;
 		if (input.args[1])
 			cmd = input.args[1].toLowerCase();
 		aliasString = input.args.slice(2).join(" ");
@@ -49,8 +49,8 @@ cmdListen({
 				helpDB.saveOne(cmd, help);
 				irc.say(input.context, "Help for the \""+cmd+"\" alias has been set.");
 			} else {
-				irc.say(input.context, (help.help ? "[Help] Alias: "+config.command_prefix+cmd+" - "
-					+help.help : "There is no help set for the \""+cmd+"\" alias."), false);
+				irc.say(input.context, (help.help ? "[Help] Alias: "+config.command_prefix+cmd+" - "+
+					help.help : "There is no help set for the \""+cmd+"\" alias."), false);
 			}
 			break;
 		case "syntax":
@@ -77,8 +77,8 @@ cmdListen({
 				helpDB.saveOne(cmd, help);
 				irc.say(input.context, "Syntax for the \""+cmd+"\" alias has been set.");
 			} else {
-				irc.say(input.context, (help.syntax ? "[Help] Alias syntax: "+config.command_prefix+cmd+" "
-					+help.syntax : "There is no syntax set for the \""+cmd+"\" alias."), false);
+				irc.say(input.context, (help.syntax ? "[Help] Alias syntax: "+config.command_prefix+cmd+" "+
+					help.syntax : "There is no syntax set for the \""+cmd+"\" alias."), false);
 			}
 			break;
 		case "arglen":
@@ -96,7 +96,8 @@ cmdListen({
 				return;
 			}
 			if (aliasIsCommand(cmd)) {
-				irc.say(input.context, "You can't set the minimum argument length for \""+cmd+"\", since it's a plugin or core command.");
+				irc.say(input.context, "You can't set the minimum argument length for \""+cmd+
+					"\", since it's a plugin or core command.");
 				return;
 			}
 			help = helpDB.getOne(cmd) || {};
@@ -110,14 +111,15 @@ cmdListen({
 				helpDB.saveOne(cmd, help);
 				irc.say(input.context, "The minimum argument length for alias \""+cmd+"\" has been set.");
 			} else {
-				irc.say(input.context, (help.arglen !== undefined ? "[Help] The minimum argument length for "+config.command_prefix+cmd+" is "
-					+help.arglen : "There is no minimum argument length set for the \""+cmd+"\" alias."), false);
+				irc.say(input.context, (help.arglen !== undefined ? "[Help] The minimum argument length for "+
+					config.command_prefix+cmd+" is "+help.arglen :
+					"There is no minimum argument length set for the \""+cmd+"\" alias."), false);
 			}
 			break;
 		case "add":
 			if (!cmd || !aliasString) {
-				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"alias add <alias name> <command> - \
-					Example: "+config.command_prefix+"alias add mitchslap action mitchslaps {args1}");
+				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"alias add <alias name> <command> - Example: "+
+					config.command_prefix+"alias add mitchslap action mitchslaps {args1}");
 				return;
 			}
 			alias = aliasDB.getOne(cmd);
@@ -144,8 +146,8 @@ cmdListen({
 				return;
 			}
 			if (!perms.isOwner(input.user, "alias", cmd)) {
-				irc.say(input.context, "You need to own the \""+cmd+"\" alias to remove it. If you \
-					do own it, have you identified?");
+				irc.say(input.context, "You need to own the \""+cmd+
+					"\" alias to remove it. If you do own it, have you identified?");
 				return;
 			}
 			aliasDB.removeOne(cmd);
@@ -182,15 +184,15 @@ cmdListen({
 		"try each command on it's own for further help.",
 	arglen: 1,
 	callback: function (input) {
-		var lcVarname, list, variable, varName, permission, arr, varString, sep;
+		var lcVarname, list, variable, varName, arr, varString, sep;
 		input.user = input.nick+"!"+input.address;
 		varString = input.args.slice(2).join(" ").trim();
 		switch (input.args[0]) {
 		case "add":
 			if (!input.args[1] || !varString) {
-				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"var add <variable> <entry> - \
-					Example: "+config.command_prefix+"var add anime_list Steins;Gate, \
-					Hellsing Ultimate, Hyouka");
+				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
+					"var add <variable> <entry> - Example: "+config.command_prefix+
+					"var add anime_list Steins;Gate, Hellsing Ultimate, Hyouka");
 				return;
 			}
 			lcVarname = input.args[1].toLowerCase();
@@ -211,9 +213,9 @@ cmdListen({
 			break;
 		case "append":
 			if (!input.args[1] || !varString) {
-				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"var append <variable> <entry> - \
-					Example: "+config.command_prefix+"var append towatch ranma's DIY guide to \
-					unplugging a butt.");
+				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
+					"var append <variable> <entry> - Example: "+config.command_prefix+
+					"var append towatch ranma's DIY guide to unplugging a butt.");
 				return;
 			}
 			lcVarname = input.args[1].toLowerCase();
@@ -235,8 +237,9 @@ cmdListen({
 		case "seppend":
 			varString = input.args.slice(3).join(" ");
 			if (!input.args[1] || !input.args[2] || !varString) {
-				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"var seppend <variable> <separator> <entry> - \
-					Example: "+config.command_prefix+"var seppend towatch | Black Books");
+				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
+					"var seppend <variable> <separator> <entry> - Example: "+config.command_prefix+
+					"var seppend towatch | Black Books");
 				return;
 			}
 			lcVarname = input.args[1].toLowerCase();
@@ -262,8 +265,9 @@ cmdListen({
 		case "seprem":
 			varString = input.args.slice(3).join(" ");
 			if (!input.args[1] || !input.args[2] || !varString) {
-				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"var seprem <varname> <separator> <entry> - \
-					Example: "+config.command_prefix+"var seprem anime_list | Boku no Pico");
+				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
+					"var seprem <varname> <separator> <entry> - Example: "+config.command_prefix+
+					"var seprem anime_list | Boku no Pico");
 				return;
 			}
 			lcVarname = input.args[1].toLowerCase();
@@ -283,8 +287,8 @@ cmdListen({
 					perms.Action(input.user, "delete all", "variable", lcVarname);
 					irc.say(input.context, "Removed o7");
 				} else {
-					irc.say(input.context, "This would remove the last entry, and thus the \
-						variable - you need to be an owner to do that.");
+					irc.say(input.context, "This would remove the last entry, and thus the variable -"+
+						" you need to be an owner to do that.");
 				}
 			} else {
 				sep = (input.args[2] === "," ? ", " : " "+input.args[2]+" ");
@@ -306,8 +310,8 @@ cmdListen({
 			break;
 		case "seprand":
 			if (!input.args[1] || !input.args[2]) {
-				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"var seprand <varname> <separator> - \
-					Example: "+config.command_prefix+"var seprand anime_list |");
+				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
+					"var seprand <varname> <separator> - Example: "+config.command_prefix+"var seprand anime_list |");
 				return;
 			}
 			varName = "{" + input.args[1].toLowerCase()+ "}";
@@ -324,8 +328,8 @@ cmdListen({
 			break;
 		case "remove":
 			if (!input.args[1]) {
-				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"var remove <variable> - \
-					Example: "+config.command_prefix+"var remove anime_list");
+				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
+					"var remove <variable> - Example: "+config.command_prefix+"var remove anime_list");
 				return;
 			}
 			lcVarname = input.args[1].toLowerCase();
@@ -345,11 +349,11 @@ cmdListen({
 			break;
 		case "info":
 			if (!input.args[1]) {
-				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"var info <variable> - \
-					Example: "+config.command_prefix+"var info anime_list");
+				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
+					"var info <variable> - Example: "+config.command_prefix+"var info anime_list");
 				return;
 			}
-			variable = varDB.getOne("{"+input.args[1].toLowerCase()+"}")
+			variable = varDB.getOne("{"+input.args[1].toLowerCase()+"}");
 			if (variable)
 				irc.say(input.context, "Variable \""+input.args[1]+"\" contains: \""+variable.data+"\"");
 			else
@@ -371,4 +375,3 @@ cmdListen({
 		}
 	}
 });
-

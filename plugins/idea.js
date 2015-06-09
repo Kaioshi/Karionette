@@ -1,4 +1,5 @@
 ﻿// Idea from 'this for that'
+"use strict";
 cmdListen({
 	command: "idea",
 	help: "Random idea for you to ponder!",

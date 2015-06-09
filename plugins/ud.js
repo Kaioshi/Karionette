@@ -1,4 +1,5 @@
 ﻿// Urban dictionary look-up
+"use strict";
 cmdListen({
 	command: "ud",
 	help: "Look up something from Urban dictionary!",
@@ -27,4 +28,3 @@ cmdListen({
 		});
 	}
 });
-

@@ -1,4 +1,5 @@
 // weather!
+"use strict";
 var weatherDB = new DB.Json({filename: "weather"});
 
 function tellEmSteveDave(location, conditions, temp) {
@@ -65,7 +66,7 @@ cmdListen({
 	callback: function (input) {
 		var uri, temp, place,
 			location = getLocation(input.nick, input.context, input.args);
-		
+
 		if (!location) {
 			irc.say(input.context, cmdHelp("weather", "syntax"));
 			return;
@@ -130,4 +131,3 @@ cmdListen({
 		});
 	}
 });
-

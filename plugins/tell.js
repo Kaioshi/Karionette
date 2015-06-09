@@ -4,8 +4,7 @@ var msgDB = new DB.Json({filename: 'messages'}),
 	messages = msgDB.getAll();
 
 function checkMessages(nick, context) {
-	var i, l, lchannel, send, target,
-		lnick = nick.toLowerCase();
+	var i, l, send, lnick = nick.toLowerCase();
 	if (!messages[lnick]) return;
 	i = 0; l = messages[lnick].length;
 	for (; i < l; i++) {
@@ -13,8 +12,8 @@ function checkMessages(nick, context) {
 			if (context[0] === "#" && context.toLowerCase() === messages[lnick][i].channel) {
 				if (!send) send = [];
 				if (messages[lnick][i].time !== undefined) {
-					messages[lnick][i].message = messages[lnick][i].nick+", message from "+messages[lnick][i].from+" ("
-						+lib.duration(messages[lnick][i].time, false, true)+" ago): "+messages[lnick][i].message;
+					messages[lnick][i].message = messages[lnick][i].nick+", message from "+messages[lnick][i].from+" ("+
+						lib.duration(messages[lnick][i].time, false, true)+" ago): "+messages[lnick][i].message;
 				}
 				send.push([ messages[lnick][i].method, context, messages[lnick][i].message, messages[lnick][i].sanitise ]);
 				messages[lnick].splice(i, 1); i--; l--;
@@ -100,4 +99,3 @@ cmdListen({
 		irc.say(input.context, "I'll tell them when I see them next.");
 	}
 });
-

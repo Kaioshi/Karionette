@@ -1,11 +1,4 @@
-// This script handles the following functions:
-//     ~secret password - authenticate to become an admin
-//     ~makeadmin user - make user an admin
-//     ~unadmin user - demote user input.nick admin status
-//     ~admins - list admins
-//     ~ignore user - the bot will no longer respond to messages input.nick [user]
-//     ~unignore user - the bot will once more respond to messages input.nick [user]
-//     ~reload - reload scripts
+"use strict";
 var fs = require('fs');
 
 cmdListen({
@@ -141,8 +134,8 @@ cmdListen({
 cmdListen({
 	command: "act",
 	help: "Sends an action to a target. Admin only.",
-	syntax: config.command_prefix+"act <target> <action to do> - Example: "
-		+config.command_prefix+"act #anime whips Deide's behind.",
+	syntax: config.command_prefix+"act <target> <action to do> - Example: "+
+		config.command_prefix+"act #anime whips Deide's behind.",
 	admin: true,
 	arglen: 1,
 	callback: function (input) {

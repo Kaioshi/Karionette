@@ -11,7 +11,7 @@ function getOldSeen(nick, channel) {
 		seenDB = null;
 		entry.last.seen = new Date(entry.last.seen).valueOf();
 		if (!entry.last.nick) {
-			entry.last.nick = /(\<|\* )([^> ]+)/.exec(entry.last.message)[2];
+			entry.last.nick = /(<|\* )([^> ]+)/.exec(entry.last.message)[2];
 		}
 		if (entry.left) entry.left.date = new Date(entry.left.date).valueOf();
 		convertSeen(entry, channel);
@@ -22,11 +22,11 @@ function getOldSeen(nick, channel) {
 
 function convertSeen(entry, channel) {
 	var line;
-	
+
 	function quote(text) {
 		return "\""+text+"\"";
 	}
-	
+
 	if (!entry.left) {
 		line = [
 			entry.last.nick,
@@ -102,8 +102,7 @@ function findUserIndex(nick, channel) {
 }
 
 function getSeen(nick, channel) {
-	var i, reg,
-		id = findUserIndex(nick, channel);
+	var reg, id = findUserIndex(nick, channel);
 	if (id === -1) {
 		logger.debug("Didn't find such a guy. Checking old DB.");
 		return getOldSeen(nick, channel);
@@ -268,8 +267,8 @@ cmdListen({
 			return;
 		}
 		if (user.left) {
-			irc.say(input.context, user.left.user+" "+(chan !== input.context ? user.left.type+" "+chan : user.left.type)
-					+" "+lib.duration(new Date(parseInt(user.left.date, 10)), null, true)+" ago"+user.left.msg, false);
+			irc.say(input.context, user.left.user+" "+(chan !== input.context ? user.left.type+" "+chan : user.left.type)+
+					" "+lib.duration(new Date(parseInt(user.left.date, 10)), null, true)+" ago"+user.left.msg, false);
 		}
 		target = user.last.nick || target;
 		seen = (chan !== input.context ? target+" was last seen talking in "+chan+" " : target+" was last seen talking ");
@@ -282,4 +281,3 @@ cmdListen({
 lib.events.on("closing", function () {
 	saveAllSeen();
 });
-

@@ -18,8 +18,8 @@ var memDB = new DB.Json({filename: "remember"}),
 cmdListen({
 	command: "remember",
 	help: "remembers things so you don't have to. See also: memories, forget, wtf",
-	syntax: config.command_prefix+"remember <memory handle> <as/are/is/were> <thing to remember> - Example: "
-			+config.command_prefix+"remember Uni's pantsu as being striped white and blue.",
+	syntax: config.command_prefix+"remember <memory handle> <as/are/is/were> <thing to remember> - Example: "+
+			config.command_prefix+"remember Uni's pantsu as being striped white and blue.",
 	callback: function (input) {
 		var old,
 			reg = /(.*) (as|is|are|were) (.*)/.exec(input.data);
@@ -37,8 +37,8 @@ cmdListen({
 cmdListen({
 	command: "memories",
 	help: "lists memory handles. See also: remember, forget, wtf",
-	syntax: config.command_prefix+"memories [-find <string>] - no arg to list memories"
-		+" - Example: "+config.command_prefix+"memories -f pantsu",
+	syntax: config.command_prefix+"memories [-find <string>] - no arg to list memories"+
+		" - Example: "+config.command_prefix+"memories -f pantsu",
 	callback: function (input) {
 		var memories, term,
 			handles = [],
@@ -92,8 +92,8 @@ cmdListen({
 			memDB.removeOne(input.data);
 			irc.say(input.context, "I've forgotten all about "+input.data, false);
 		} else {
-			irc.say(input.context, "I don't remember "+input.data+" in the first place.. :\\ - try \""
-				+config.command_prefix+"memories\" for a list.", false);
+			irc.say(input.context, "I don't remember "+input.data+" in the first place.. :\\ - try \""+
+				config.command_prefix+"memories\" for a list.", false);
 		}
 	}
 });
@@ -101,8 +101,8 @@ cmdListen({
 cmdListen({
 	command: "wtf",
 	help: "wtf is wtf? See also: remember, memories, forget",
-	syntax: config.command_prefix+"wtf <is/are/was/were> <memory handle> - Example: "
-			+config.command_prefix+"wtf is the colour of ranma's pantsu",
+	syntax: config.command_prefix+"wtf <is/are/was/were> <memory handle> - Example: "+
+			config.command_prefix+"wtf is the colour of ranma's pantsu",
 	arglen: 2,
 	callback: function (input) {
 		var reg, memory;
@@ -115,4 +115,3 @@ cmdListen({
 		irc.say(input.context, [ reg[2], memory[0], memory[1] ].join(" "), false);
 	}
 });
-

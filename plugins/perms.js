@@ -32,11 +32,10 @@ function itemExists(type, item) {
 cmdListen({
 	command: [ "perms", "permissions" ],
 	help: "Lets you set permissions on aliases/variables/commands. See also: claim, inspect",
-	syntax: config.command_prefix+"perms <allow/deny/owner> <add/remove> <alias/variable/command> \
-		<name of alias/variable/command> <username> - Example: "+config.command_prefix+"perms \
-		deny add alias whip mitch",
+	syntax: config.command_prefix+"perms <allow/deny/owner> <add/remove> <alias/variable/command> <name of alias/variable/command> "+
+		"<username> - Example: "+config.command_prefix+"perms deny add alias whip ranma",
 	callback: function (input) {
-		var reg, result, user;
+		var reg, result;
 		reg = /^(allow|deny|owner) (add|remove) (alias|variable|command) ([^ ]+) ([^ ]+)/.exec(input.data);
 		if (!reg) {
 			irc.say(input.context, cmdHelp("perms", "syntax"));
@@ -44,8 +43,7 @@ cmdListen({
 		}
 		// does it exist?
 		if (!perms.hasPerms(reg[3], reg[4])) {
-			irc.say(input.context, reg[3]+" "+reg[4]+" has no owner set - or doesn't exist. \
-				Someone needs to create or claim it first.");
+			irc.say(input.context, reg[3]+" "+reg[4]+" has no owner set - or doesn't exist. Someone needs to create or claim it first.");
 			return;
 		}
 		result = perms.Action(input.user, reg[1]+" "+reg[2], reg[3], reg[4], reg[5]);
@@ -87,7 +85,7 @@ cmdListen({
 	syntax: config.command_prefix+"claim <alias/variable/command> <name of alias/variable/command>",
 	arglen: 2,
 	callback: function (input) {
-		var reg, result, admin, user;
+		var reg, admin, user;
 		reg = /^(alias|variable|command) ([^ ]+)/.exec(input.data.toLowerCase());
 		if (!reg) {
 			irc.say(input.context, cmdHelp("claim", "syntax"));
@@ -119,4 +117,3 @@ cmdListen({
 		}
 	}
 });
-

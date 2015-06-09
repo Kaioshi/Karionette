@@ -1,19 +1,20 @@
+"use strict";
 cmdListen({
 	command: "define",
 	help: "Defines words or phrases using wordnik.",
 	syntax: config.command_prefix+"define <word/phrase> - Example: "+config.command_prefix+"define butt",
 	arglen: 1,
 	callback: function (input) {
-		var uri, i, l, definitions, example, query;
+		var uri, i, l, definitions, query;
 		if (!config.api.wordnik) {
-			irc.say(input.context, "The wordnik plugin requires an API key to be present in config, \
-				go to http://developer.wordnik.com to get one.");
+			irc.say(input.context, "The wordnik plugin requires an API key to be present in config, go to "+
+				"http://developer.wordnik.com to get one.");
 			return;
 		}
 		query = input.data.trim();
 		uri = "http://api.wordnik.com:80/v4/word.json/"+query+
-			"/definitions?limit=3&includeRelated=true&sourceDictionaries=wordnet,wiktionary&useCanonical=false&includeTags=false&api_key="
-			+config.api.wordnik;
+			"/definitions?limit=3&includeRelated=true&sourceDictionaries=wordnet,wiktionary&useCanonical=false&includeTags=false&api_key="+
+			config.api.wordnik;
 		web.get(uri, function (error, response, body) {
 			try {
 				body = JSON.parse(body);

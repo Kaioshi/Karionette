@@ -4,10 +4,10 @@ var url = require("url"),
 	fs = require('fs'),
 	ytReg = /v=([^ &\?]+)/i,
 	ytBReg = /^\/([^ &\?]+)/,
-	titleReg = /<title?[^>]+>([^<]+)<\/title>/i,
-	sayTitle;
+	titleReg, sayTitle;
 
 if (config.titlesnarfer_inline) {
+	titleReg = /<title?[^>]+>([^<]+)<\/title>/i;
 	sayTitle = function (context, uri, imgur, old, record, length) {
 		var reg, title;
 		web.get(uri.href, function (error, response, body) {

@@ -1,5 +1,5 @@
 // http://upload.gfycat.com/transcode?fetchUrl=i.imgur.com/lKi99vn.gif
-
+"use strict";
 cmdListen({
 	command: [ "gfycat", "gfy" ],
 	help: "Gfycat frontend.",

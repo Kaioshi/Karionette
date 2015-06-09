@@ -1,4 +1,5 @@
 // Keeps the bot connected
+"use strict";
 evListen({
 	handle: "corePing",
 	event: "PING",
@@ -11,7 +12,7 @@ evListen({
 	handle: "nickChange",
 	event: "433",
 	callback: function (input) {
-		var i;
+		var i, changeNick;
 		/*
 		 * must be the one we set in config, and we're not connected yet.
 		 * since it's tracked after that point, and only when it's changed
@@ -26,15 +27,18 @@ evListen({
 					irc.raw("NICK "+config.nick);
 				}, 1000);
 			} else {
+				changeNick = function (newNick) {
+					setTimeout(function () {
+						irc.raw("NICK "+newNick);
+					}, 1000);
+				};
 				for (i = 0; i < config.nickname.length; i++) {
 					logger.debug(config.nickname[i]+" - "+i);
 					if (config.nickname[i] === config.nick) {
 						config.nickname.splice(i, 1);
 					} else {
 						config.nick = config.nickname[i];
-						setTimeout(function () {
-							irc.raw("NICK " + config.nick);
-						}, 1000);
+						changeNick(config.nick);
 					}
 				}
 			}
@@ -47,7 +51,7 @@ evListen({
 	handle: "nickserv",
 	event: "NOTICE",
 	regex: new RegExp("^:"+config.nickserv_nickname+"!"+config.nickserv_hostname+" NOTICE [^ ]+ :This nickname is registered", "i"),
-	callback: function (input) {
+	callback: function () {
 		irc.say("NickServ", "IDENTIFY " + config.nickserv_password);
 	}
 });
@@ -59,27 +63,27 @@ evListen({
 	callback: function (input) {
 		var ctcp = input.match[1].split(" ");
 		switch (ctcp[0].toUpperCase()) {
-			case "VERSION":
-				irc.raw("NOTICE "+input.context+" :\x01VERSION Karionette ~ \x02"+lib.randSelect([
-						"Now with 90% more butts!",
-						"All dem bot butts",
-						"This one time, at band camp..",
-						"Secretly loves fish fingers and custard",
-						"Dun dun dunnnn",
-						"N-Nya..",
-						"Pantsu?",
-						"PANTSU!",
-						"Needs more Pantsu."])+
-					"\x02 ~ https://github.com/Kaioshi/Karionette.git [based on Marionette by Deide @ EsperNet]\x01");
-				break;
-			case "TIME":
-				irc.raw("NOTICE "+input.context+" :\x01TIME "+new Date()+"\x01");
-				break;
-			case "PING":
-				irc.raw("NOTICE "+input.context+" :\x01PING "+ctcp.slice(1).join(" ")+"\x01");
-				break;
-			default:
-				break; // should never happen
+		case "VERSION":
+			irc.raw("NOTICE "+input.context+" :\x01VERSION Karionette ~ \x02"+lib.randSelect([
+					"Now with 90% more butts!",
+					"All dem bot butts",
+					"This one time, at band camp..",
+					"Secretly loves fish fingers and custard",
+					"Dun dun dunnnn",
+					"N-Nya..",
+					"Pantsu?",
+					"PANTSU!",
+					"Needs more Pantsu."])+
+				"\x02 ~ https://github.com/Kaioshi/Karionette.git [based on Marionette by Deide @ EsperNet]\x01");
+			break;
+		case "TIME":
+			irc.raw("NOTICE "+input.context+" :\x01TIME "+new Date()+"\x01");
+			break;
+		case "PING":
+			irc.raw("NOTICE "+input.context+" :\x01PING "+ctcp.slice(1).join(" ")+"\x01");
+			break;
+		default:
+			break; // should never happen
 		}
 	}
 });
@@ -101,19 +105,17 @@ evListen({
 	event: "315",
 	callback: function (input) {
 		var channel;
-		if (globals.autojoining !== undefined) {
-			if (globals.autojoining.length > 0) {
-				channel = input.raw.slice(input.raw.indexOf("#"));
-				channel = channel.slice(0, channel.indexOf(" "));
-				globals.autojoining = globals.autojoining.filter(function (element) {
-					return (element.toLowerCase() !== channel.toLowerCase());
-				});
-				if (globals.autojoining.length === 0) {
-					delete globals.autojoining;
-					lib.events.emit("Event: autojoinFinished");
-					logger.debug("Finished joining channels");
-				}
-			}
+		if (globals.autojoining === undefined || !globals.autojoining.length)
+			return;
+		channel = input.raw.slice(input.raw.indexOf("#"));
+		channel = channel.slice(0, channel.indexOf(" "));
+		globals.autojoining = globals.autojoining.filter(function (element) {
+			return (element.toLowerCase() !== channel.toLowerCase());
+		});
+		if (globals.autojoining.length === 0) {
+			delete globals.autojoining;
+			lib.events.emit("Event: autojoinFinished");
+			logger.debug("Finished joining channels");
 		}
 	}
 });
@@ -202,7 +204,7 @@ cmdListen({
 	help: "Seriously?",
 	syntax: config.command_prefix+"help [<command or alias you want help with>] - supply no command in order to list commands (does not list aliases).",
 	callback: function (input) {
-		var cmd, cmdArr, help, syntax, options;
+		var cmd, help, syntax, options;
 		if (!input.args) { // show all commands
 			irc.say(input.context, "Available commands: "+cmdList().sort().join(", "));
 			return;
@@ -264,7 +266,6 @@ cmdListen({
 	command: "age",
 	help: "Tells you how old Mari is!",
 	callback: function (input) {
-		irc.say(input.context, "I am " 
-			+ lib.duration(new Date("1 May 2013 18:40:00 GMT"))	+ " old, but always sweet as sugar.");
+		irc.say(input.context, "I am "+lib.duration(new Date("1 May 2013 18:40:00 GMT"))+" old, but always sweet as sugar.");
 	}
 });
