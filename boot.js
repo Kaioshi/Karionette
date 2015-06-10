@@ -7,7 +7,7 @@ global.globals = {
 };
 
 var fs = require('fs'),
-	DB = require("./lib/fileDB.js"),
+	DB = require("./lib/db.js"),
 	fragDB = require("./lib/fragStorage.js"),
 	web = require("./lib/web.js"),
 	regexFactory = require("./lib/regexFactory.js"),
