@@ -41,15 +41,8 @@ if (config.titlesnarfer_inline) {
 	};
 } else {
 	sayTitle = function (context, uri, imgur, old, record) {
-		var title, result;
-		web.get("http://felt.ninja:5036/?singlespace=1&uri="+uri.href, function (error, response, body) {
-			try {
-				result = JSON.parse(body);
-			} catch (e) {
-				logger.warn("Couldn't parse titlesnarfer JSON, saved body to globals.lastTitleFail - " + e.error);
-				globals.lastTitleFail = body;
-				return;
-			}
+		var title;
+		web.json("http://felt.ninja:5036/?singlespace=1&uri="+uri.href).then(function (result) {
 			if (result.error) {
 				if (record)
 					recordURL(record[0], record[1], record[2]);
@@ -77,37 +70,18 @@ if (fs.existsSync("data/urls.json")) {
 
 function convertUrls() {
 	var db = JSON.parse(fs.readFileSync("data/urls.json").toString()),
-		channel, nick, i, l, fn;
-	if (!fs.existsSync("data/urls/")) fs.mkdirSync("data/urls/");
-	for (channel in db) {
-		for (nick in db[channel]) {
-			i = 0; l = db[channel][nick].length;
+		i, fn;
+	if (!fs.existsSync("data/urls/"))
+		fs.mkdirSync("data/urls/");
+	Object.keys(db).forEach(function (channel) {
+		Object.keys(db[channel]).forEach(function (nick) {
 			fn = "data/urls/"+channel.toLowerCase()+".txt";
-			for (; i < l; i++) {
+			for (i = 0; i < db[channel][nick].length; i++) {
 				fs.appendFileSync(fn, db[channel][nick][i][0]+" "+nick+" "+new Date(db[channel][nick][i][1]).valueOf()+"\n");
 			}
-		}
-	}
+		});
+	});
 	fs.unlinkSync("data/urls.json");
-}
-
-function zero(n) {
-	return (n > 9 ? n : "0" + n);
-}
-
-function dura(secs) {
-	var mins = Math.floor(secs/60),
-		hours = Math.floor(mins/60),
-		ret = [];
-		secs = (secs % 60);
-		mins = (mins % 60);
-		hours = (hours % 24);
-	if (hours)
-		ret.push(zero(hours));
-	if (mins)
-		ret.push(zero(mins));
-	ret.push(zero(secs));
-	return ret.join(":");
 }
 
 function lastUrl(channel, nick, match) {
@@ -141,9 +115,9 @@ function lastUrl(channel, nick, match) {
 	if (index !== undefined) {
 		mostRecent = urls[index].split(" ");
 		urls = null; entry = null;
-		return mostRecent[1]+" linked "+mostRecent[0]+" "
-			+(mostRecent[3] ? "("+mostRecent.slice(3).join(" ")+") " : "")
-			+lib.duration(mostRecent[2], null, true)+" ago.";
+		return mostRecent[1]+" linked "+mostRecent[0]+" "+
+			(mostRecent[3] ? "("+mostRecent.slice(3).join(" ")+") " : "")+
+			lib.duration(mostRecent[2], null, true)+" ago.";
 	}
 	return "Can't see any.";
 }
@@ -198,14 +172,7 @@ function getURL(channel, url) {
 
 function youtubeIt(context, id, old, record) {
 	var resp;
-	web.youtube(id, function (yt) {
-		if (yt.error) {
-			if (yt.error.reason === "keyInvalid")
-				irc.say(context, "You need a youtube API key in the config. See https://developers.google.com/youtube/v3/getting-started");
-			else
-				irc.say(context, yt.error.message+": "+yt.error.reason);
-			return;
-		}
+	web.youtubeByID(id).then(function (yt) {
 		yt.date = yt.date.split("T")[0];
 		yt.views = lib.commaNum(yt.views);
 		if (config.titlesnarfer_youtube_format !== undefined) {
@@ -217,6 +184,11 @@ function youtubeIt(context, id, old, record) {
 		irc.say(context, resp+(old ? " ("+old+")" : ""), false);
 		if (record)
 			recordURL(record[0], record[1], record[2], yt.title);
+	}, function (error) {
+		if (error.reason === "keyInvalid")
+			irc.say(context, "You need a youtube API key in the config. See https://developers.google.com/youtube/v3/getting-started");
+		else
+			irc.say(context, error.message+": "+error.reason);
 	});
 }
 
@@ -225,8 +197,8 @@ evListen({
 	event: "PRIVMSG",
 	regex: /^:[^ ]+ PRIVMSG #[^ ]+ :.*((?:https?:\/\/)[^\x01 ]+)/i,
 	callback: function (input) {
-		var uri, ext, allow, old, record, videoID;
-		
+		var uri, ext, old, record, videoID;
+
 		if (input.args)
 			return; // don't process urls in commands
 		old = getURL(input.channel, input.match[1]) || false;
@@ -270,8 +242,8 @@ evListen({
 cmdListen({
 	command: "lasturl",
 	help: "Shows the last URLs people posted!",
-	syntax: config.command_prefix+"lasturl [<nick>] [<term>] - Example: "
-		+config.command_prefix+"lasturl ranma goatse",
+	syntax: config.command_prefix+"lasturl [<nick>] [<term>] - Example: "+
+		config.command_prefix+"lasturl ranma goatse",
 	callback: function (input) {
 		var searchTerm, target;
 		if (!input.channel) {
@@ -287,8 +259,8 @@ cmdListen({
 cmdListen({
 	command: "urlstats",
 	help: "Shows URL stats!",
-	syntax: config.command_prefix+"urlstats [<nick>] [<term>] - Example: "
-		+config.command_prefix+"urlstats ranma imgur",
+	syntax: config.command_prefix+"urlstats [<nick>] [<term>] - Example: "+
+		config.command_prefix+"urlstats ranma imgur",
 	callback: function (input) {
 		var searchTerm, target;
 		if (!input.channel) {
