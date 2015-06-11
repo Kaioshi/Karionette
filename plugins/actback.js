@@ -29,6 +29,8 @@ function transformObj(args, num) {
 			"her"
 		],
 		isNonObj = function (elem) {
+			if (args[num] === undefined)
+				return;
 			return (elem.toLowerCase() === args[num].toLowerCase());
 		};
 	while (nonObjs.some(isNonObj))
