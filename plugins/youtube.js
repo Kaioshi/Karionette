@@ -20,46 +20,35 @@ cmdListen({
 			searchTerm = input.args.slice(1).join(" ");
 			uri = "https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q="+searchTerm+
 				"&safeSearch=none&type=channel&fields=items&key="+config.api.youtube;
-			web.get(uri, function (error, response, body) {
-				resp = JSON.parse(body);
-				if (!resp.items.length) {
+			web.json(uri).then(function (yt) {
+				if (!yt.items.length)
 					irc.say(input.context, "\""+searchTerm+"\" doesn't seem to be a channel on YouTube.", false);
-					return;
+				else {
+					resp = yt.items[0];
+					desc = (resp.snippet.description.length ? ": "+resp.snippet.description.slice(0,140) : "");
+					irc.say(input.context, resp.snippet.title+desc+
+						" - Channel launched on "+resp.snippet.publishedAt.split("T")[0]+
+						" ~ https://youtube.com/channel/"+resp.id.channelId, false);
 				}
-				desc = (resp.items[0].snippet.description.length ? ": "+resp.items[0].snippet.description.slice(0,140) : "");
-				irc.say(input.context, resp.items[0].snippet.title+desc+
-					" - Channel launched on "+resp.items[0].snippet.publishedAt.split("T")[0]+
-					" ~ https://youtube.com/channel/"+resp.items[0].id.channelId, false);
+			}, function (error) {
+				irc.say(input.context, error.message);
 			});
 			break;
 		default:
-			uri = "https://www.googleapis.com/youtube/v3/search?part=id&maxResults=1&q="+input.data+
-				"&safeSearch=none&type=video&fields=items&key="+config.api.youtube;
-			web.get(uri, function (error, response, body) {
-				resp = JSON.parse(body);
-				if (!resp.items.length) {
-					irc.say(input.context, "\""+input.data+"\" is not a thing on YouTube.", false);
-					return;
+			web.youtubeSearch(input.data).then(function (yt) {
+				yt.date = yt.date.split("T")[0];
+				yt.views = lib.commaNum(yt.views);
+				if (config.youtube_format !== undefined) {
+					yt.b = '\x02';
+					yt.nick = input.nick;
+					irc.say(input.context, lib.formatOutput(config.youtube_format, yt), false);
+				} else {
+					irc.say(input.context,
+						lib.formatOutput("{title} - [{duration}] {date} - {channel} - {views} views ~ {link}", yt),
+						false);
 				}
-				web.youtube(resp.items[0].id.videoId, function (yt) {
-					if (yt.error) {
-						if (yt.error.reason === "keyInvalid")
-							irc.say(input.context, "Your YouTube API key is invalid. Get another: "+
-								"https://developers.google.com/youtube/v3/getting-started");
-						else
-							irc.say(input.context, yt.error.message+": "+yt.error.reason);
-						return;
-					}
-					yt.date = yt.date.split("T")[0];
-					yt.views = lib.commaNum(yt.views);
-					if (config.youtube_format !== undefined) {
-						yt.b = '\x02';
-						yt.nick = input.nick;
-						irc.say(input.context, lib.formatOutput(config.youtube_format, yt), false);
-					} else {
-						irc.say(input.context, lib.formatOutput("{title} - [{duration}] {date} - {channel} - {views} views ~ {link}", yt), false);
-					}
-				});
+			}, function (error) {
+				irc.say(input.context, error.message);
 			});
 			break;
 		}
