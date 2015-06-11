@@ -10,46 +10,40 @@ function getGenres(genres) {
 	return ret.join(", ");
 }
 
-function doSearch(type, context, title, synopsis, google) {
+function doSearch(type, context, title, synopsis) {
 	var id, uri, eps;
-	web.google("site:myanimelist.net/"+type+"/ "+title, function (error, hits, results) {
-		if (!hits) {
-			irc.say(context, "Couldn't find it. :\\");
-			return;
-		}
-		if (google) {
-			irc.say(context, results[0].title+" ~ "+results[0].url+" ~ "+results[0].content, false, 1);
-			return;
-		}
+	web.google("site:myanimelist.net/"+type+"/ "+title).then(function (results) {
 		id = new RegExp("http://myanimelist\\.net/"+type+"/([0-9]+)/?", "i").exec(results[0].url);
-		if (!id) id = new RegExp("http://myanimelist\\.net/"+type+"\\.php\\?id=([0-9]+)", "i").exec(results[0].url);
-		if (id) id = id[1];
+		if (!id)
+			id = new RegExp("http://myanimelist\\.net/"+type+"\\.php\\?id=([0-9]+)", "i").exec(results[0].url);
+		if (id)
+			id = id[1];
 		else {
 			irc.say(context, "Couldn't parse the result from google. Woops.");
 			logger.debug("Need a better regex! URL: "+results[0].url);
 			return;
 		}
-		uri = "http://api.atarashiiapp.com/"+type+"/"+id;
-		web.get(uri, function (error, response, body) {
-			body = JSON.parse(body);
-			if (body.error) {
-				irc.say(context, "The unofficial MAL API said: "+body.error+" - "+body.details);
-				irc.say(context, "Google result: "+results[0].title+" ~ "+results[0].url+" ~ "+results[0].content, false, 1);
-				return;
-			}
-			eps = "";
-			if (body.episodes) {
-				eps = " - "+body.episodes+" "+(parseInt(body.episodes, 10) > 1 ? "episodes" : "episode");
-			} else if (body.chapters) {
-				eps = " - "+body.chapters+" "+(parseInt(body.chapters, 10) > 1 ? "chapters" : "chapter");
-			}
-			uri = "http://myanimelist.net/"+type+"/"+id;
-			irc.say(context, lib.decode(body.title)+" ~ Rank #"+body.rank+
-				" ["+getGenres(body.genres)+"]"+eps+" - "+body.status+" ~ "+uri, false);
-			if (synopsis) {
-				irc.say(context, lib.stripHtml(lib.decode(body.synopsis)), false, 1);
-			}
-		});
+		return web.json("http://api.atarashiiapp.com/"+type+"/"+id);
+	}).then(function (body) {
+		if (body.error) {
+			irc.say(context, "The unofficial MAL API said: "+body.error+" - "+body.details);
+			return;
+		}
+		eps = "";
+		if (body.episodes) {
+			eps = " - "+body.episodes+" "+(parseInt(body.episodes, 10) > 1 ? "episodes" : "episode");
+		} else if (body.chapters) {
+			eps = " - "+body.chapters+" "+(parseInt(body.chapters, 10) > 1 ? "chapters" : "chapter");
+		}
+		irc.say(context, lib.decode(body.title)+" ~ Rank #"+body.rank+" ["+getGenres(body.genres)+"]"+
+			eps+" - "+body.status+" ~ http://myanimelist.net/"+type+"/"+id, false);
+		if (synopsis)
+			irc.say(context, lib.stripHtml(lib.decode(body.synopsis)), false, 1);
+	}, function (error) {
+		irc.say(context, error.message);
+		irc.say(context, uri+" didn't return a valid JSON object.");
+	}).catch(function (error) {
+		logger.error("Error in ;mal -> ", error);
 	});
 }
 
