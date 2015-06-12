@@ -13,40 +13,34 @@ var	mangaDB = {
 	check = {
 		mangafox: function (notify) {
 			if (Object.keys(watched.mangafox).length > 0) {
-				web.get("http://felt.ninja:5667/?source=mangafox", function (error, response, body) {
-					findUpdates(JSON.parse(body), "mangafox", notify);
+				web.json("http://felt.ninja:5667/?source=mangafox").then(function (resp) {
+					findUpdates(resp, "mangafox", notify);
 				});
 			}
 		},
 		mangastream: function (notify) {
 			if (Object.keys(watched.mangastream).length > 0) {
-				web.get("http://felt.ninja:5667/?source=mangastream", function (error, response, body) {
-					findUpdates(JSON.parse(body), "mangastream", notify);
+				web.json("http://felt.ninja:5667/?source=mangastream").then(function (resp) {
+					findUpdates(resp, "mangastream", notify);
 				});
 			}
 		},
 		batoto: function (notify) {
-			var rss, i, l, engReleases;
+			var i;
 			if (Object.keys(watched.batoto).length > 0) {
-				web.get("http://bato.to/recent_rss", function (err, resp, body) {
-					rss = body.replace(/\n|<\!\[CDATA\[|\]\]>/g, "");
-					rss = rss.slice(rss.indexOf("<item>"), rss.lastIndexOf("</item>")).replace(/<item>/g, "").split("</item>");
-					engReleases = [];
-					for (i = 0, l = rss.length; i < l; i++) {
-						try {
-							rss[i] = JSON.parse("{"+rss[i].replace(/\"/g, "'").replace(/<\/([^<]+)>/g, "").replace(/<([^<]+)>([^<]+)/g, "\"$1\":\"$2\",").slice(0,-1)+"}");
-							if (rss[i].title.indexOf("- English -") > -1) {
-								rss[i].title = rss[i].title.replace("- English - ", "").trim();
-								rss[i].pubDate = new Date(rss[i].pubDate).valueOf();
-								delete rss[i].guid;
-								delete rss[i].description;
-								engReleases.push(rss[i]);
-							}
-						} catch (e) {
-							logger.debug("Batoto failed on "+rss[i]);
+				web.rss2json("http://bato.to/recent_rss").then(function (res) {
+					for (i = 0; i < res.length; i++) {
+						if (res[i].title.indexOf("- English -") > -1) {
+							res[i].title = res[i].title.replace("- English - ", "").trim();
+							res[i].pubDate = new Date(res[i].pubDate).valueOf();
+							delete res[i]['y:published'];
+							delete res[i].guid;
+							delete res[i].description;
+							delete res[i]['y:id'];
+							delete res[i]['y:title'];
 						}
 					}
-					findUpdates(engReleases, "batoto", notify);
+					findUpdates(res, "batoto", notify);
 				});
 			}
 		},
