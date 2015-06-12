@@ -72,15 +72,14 @@ cmdListen({
 			return;
 		}
 		uri = "http://api.openweathermap.org/data/2.5/weather?q="+location;
-		web.get(uri, function (error, response, body) {
-			body = JSON.parse(body);
-			if (body.cod === "404") {
+		web.json(uri).then(function (resp) {
+			if (resp.cod === "404")
 				irc.say(input.context, "Couldn't find \""+location+"\"");
-				return;
+			else {
+				temp = toCelsius(resp.main.temp)+"C / "+toFahrenheit(resp.main.temp)+"F";
+				place = (resp.name ? resp.name+", " : "")+fondleCountry(resp.sys.country);
+				irc.say(input.context, tellEmSteveDave(place, getConditions(resp.weather), temp));
 			}
-			temp = toCelsius(body.main.temp)+"C / "+toFahrenheit(body.main.temp)+"F";
-			place = (body.name ? body.name+", " : "")+fondleCountry(body.sys.country);
-			irc.say(input.context, tellEmSteveDave(place, getConditions(body.weather), temp));
 		});
 	}
 });
@@ -120,14 +119,13 @@ cmdListen({
 			return;
 		}
 		uri = "http://api.openweathermap.org/data/2.5/forecast?q="+location;
-		web.get(uri, function (error, response, body) {
-			body = JSON.parse(body);
-			if (body.cod === "404") {
+		web.json(uri).then(function (resp) {
+			if (resp.cod === "404")
 				irc.say(input.context, "Couldn't find \""+location+"\"");
-				return;
+			else {
+				place = (resp.city.name ? resp.city.name+", " : "")+fondleCountry(resp.city.country);
+				irc.say(input.context, place+" ~ "+getForecast(resp.list));
 			}
-			place = (body.city.name ? body.city.name+", " : "")+fondleCountry(body.city.country);
-			irc.say(input.context, place+" ~ "+getForecast(body.list));
 		});
 	}
 });
