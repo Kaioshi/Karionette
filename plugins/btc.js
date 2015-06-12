@@ -39,7 +39,7 @@ cmdListen({
 	syntax: config.command_prefix+"btc [<currency code>] - Example: "+config.command_prefix+
 		"btc AUD",
 	callback: function (input) {
-		var provider, rate, cur, time, avg, high, low, btc;
+		var provider, rate, cur, time, avg, high, low;
 		if (input.args && input.args[0] !== undefined)
 			cur = input.args[0].toUpperCase();
 		else
@@ -48,8 +48,7 @@ cmdListen({
 			irc.say(input.context, "Invalid currency. Available: " + lib.commaList(KEYS) + ".");
 			return;
 		}
-		web.get(CURRENCY[cur], function (error, response, body) {
-			btc = JSON.parse(body);
+		web.json(CURRENCY[cur]).then(function (btc) {
 			if (btc.timestamp) {
 				time = " data fetched " + lib.duration(new Date(btc.timestamp)) + " ago.";
 				delete btc.timestamp;
