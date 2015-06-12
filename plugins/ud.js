@@ -7,12 +7,11 @@ cmdListen({
 		"ud scrobble",
 	arglen: 1,
 	callback: function (input) {
-		var result, i, tmp, def;
-		web.get("http://api.urbandictionary.com/v0/define?term="+input.data, function (error, response, body) {
-			result = JSON.parse(body);
-			if (result.result_type === "no_results" || result.list.length === 0) {
+		var i, tmp, def;
+		web.json("http://api.urbandictionary.com/v0/define?term="+input.data).then(function (result) {
+			if (result.result_type === "no_results" || result.list.length === 0)
 				irc.say(input.context, "Pantsu.");
-			} else {
+			else {
 				tmp = "1) "+lib.singleSpace(result.list[0].definition.replace(/\n|\r|\t/g, " "));
 				if (result.list.length > 1) {
 					for (i = 1; i < result.list.length; i++) {
