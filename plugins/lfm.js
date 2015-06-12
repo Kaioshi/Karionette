@@ -43,8 +43,7 @@ cmdListen({
 		config.command_prefix+"lfm plonk420",
 	callback: function (input) {
 		var uri, user, i, method, artist, track, formed, summary,
-			result, keys, ret, song, then, now, tags, from,
-			max, tn = 0;
+			keys, ret, song, then, now, tags, from, max, tn = 0;
 
 		if (config.api.lfm.length < 1) {
 			irc.say(input.context, "I.. I don't have a lastfm api key. ;<");
@@ -64,8 +63,7 @@ cmdListen({
 				}
 				uri = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist="+input.args.slice(1).join(" ")+
 					"&api_key="+config.api.lfm+"&format=json";
-				web.get(uri, function (error, response, body) {
-					result = JSON.parse(body);
+				web.json(uri).then(function (result) {
 					if (result.error) {
 						irc.say(input.context, result.message+" (Code: "+result.error+"). Pantsu.");
 						return;
@@ -103,8 +101,7 @@ cmdListen({
 				if (input.args[1] === "artists" || input.args[1] === "tracks") {
 					method = (input.args[1] === "tracks" ? "chart.gettoptracks" : "chart.gettopartists");
 					uri = "http://ws.audioscrobbler.com/2.0/?method="+method+"&api_key="+config.api.lfm+"&limit=5&format=json";
-					web.get(uri, function (error, response, body) {
-						result = JSON.parse(body);
+					web.json(uri).then(function (result) {
 						ret = [];
 						if (input.args[1] === "artists") {
 							keys = Object.keys(result.artists.artist);
@@ -128,8 +125,7 @@ cmdListen({
 				artist = input.args.slice(1).join(" ");
 				uri = "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptracks&artist="+artist+
 					"&api_key="+config.api.lfm+"&limit=5&format=json";
-				web.get(uri, function (error, response, body) {
-					result = JSON.parse(body);
+				web.json(uri).then(function (result) {
 					if (result.error) {
 						irc.say(input.context, result.message+" (Code: "+result.error+"). Pantsu.");
 						return;
@@ -159,12 +155,9 @@ cmdListen({
 		}
 		uri = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="+user+
 			"&api_key="+config.api.lfm+"&format=json";
-		web.get(uri, function (error, response, body) {
-			result = JSON.parse(body);
-			if (result.error || !result.recenttracks.track) {
-				irc.say(input.context, "No track found.");
-				return;
-			}
+		web.json(uri).then(function (result) {
+			if (result.error || !result.recenttracks.track)
+				throw Error("No track found.");
 			song = {};
 			song.artist = result.recenttracks.track[tn].artist["#text"];
 			song.track = result.recenttracks.track[tn].name;
@@ -180,49 +173,41 @@ cmdListen({
 			}
 			uri = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&username="+user+
 				"&api_key="+config.api.lfm+"&artist="+song.artist+"&track="+song.track+"&format=json";
-			web.get(uri, function (error, response, body) {
-				try {
-					result = JSON.parse(body);
-				} catch (e) {
-					body = body.replace(/\n/g, " ");
-					logger.error("Couldn't parse Lastfm's response: "+body);
-					irc.say(input.context, "Couldn't JSON.parse Lastfm's response: "+body, false);
-					return;
-				}
-				if (result.error) {
-					irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+"\" "+song.date, false);
-					irc.say(input.context, "Lastfm couldn't find detailed track info - \""+result.message+
-						"\" (Code: "+result.error+"). Pantsu.", false);
-					return;
-				}
-				song.userplays = (result.track.userplaycount ? " - User Plays: "+lib.commaNum(result.track.userplaycount) : "");
-				song.playcount = result.track.playcount;
-				song.listeners = result.track.listeners;
-				song.duration = dura(result.track.duration);
-				uri = "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptags&artist="+song.artist+
-					"&api_key="+config.api.lfm+"&format=json";
-				web.get(uri, function (error, response, body) {
-					result = JSON.parse(body);
-					song.tags = [];
-					if (result.toptags.tag) {
-						if (Array.isArray(result.toptags.tag)) {
-							keys = Object.keys(result.toptags.tag);
-							max = (keys.length < 3 ? keys.length : 3);
-							for (i = 0; i < max; i++) {
-								song.tags.push(result.toptags.tag[i].name);
-							}
-						} else if (result.toptags.tag.name) {
-							song.tags.push(result.toptags.tag.name);
-						}
-					} else {
-						song.tags.push("No tags found");
+			return web.json(uri);
+		}).then(function (result) {
+			if (result.error) {
+				irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+"\" "+song.date, false);
+				throw Error("Lastfm couldn't find detailed track info - \""+
+					result.message+"\" (Code: "+result.error+"). Pantsu.");
+			}
+			song.userplays = (result.track.userplaycount ? " - User Plays: "+lib.commaNum(result.track.userplaycount) : "");
+			song.playcount = result.track.playcount;
+			song.listeners = result.track.listeners;
+			song.duration = dura(result.track.duration);
+			uri = "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptags&artist="+song.artist+
+				"&api_key="+config.api.lfm+"&format=json";
+			return web.json(uri);
+		}).then(function (result) {
+			song.tags = [];
+			if (result.toptags.tag) {
+				if (Array.isArray(result.toptags.tag)) {
+					keys = Object.keys(result.toptags.tag);
+					max = (keys.length < 3 ? keys.length : 3);
+					for (i = 0; i < max; i++) {
+						song.tags.push(result.toptags.tag[i].name);
 					}
-					irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+
-						"\" ["+song.tags.join(", ")+"] ("+song.duration+") ~ "+lib.commaNum(song.date+song.userplays)+
-						" - Total Plays: "+lib.commaNum(song.playcount)+
-						" - Current Listeners: "+lib.commaNum(song.listeners), false);
-				});
-			});
+				} else if (result.toptags.tag.name) {
+					song.tags.push(result.toptags.tag.name);
+				}
+			} else {
+				song.tags.push("No tags found");
+			}
+			irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+
+				"\" ["+song.tags.join(", ")+"] ("+song.duration+") ~ "+lib.commaNum(song.date+song.userplays)+
+				" - Total Plays: "+lib.commaNum(song.playcount)+
+				" - Current Listeners: "+lib.commaNum(song.listeners), false);
+		}, function (error) {
+			irc.say(input.context, error.message);
 		});
 	}
 });
