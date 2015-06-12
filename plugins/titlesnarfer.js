@@ -10,11 +10,7 @@ if (config.titlesnarfer_inline) {
 	titleReg = /<title?[^>]+>([^<]+)<\/title>/i;
 	sayTitle = function (context, uri, imgur, old, record, length) {
 		var reg, title;
-		web.get(uri.href, function (error, response, body) {
-			if (error) {
-				logger.warn("error fetching "+uri.href+": "+error);
-				return;
-			}
+		web.fetch(uri.href, length).then(function (body) {
 			if (!body) {
 				logger.warn(uri.href + " - returned no body.");
 				return;
@@ -36,8 +32,7 @@ if (config.titlesnarfer_inline) {
 			irc.say(context, title+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""), false);
 			if (record)
 				recordURL(record[0], record[1], record[2], title);
-			reg = null; title = null; body = null; response = null; error = null;
-		}, length);
+		});
 	};
 } else {
 	sayTitle = function (context, uri, imgur, old, record) {
