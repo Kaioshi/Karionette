@@ -28,7 +28,7 @@ var	mangaDB = {
 		batoto: function (notify) {
 			var i;
 			if (Object.keys(watched.batoto).length > 0) {
-				web.rss2json("http://bato.to/recent_rss").then(function (res) {
+				web.rss2json("http://bato.to/recent_rss", true).then(function (res) {
 					for (i = 0; i < res.length; i++) {
 						if (res[i].title.indexOf("- English -") > -1) {
 							res[i].title = res[i].title.replace("- English - ", "").trim();
