@@ -7,7 +7,7 @@ cmdListen({
 	syntax: config.command_prefix + "geoip <nick/hostname/IP/url>",
 	arglen: 1,
 	callback: function (input) {
-		var uri, target, resp, nick, blame;
+		var uri, target, nick, blame;
 		if (input.args[0].match(/\.|\:/)) {
 			if (input.args[0].match(/https?:\/\/[^ ]+/))
 				target = url.parse(input.args[0]).host;
@@ -29,23 +29,23 @@ cmdListen({
 			}
 		}
 		uri = "http://ip-api.com/json/"+target;
-		web.get(uri, function (error, response, body) {
+		web.json(uri).then(function (resp) {
 			target = (nick ? nick : target);
-			body = JSON.parse(body);
-			if (body.status === "fail") {
+			if (resp.status === "fail") {
 				blame = lib.randSelect(ial.Active(input.context));
 				if (!blame || blame === input.nick)
 					blame = lib.randSelect(config.local_whippingboys);
-				irc.say(input.context, "ip-api reported a failure status, sorry. Blame "+blame+lib.randSelect([".", "!", "?"]));
-				return;
+				throw Error("ip-api reported a failure status, sorry. Blame "+blame+lib.randSelect([".", "!", "?"]));
 			} else {
-				resp = target+" is in "+body.country;
-				if (body.regionName)
-					resp += " - "+body.regionName;
-				if (body.city)
-					resp += ", "+body.city;
+				resp = target+" is in "+resp.country;
+				if (resp.regionName)
+					resp += " - "+resp.regionName;
+				if (resp.city)
+					resp += ", "+resp.city;
 			}
 			irc.say(input.context, resp+".", false);
+		}).catch(function (error) {
+			irc.say(input.context, error.message);
 		});
 	}
 });
