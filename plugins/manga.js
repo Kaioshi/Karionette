@@ -26,21 +26,9 @@ var	mangaDB = {
 			}
 		},
 		batoto: function (notify) {
-			var i;
 			if (Object.keys(watched.batoto).length > 0) {
-				web.rss2json("http://bato.to/recent_rss", true).then(function (res) {
-					for (i = 0; i < res.length; i++) {
-						if (res[i].title.indexOf("- English -") > -1) {
-							res[i].title = res[i].title.replace("- English - ", "").trim();
-							res[i].pubDate = new Date(res[i].pubDate).valueOf();
-							delete res[i]['y:published'];
-							delete res[i].guid;
-							delete res[i].description;
-							delete res[i]['y:id'];
-							delete res[i]['y:title'];
-						}
-					}
-					findUpdates(res, "batoto", notify);
+				web.json("http://felt.ninja:5667/?source=batoto").then(function (resp) {
+					findUpdates(resp, "batoto", notify);
 				});
 			}
 		},
