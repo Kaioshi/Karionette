@@ -79,7 +79,7 @@ cmdListen({
 			break;
 		}
 		url = url.trim();
-		web.get("http://"+gd+"/create.php?format=simple&url="+url+"&shorturl="+makeUrl(url), function (error, response, body) {
+		web.fetch("http://"+gd+"/create.php?format=simple&url="+url+"&shorturl="+makeUrl(url)).then(function (body) {
 			irc.say(input.context, body);
 		});
 	}

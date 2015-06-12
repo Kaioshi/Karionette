@@ -62,14 +62,12 @@ cmdListen({
 	syntax: config.command_prefix+"tvrage <show name> - Example: "+config.command_prefix+"tvrage Sherlock",
 	arglen: 1,
 	callback: function (input) {
-		var uri;
-		uri = "http://services.tvrage.com/tools/quickinfo.php?show="+input.data;
-		web.get(uri, function (error, response, body) {
-			if (body.indexOf("\n") === -1) { // this is tvrage's version of an error.
-				irc.say(input.context, "Couldn't find it. :<", false); // sort of.
-				return;
-			}
-			irc.say(input.context, getShowInfo(parseTvRage(body)), false);
+		var uri = "http://services.tvrage.com/tools/quickinfo.php?show="+input.data;
+		web.fetch(uri).then(function (body) {
+			if (body.indexOf("\n") === -1)// this is tvrage's version of an error.
+				irc.say(input.context, "Couldn't find it."); // sort of.
+			else
+				irc.say(input.context, getShowInfo(parseTvRage(body)), false);
 		});
 	}
 });
