@@ -7,16 +7,14 @@ cmdListen({
 		config.command_prefix+"gfy http://i.imgur.com/N2FEP.gif",
 	arglen: 1,
 	callback: function (input) {
-		var result, sizeReduction;
-		input.args[0] = input.args[0].trim();
-		web.get("http://upload.gfycat.com/transcode?fetchUrl="+input.args[0], function (error, response, body) {
-			result = JSON.parse(body);
-			if (result.error) {
-				irc.say(input.context, "Gfycat said \""+result.error+"\"");
-				return;
-			}
-			sizeReduction = Math.round((result.gifSize - result.gfysize)/1024);
-			irc.say(input.context, "http://gfycat.com/"+result.gfyname+" - Shrunk by "+sizeReduction+" KiB - Framerate: "+result.frameRate+".");
+		web.json("http://upload.gfycat.com/transcode?fetchUrl="+input.args[0]).then(function (gfy) {
+			if (gfy.error)
+				irc.say(input.context, "Gfycat said \""+gfy.error+"\"");
+			else
+				irc.say(input.context, "http://gfycat.com/"+gfy.gfyname+" - Shrunk by "+
+					Math.round((gfy.gifSize - gfy.gfysize)/1024)+" KiB - Framerate: "+gfy.frameRate+".");
+		}, function (error) {
+			irc.say(input.context, error.message);
 		});
 	}
 });
