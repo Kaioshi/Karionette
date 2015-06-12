@@ -38,13 +38,11 @@ cmdListen({ // this will stop working soon~
 	syntax: config.command_prefix+"gi puppies",
 	arglen: 1,
 	callback: function (input) {
-		web.fetch("http://ajax.googleapis.com/ajax/services/search/images?v=1.0&safe=moderate&rsz=1&q="+input.data)
-		.then(function (body) {
-			var data = JSON.parse(body);
+		var uri = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&safe=moderate&rsz=1&q="+input.data;
+		web.json(uri).then(function (data) {
 			if (data && data.responseData && data.responseData.results && data.responseData.results[0]) {
 				data = data.responseData.results[0];
-				irc.say(input.context, lib.decode(data.titleNoFormatting)+
-					" ("+data.width+"x"+data.height+"): "+data.url, false);
+				irc.say(input.context, lib.decode(data.titleNoFormatting)+" ("+data.width+"x"+data.height+"): "+data.url, false);
 			} else {
 				irc.say(input.context, "No image found. :<");
 			}
