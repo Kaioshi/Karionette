@@ -5,12 +5,17 @@ var learnDB = new DB.Json({filename: "learnedThings"}),
 	learnRegex = /^(.*) = (.*)$/,
 	knowledgeRegex = /^(.*) @ (.*)$/;
 
+function getPrefix() {
+	return config.learn_prefix || "!";
+}
+
 cmdListen({
 	command: "learn",
-	help: "Teach me about things, so I can tell others about them!",
+	help: "Teach me about things, so I can tell others about them! See also: unlearn, facts",
 	syntax: config.command_prefix+"learn <keyword> = <tell me about the thing here> - Example: "+
 		config.command_prefix+"learn mari = Mari is a node.js IRC robot. http://github.com/Kaioshi/Karionette"+
-		" - you can then type !mari to bring up that line, or !mari @ Nick to make me yell it at someone.",
+		" - you can then type "+getPrefix()+"mari to bring up that line, or "+getPrefix()+
+		"mari @ Nick to make me yell it at someone.",
 	arglen: 3,
 	callback: function (input) {
 		var learn = learnRegex.exec(input.data);
@@ -29,7 +34,7 @@ cmdListen({
 
 cmdListen({
 	command: "unlearn",
-	help: "Make me forget something I've learned.",
+	help: "Make me forget something I've learned. See also: learn, facts",
 	syntax: config.command_prefix+"unlearn <learned thing> - Example: "+config.command_prefix+"unlearn the meaning of life",
 	arglen: 1,
 	callback: function (input) {
@@ -44,10 +49,14 @@ cmdListen({
 
 cmdListen({
 	command: "facts",
-	help: "Shows a list of things I've "+config.command_prefix+"learn'd",
+	help: "Shows a list of things I've "+config.command_prefix+"learn'd. See also: learn, unlearn",
 	syntax: config.command_prefix+"facts",
 	callback: function (input) {
-		irc.say(input.context, learnDB.size() > 0 ? lib.commaNum(learnDB.getKeys()) : "I haven't been taught anything.", false);
+		var prefix = getPrefix();
+		if (learnDB.size() > 0)
+			irc.say(input.context, learnDB.getKeys().map(function (key) { return prefix+key; }).join(", "), false);
+		else
+			irc.say(input.context, "I haven't been taught anything.");
 	}
 });
 
@@ -56,7 +65,7 @@ evListen({
 	event: "PRIVMSG",
 	callback: function (input) {
 		var entry, reg, target = "";
-		if (input.message[0] === "!") {
+		if (input.message[0] === getPrefix()) {
 			entry = input.message.slice(1);
 			reg = knowledgeRegex.exec(entry);
 			if (reg) {
