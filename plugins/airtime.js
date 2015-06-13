@@ -6,42 +6,40 @@ cmdListen({
 	syntax: config.command_prefix+"airtime <show name>",
 	arglen: 1,
 	callback: function(input) {
-		web.get("http://c.milkteafuzz.com/api/1/search.json?q="+input.data.trim(), function (error, resp, body) {
-			body = JSON.parse(body);
-			if (body[0] && body[0]._id.$oid) {
-				web.get("https://c.milkteafuzz.com/api/1/shows/"+body[0]._id.$oid+".json", function (error, resp, body) {
-					var status = "",
-						title = "",
-						airtime = "",
-						date, now,
-						eps = "";
-					body = JSON.parse(body);
-					if (body.status_code) {
-						irc.say(input.context, "Couldn't find it. :<");
-						return;
-					}
-					if (body.status) status = " - "+body.status+" - ";
-					if (body.airtime) {
-						date = new Date(body.airtime.$date).valueOf();
-						now = new Date().valueOf();
-						if (date > now) airtime = "- The next episode airs in "+lib.duration(now, date)+".";
-						else {
-							// for some reason they don't increment the episodes as soon as the next one has aired.
-							if (body.episodes && body.episodes.current) body.episodes.current++;
-							airtime = "- Last aired "+lib.duration(date, now)+" ago.";
-						}
-					}
-					if (body.episodes) eps = body.episodes.current+" episodes ("+body.episodes.total+" total) ";
-					if (body.titles) {
-						if (body.titles.english) title = body.titles.english;
-						if (body.titles.japanese) title = (title ? "["+title+" / "+body.titles.japanese.trim()+"]" : body.titles.japanese);
-					}
-					irc.say(input.context, title+status+eps+airtime, false);
-					body = null; title = null; status = null; eps = null; airtime = null; date = null; now = null;
-				});
-			} else {
-				irc.say(input.context, "Couldn't find it. :<");
+		web.json("http://c.milkteafuzz.com/api/1/search.json?q="+input.data.trim()).then(function (resp) {
+			if (resp[0] && resp[0]._id.$oid)
+				return web.json("https://c.milkteafuzz.com/api/1/shows/"+resp[0]._id.$oid+".json");
+			else
+				throw Error("Couldn't find it. :\\");
+		}).then(function (resp) {
+			var status = "", title = "", airtime = "", date, now, eps = "";
+			if (resp.status_code)
+				throw Error("Couldn't find it. :<");
+			if (resp.status)
+				status = " - "+resp.status+" - ";
+			if (resp.airtime) {
+				date = new Date(resp.airtime.$date).valueOf();
+				now = new Date().valueOf();
+				if (date > now)
+					airtime = "- The next episode airs in "+lib.duration(now, date)+".";
+				else { // for some reason they don't increment the episodes as soon as the next one has aired.
+					if (resp.episodes && resp.episodes.current)
+						resp.episodes.current++;
+					airtime = "- Last aired "+lib.duration(date, now)+" ago.";
+				}
 			}
+			if (resp.episodes)
+				eps = resp.episodes.current+" episodes ("+resp.episodes.total+" total) ";
+			if (resp.titles) {
+				if (resp.titles.english)
+					title = resp.titles.english;
+				if (resp.titles.japanese)
+					title = (title ? "["+title+" / "+resp.titles.japanese.trim()+"]" : resp.titles.japanese);
+			}
+			irc.say(input.context, title+status+eps+airtime, false);
+			resp = null; title = null; status = null; eps = null; airtime = null; date = null; now = null;
+		}).catch(function (error) {
+			irc.say(input.context, error.message);
 		});
 	}
 });
