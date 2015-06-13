@@ -2,8 +2,8 @@
 // !keyword [@ nick]
 "use strict";
 var learnDB = new DB.Json({filename: "learnedThings"}),
-	learnRegex = /^(.*) = (.*)$/,
-	knowledgeRegex = /^(.*) @ (.*)$/;
+	learnRegex = /^([^=]+) = (.*)$/,
+	knowledgeRegex = /^([^@]+) @ (.*)$/;
 
 function getPrefix() {
 	return config.learn_prefix || "!";
