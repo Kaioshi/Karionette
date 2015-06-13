@@ -8,9 +8,8 @@ global.globals = {
 
 var fs = require('fs'),
 	DB = require("./lib/db.js"),
-	fragDB = require("./lib/fragStorage.js"),
+	fragDB = require("./lib/fragDB.js"),
 	web = require("./lib/web.js"),
-	regexFactory = require("./lib/regexFactory.js"),
 	Plugin = require("./lib/plugin.js"),
 	replPrompt = "", gc = true, gcInterval = 5000, mwInterval = 30000, repl = true;
 
@@ -118,7 +117,6 @@ function createSandbox() {
 		userLogin: userLogin,
 		timers: timers,
 		require: require,
-		regexFactory: regexFactory,
 		evListen: caveman.eventListen,
 		cmdListen: caveman.commandListen,
 		cmdHelp: caveman.cmdHelp,
