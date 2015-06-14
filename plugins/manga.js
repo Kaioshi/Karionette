@@ -110,7 +110,7 @@ function findUpdates(releases, type, notify) {
 			watched[type][title] = "";
 		});
 	}
-	if (updates) {
+	if (updates.length) {
 		irc.rated(updates);
 	} else if (typeof notify === 'string') {
 		irc.say(notify, "Nothing new. :\\");
