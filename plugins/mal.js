@@ -41,7 +41,6 @@ function doSearch(type, context, title, synopsis) {
 			irc.say(context, lib.stripHtml(lib.decode(body.synopsis)), false, 1);
 	}, function (error) {
 		irc.say(context, error.message);
-		irc.say(context, uri+" didn't return a valid JSON object.");
 	}).catch(function (error) {
 		logger.error("Error in ;mal -> ", error);
 	});
