@@ -1,9 +1,9 @@
 // combined mangafox / mangastream
 "use strict";
 var	mangaDB = {
-		mangafox: new fragDB("mangafox", "data/mangafox.json"),
-		mangastream: new fragDB("mangastream", "data/mangastream.json"),
-		batoto: new fragDB("batoto", "data/batoto.json")
+		mangafox: new fragDB("mangafox"),
+		mangastream: new fragDB("mangastream"),
+		batoto: new fragDB("batoto")
 	},
 	watched = {
 		mangafox: mangaDB.mangafox.getKeysObj(),
@@ -11,39 +11,41 @@ var	mangaDB = {
 		batoto: mangaDB.batoto.getKeysObj()
 	},
 	check = {
+		all: function (notify) {
+			web.json("http://felt.ninja:5667/").then(function (resp) {
+				[ "mangafox", "mangastream", "batoto" ].forEach(function (type) {
+					if (Object.keys(watched[type]).length)
+						findUpdates(resp.filter(function (rel) { return rel.source === type; }), type, notify);
+				});
+			});
+		},
 		mangafox: function (notify) {
-			if (Object.keys(watched.mangafox).length > 0) {
+			if (Object.keys(watched.mangafox).length) {
 				web.json("http://felt.ninja:5667/?source=mangafox").then(function (resp) {
 					findUpdates(resp, "mangafox", notify);
 				});
 			}
 		},
 		mangastream: function (notify) {
-			if (Object.keys(watched.mangastream).length > 0) {
+			if (Object.keys(watched.mangastream).length) {
 				web.json("http://felt.ninja:5667/?source=mangastream").then(function (resp) {
 					findUpdates(resp, "mangastream", notify);
 				});
 			}
 		},
 		batoto: function (notify) {
-			if (Object.keys(watched.batoto).length > 0) {
+			if (Object.keys(watched.batoto).length) {
 				web.json("http://felt.ninja:5667/?source=batoto").then(function (resp) {
 					findUpdates(resp, "batoto", notify);
 				});
 			}
-		},
-		all: function (notify) {
-			check.mangafox(notify);
-			check.mangastream(notify);
-			check.batoto(notify);
 		}
 	};
 
 timers.startTick(300); // start a 5 minute ticker
 
 function updateAnnouncements(announce, msg, updates) {
-	var i = 0, l = announce.length;
-	for (; i < l; i++) {
+	for (var i = 0; i < announce.length; i++) {
 		if (announce[i][0] === "#") {
 			if (lib.hasElement(ial.Channels(), announce[i]))
 				updates.push([ "say", announce[i], msg, false ]);
@@ -64,54 +66,52 @@ function updateAnnouncements(announce, msg, updates) {
 	}
 }
 
+function isNewRelease(date, latest, title) {
+	if (!latest)
+		return true;
+	if (latest.title === title) // no more revision releases without title changes >:(
+		return false;
+	if (date > latest.date)
+		return true;
+}
+
 function findUpdates(releases, type, notify) {
-	var i = 0, l = releases.length, updates, hits = [],
-		index, date, release, title, reltitle, msg;
-	for (; i < l; i++) {
-		for (title in watched[type]) {
-			if (watched[type].hasOwnProperty(title)) {
-				index = releases[i].title.toLowerCase().indexOf(title);
-				if (index > -1) {
-					if (!lib.hasElement(hits, title))
-						hits.push(title);
-					reltitle = releases[i].title.slice(index, index+title.length);
-					release = releases[i].title.slice(index+title.length+1);
-					date = new Date(releases[i].date).valueOf();
-					if (!watched[type][title].title)
-						watched[type][title] = mangaDB[type].getOne(title);
-					if (!watched[type][title].latest || date > watched[type][title].latest.date) {
-						// new release~
-						if (!updates)
-							updates = [];
-						// make the case nice if the user put in something weird.
-						if (watched[type][title].title !== reltitle)
-							watched[type][title].title = reltitle;
-						// sometimes there's weird unrequired trailing ?foo=butts&butts=foo stuff.
-						index = releases[i].link.indexOf("?");
-						watched[type][title].latest = {
-							title: releases[i].title,
-							link: (index > -1 ? releases[i].link.slice(0, index) : releases[i].link), // we dun wannit.
-							release: release,
-							date: date
-						};
-						mangaDB[type].saveOne(title, watched[type][title]);
-						msg = lib.decode(releases[i].title)+" is out! \\o/ ~ "+watched[type][title].latest.link;
-						updateAnnouncements(watched[type][title].announce, msg, updates);
-					}
-				}
+	var updates = [], hits = [],
+		index, date, reltitle, msg;
+
+	Object.keys(releases).forEach(function (r) {
+		Object.keys(watched[type]).forEach(function (title) {
+			index = releases[r].title.toLowerCase().indexOf(title);
+			if (index === -1)
+				return; // NEXT!
+			if (!lib.hasElement(hits, title))
+				hits.push(title);
+			reltitle = releases[r].title.slice(index, index+title.length);
+			date = new Date(releases[r].date).valueOf();
+			if (!watched[type][title].title)
+				watched[type][title] = mangaDB[type].getOne(title);
+			if (isNewRelease(date, watched[type][title].latest, releases[r].title)) { // new release~
+				watched[type][title].title = reltitle; // make the case nice if the user put in something weird.
+				index = releases[r].link.indexOf("?"); // weird unrequired trailing ?foo=butts&butts=foo stuff.
+				watched[type][title].latest = {
+					title: releases[r].title,
+					link: (index > -1 ? releases[r].link.slice(0, index) : releases[r].link), // die die die
+					date: date
+				};
+				mangaDB[type].saveOne(title, watched[type][title]);
+				msg = lib.decode(releases[r].title)+" is out! \\o/ ~ "+watched[type][title].latest.link;
+				updateAnnouncements(watched[type][title].announce, msg, updates);
 			}
-		}
-	}
+		});
+	});
 	if (hits.length) {
 		hits.forEach(function (title) {
 			mangaDB[type].clearCache(title);
 			watched[type][title] = "";
 		});
-		hits = null;
 	}
 	if (updates) {
 		irc.rated(updates);
-		updates = null;
 	} else if (typeof notify === 'string') {
 		irc.say(notify, "Nothing new. :\\");
 	}
