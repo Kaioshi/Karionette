@@ -11,7 +11,6 @@ function checkGits() {
 	.then(function (json) {
 		var altered = false,
 			latest = gitDB.getOne("latest") || [],
-			aList = gitDB.getOne("announceList"),
 			announce = [];
 		json.forEach(function (entry) {
 			if (latest.indexOf(entry.link) === -1) {
