@@ -1,6 +1,13 @@
 "use strict";
-var run = require('child_process').exec,
-	gitDB = new DB.Json({filename: "gitannounce"});
+var run = require('child_process').execFile,
+	fs = require('fs'),
+	gitDB = new DB.Json({filename: "gitannounce"}),
+	git = (function () {
+		if (fs.existsSync("/usr/bin/git"))
+			return "/usr/bin/git";
+		if (fs.existsSync("/usr/local/bin"))
+			return "/usr/local/bin/git";
+	})();
 
 function checkGits() {
 	var aList = gitDB.getOne("announceList");
@@ -43,18 +50,17 @@ evListen({ // check for updates when we start and joins are done
 cmdListen({
 	command: "git",
 	help: "git pull for people too lazy to open a shell. Admin only.",
-	syntax: config.command_prefix+"git pull",
+	syntax: config.command_prefix+"git pull / "+config.command_prefix+"git announce",
 	admin: true,
 	arglen: 1,
 	callback: function (input) {
-		var changes, i, l, target, aList;
+		var changes, i, target, aList;
 		switch (input.args[0].toLowerCase()) {
 		case "pull":
 			if (userLogin.isAdmin(input.user)) {
-				run("git pull", function (error, stdout, stderr) {
+				run(git, [ "pull" ], {}, function (error, stdout) {
 					stdout = stdout.split("\n");
-					changes = []; i = 0; l = stdout.length;
-					for (; i < l; i++) {
+					for (i = 0, changes = []; i < stdout.length; i++) {
 						if (stdout[i][0] === " " && stdout[i][1] !== " ")
 							changes.push([ "say", input.context, stdout[i].trim(), false ]);
 					}
@@ -82,7 +88,7 @@ cmdListen({
 			}
 			break;
 		default:
-			irc.say(input.context, "There is only one option. "+config.command_prefix+"git pull");
+			irc.say(input.context, cmdHelp("git", "syntax"));
 			break;
 		}
 	}
