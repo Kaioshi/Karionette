@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'/>
+<title>{{target}}'s {{list}} list</title>
+<style>
+body {
+	color: #FFFFFF;
+	font-family:sans-serif;
+	background-color: rgb(38, 38, 38);
+}
+/* LIST #8 */
+#list8 {  }
+#list8 ul {
+	list-style:none;
+}
+#list8 ul li {
+	/*font-family:Georgia,serif,Times;*/
+	font-size:18px;
+}
+#list8 ul li a {
+	display:block;
+	width:300px;
+	height:28px;
+	background-color:#333;
+	border-left:5px solid #222;
+	border-right:5px solid #222;
+	padding-left:10px;
+	text-decoration:none;
+	color:#bfe1f1;
+}
+#list8 ul li a:hover {
+	-moz-transform:rotate(-2deg);
+	-moz-box-shadow:2px 2px 5px #000000;
+	-webkit-transform:rotate(-1deg);
+	-webkit-box-shadow:2px 2px 5px #000000;
+	transform:rotate(-1deg); box-shadow:2px 2px 5px #000000;
+}
+</style>
+</head>
+<body>
+<h1>{{target}}'s {{list}} list</h1>
+<div id='list8'><ul>{{data}}</ul></div>
+</body>
+</html>
