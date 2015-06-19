@@ -78,9 +78,9 @@ function addListItem(context, target, list, item, type) {
 	var gReg, linkReg, user;
 	if (!isGoodPath(list))
 		return "Bad list name. Lists should be letters and numbers only and no longer than 20 characters.";
-	user = pastaDB.getOne(target);
-	if (!user || !user.lists || !user.lists[list])
-		return "There is no such list.";
+	user = pastaDB.getOne(target) || {};
+	user.lists = user.lists || {};
+	user.lists[list] = user.lists[list] || [];
 	user.target = target;
 	gReg = /^(.*) (google|bing) (site:[^ ]+)/i.exec(item);
 	if (gReg) {
