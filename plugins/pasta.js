@@ -82,13 +82,14 @@ function addListItem(context, target, list, item, type) {
 	if (!user || !user.lists || !user.lists[list])
 		return "There is no such list.";
 	user.target = target;
-	gReg = /^(.*) (site:[^ ]+)/.exec(item);
+	gReg = /^(.*) (google|bing) (site:[^ ]+)/i.exec(item);
 	if (gReg) {
 		if (listContains(user.lists[list], gReg[1])) {
 			irc.say(context, "That's already on the list.");
 			return;
 		}
-		web.google(item).then(function (resp) {
+		gReg[2] = gReg[2].toLowerCase();
+		web[gReg[2]](gReg[1]+" "+gReg[3]).then(function (resp) {
 			user.lists[list].push({
 				name: gReg[1],
 				link: resp[0].url
@@ -96,7 +97,7 @@ function addListItem(context, target, list, item, type) {
 			pastaDB.saveOne(target, user);
 			irc.say(context, writeList(user, list, type), false);
 		}, function () {
-			irc.say(context, "Google didn't find '"+gReg[1]+"' on "+gReg[2].slice(5), false);
+			irc.say(context, "Google didn't find '"+gReg[1]+"' on "+gReg[3].slice(5), false);
 		});
 		return;
 	}
