@@ -21,6 +21,7 @@ autojoin: #anime, #pyoshi
 #api lfm: <your key here> - needed for ;lfm lookups - go to http://last.fm to get one
 #api googlesearch: <your key here> - go to https://developers.google.com/custom-search/ to get one
 #api youtube: <your key here> - go to https://developers.google.com/youtube/v3/getting-started#before-you-start to get one
+#api bing: <your bing key here> - go to https://datamarket.azure.com/dataset/bing/searchweb to get one
 
 # Pass to become admin
 secret: HuHu74Kfj&
