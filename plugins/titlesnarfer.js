@@ -202,6 +202,8 @@ evListen({
 		uri = url.parse(input.match[1]);
 		switch (uri.host.replace(/www\./gi, "")) {
 		case "youtube.com":
+			if (!config.api.youtube)
+				break;
 			videoID = ytReg.exec(uri.path);
 			if (videoID) {
 				youtubeIt(input.context, videoID[1], old, record);
@@ -209,6 +211,8 @@ evListen({
 			}
 			break;
 		case "youtu.be":
+			if (!config.api.youtube)
+				break;
 			videoID = ytBReg.exec(uri.path);
 			if (videoID) {
 				youtubeIt(input.context, videoID[1], old, record);
@@ -221,6 +225,7 @@ evListen({
 				uri.path = uri.path.slice(0, -ext.length);
 				uri.href = uri.href.slice(0, -ext.length);
 			}
+		/* fall through */
 		case "imgur.com":
 			sayTitle(input.context, uri, true, old, record, 10000);
 			return;
