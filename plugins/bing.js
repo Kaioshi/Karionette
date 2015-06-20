@@ -5,6 +5,11 @@ cmdListen({
 	syntax: config.command_prefix+"bing Oh god why am I using bing",
 	arglen: 1,
 	callback: function (input) {
+		if (!config.api.bing) {
+			irc.say(input.context, "You need a bing api key in the config. "+
+				"Get one at https://datamarket.azure.com/dataset/bing/searchweb");
+			return;
+		}
 		web.bing(input.data).then(function (results) {
 			if (config.bing_format) {
 				results[0].b = '\x02';
