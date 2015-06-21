@@ -12,33 +12,27 @@ var	mangaDB = {
 	},
 	check = {
 		all: function (notify) {
+			var all = [ "mangafox", "mangastream", "batoto" ]
+				.filter(function (m) { return Object.keys(watched[m]).length; });
 			web.json("http://felt.ninja:5667/").then(function (resp) {
-				[ "mangafox", "mangastream", "batoto" ].forEach(function (type) {
-					if (Object.keys(watched[type]).length)
-						findUpdates(resp.filter(function (rel) { return rel.source === type; }), type, notify);
+				all.forEach(function (type) {
+					findUpdates(resp.filter(function (rel) { return rel.source === type; }), type, notify);
 				});
+			}).catch(function (err) {
+				logger.error("check.all(): "+err, err);
 			});
 		},
-		mangafox: function (notify) {
-			if (Object.keys(watched.mangafox).length) {
-				web.json("http://felt.ninja:5667/?source=mangafox").then(function (resp) {
-					findUpdates(resp, "mangafox", notify);
-				});
+		one: function (type, notify) {
+			if (!watched[type] || !Object.keys(watched[type]).length) {
+				if (notify)
+					irc.say(notify, "I'm not tracking any releases on "+type+".");
+				return;
 			}
-		},
-		mangastream: function (notify) {
-			if (Object.keys(watched.mangastream).length) {
-				web.json("http://felt.ninja:5667/?source=mangastream").then(function (resp) {
-					findUpdates(resp, "mangastream", notify);
-				});
-			}
-		},
-		batoto: function (notify) {
-			if (Object.keys(watched.batoto).length) {
-				web.json("http://felt.ninja:5667/?source=batoto").then(function (resp) {
-					findUpdates(resp, "batoto", notify);
-				});
-			}
+			web.json("http://felt.ninja:5667/?source="+type).then(function (resp) {
+				findUpdates(resp, type, notify);
+			}).catch(function (err) {
+				logger.error("check."+type+": "+err, err);
+			});
 		}
 	};
 
@@ -67,18 +61,31 @@ function updateAnnouncements(announce, msg, updates) {
 }
 
 function isNewRelease(date, latest, title) {
-	if (!latest)
+	var i, newest;
+	if (!latest || !Array.isArray(latest) || !latest.length)
 		return true;
-	if (latest.title === title) // no more revision releases without title changes >:(
-		return false;
-	if (date > latest.date)
+	for (i = 0, newest = 0; i < latest.length; i++) {
+		if (latest[i].title === title)
+			return false;
+		if (latest[i].date > newest)
+			newest = latest[i].date;
+	}
+	if (date > newest)
 		return true;
+	return false;
+}
+
+function setLatest(type, title, release, date) {
+	if (!Array.isArray(watched[type][title].latest)) // old format
+		watched[type][title].latest = [];
+	watched[type][title].latest.push({ title: release.title, link: release.link, date: date });
+	if (watched[type][title].latest.length > 5)
+		logger.debug("Removed "+watched[type][title].latest.shift());
 }
 
 function findUpdates(releases, type, notify) {
 	var updates = [], hits = [],
 		index, date, reltitle, msg;
-
 	Object.keys(releases).forEach(function (r) {
 		Object.keys(watched[type]).forEach(function (title) {
 			index = releases[r].title.toLowerCase().indexOf(title);
@@ -93,13 +100,11 @@ function findUpdates(releases, type, notify) {
 			if (isNewRelease(date, watched[type][title].latest, releases[r].title)) { // new release~
 				watched[type][title].title = reltitle; // make the case nice if the user put in something weird.
 				index = releases[r].link.indexOf("?"); // weird unrequired trailing ?foo=butts&butts=foo stuff.
-				watched[type][title].latest = {
-					title: releases[r].title,
-					link: (index > -1 ? releases[r].link.slice(0, index) : releases[r].link), // die die die
-					date: date
-				};
+				if (index > -1)
+					releases[r].link = releases[r].link.slice(0, index);
+				setLatest(type, title, releases[r], date);
 				mangaDB[type].saveOne(title, watched[type][title]);
-				msg = lib.decode(releases[r].title)+" is out! \\o/ ~ "+watched[type][title].latest.link;
+				msg = lib.decode(releases[r].title)+" is out! \\o/ ~ "+releases[r].link;
 				updateAnnouncements(watched[type][title].announce, msg, updates);
 			}
 		});
@@ -178,78 +183,78 @@ function parseMangaCmd(input) {
 	case "announce":
 		switch (input.args[1].toLowerCase()) {
 		case "add":
-			if (input.args.length >= 4) {
-				title = input.args.slice(2,-1).join(" ");
-				ltitle = title.toLowerCase();
-				if (watched[type[1]][ltitle] === undefined) {
-					irc.say(input.context, "I'm not tracking \""+title+"\" updates, so there's no announce list for it.");
-					return;
-				}
-				target = input.args[input.args.length-1];
-				watched[type[1]][ltitle] = mangaDB[type[1]].getOne(ltitle);
-				if (lib.hasElement(watched[type[1]][ltitle].announce, target)) {
-					irc.say(input.context, "I'm already announcing "+title+" releases to "+target+".");
-					return;
-				}
-				watched[type[1]][ltitle].announce.push(target);
-				mangaDB[type[1]].saveOne(ltitle, watched[type[1]][ltitle]);
-				watched[type[1]][ltitle] = "";
-				irc.say(input.context, "Added! o7");
-			} else {
+			if (input.args.length < 4) {
 				irc.say(input.context, "[Help] "+config.command_prefix+type[1]+" announce add <manga title> <target> - Example: "+
 					config.command_prefix+type[1]+" announce add One Piece #pyoshi");
+				return;
 			}
+			title = input.args.slice(2,-1).join(" ");
+			ltitle = title.toLowerCase();
+			if (watched[type[1]][ltitle] === undefined) {
+				irc.say(input.context, "I'm not tracking \""+title+"\" updates, so there's no announce list for it.");
+				return;
+			}
+			target = input.args[input.args.length-1];
+			watched[type[1]][ltitle] = mangaDB[type[1]].getOne(ltitle);
+			if (lib.hasElement(watched[type[1]][ltitle].announce, target)) {
+				irc.say(input.context, "I'm already announcing "+title+" releases to "+target+".");
+				return;
+			}
+			watched[type[1]][ltitle].announce.push(target);
+			mangaDB[type[1]].saveOne(ltitle, watched[type[1]][ltitle]);
+			watched[type[1]][ltitle] = "";
+			irc.say(input.context, "Added! o7");
 			break;
 		case "remove":
-			if (input.args.length >= 4) {
-				title = input.args.slice(2,-1).join(" ");
-				ltitle = title.toLowerCase();
-				if (watched[type[1]][ltitle] === undefined) {
-					irc.say(input.context, "I'm not tracking \""+title+"\" updates, so there's no announce list for it.");
-					return;
-				}
-				target = input.args[input.args.length-1];
-				ltarget = target.toLowerCase();
-				watched[type[1]][ltitle] = mangaDB[type[1]].getOne(ltitle);
-				i = 0; l = watched[type[1]][ltitle].announce.length;
-				for (; i < l; i++) {
-					if (watched[type[1]][ltitle].announce[i].toLowerCase() === ltarget) {
-						if (l === 1) {
-							irc.say(input.context, "Removed ~ "+title+" now has an empty announce list, so I'm removing it from the watch list.");
-							delete watched[type[1]][ltitle];
-						} else {
-							watched[type[1]][ltitle].announce.splice(i, 1);
-							irc.say(input.context, "Removed. o7");
-						}
-						mangaDB[type[1]].saveOne(ltitle, watched[type[1]][ltitle]);
-						break;
-					}
-				}
-				watched[type[1]][ltitle] = "";
-				mangaDB[type[1]].clearCache();
-				irc.say(input.context, target+" isn't on the announce list for "+title+".");
-			} else {
+			if (input.args.length < 4) {
 				irc.say(input.context, "[Help] "+config.command_prefix+type[1]+" announce remove <manga title> <target> - Example: "+
 					config.command_prefix+type[1]+" announce remove Fairy Tail #pyoshi");
+				return;
 			}
+			title = input.args.slice(2,-1).join(" ");
+			ltitle = title.toLowerCase();
+			if (watched[type[1]][ltitle] === undefined) {
+				irc.say(input.context, "I'm not tracking \""+title+"\" updates, so there's no announce list for it.");
+				return;
+			}
+			target = input.args[input.args.length-1];
+			ltarget = target.toLowerCase();
+			watched[type[1]][ltitle] = mangaDB[type[1]].getOne(ltitle);
+			i = 0; l = watched[type[1]][ltitle].announce.length;
+			for (; i < l; i++) {
+				if (watched[type[1]][ltitle].announce[i].toLowerCase() === ltarget) {
+					if (l === 1) {
+						irc.say(input.context, "Removed ~ "+title+" now has an empty announce list, so I'm removing it from the watch list.");
+						delete watched[type[1]][ltitle];
+					} else {
+						watched[type[1]][ltitle].announce.splice(i, 1);
+						irc.say(input.context, "Removed. o7");
+					}
+					mangaDB[type[1]].saveOne(ltitle, watched[type[1]][ltitle]);
+					break;
+				}
+			}
+			watched[type[1]][ltitle] = "";
+			mangaDB[type[1]].clearCache();
+			irc.say(input.context, target+" isn't on the announce list for "+title+".");
 			break;
 		case "list":
-			if (input.args.length >= 3) {
-				title = input.args.slice(2).join(" ");
-				ltitle = title.toLowerCase();
-				if (watched[type[1]][ltitle] === undefined) {
-					irc.say(input.context, "I'm not tracking \""+title+"\" updates, so there's no announce list for it.");
-					return;
-				}
-				watched[type[1]][ltitle] = mangaDB[type[1]].getOne(ltitle);
-				irc.say(input.context, watched[type[1]][ltitle].title+" releases are announced to "+
-					lib.commaList(lib.sort(watched[type[1]][ltitle].announce))+".");
-				watched[type[1]][ltitle] = "";
-				mangaDB[type[1]].clearCache();
-			} else {
+			if (input.args.length < 3) {
 				irc.say(input.context, "[Help] "+config.command_prefix+type[1]+" announce list <manga title> - Example: "+
 					config.command_prefix+type[1]+" announce list One Piece");
+				return;
 			}
+			title = input.args.slice(2).join(" ");
+			ltitle = title.toLowerCase();
+			if (watched[type[1]][ltitle] === undefined) {
+				irc.say(input.context, "I'm not tracking \""+title+"\" updates, so there's no announce list for it.");
+				return;
+			}
+			watched[type[1]][ltitle] = mangaDB[type[1]].getOne(ltitle);
+			irc.say(input.context, watched[type[1]][ltitle].title+" releases are announced to "+
+				lib.commaList(lib.sort(watched[type[1]][ltitle].announce))+".");
+			watched[type[1]][ltitle] = "";
+			mangaDB[type[1]].clearCache();
 			break;
 		default:
 			irc.say(input.context, "[Help] "+config.command_prefix+type[1]+
@@ -274,7 +279,7 @@ function parseMangaCmd(input) {
 		watched[type[1]][ltitle] = { title: title, announce: [ input.context ] };
 		mangaDB[type[1]].saveOne(ltitle, watched[type[1]][ltitle]);
 		irc.say(input.context, "Added! o7");
-		check[type[1]]();
+		check.one(type[1]);
 		break;
 	case "remove":
 		if (!input.args[1]) {
@@ -308,7 +313,7 @@ function parseMangaCmd(input) {
 		mangaDB[type[1]].clearCache();
 		break;
 	case "check":
-		check[type[1]](input.context);
+		check.one(type[1], input.context);
 		break;
 	default:
 		irc.say(input.context, cmdHelp(type[0], "syntax"));
