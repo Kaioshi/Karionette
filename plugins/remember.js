@@ -15,7 +15,7 @@ var memDB = new DB.Json({filename: "remember"}),
 		"I'm not aware of such a thing"
 	];
 
-cmdListen({
+bot.command({
 	command: "remember",
 	help: "remembers things so you don't have to. See also: memories, forget, wtf",
 	syntax: config.command_prefix+"remember <memory handle> <as/are/is/were> <thing to remember> - Example: "+
@@ -24,7 +24,7 @@ cmdListen({
 		var old,
 			reg = /(.*) (as|is|are|were) (.*)/.exec(input.data);
 		if (!reg) {
-			irc.say(input.context, cmdHelp("remember", "syntax"));
+			irc.say(input.context, bot.cmdHelp("remember", "syntax"));
 			return;
 		}
 		old = memDB.getOne(reg[1]);
@@ -34,7 +34,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "memories",
 	help: "lists memory handles. See also: remember, forget, wtf",
 	syntax: config.command_prefix+"memories [-find <string>] - no arg to list memories"+
@@ -55,7 +55,7 @@ cmdListen({
 		case "-f":
 		case "-find":
 			if (!input.args[1]) {
-				irc.say(input.context, cmdHelp("memories", "syntax"));
+				irc.say(input.context, bot.cmdHelp("memories", "syntax"));
 				return;
 			}
 			term = input.args.slice(1).join(" ");
@@ -76,13 +76,13 @@ cmdListen({
 			}
 			break;
 		default:
-			irc.say(input.context, cmdHelp("memories", "syntax"));
+			irc.say(input.context, bot.cmdHelp("memories", "syntax"));
 			break;
 		}
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "forget",
 	help: "forgets .. what was I doing? See also: remember, memories, wtf",
 	syntax: config.command_prefix+"forget <memory handle>",
@@ -98,7 +98,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "wtf",
 	help: "wtf is wtf? See also: remember, memories, forget",
 	syntax: config.command_prefix+"wtf <is/are/was/were> <memory handle> - Example: "+

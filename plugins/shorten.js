@@ -55,7 +55,7 @@ function makeUrl(url) {
 	return word+makeKey(4);
 }
 
-cmdListen({
+bot.command({
 	command: "shorten",
 	help: "Shortens URLs!",
 	syntax: config.command_prefix+"shorten [-p(review)] <url> - Example: "+
@@ -67,7 +67,7 @@ cmdListen({
 		case "-p":
 		case "-preview":
 			if (!input.args[1]) {
-				irc.say(input.context, cmdHelp("shorten", "syntax"));
+				irc.say(input.context, bot.cmdHelp("shorten", "syntax"));
 				return;
 			}
 			gd = "v.gd";

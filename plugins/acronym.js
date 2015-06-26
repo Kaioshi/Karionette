@@ -33,7 +33,7 @@ function getWord(letter, type) {
 	return "???";
 }
 
-cmdListen({
+bot.command({
 	command: "acronym",
 	help: "Tries to guess your acronym.",
 	syntax: config.command_prefix+"acronym <ACRONYM> - Example: "+

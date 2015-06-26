@@ -1,6 +1,6 @@
 // user logins :<
 "use strict";
-cmdListen({
+bot.command({
 	command: "identify",
 	help: "Identifies you with "+config.nick+". See also: unidentify, whoami, adduser, deluser",
 	syntax: config.command_prefix+"identify <username> <password> - via query. You can supply the bot's secret code as the password, if need be.",
@@ -30,7 +30,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "unidentify",
 	help: "Unidentifies you with "+config.nick+". See also: identify, whoami, adduser, deluser",
 	callback: function (input) {
@@ -46,7 +46,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "whoami",
 	help: "Tells you who you're identified as, if you are. See also: identify, unidentify, adduser, deluser",
 	callback: function (input) {
@@ -59,7 +59,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "set",
 	help: "Sets or shows per-user attributes. See also: unset",
 	syntax: config.command_prefix+"set [<attribute>] [<value>] - Supply a value to set it, none to show it, or no args to see all attributes.",
@@ -87,7 +87,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "unset",
 	help: "Unsets per-user attributes. See also: set",
 	syntax: config.command_prefix+"unset <attribute> - Supply no args to see your current attributes.",
@@ -125,7 +125,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "adduser",
 	help: "Adds a user to the bot. See also: deluser, whoami, identify, unidentify",
 	syntax: config.command_prefix+"adduser <username> <password> [<secret>] - via query. Supply the bot's secret code to be recognised as an admin.",
@@ -156,7 +156,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "deluser",
 	help: "Removes a user from the bot. See also: adduser, whoami, identify, unidentify",
 	syntax: config.command_prefix+"deluser <username> [<password>] - via query. Admins don't need the password if it's another user.",
@@ -176,7 +176,7 @@ cmdListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "loginNick",
 	event: "NICK",
 	callback: function (input) {
@@ -192,7 +192,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "loginQuit",
 	event: "QUIT",
 	callback: function (input) {

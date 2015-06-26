@@ -1,7 +1,7 @@
 "use strict";
 var url = require('url');
 
-cmdListen({
+bot.command({
 	command: "geoip",
 	help: "Stalks motherflippers",
 	syntax: config.command_prefix + "geoip <nick/hostname/IP/url>",
@@ -24,7 +24,7 @@ cmdListen({
 				target = target.address.split("@")[1];
 			} else {
 				irc.say(input.context, "I don't see a "+input.args[0]+" in here.");
-				irc.say(input.context, cmdHelp("geoip", "syntax"));
+				irc.say(input.context, bot.cmdHelp("geoip", "syntax"));
 				return;
 			}
 		}

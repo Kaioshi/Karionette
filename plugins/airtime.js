@@ -1,6 +1,6 @@
 // Commie airtimes - this command is poorly named.
 "use strict";
-cmdListen({
+bot.command({
 	command: "airtime",
 	help: "Hopefully shows airtimes of Commie things.",
 	syntax: config.command_prefix+"airtime <show name>",

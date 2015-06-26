@@ -55,7 +55,7 @@ function getShowInfo(show) {
 	return show["Show Name"]+" - "+getShowtime(show)+getShowDuration(show)+getGenres(show)+" ~ Status: "+show.Status;
 }
 
-cmdListen({
+bot.command({
 	command: "tvrage",
 	help: "Shows the next airtime for a show. Note that TvRage does a search based on your input and returns that result, "+
 		"so you may get something random sometimes, if it didn't know about the show.",

@@ -70,14 +70,14 @@ function addReminder(time, nick, context, reminder) {
 	reminderDB.saveAll(reminders);
 }
 
-evListen({
+bot.event({
 	handle: "loadRemindersListener",
 	event: "autojoinFinished",
 	callback: loadReminders
 });
 
 // Reminds you about things
-cmdListen({
+bot.command({
 	command: "remind",
 	help: "Reminds you to do something in",
 	syntax: config.command_prefix+"remind me in <N seconds/minutes/hours> to/that <reminder here>",
@@ -93,7 +93,7 @@ cmdListen({
 		} else {
 			rMatch = /^me (to|that) (.*) in (\d*) (seconds?|minutes?|hours?)[.!?]?$/i.exec(input.data);
 			if (!rMatch) {
-				irc.say(input.context, "Bad syntax - "+cmdHelp("remind", "syntax"));
+				irc.say(input.context, "Bad syntax - "+bot.cmdHelp("remind", "syntax"));
 				return;
 			}
 			time = parseInt(rMatch[3], 10);

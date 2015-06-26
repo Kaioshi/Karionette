@@ -1,7 +1,7 @@
 ﻿// Returns first Google search result
 "use strict";
 
-cmdListen({
+bot.command({
 	command: [ "g", "google" ],
 	help: "Google search - returns the first hit.",
 	syntax: config.command_prefix+"g <search term> - Example: "+config.command_prefix+"g puppies",
@@ -22,7 +22,7 @@ cmdListen({
 	}
 });
 
-cmdListen({ // for ranmabutts
+bot.command({ // for ranmabutts
 	command: "gr",
 	help: "Constructs a google query",
 	syntax: config.command_prefix+"gr <search term> - Example: "+config.command_prefix+"gr puppies vs. kittens?",
@@ -32,7 +32,7 @@ cmdListen({ // for ranmabutts
 	}
 });
 
-cmdListen({ // this will stop working soon~
+bot.command({ // this will stop working soon~
 	command: "gi",
 	help: "Google image search - returns the first hit.",
 	syntax: config.command_prefix+"gi puppies",

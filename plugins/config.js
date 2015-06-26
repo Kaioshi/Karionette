@@ -138,7 +138,7 @@ function needsRestart(field) {
 	}
 }
 
-cmdListen({
+bot.command({
 	command: "config",
 	help: "Edits the config. Don't touch this unless you know what you're doing.",
 	syntax: config.command_prefix+"config set <field>: <new setting> / "+config.command_prefix+"config find <term>",
@@ -211,7 +211,7 @@ cmdListen({
 				irc.say(input.context, term+" - "+configHelp[term].replace(/undefined$/, "Not set"), false);
 			break;
 		default:
-			irc.say(input.context, cmdHelp("config", "syntax"));
+			irc.say(input.context, bot.cmdHelp("config", "syntax"));
 			break;
 		}
 	}

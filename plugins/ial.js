@@ -1,6 +1,6 @@
 // internal address list, updates itself whenever there is movement.
 "use strict";
-evListen({
+bot.event({
 	handle: "ialWho",
 	event: "352",
 	callback: function (input) {
@@ -9,7 +9,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "ialJoin",
 	event: "JOIN",
 	callback: function (input) {
@@ -23,7 +23,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "ialPart",
 	event: "PART",
 	callback: function (input) {
@@ -37,7 +37,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "ialKick",
 	event: "KICK",
 	callback: function (input) {
@@ -51,7 +51,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "ialQuit",
 	event: "QUIT",
 	callback: function (input) {
@@ -65,7 +65,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "ialNick",
 	event: "NICK",
 	callback: function (input) {

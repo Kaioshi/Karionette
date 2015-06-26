@@ -228,12 +228,12 @@ function pastaCmd(input) {
 				lib.commaList(user.lists[list].map(function (listItem) { return listItem.name; })), false);
 		break;
 	default:
-		irc.say(input.context, cmdHelp(cmd, "syntax"));
+		irc.say(input.context, bot.cmdHelp(cmd, "syntax"));
 		break;
 	}
 }
 
-cmdListen({
+bot.command({
 	command: "clist",
 	help: "Creates BOTDIR/data/www/#channel/listname.html with your channel list in it. "+
 		"Not terribly useful if your bot doesn't run on a webserver, "+
@@ -249,7 +249,7 @@ cmdListen({
 	callback: pastaCmd
 });
 
-cmdListen({
+bot.command({
 	command: "ulist",
 	help: "Creates BOTDIR/data/www/<yournick>/listname.html with your personal list in it. "+
 		"Not terribly useful if your bot doesn't run on a webserver, "+

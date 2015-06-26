@@ -1,6 +1,6 @@
 // Keeps the bot connected
 "use strict";
-evListen({
+bot.event({
 	handle: "corePing",
 	event: "PING",
 	callback: function (input) {
@@ -8,7 +8,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "nickChange",
 	event: "433",
 	callback: function (input) {
@@ -47,7 +47,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "nickserv",
 	event: "NOTICE",
 	regex: new RegExp("^:"+config.nickserv_nickname+"!"+config.nickserv_hostname+" NOTICE [^ ]+ :This nickname is registered", "i"),
@@ -56,7 +56,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "ctcp",
 	event: "PRIVMSG",
 	regex: /^:[^ ]+ PRIVMSG [^ ]+ :\x01(VERSION|PING .*|TIME)\x01$/i,
@@ -88,7 +88,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "coreAutojoin",
 	event: "376",
 	callback: function () {
@@ -100,7 +100,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "coreWhoFinished",
 	event: "315",
 	callback: function (input) {
@@ -131,7 +131,7 @@ evListen({
  *	- uptime
  */
 
-cmdListen({
+bot.command({
 	command: "say",
 	help: "Makes me say something. Duh!",
 	syntax: config.command_prefix+"say <what you want me to say>",
@@ -141,7 +141,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "sayuni",
 	help: "Makes me say something, Unicode-style. Represent!",
 	syntax: config.command_prefix+"sayuni <what you want me to say>",
@@ -151,7 +151,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "action",
 	help: "Makes me do something. Probably erotic.",
 	syntax: config.command_prefix+"action <what you want me to do>",
@@ -161,7 +161,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "actionuni",
 	help: "Makes me do stuff in a Unicode-kinda way.",
 	syntax: config.command_prefix+"actionuni <what you want me to do>",
@@ -171,7 +171,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "notice",
 	help: "Makes me notice things. Like your new shoes!",
 	syntax: config.command_prefix+"notice <target> <what you want me to notice them>",
@@ -185,7 +185,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "noticeuni",
 	help: "Makes me notice things in a Unicode-kinda way.",
 	syntax: config.command_prefix+"noticeuni <target> <what you want me to notice them>",
@@ -199,7 +199,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "help",
 	help: "Seriously?",
 	syntax: config.command_prefix+"help [<command or alias you want help with>] - supply no command in order to list commands (does not list aliases).",
@@ -210,10 +210,10 @@ cmdListen({
 			return;
 		}
 		cmd = input.args[0].toLowerCase();
-		help = cmdHelp(cmd, "help");
+		help = bot.cmdHelp(cmd, "help");
 		if (help) {
-			syntax = cmdHelp(cmd, "syntax");
-			options = cmdHelp(cmd, "options");
+			syntax = bot.cmdHelp(cmd, "syntax");
+			options = bot.cmdHelp(cmd, "options");
 			irc.say(input.context, help);
 			if (syntax)
 				irc.say(input.context, syntax);
@@ -221,7 +221,7 @@ cmdListen({
 				irc.say(input.context, options);
 		} else {
 			// maybe it's an alias! with alias help set!
-			help = getAliasHelp(cmd);
+			help = bot.getAliasHelp(cmd);
 			if (help && (help.help || help.syntax)) {
 				if (help.help)
 					irc.say(input.context, "[Help] "+help.help, false);
@@ -235,7 +235,7 @@ cmdListen({
 });
 
 // Show node version
-cmdListen({
+bot.command({
 	command: "nodeversion",
 	help: "Shows the node version I'm running.",
 	callback: function (input) {
@@ -244,7 +244,7 @@ cmdListen({
 });
 
 // Memory usage report
-cmdListen({
+bot.command({
 	command: "memstats",
 	help: "Shows how much memory I'm using.",
 	callback: function (input) {
@@ -253,7 +253,7 @@ cmdListen({
 });
 
 // get uptime
-cmdListen({
+bot.command({
 	command: "uptime",
 	help: "Shows how long it's been since I was started.",
 	callback: function (input) {
@@ -262,7 +262,7 @@ cmdListen({
 });
 
 // Get Mari's age
-cmdListen({
+bot.command({
 	command: "age",
 	help: "Tells you how old Mari is!",
 	callback: function (input) {

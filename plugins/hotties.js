@@ -52,7 +52,7 @@ function convertHotties(ch) {
 	}
 }
 
-cmdListen({
+bot.command({
 	command: "hottie",
 	help: "Maintains a list of hotties! NSFW! Please use "+config.command_prefix+"shorten to shorten long urls.",
 	syntax: config.command_prefix+"hottie <add/remove/find/random/tag/stats> - Example: "
@@ -129,7 +129,7 @@ cmdListen({
 			break;
 		case "add":
 			if (!input.args[1]) {
-				irc.say(input.context, cmdHelp("hottie", "syntax"));
+				irc.say(input.context, bot.cmdHelp("hottie", "syntax"));
 				return;
 			}
 			hottie = { hottie: input.args[1] };
@@ -246,7 +246,7 @@ cmdListen({
 				", added by "+tmp.length+" "+(tmp.length > 1 ? "people." : "person."));
 			break;
 		default:
-			irc.say(input.context, cmdHelp("hottie", "syntax"));
+			irc.say(input.context, bot.cmdHelp("hottie", "syntax"));
 			break;
 		}
 	}

@@ -1,5 +1,5 @@
 "use strict";
-cmdListen({
+bot.command({
 	command: "define",
 	help: "Defines words or phrases using wordnik.",
 	syntax: config.command_prefix+"define <word/phrase> - Example: "+config.command_prefix+"define butt",

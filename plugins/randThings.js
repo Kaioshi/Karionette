@@ -1,20 +1,19 @@
 "use strict";
-var randDB = new DB.List({filename: "randomThings"});
 
-cmdListen({
+bot.command({
 	command: "random",
 	help: "Picks a random element from your comma separated list.",
 	syntax: config.command_prefix+"random list, of, things, to select, from",
 	arglen: 1,
 	callback: function (input) {
 		if (input.data.indexOf(",") === -1)
-			irc.say(input.context, cmdHelp("random", "syntax"));
+			irc.say(input.context, bot.cmdHelp("random", "syntax"));
 		else
 			irc.say(input.context, lib.randSelect(input.data.split(",")).trim());
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "thing",
 	help: "add to randThings",
 	syntax: config.command_prefix+"thing <add/remove> <thing> - Example: "+config.command_prefix+
@@ -23,11 +22,11 @@ cmdListen({
 	callback: function (input) {
 		var entry;
 		switch (input.args[0].toLowerCase()) {
-		case 'add':
+		case "add":
 			randDB.saveOne(input.args.slice(1).join(" "));
-			irc.say(input.context, 'Added :)');
+			irc.say(input.context, "Added :)");
 			break;
-		case 'remove':
+		case "remove":
 			entry = randDB.getOne(input.args.slice(1).join(" "));
 			if (entry) {
 				randDB.removeOne(entry);
@@ -37,7 +36,7 @@ cmdListen({
 			}
 			break;
 		default:
-			irc.say(input.context, cmdHelp("thing", "syntax"));
+			irc.say(input.context, bot.cmdHelp("thing", "syntax"));
 			break;
 		}
 	}

@@ -1,6 +1,6 @@
 // shows the last recorded error.
 "use strict";
-cmdListen({
+bot.command({
 	command: "last",
 	help: "Shows the last error/warning, if there is one.",
 	syntax: config.command_prefix + "last <warning/error> [clear]",
@@ -44,7 +44,7 @@ cmdListen({
 			irc.say(input.context, "The last recorded warning was: "+globals.lastWarning);
 			break;
 		default:
-			irc.say(input.context, cmdHelp("last", "syntax"));
+			irc.say(input.context, bot.cmdHelp("last", "syntax"));
 			break;
 		}
 	}

@@ -1,8 +1,5 @@
 // perms fondling
 "use strict";
-var aliasDB = new DB.Json({filename: "alias/alias", queue: true}),
-	varDB = new DB.Json({filename: "alias/vars", queue: true});
-
 function itemExists(type, item) {
 	var variable, alias;
 	switch (type) {
@@ -21,7 +18,7 @@ function itemExists(type, item) {
 			}
 			break;
 		case "command":
-			if (cmdExists(item)) return true;
+			if (bot.cmdExists(item)) return true;
 			break;
 		default:
 			logger.debug("[perms/itemExists] called with "+item+" item. this is not a thing.");
@@ -29,7 +26,7 @@ function itemExists(type, item) {
 	}
 }
 
-cmdListen({
+bot.command({
 	command: [ "perms", "permissions" ],
 	help: "Lets you set permissions on aliases/variables/commands. See also: claim, inspect",
 	syntax: config.command_prefix+"perms <allow/deny/owner> <add/remove> <alias/variable/command> <name of alias/variable/command> "+
@@ -38,7 +35,7 @@ cmdListen({
 		var reg, result;
 		reg = /^(allow|deny|owner) (add|remove) (alias|variable|command) ([^ ]+) ([^ ]+)/.exec(input.data);
 		if (!reg) {
-			irc.say(input.context, cmdHelp("perms", "syntax"));
+			irc.say(input.context, bot.cmdHelp("perms", "syntax"));
 			return;
 		}
 		// does it exist?
@@ -55,7 +52,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "inspect",
 	help: "Shows permission information on an alias, variable or command. See also: perms, claim",
 	syntax: config.command_prefix+"inspect <variable/alias/command> <name of variable/alias/command>",
@@ -63,7 +60,7 @@ cmdListen({
 		var reg, result;
 		reg = /^(variable|alias|command) ([^ ]+)/.exec(input.data.toLowerCase());
 		if (!reg) {
-			irc.say(input.context, cmdHelp("inspect", "syntax"));
+			irc.say(input.context, bot.cmdHelp("inspect", "syntax"));
 			return;
 		}
 		result = perms.Info(input.user, reg[1], reg[2]);
@@ -79,7 +76,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "claim",
 	help: "Allows you to claim ownership of an unclaimed alias, variable or command. See also: perms, inspect",
 	syntax: config.command_prefix+"claim <alias/variable/command> <name of alias/variable/command>",
@@ -88,7 +85,7 @@ cmdListen({
 		var reg, admin, user;
 		reg = /^(alias|variable|command) ([^ ]+)/.exec(input.data.toLowerCase());
 		if (!reg) {
-			irc.say(input.context, cmdHelp("claim", "syntax"));
+			irc.say(input.context, bot.cmdHelp("claim", "syntax"));
 			return;
 		}
 		if (!itemExists(reg[1], reg[2])) {

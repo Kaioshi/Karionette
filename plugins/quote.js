@@ -11,7 +11,7 @@ function makeTime(time) {
 	return zero(time.getDate())+"/"+zero(time.getMonth()+1)+"/"+time.getYear().toString().slice(1);
 }
 
-cmdListen({
+bot.command({
 	command: "quote",
 	help: "Quote added by mitchplz on 24/07/13: <mitch_> should I into quotes",
 	syntax: config.command_prefix+"quote <add/remove/find/get/random/stats> - Example: "+
@@ -27,7 +27,7 @@ cmdListen({
 		switch (input.args[0].toLowerCase()) {
 		case "add":
 			if (!input.args[1]) {
-				irc.say(input.context, cmdHelp("quote", "syntax"));
+				irc.say(input.context, bot.cmdHelp("quote", "syntax"));
 				return;
 			}
 			quote = { quote: input.args.slice(1).join(" ") };
@@ -179,7 +179,7 @@ cmdListen({
 				", added by "+tmp.length+" "+(tmp.length > 1 ? "people." : "person."));
 			break;
 		default:
-			irc.say(input.context, cmdHelp("quote", "syntax"));
+			irc.say(input.context, bot.cmdHelp("quote", "syntax"));
 			break;
 		}
 	}

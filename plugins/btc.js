@@ -33,7 +33,7 @@ function trimNum(n) {
 	return n.slice(0, i+3);
 }
 
-cmdListen({
+bot.command({
 	command: "btc",
 	help: "Retrieves high and low of bitcoin value. Defaults to USD if no argument is given",
 	syntax: config.command_prefix+"btc [<currency code>] - Example: "+config.command_prefix+

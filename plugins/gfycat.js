@@ -1,6 +1,6 @@
 // http://upload.gfycat.com/transcode?fetchUrl=i.imgur.com/lKi99vn.gif
 "use strict";
-cmdListen({
+bot.command({
 	command: [ "gfycat", "gfy" ],
 	help: "Gfycat frontend.",
 	syntax: config.command_prefix+"gfy <url> - Example: "+

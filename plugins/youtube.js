@@ -1,7 +1,7 @@
 "use strict";
 // youtubes!
 
-cmdListen({
+bot.command({
 	command: [ "yt", "youtube", "y" ],
 	help: "Searches YouTube!",
 	syntax: config.command_prefix + "yt [-c|--channel] <search terms> - Example: "+config.command_prefix+

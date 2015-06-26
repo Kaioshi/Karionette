@@ -9,7 +9,7 @@ function getPrefix() {
 	return config.learn_prefix || "!";
 }
 
-cmdListen({
+bot.command({
 	command: "learn",
 	help: "Teach me about things, so I can tell others about them! See also: unlearn, facts",
 	syntax: config.command_prefix+"learn <keyword> = <tell me about the thing here> - Example: "+
@@ -20,7 +20,7 @@ cmdListen({
 	callback: function (input) {
 		var learn = learnRegex.exec(input.data);
 		if (!learn) {
-			irc.say(input.context, cmdHelp("learn", "syntax"));
+			irc.say(input.context, bot.cmdHelp("learn", "syntax"));
 			return;
 		}
 		learn[1] = learn[1].toLowerCase();
@@ -32,7 +32,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "unlearn",
 	help: "Make me forget something I've learned. See also: learn, facts",
 	syntax: config.command_prefix+"unlearn <learned thing> - Example: "+config.command_prefix+"unlearn the meaning of life",
@@ -47,7 +47,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "facts",
 	help: "Shows a list of things I've "+config.command_prefix+"learn'd. See also: learn, unlearn",
 	syntax: config.command_prefix+"facts",
@@ -60,7 +60,7 @@ cmdListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "learnChecker",
 	event: "PRIVMSG",
 	callback: function (input) {

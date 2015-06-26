@@ -11,7 +11,7 @@ function getGenres(genres) {
 }
 
 function doSearch(type, context, title, synopsis) {
-	var id, uri, eps;
+	var id, eps;
 	web.google("site:myanimelist.net/"+type+"/ "+title).then(function (results) {
 		id = new RegExp("http://myanimelist\\.net/"+type+"/([0-9]+)/?", "i").exec(results[0].url);
 		if (!id)
@@ -46,7 +46,7 @@ function doSearch(type, context, title, synopsis) {
 	});
 }
 
-cmdListen({
+bot.command({
 	command: "mal",
 	help: "MyAnimeList anime searcher",
 	syntax: config.command_prefix+"mal [-s(ynopsis)/-g(oogle)] <title> - Example: "+config.command_prefix+"mal -s Steins;Gate",
@@ -68,7 +68,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "mml",
 	help: "MyAnimeList manga searcher",
 	syntax: config.command_prefix+"mml [-s(ynopsis)/-g(oogle)] <title> - Example: "+config.command_prefix+"mml Pluto",

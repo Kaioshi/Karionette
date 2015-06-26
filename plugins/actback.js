@@ -1,7 +1,6 @@
 "use strict";
 var regexFactory = require("./lib/regexFactory.js"),
 	denyDB = new DB.Json({filename: "actback/deny"}),
-	randDB = new DB.List({filename: "randomThings"}),
 	statsDB = new DB.Json({filename: "actback/stats"}),
 	repliesDB = new DB.Json({filename: "actback/replies"});
 
@@ -260,6 +259,7 @@ var questionReply = (function () {
 			return lib.randSelect(how);
 		case "do":
 		case "is":
+			return lib.randSelect(yn);
 		default:
 			return lib.randSelect(yn);
 		}
@@ -275,7 +275,7 @@ function checkDeny(context) {
 	return true;
 }
 
-cmdListen({
+bot.command({
 	command: "actback",
 	admin: true,
 	help: "Allows or denies actbacks in the channel.",
@@ -302,7 +302,7 @@ cmdListen({
 		}
 		reg = /(on|off)/i.exec(input.data.trim().toLowerCase());
 		if (!reg) {
-			irc.say(input.context, cmdHelp("actback", "syntax"));
+			irc.say(input.context, bot.cmdHelp("actback", "syntax"));
 			return;
 		}
 		if (reg[0] === "on") {
@@ -323,7 +323,7 @@ cmdListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "actback",
 	event: "PRIVMSG",
 	regex: regexFactory.actionMatching(config.nickname),
@@ -436,7 +436,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "actbackquestion",
 	event: "PRIVMSG",
 	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :(?:(?:(?:"+

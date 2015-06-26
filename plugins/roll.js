@@ -1,6 +1,6 @@
 // dice roller!
 
-cmdListen({
+bot.command({
 	command: "roll",
 	help: "Roll for initiative sucka!~",
 	syntax: config.command_prefix+"roll NdN+N - Example: "+config.command_prefix+"roll 1d20+5 \"1 dice, 20 sides, bonus 5 modifier (optional)\"",
@@ -10,7 +10,7 @@ cmdListen({
 			input.args = [ "1d20" ];
 		reg = /(\d+)d(\d+)\+?(\d+)?/i.exec(input.args[0].trim());
 		if (!reg) {
-			irc.say(input.context, cmdHelp("roll", "syntax"));
+			irc.say(input.context, bot.cmdHelp("roll", "syntax"));
 			return;
 		}
 		if (reg[1] > 100) {

@@ -39,13 +39,13 @@ function addMessage(message) {
 	msgDB.saveAll(messages);
 }
 
-evListen({
+bot.event({
 	handle: "messageQueueListener",
 	event: "queueMessage",
 	callback: addMessage
 });
 
-evListen({
+bot.event({
 	handle: "messageMsg",
 	event: "PRIVMSG",
 	callback: function (input) {
@@ -53,7 +53,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "messageJoin",
 	event: "JOIN",
 	callback: function (input) {
@@ -61,7 +61,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "messageNick",
 	event: "NICK",
 	callback: function (input) {
@@ -73,7 +73,7 @@ evListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "tell",
 	help: "Passes along a message when the person person in question is spotted next.",
 	syntax: config.command_prefix+"tell <nick> <message> - Example: "+config.command_prefix+

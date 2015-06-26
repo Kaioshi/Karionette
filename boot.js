@@ -6,30 +6,33 @@ global.globals = {
 	startTime: new Date()
 };
 
-var fs = require('fs'),
-	DB = require("./lib/db.js"),
-	fragDB = require("./lib/fragDB.js"),
-	web = require("./lib/web.js"),
-	Plugin = require("./lib/plugin.js"),
-	replPrompt = "", gc = true, gcInterval = 5000, mwInterval = 30000, repl = true;
-
-global.irc = new require('./lib/irc.js')();
-
-if (!fs.existsSync("config")) {
-	console.error(" * NO CONFIG FOUND~ SEE config.example");
-	process.exit();
-} else {
-	require("./lib/config.js");
+if (!require("fs").existsSync("config")) {
+	console.error(" * NO config FOUND, SEE config.example");
+	process.exit(1);
 }
 
-require("./lib/funcs.js");
-require("./lib/logger.js");
-require("./lib/ial.js");
-require("./lib/perms.js");
-require("./lib/timers.js");
-require("./lib/words.js");
-require("./lib/caveman.js");
-require("./lib/login.js");
+var lib = require("./lib/funcs.js")(),
+	config = require("./lib/config.js")(),
+	timers = require("./lib/timers.js")(lib),
+	ial = require("./lib/ial.js")(lib),
+	DB = require("./lib/db.js")(lib),
+	aliasDB = new DB.Json({filename: "alias/alias"}),
+	varDB = new DB.Json({filename: "alias/vars"}),
+	helpDB = new DB.Json({filename: "alias/help"}),
+	ignoreDB = new DB.List({filename: "ignore"}),
+	randDB = new DB.List({filename: "randomThings"}),
+	logger = require("./lib/logger.js")(lib, config),
+	web = require("./lib/web.js")(lib, logger),
+	words = require("./lib/words.js")(lib, logger, web),
+	fragDB = require("./lib/fragDB.js")(lib, logger),
+	userLogin = require("./lib/login.js")(lib, config, logger, fragDB, ial),
+	perms = require("./lib/perms.js")(DB, logger, ial, userLogin),
+	bot = require("./lib/caveman.js")(lib, config, logger, ial, perms, words,
+			userLogin, aliasDB, varDB, helpDB, ignoreDB, randDB),
+	Plugin = require("./lib/plugin.js")(logger, config),
+	replPrompt = "", gc = true, gcInterval = 5000, mwInterval = 30000, repl = true;
+
+global.irc = new require("./lib/irc.js")(config, bot, logger, Plugin);
 
 function processArgs(args) {
 	var slicelen,
@@ -105,27 +108,23 @@ if (gc) {
 function createSandbox() {
 	return {
 		irc: global.irc,
-		config: irc_config,
+		config: config,
 		console: console,
 		setTimeout: setTimeout,
 		setInterval: setInterval,
 		web: web,
 		DB: DB,
+		aliasDB: aliasDB,
+		varDB: varDB,
+		helpDB: helpDB,
+		randDB: randDB,
 		fragDB: fragDB,
 		lib: lib,
 		ial: ial,
 		userLogin: userLogin,
 		timers: timers,
 		require: require,
-		evListen: caveman.eventListen,
-		cmdListen: caveman.commandListen,
-		cmdHelp: caveman.cmdHelp,
-		cmdList: caveman.cmdList,
-		cmdExists: caveman.cmdExists,
-		getAliasHelp: caveman.getAliasHelp,
-		ignore: caveman.ignore,
-		unignore: caveman.unignore,
-		ignoreList: caveman.ignoreList,
+		bot: bot,
 		logger: logger,
 		words: words,
 		perms: perms,
@@ -141,18 +140,18 @@ irc.reload = function (plugin) {
 	}
 };
 
-process.on('uncaughtException', function (err) {
+process.on("uncaughtException", function caughtUncaughtExcaption(err) {
 	logger.error("Uncaught Exception: ", err);
 });
 
 Plugin.loadAll(createSandbox());
 
 irc.open({
-	server: irc_config.server,
-	port: irc_config.port,
-	nickname: irc_config.nickname[0],
-	username: irc_config.username,
-	realname: irc_config.realname
+	server: config.server,
+	port: config.port,
+	nickname: config.nickname[0],
+	username: config.username,
+	realname: config.realname
 });
 
 if (repl) {

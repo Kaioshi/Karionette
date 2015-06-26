@@ -59,7 +59,7 @@ function getLocation(nick, context, args) {
 	return location || (args ? args.join(" ") : null) || weatherDB.getOne(nick.toLowerCase());
 }
 
-cmdListen({
+bot.command({
 	command: "weather",
 	help: "Weather thing! Weathers.",
 	syntax: config.command_prefix+"weather [-bind] [<city / state & country>] [<bound nick>]",
@@ -68,7 +68,7 @@ cmdListen({
 			location = getLocation(input.nick, input.context, input.args);
 
 		if (!location) {
-			irc.say(input.context, cmdHelp("weather", "syntax"));
+			irc.say(input.context, bot.cmdHelp("weather", "syntax"));
 			return;
 		}
 		uri = "http://api.openweathermap.org/data/2.5/weather?q="+location;
@@ -107,7 +107,7 @@ function getForecast(fc) {
 	return ret.slice(0,-3);
 }
 
-cmdListen({
+bot.command({
 	command: "forecast",
 	help: "Weather forecast! Forecasts.",
 	syntax: config.command_prefix+"forecast [-bind] [<city / state & country>] [<bound nick>]",
@@ -115,7 +115,7 @@ cmdListen({
 		var uri, place,
 			location = getLocation(input.nick, input.context, input.args);
 		if (!location) {
-			irc.say(input.context, cmdHelp("forecast", "syntax"));
+			irc.say(input.context, bot.cmdHelp("forecast", "syntax"));
 			return;
 		}
 		uri = "http://api.openweathermap.org/data/2.5/forecast?q="+location;

@@ -122,19 +122,19 @@ function findUpdates(releases, type, notify) {
 	}
 }
 
-evListen({
+bot.event({
 	handle: "mangaCheck",
 	event: "300s tick", // check for updates every 5 min
 	callback: check.all
 });
 
-evListen({ // check for updates when we start and joins are done
+bot.event({ // check for updates when we start and joins are done
 	handle: "mangaCheckOnStart",
 	event: "autojoinFinished",
 	callback: check.all
 });
 
-cmdListen({
+bot.command({
 	command: "batoto",
 	help: "Batoto RSS watcher",
 	syntax: config.command_prefix+"batoto <add/remove/list/check> [<manga title>] / <announce add/remove/list> <manga title> [<target>] -"+
@@ -142,7 +142,7 @@ cmdListen({
 	callback: parseMangaCmd
 });
 
-cmdListen({
+bot.command({
 	command: [ "mf", "mangafox" ],
 	help: "Mangafox RSS watcher",
 	syntax: config.command_prefix+"mangafox <add/remove/list/check> [<manga title>] / <announce add/remove/list> <manga title> [<target>] -"+
@@ -150,7 +150,7 @@ cmdListen({
 	callback: parseMangaCmd
 });
 
-cmdListen({
+bot.command({
 	command: [ "ms", "mangastream" ],
 	help: "MangaStream RSS watcher",
 	syntax: config.command_prefix+"mangastream <add/remove/list/check> [<manga title>] / <announce add/remove/list> <manga title> [<target>] -"+
@@ -176,7 +176,7 @@ function parseMangaCmd(input) {
 	}
 
 	if (!input.args || input.args[0].toLowerCase() === "announce" && !input.args[1]) {
-		irc.say(input.context, cmdHelp(type[0], "syntax"));
+		irc.say(input.context, bot.cmdHelp(type[0], "syntax"));
 		return;
 	}
 	switch (input.args[0].toLowerCase()) {
@@ -316,7 +316,7 @@ function parseMangaCmd(input) {
 		check.one(type[1], input.context);
 		break;
 	default:
-		irc.say(input.context, cmdHelp(type[0], "syntax"));
+		irc.say(input.context, bot.cmdHelp(type[0], "syntax"));
 		break;
 	}
 }

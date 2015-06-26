@@ -187,7 +187,7 @@ function youtubeIt(context, id, old, record) {
 	});
 }
 
-evListen({
+bot.event({
 	handle: "titleSnarfer",
 	event: "PRIVMSG",
 	regex: /^:[^ ]+ PRIVMSG #[^ ]+ :.*((?:https?:\/\/)[^\x01 ]+)/i,
@@ -239,7 +239,7 @@ evListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "lasturl",
 	help: "Shows the last URLs people posted!",
 	syntax: config.command_prefix+"lasturl [<nick>] [<term>] - Example: "+
@@ -256,7 +256,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "urlstats",
 	help: "Shows URL stats!",
 	syntax: config.command_prefix+"urlstats [<nick>] [<term>] - Example: "+

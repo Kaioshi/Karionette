@@ -1,7 +1,7 @@
 "use strict";
-var fs = require('fs');
+var fs = require("fs");
 
-cmdListen({
+bot.command({
 	command: "errors",
 	help: "Add/remove yourself to/from the error announcer. Admin only.",
 	syntax: config.command_prefix+"errors announce/unannounce",
@@ -21,7 +21,7 @@ cmdListen({
 			irc.say(input.context, "k.");
 			break;
 		default:
-			irc.say(input.context, cmdHelp("errors", "syntax"));
+			irc.say(input.context, bot.cmdHelp("errors", "syntax"));
 			break;
 		}
 	}
@@ -33,7 +33,7 @@ function getErrorAnnounceList() {
 	});
 }
 
-evListen({
+bot.event({
 	handle: "errorAnnouncer",
 	event: "Error",
 	callback: function (error) {
@@ -43,7 +43,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "errorStackAnnouncer",
 	event: "Error Stack",
 	callback: function (error) {
@@ -59,7 +59,7 @@ evListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "ignore",
 	help: "Ignores people!",
 	syntax: config.command_prefix+"ignore <mask> - Example: "+config.command_prefix+
@@ -67,12 +67,12 @@ cmdListen({
 	admin: true,
 	arglen: 1,
 	callback: function (input) {
-		irc.say(input.context, ignore(input.args[0]));
+		irc.say(input.context, bot.ignore(input.args[0]));
 	}
 });
 
 
-cmdListen({
+bot.command({
 	command: "unignore",
 	help: "Unignores!",
 	syntax: config.command_prefix+"unignore <mask> - Example: "+config.command_prefix+
@@ -80,29 +80,27 @@ cmdListen({
 	admin: true,
 	arglen: 1,
 	callback: function (input) {
-		if (!lib.checkArgs(input.nick, "unignore", input.args, 1))
-			return;
-		irc.say(input.context, unignore(input.args[0]));
+		irc.say(input.context, bot.unignore(input.args[0]));
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "ignorelist",
 	help: "Shows ignore list.",
 	admin: true,
 	callback: function (input) {
-		irc.say(input.context, (ignoreList() || "Ignoring no one. ;)"));
+		irc.say(input.context, (bot.ignoreList() || "Ignoring no one. ;)"));
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "reload",
 	help: "Reloads plugins, or a single plugin.",
 	syntax: config.command_prefix+"reload [<plugin>]",
 	admin: true,
 	callback: function (input) {
 		if (input.args) {
-			if (!fs.existsSync('plugins/'+input.args[0]+'.js')) {
+			if (!fs.existsSync("plugins/"+input.args[0]+".js")) {
 				irc.say(input.context, "There is no such plugin. o.o;");
 				return;
 			}
@@ -120,7 +118,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "raw",
 	help: "Sends raw text to the server.",
 	syntax: config.command_prefix+"raw <text to send to server>",
@@ -131,7 +129,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "act",
 	help: "Sends an action to a target. Admin only.",
 	syntax: config.command_prefix+"act <target> <action to do> - Example: "+
@@ -143,7 +141,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "join",
 	help: "Joins channels. Admin only.",
 	syntax: config.command_prefix+"join <channel> [<key>] - Example: "+config.command_prefix+"join #anime",
@@ -158,7 +156,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "part",
 	help: "Leaves channels. Admin only.",
 	admin: true,
@@ -174,7 +172,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "autojoin",
 	help: "Adds channels to the autojoin list.",
 	syntax: config.command_prefix+"autojoin <channel>",
@@ -196,7 +194,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "unautojoin",
 	help: "Removes channels from the autojoin list.",
 	syntax: config.command_prefix+"unautojoin <channel>",
@@ -220,7 +218,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "quit",
 	help: "Quits!",
 	admin: true,

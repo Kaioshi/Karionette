@@ -1,7 +1,7 @@
 // http://unicodeemoticons.com/
 // http://rishida.net/tools/conversion/
 
-cmdListen({
+bot.command({
 	command: 'get',
 	help: "Get what?",
 	callback: function (input) {
@@ -11,7 +11,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: 'dis',
 	help: "Piss off",
 	callback: function (input) {
@@ -19,7 +19,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "soviet",
 	help: "In soviet russia, ...",
 	callback: function (input) {
@@ -29,7 +29,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: 'calm',
 	help: "No, you calm down.",
 	callback: function (input) {
@@ -39,7 +39,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "be",
 	help: "EVERYBODY BE COOL, THIS IS A RUBBER DUCKY!!",
 	callback: function (input) {
@@ -56,7 +56,7 @@ cmdListen({
 });
 
 // flips dudes
-cmdListen({
+bot.command({
 	command: "flip",
 	help: "Flips a motherflipper",
 	syntax: config.command_prefix+"flip <text>",

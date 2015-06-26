@@ -50,7 +50,7 @@ function handleBookmark(args) {
 function showBookmark(context, target, handle) {
 	var bookmarks, result;
 	if (!target || !handle) {
-		irc.say(context, cmdHelp("bm", "syntax"));
+		irc.say(context, bot.cmdHelp("bm", "syntax"));
 		return;
 	}
 	bookmarks = bookmarkDB.getOne(target);
@@ -68,7 +68,7 @@ function showBookmark(context, target, handle) {
 		irc.say(context, target+" has no such bookmark.");
 }
 
-cmdListen({
+bot.command({
 	command: [ "bm", "bookmark" ],
 	help: "Allows you to store links for later retrieval.",
 	syntax: config.command_prefix+

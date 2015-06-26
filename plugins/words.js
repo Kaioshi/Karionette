@@ -26,7 +26,7 @@ function tokenizeLine(line) {
 	return ret.join(" ");
 }
 
-cmdListen({
+bot.command({
 	command: "word",
 	help: "Word list management",
 	syntax: config.command_prefix+"word verb/adverb/noun/adjective/pronoun add/remove/get/count/random/correct(verbs only) "+
@@ -39,7 +39,7 @@ cmdListen({
 		if (input.args[0] === "possessivepronoun") input.args[0] = "possessivePronoun"; // ever.
 		if (input.args[0].match(/^adjective$|^adverb$|^pronoun$|^possessivePronoun$|^personalPronoun$/)) {
 			if (!input.args[1]) {
-				irc.say(input.context, cmdHelp("word", "syntax"));
+				irc.say(input.context, bot.cmdHelp("word", "syntax"));
 				return;
 			}
 			switch (input.args[1]) {
@@ -112,7 +112,7 @@ cmdListen({
 				irc.say(input.context, words.noun.add(entry.join(" ")));
 				break;
 			default:
-				irc.say(input.context, cmdHelp("word", "syntax"));
+				irc.say(input.context, bot.cmdHelp("word", "syntax"));
 				break;
 			}
 			break;
@@ -152,12 +152,12 @@ cmdListen({
 				irc.say(input.context, words.verb.change(input.args.slice(2).join(" ")));
 				break;
 			default:
-				irc.say(input.context, cmdHelp("word", "syntax"));
+				irc.say(input.context, bot.cmdHelp("word", "syntax"));
 				break;
 			}
 			break;
 		default:
-			irc.say(input.context, cmdHelp("word", "syntax"));
+			irc.say(input.context, bot.cmdHelp("word", "syntax"));
 			break;
 		}
 	}

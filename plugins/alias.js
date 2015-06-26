@@ -1,18 +1,15 @@
 "use strict";
-var aliasDB = new DB.Json({filename: "alias/alias"}),
-	helpDB = new DB.Json({filename: "alias/help"}),
-	varDB = new DB.Json({filename: "alias/vars"});
 
 function aliasIsCommand(alias) {
-	var i = 0, commands = cmdList(), l = commands.length;
-	for (; i < l; i++) {
+	var i, commands = bot.cmdList();
+	for (i = 0; i < commands.length; i++) {
 		if (commands[i] === alias)
 			return true;
 	}
 }
 
 // Handles Alias interface
-cmdListen({
+bot.command({
 	command: "alias",
 	help: "Allows user defined 'commands' (Eg: The alias "+config.command_prefix+
 		"mal becomes google site:myanimelist.net). Vars can be used- see var help for more information",
@@ -169,13 +166,13 @@ cmdListen({
 			irc.say(input.context, (alias ? "The alias \""+cmd+"\" contains: "+alias : "There is no such alias."), false);
 			break;
 		default:
-			irc.say(input.context, cmdHelp("alias", "syntax"));
+			irc.say(input.context, bot.cmdHelp("alias", "syntax"));
 			break;
 		}
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "var",
 	help: "Allows you to add variables for use in aliases (only). Default variables are: "+
 		"{me} {from}, {channel}, {randThing}, {randNick}, {args*} (provided arguments), "+
@@ -370,7 +367,7 @@ cmdListen({
 				irc.say(input.context, "There are no variables yet.");
 			break;
 		default:
-			irc.say(input.context, cmdHelp("var", "syntax"));
+			irc.say(input.context, bot.cmdHelp("var", "syntax"));
 			break;
 		}
 	}

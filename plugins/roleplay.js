@@ -93,7 +93,7 @@ function createPlayer(nick) {
 	return player;
 }
 
-cmdListen({
+bot.command({
 	command: [ "gencharacter", "genchar" ],
 	help: "Generates random characters for #roleplay",
 	syntax: config.command_prefix+"gencharacter",
@@ -105,7 +105,7 @@ cmdListen({
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "setchar",
 	help: "Sets various character attributes. #roleplay",
 	syntax: config.command_prefix+"setchar <age/race/ethnicity/gender/description>",
@@ -198,13 +198,13 @@ cmdListen({
 			irc.say(input.context, input.nick+"'s description was updated.");
 			break;
 		default:
-			irc.say(input.context, cmdHelp("setchar", "syntax"));
+			irc.say(input.context, bot.cmdHelp("setchar", "syntax"));
 			break;
 		}
 	}
 });
 
-cmdListen({
+bot.command({
 	command: "look",
 	help: "Looks at a character. #roleplay",
 	syntax: config.command_prefix+"look <nick>",

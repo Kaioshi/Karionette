@@ -163,13 +163,13 @@ function isAction(data) {
 
 timers.startTick(900);
 
-evListen({
+bot.event({
 	handle: "saveAllSeen",
 	event: "900s tick",
 	callback: saveAllSeen
 });
 
-evListen({
+bot.event({
 	handle: "seenMsg",
 	event: "PRIVMSG",
 	callback: function (input) {
@@ -184,7 +184,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "seenJoin",
 	event: "JOIN",
 	callback: function (input) {
@@ -193,7 +193,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "seenPart",
 	event: "PART",
 	callback: function (input) {
@@ -201,7 +201,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "seenKick",
 	event: "KICK",
 	callback: function (input) {
@@ -212,7 +212,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "seenNick",
 	event: "NICK",
 	callback: function (input) {
@@ -226,7 +226,7 @@ evListen({
 	}
 });
 
-evListen({
+bot.event({
 	handle: "seenQuit",
 	event: "QUIT",
 	callback: function (input) {
@@ -243,7 +243,7 @@ evListen({
 });
 
 // Handles Last Seen interface
-cmdListen({
+bot.command({
 	command: "seen",
 	help: "Displays the last known time {person} was seen, and what they last said.",
 	syntax: config.command_prefix+"seen <nick>",

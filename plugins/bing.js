@@ -1,5 +1,5 @@
 "use strict";
-cmdListen({
+bot.command({
 	command: [ "bing", "b" ],
 	help: "Bing searches things.",
 	syntax: config.command_prefix+"bing Oh god why am I using bing",

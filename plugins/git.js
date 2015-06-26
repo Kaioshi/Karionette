@@ -35,19 +35,19 @@ function checkGits() {
 	});
 }
 
-evListen({
+bot.event({
 	handle: "gitAnnouncerCheck",
 	event: "300s tick",
 	callback: checkGits
 });
 
-evListen({ // check for updates when we start and joins are done
+bot.event({ // check for updates when we start and joins are done
 	handle: "gitAnnouncerCheckOnStart",
 	event: "autojoinFinished",
 	callback: checkGits
 });
 
-cmdListen({
+bot.command({
 	command: "git",
 	help: "git pull for people too lazy to open a shell. Admin only.",
 	syntax: config.command_prefix+"git pull / "+config.command_prefix+"git announce",
@@ -88,7 +88,7 @@ cmdListen({
 			}
 			break;
 		default:
-			irc.say(input.context, cmdHelp("git", "syntax"));
+			irc.say(input.context, bot.cmdHelp("git", "syntax"));
 			break;
 		}
 	}

@@ -1,6 +1,6 @@
 ﻿// Urban dictionary look-up
 "use strict";
-cmdListen({
+bot.command({
 	command: "ud",
 	help: "Look up something from Urban dictionary!",
 	syntax: config.command_prefix+"ud <term> - Example: "+config.command_prefix+
