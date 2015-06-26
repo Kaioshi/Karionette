@@ -206,7 +206,7 @@ bot.command({
 	callback: function (input) {
 		var cmd, help, syntax, options;
 		if (!input.args) { // show all commands
-			irc.say(input.context, "Available commands: "+cmdList().sort().join(", "));
+			irc.say(input.context, "Available commands: "+bot.cmdList().sort().join(", "));
 			return;
 		}
 		cmd = input.args[0].toLowerCase();
