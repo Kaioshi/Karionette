@@ -9,7 +9,7 @@ bot.command({
 	callback: function (input) {
 		web.google(input.data.trim()).then(function (results) {
 			if (config.google_format) {
-				results[0].b = '\x02';
+				results[0].b = "\x02";
 				irc.say(input.context, lib.formatOutput(config.google_format, results[0]), false, 1);
 			} else {
 				irc.say(input.context, lib.formatOutput("{title} ~ {url} ~ {content}", results[0]), false, 1);

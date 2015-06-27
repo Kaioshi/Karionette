@@ -24,15 +24,16 @@ var lib = require("./lib/funcs.js")(),
 	randDB = new DB.List({filename: "randomThings"}),
 	web = require("./lib/web.js")(lib, logger, config),
 	words = require("./lib/words.js")(lib, logger, web),
+	alias = require("./lib/alias.js")(lib, config, ial, words, aliasDB, varDB, randDB),
 	fragDB = require("./lib/fragDB.js")(lib, logger),
 	userLogin = require("./lib/login.js")(lib, config, logger, fragDB, ial),
 	perms = require("./lib/perms.js")(DB, logger, ial, userLogin),
 	bot = require("./lib/caveman.js")(lib, config, logger, ial, perms, words,
-			userLogin, aliasDB, varDB, helpDB, ignoreDB, randDB),
+			userLogin, alias, helpDB, ignoreDB),
 	Plugin = require("./lib/plugin.js")(logger, config),
 	replPrompt = "", gc = true, gcInterval = 5000, mwInterval = 30000, repl = true;
 
-global.irc = new require("./lib/irc.js")(config, bot, logger, Plugin);
+global.irc = new require("./lib/irc.js")(config, bot, logger);
 
 function processArgs(args) {
 	var slicelen,

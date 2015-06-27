@@ -39,7 +39,7 @@ bot.command({
 				yt.date = yt.date.split("T")[0];
 				yt.views = lib.commaNum(yt.views);
 				if (config.youtube_format !== undefined) {
-					yt.b = '\x02';
+					yt.b = "\x02";
 					yt.nick = input.nick;
 					irc.say(input.context, lib.formatOutput(config.youtube_format, yt), false);
 				} else {
