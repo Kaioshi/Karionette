@@ -1,5 +1,6 @@
 "use strict";
-var fs = require("fs");
+var fs = require("fs"),
+	ignore = require("./lib/ignore.js")(DB, lib, ial);
 
 bot.command({
 	command: "errors",
@@ -67,7 +68,7 @@ bot.command({
 	admin: true,
 	arglen: 1,
 	callback: function (input) {
-		irc.say(input.context, bot.ignore(input.args[0]));
+		irc.say(input.context, ignore.add(input.args[0]));
 	}
 });
 
@@ -80,7 +81,7 @@ bot.command({
 	admin: true,
 	arglen: 1,
 	callback: function (input) {
-		irc.say(input.context, bot.unignore(input.args[0]));
+		irc.say(input.context, ignore.remove(input.args[0]));
 	}
 });
 
@@ -89,7 +90,7 @@ bot.command({
 	help: "Shows ignore list.",
 	admin: true,
 	callback: function (input) {
-		irc.say(input.context, (bot.ignoreList() || "Ignoring no one. ;)"));
+		irc.say(input.context, (ignore.list() || "Ignoring no one. ;)"));
 	}
 });
 
