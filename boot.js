@@ -17,19 +17,18 @@ var lib = require("./lib/funcs.js")(),
 	ial = require("./lib/ial.js")(lib),
 	logger = require("./lib/logger.js")(lib, config),
 	DB = require("./lib/db.js")(lib, logger),
+	ignore = require("./lib/ignore.js")(DB, lib, ial),
 	aliasDB = new DB.Json({filename: "alias/alias"}),
 	varDB = new DB.Json({filename: "alias/vars"}),
 	helpDB = new DB.Json({filename: "alias/help"}),
-	ignoreDB = new DB.List({filename: "ignore"}),
 	randDB = new DB.List({filename: "randomThings"}),
 	web = require("./lib/web.js")(lib, logger, config),
 	words = require("./lib/words.js")(lib, logger, web),
-	alias = require("./lib/alias.js")(lib, config, ial, words, aliasDB, varDB, randDB),
+	alias = require("./lib/alias.js")(lib, config, ial, words, aliasDB, varDB, randDB, helpDB),
 	fragDB = require("./lib/fragDB.js")(lib, logger),
 	userLogin = require("./lib/login.js")(lib, config, logger, fragDB, ial),
 	perms = require("./lib/perms.js")(DB, logger, ial, userLogin),
-	bot = require("./lib/caveman.js")(lib, config, logger, ial, perms, words,
-			userLogin, alias, helpDB, ignoreDB),
+	bot = require("./lib/bot.js")(lib, config, logger, ial, perms, words, userLogin, alias, ignore),
 	Plugin = require("./lib/plugin.js")(logger, config),
 	replPrompt = "", gc = true, gcInterval = 5000, mwInterval = 30000, repl = true;
 
@@ -155,7 +154,5 @@ irc.open({
 	realname: config.realname
 });
 
-if (repl) {
-	repl = require("repl");
-	repl.start({ prompt: replPrompt, ignoreUndefined: true });
-}
+if (repl)
+	require("repl").start({ prompt: replPrompt, ignoreUndefined: true });
