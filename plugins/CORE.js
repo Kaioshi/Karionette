@@ -221,7 +221,7 @@ bot.command({
 				irc.say(input.context, options);
 		} else {
 			// maybe it's an alias! with alias help set!
-			help = bot.getAliasHelp(cmd);
+			help = helpDB.getOne(cmd);
 			if (help && (help.help || help.syntax)) {
 				if (help.help)
 					irc.say(input.context, "[Help] "+help.help, false);
