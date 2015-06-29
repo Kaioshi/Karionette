@@ -30,7 +30,9 @@ var lib = require("./lib/funcs.js")(),
 	perms = require("./lib/perms.js")(DB, logger, ial, userLogin),
 	bot = require("./lib/bot.js")(lib, config, logger, ial, perms, words, userLogin, alias, ignore),
 	Plugin = require("./lib/plugin.js")(logger, config),
-	replPrompt = "", gc = true, gcInterval = 5000, mwInterval = 30000, repl = true;
+	replPrompt = "", gc = true, gcInterval = 10000, mwInterval = 30000, repl = true;
+
+processArgs(process.argv.slice(2));
 
 global.irc = new require("./lib/irc.js")(config, bot, logger);
 
@@ -92,8 +94,6 @@ function processArgs(args) {
 	}
 }
 
-processArgs(process.argv.slice(2));
-
 if (gc) {
 	if (!global.gc) {
 		logger.warn("You need to run node with --expose-gc if you want reasonable garbage collection.");
@@ -105,38 +105,35 @@ if (gc) {
 	}
 }
 
-function createSandbox() {
-	return {
-		irc: global.irc,
-		config: config,
-		console: console,
-		setTimeout: setTimeout,
-		setInterval: setInterval,
-		web: web,
-		DB: DB,
-		aliasDB: aliasDB,
-		varDB: varDB,
-		helpDB: helpDB,
-		randDB: randDB,
-		fragDB: fragDB,
-		lib: lib,
-		ial: ial,
-		userLogin: userLogin,
-		timers: timers,
-		require: require,
-		bot: bot,
-		logger: logger,
-		words: words,
-		perms: perms,
-		globals: globals
-	};
-}
+Plugin.setupSandbox({ // console and setInterval not used by any plugins as of 2015-06-29
+	irc: global.irc,
+	config: config,
+	setTimeout: setTimeout,
+	web: web,
+	DB: DB,
+	aliasDB: aliasDB,
+	varDB: varDB,
+	helpDB: helpDB,
+	randDB: randDB,
+	fragDB: fragDB,
+	lib: lib,
+	ial: ial,
+	userLogin: userLogin,
+	timers: timers,
+	require: require,
+	bot: bot,
+	logger: logger,
+	words: words,
+	perms: perms,
+	globals: globals
+});
 
 irc.reload = function (plugin) {
 	if (!plugin) {
-		Plugin.loadAll(createSandbox());
+		Plugin.loadAll("core", "plugins/core");
+		Plugin.loadAll("optional", "plugins");
 	} else {
-		Plugin.loadOne(createSandbox(), plugin);
+		Plugin.loadOne(plugin);
 	}
 };
 
@@ -144,7 +141,8 @@ process.on("uncaughtException", function caughtUncaughtExcaption(err) {
 	logger.error("Uncaught Exception: ", err);
 });
 
-Plugin.loadAll(createSandbox());
+Plugin.loadAll("core", "plugins/core/");
+Plugin.loadAll("optional", "plugins/");
 
 irc.open({
 	server: config.server,

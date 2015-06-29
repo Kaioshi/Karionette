@@ -48,12 +48,11 @@ bot.event({
 	handle: "errorStackAnnouncer",
 	event: "Error Stack",
 	callback: function (error) {
-		var announceTo = getErrorAnnounceList(), i, l,
-			messages;
+		var announceTo = getErrorAnnounceList(), i, messages;
 		error = error.split("\n");
 		announceTo.forEach(function (user) {
 			messages = [];
-			for (i = 0, l = error.length; i < l; i++)
+			for (i = 0; i < error.length; i++)
 				messages.push([ "notice", user, error[i], false ]);
 			irc.rated(messages);
 		});
@@ -100,22 +99,23 @@ bot.command({
 	syntax: config.command_prefix+"reload [<plugin>]",
 	admin: true,
 	callback: function (input) {
+		var plugin;
 		if (input.args) {
-			if (!fs.existsSync("plugins/"+input.args[0]+".js")) {
+			plugin = input.args[0];
+			if (!fs.existsSync("plugins/"+plugin+".js") && !fs.existsSync("plugins/core/"+plugin+".js")) {
 				irc.say(input.context, "There is no such plugin. o.o;");
 				return;
 			}
-			lib.events.emit("Event: Reloading plugin "+input.args[0]);
-			if (config.disabled_plugins && config.disabled_plugins.length > 0 &&
-				config.disabled_plugins.some(function (entry) { return (entry === input.args[0]); })) {
+			lib.events.emit("Event: Reloading plugin "+plugin);
+			if (Array.isArray(config.disabled_plugins) && config.disabled_plugins.indexOf(plugin) > -1)
 				irc.say(input.context, "This plugin is in the disabled plugins list - loading it anyway.");
-			}
-			irc.reload(input.args[0]);
+			irc.reload(plugin);
+			irc.say(input.context, "Reloaded the "+plugin+" plugin.");
 		} else {
 			lib.events.emit("Event: Reloading all plugins");
 			irc.reload();
+			irc.say(input.context, "Reloaded all plugins.");
 		}
-		irc.say(input.context, "Reloaded "+(input.args && input.args[0] ? "the "+input.args[0]+" plugin." : "all plugins."));
 	}
 });
 
