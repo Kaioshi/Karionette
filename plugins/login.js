@@ -34,15 +34,12 @@ bot.command({
 	command: "unidentify",
 	help: "Unidentifies you with "+config.nick+". See also: identify, whoami, adduser, deluser",
 	callback: function (input) {
-		var user = userLogin.Check(input.user);
-		if (user) {
-			delete userLogin.loggedIn[user];
-			delete userLogin.loginCache[input.user];
-			userLogin.saveState();
-			irc.say(input.nick, "I no longer recognize you as "+user+".");
-			return;
+		if (userLogin.isLoggedIn(input.user)) {
+			userLogin.Logout(input.user);
+			irc.say(input.nick, "K Bye.");
+		} else {
+			irc.say(input.nick, "Who are you again?");
 		}
-		irc.say(input.nick, "Eh? What's that? Someone's talking? I don't recognize you in the first place. You wish you could unidentify..");
 	}
 });
 
@@ -51,7 +48,8 @@ bot.command({
 	help: "Tells you who you're identified as, if you are. See also: identify, unidentify, adduser, deluser",
 	callback: function (input) {
 		var user = userLogin.Check(input.user);
-		if (user) irc.say(input.context, "I recognize you as \""+user+"\".");
+		if (user)
+			irc.say(input.context, "I recognize you as \""+user+"\".");
 		else {
 			irc.say(input.context, "I don't recognize you. Try identifying! "+config.command_prefix+
 				"identify <username> <password> - if not, add a user: "+config.command_prefix+"adduser <username> <password>");
@@ -180,15 +178,8 @@ bot.event({
 	handle: "loginNick",
 	event: "NICK",
 	callback: function (input) {
-		var user = userLogin.Check(input.user),
-			newuser;
-		if (user) {
-			newuser = input.newnick+"!"+input.address;
-			delete userLogin.loginCache[input.user];
-			userLogin.loginCache[newuser] = user;
-			userLogin.loggedIn[user].user = newuser;
-			userLogin.saveState();
-		}
+		if (userLogin.isLoggedIn(input.user))
+			userLogin.Update(input.user, input.newnick+"!"+input.address);
 	}
 });
 
@@ -196,11 +187,7 @@ bot.event({
 	handle: "loginQuit",
 	event: "QUIT",
 	callback: function (input) {
-		var user = userLogin.Check(input.user);
-		if (user) {
-			delete userLogin.loginCache[input.user];
-			delete userLogin.loggedIn[user];
-			userLogin.saveState();
-		}
+		if (userLogin.isLoggedIn(input.user))
+			userLogin.Logout(input.user);
 	}
 });
