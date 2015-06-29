@@ -39,16 +39,16 @@ var configHelp = {
 
 function configEntryToString(entry) {
 	switch (typeof entry) {
-	case 'string':
+	case "string":
 		return entry;
-	case 'number':
+	case "number":
 		return entry.toString();
-	case 'object':
+	case "object":
 		if (Array.isArray(entry))
 			return entry.join(", ");
 		// must be the api object
 		return "you have to edit the config directly to mess with APIs.";
-	case 'boolean':
+	case "boolean":
 		return entry.toString();
 	default:
 		// shouldn't happen
@@ -72,11 +72,11 @@ function changeConfig(field, entry) { // for user input to config
 	}
 	type = typeof config[field];
 	switch (type) {
-	case 'string':
+	case "string":
 		config[field] = entry;
 		config.saveChanges();
 		return true;
-	case 'object':
+	case "object":
 		if (config[field].length !== undefined) { // array
 			config[field] = entry.split(", ");
 			config.saveChanges();
@@ -89,19 +89,19 @@ function changeConfig(field, entry) { // for user input to config
 			return true;
 		}
 		return false;
-	case 'boolean':
+	case "boolean":
 		switch (entry.toLowerCase()) {
-		case '1':
-		case 'on':
-		case 'yes':
-		case 'true':
+		case "1":
+		case "on":
+		case "yes":
+		case "true":
 			config[field] = true;
 			config.saveChanges();
 			return true;
-		case '0':
-		case 'off':
-		case 'no':
-		case 'false':
+		case "0":
+		case "off":
+		case "no":
+		case "false":
 			config[field] = false;
 			config.saveChanges();
 			return true;
@@ -118,7 +118,7 @@ function changeConfig(field, entry) { // for user input to config
 
 function needsCensor(field) {
 	switch (field) {
-	case 'nickserv password':
+	case "nickserv password":
 		return true;
 	}
 }
@@ -131,6 +131,7 @@ function needsRestart(field) {
 	case "server":
 	case "port":
 	case "local whippingboys":
+	case "enabled plugins":
 	case "disabled plugins":
 		return " A bot restart is needed for this to take effect.";
 	default:
@@ -156,24 +157,24 @@ bot.command({
 			term = input.args.slice(1).join(" ").toLowerCase();
 			entries = Object.keys(config); ret = []; send = [];
 			entries.forEach(function (entry) {
-				if (entry.indexOf(term) > -1) {
-					if (!entry.match(/saveChanges|nick$|address$/i)) {
-						if (entry === "api") {
-							Object.keys(config[entry]).forEach(function (item) {
-								ret.push("api "+item+": <censored, edit the config directly>");
-							});
-						} else {
-							field = entry.replace(/_/g, " ");
-							if (needsCensor(field))
-								ret.push(field+": <censored, edit the config directly>");
-							else
-								ret.push(field+": "+configEntryToString(config[entry]));
-						}
+				if (entry.indexOf(term) === -1)
+					return;
+				if (!entry.match(/saveChanges|nick$|address$/i)) {
+					if (entry === "api") {
+						Object.keys(config[entry]).forEach(function (item) {
+							ret.push("api "+item+": <censored, edit the config directly>");
+						});
+					} else {
+						field = entry.replace(/_/g, " ");
+						if (needsCensor(field))
+							ret.push(field+": <censored, edit the config directly>");
+						else
+							ret.push(field+": "+configEntryToString(config[entry]));
 					}
 				}
 			});
 			if (ret.length) {
-				if (ret.length === 1) {
+				if (ret.length >= 3) {
 					irc.say(input.context, ret[0], false);
 				} else {
 					ret.forEach(function (entry) {
