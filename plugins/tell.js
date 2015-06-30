@@ -1,6 +1,6 @@
 ﻿// Tell someone something on join if saved message for them
 "use strict";
-var msgDB = new DB.Json({filename: 'messages'}),
+var msgDB = new DB.Json({filename: "messages"}),
 	messages = msgDB.getAll();
 
 function checkMessages(nick, context) {
@@ -15,26 +15,27 @@ function checkMessages(nick, context) {
 					messages[lnick][i].message = messages[lnick][i].nick+", message from "+messages[lnick][i].from+" ("+
 						lib.duration(messages[lnick][i].time, false, true)+" ago): "+messages[lnick][i].message;
 				}
-				send.push([ messages[lnick][i].method, context, messages[lnick][i].message, messages[lnick][i].sanitise ]);
+				send.push([ messages[lnick][i].method, context, messages[lnick][i].message ]);
 				messages[lnick].splice(i, 1); i--; l--;
 			}
 		} else {
 			if (!send) send = [];
-			send.push([ messages[lnick][i].method, nick, messages[lnick][i].message, messages[lnick][i].sanitise ]);
+			send.push([ messages[lnick][i].method, nick, messages[lnick][i].message ]);
 			messages[lnick].splice(i, 1); i--; l--;
 		}
 	}
 	if (send && send.length) {
 		irc.rated(send);
-		if (!messages[lnick].length) delete messages[lnick];
+		if (!messages[lnick].length)
+			delete messages[lnick];
 		msgDB.saveAll(messages);
 	}
 }
 
 function addMessage(message) {
 	var lnick = message.nick.toLowerCase();
-	if (!messages[lnick]) messages[lnick] = [];
-	message.sanitise = message.sanitise || false;
+	if (!messages[lnick])
+		messages[lnick] = [];
 	messages[lnick].push(message);
 	msgDB.saveAll(messages);
 }

@@ -1,7 +1,7 @@
 // url title snarfer
 "use strict";
 var url = require("url"),
-	fs = require('fs'),
+	fs = require("fs"),
 	ytReg = /v=([^ &\?]+)/i,
 	ytBReg = /^\/([^ &\?]+)/,
 	titleReg, sayTitle;
@@ -29,7 +29,7 @@ if (config.titlesnarfer_inline) {
 				if (title === "imgur: the simple image sharer")
 					return;
 			}
-			irc.say(context, title+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""), false);
+			irc.say(context, title+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""));
 			if (record)
 				recordURL(record[0], record[1], record[2], title);
 		});
@@ -52,7 +52,7 @@ if (config.titlesnarfer_inline) {
 			} else if (title.toLowerCase().indexOf(uri.host) > -1) {
 				title = title.replace(new RegExp(" " + uri.host + " ?", "ig"), "");
 			}
-			irc.say(context, title + " ~ " + uri.host.replace("www.", "")+(old ? " (" + old + ")" : ""), false);
+			irc.say(context, title + " ~ " + uri.host.replace("www.", "")+(old ? " (" + old + ")" : ""));
 			if (record)
 				recordURL(record[0], record[1], record[2], title);
 		});
@@ -171,12 +171,12 @@ function youtubeIt(context, id, old, record) {
 		yt.date = yt.date.split("T")[0];
 		yt.views = lib.commaNum(yt.views);
 		if (config.titlesnarfer_youtube_format !== undefined) {
-			yt.b = '\x02';
+			yt.b = "\x02";
 			resp = lib.formatOutput(config.titlesnarfer_youtube_format, yt);
 		} else {
 			resp = lib.formatOutput("{title} - [{duration}] {date} - {channel} - {views} views", yt);
 		}
-		irc.say(context, resp+(old ? " ("+old+")" : ""), false);
+		irc.say(context, resp+(old ? " ("+old+")" : ""));
 		if (record)
 			recordURL(record[0], record[1], record[2], yt.title);
 	}, function (error) {
@@ -252,7 +252,7 @@ bot.command({
 		}
 		target = (input.args ? input.args[0] : null);
 		searchTerm = (input.args && input.args.length > 1 ? input.args.slice(1).join(" ") : null);
-		irc.say(input.context, lastUrl(input.channel, target, searchTerm), false);
+		irc.say(input.context, lastUrl(input.channel, target, searchTerm));
 	}
 });
 
@@ -269,6 +269,6 @@ bot.command({
 		}
 		target = (input.args ? input.args[0] : null);
 		searchTerm = (input.args && input.args.length > 1 ? input.args.slice(1).join(" ") : null);
-		irc.say(input.context, urlStats(input.channel, target, searchTerm), false);
+		irc.say(input.context, urlStats(input.channel, target, searchTerm));
 	}
 });

@@ -95,9 +95,9 @@ function addListItem(context, target, list, item, type) {
 				link: resp[0].url
 			});
 			pastaDB.saveOne(target, user);
-			irc.say(context, writeList(user, list, type), false);
+			irc.say(context, writeList(user, list, type));
 		}, function () {
-			irc.say(context, "Google didn't find '"+gReg[1]+"' on "+gReg[3].slice(5), false);
+			irc.say(context, "Google didn't find '"+gReg[1]+"' on "+gReg[3].slice(5));
 		});
 		return;
 	}
@@ -112,7 +112,7 @@ function addListItem(context, target, list, item, type) {
 	}
 	user.lists[list].push(item);
 	pastaDB.saveOne(target, user);
-	irc.say(context, writeList(user, list, type), false);
+	irc.say(context, writeList(user, list, type));
 }
 
 function remListItem(target, list, item, type) {
@@ -171,7 +171,7 @@ function pastaCmd(input) {
 				"- You can only remove one at a time.");
 			break;
 		}
-		irc.say(input.context, remListItem(target, list, input.args.slice(2).join(" "), type), false);
+		irc.say(input.context, remListItem(target, list, input.args.slice(2).join(" "), type));
 		break;
 	case "delete":
 		if (input.args.length < 2) {
@@ -198,7 +198,7 @@ function pastaCmd(input) {
 			irc.say(input.context, (cmd === "ulist" ? "You haven't created any lists." : input.context+" has no lists."));
 		else
 			irc.say(input.context, (cmd === "ulist" ? "Your lists: " : input.context+" lists: ")+
-				lib.commaList(Object.keys(user.lists)), false);
+				lib.commaList(Object.keys(user.lists)));
 		break;
 	case "link":
 		input.args[2] = "link";
@@ -214,18 +214,18 @@ function pastaCmd(input) {
 			break;
 		}
 		if (!user.lists[list]) {
-			irc.say(input.context, "There is no '"+list+"' list.", false);
+			irc.say(input.context, "There is no '"+list+"' list.");
 			break;
 		}
 		if (!user.lists[list].length) {
-			irc.say(input.context, (cmd === "ulist" ? "Your" : "The")+" '"+list+"' list is empty.", false);
+			irc.say(input.context, (cmd === "ulist" ? "Your" : "The")+" '"+list+"' list is empty.");
 			break;
 		}
 		if (input.args[2] && input.args[2] === "link")
-			irc.say(input.context, constructPath(target, list, type), false);
+			irc.say(input.context, constructPath(target, list, type));
 		else
 			irc.say(input.context, (cmd === "ulist" ? "Your" : "The")+" '"+list+"' list contains: "+
-				lib.commaList(user.lists[list].map(function (listItem) { return listItem.name; })), false);
+				lib.commaList(user.lists[list].map(function (listItem) { return listItem.name; })));
 		break;
 	default:
 		irc.say(input.context, bot.cmdHelp(cmd, "syntax"));

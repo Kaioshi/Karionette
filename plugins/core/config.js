@@ -175,15 +175,15 @@ bot.command({
 			});
 			if (ret.length) {
 				if (ret.length >= 3) {
-					irc.say(input.context, ret[0], false);
+					irc.say(input.context, ret[0]);
 				} else {
 					ret.forEach(function (entry) {
-						send.push([ "say", input.context, entry, false ]);
+						send.push([ "say", input.context, entry ]);
 					});
 					irc.rated(send);
 				}
 			} else {
-				irc.say(input.context, "No config entry matched \""+term+"\".", false);
+				irc.say(input.context, "No config entry matched \""+term+"\".");
 			}
 			break;
 		case "set":
@@ -205,11 +205,11 @@ bot.command({
 		case "help":
 			term = input.args.slice(1).join(" ").toLowerCase();
 			if (!term)
-				irc.say(input.context, "Config fields are: "+lib.commaList(Object.keys(configHelp)), false);
+				irc.say(input.context, "Config fields are: "+lib.commaList(Object.keys(configHelp)));
 			else if (!configHelp[term])
 				irc.say(input.context, "That isn't a valid config entry.");
 			else
-				irc.say(input.context, term+" - "+configHelp[term].replace(/undefined$/, "Not set"), false);
+				irc.say(input.context, term+" - "+configHelp[term].replace(/undefined$/, "Not set"));
 			break;
 		default:
 			irc.say(input.context, bot.cmdHelp("config", "syntax"));

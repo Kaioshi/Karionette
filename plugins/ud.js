@@ -22,7 +22,7 @@ bot.command({
 							tmp += " "+(i+1)+") "+def;
 					}
 				}
-				irc.say(input.context, tmp, false);
+				irc.say(input.context, tmp);
 			}
 		});
 	}

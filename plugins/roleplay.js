@@ -217,6 +217,6 @@ bot.command({
 			return;
 		}
 		irc.say(input.context, "You see a "+lib.commaNum(player.age)+" year old "+player.gender+" "+player.ethnicity+" "+player.race+".");
-		irc.say(input.context, player.description, false, 1);
+		irc.say(input.context, player.description, 1);
 	}
 });

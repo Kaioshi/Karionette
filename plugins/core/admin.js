@@ -53,7 +53,7 @@ bot.event({
 		announceTo.forEach(function (user) {
 			messages = [];
 			for (i = 0; i < error.length; i++)
-				messages.push([ "notice", user, error[i], false ]);
+				messages.push([ "notice", user, error[i] ]);
 			irc.rated(messages);
 		});
 	}
@@ -138,7 +138,7 @@ bot.command({
 	admin: true,
 	arglen: 1,
 	callback: function (input) {
-		irc.say(input.args[0], "\x01ACTION "+input.args.slice(1).join(" ")+"\x01", false);
+		irc.say(input.args[0], "\x01ACTION "+input.args.slice(1).join(" ")+"\x01");
 	}
 });
 

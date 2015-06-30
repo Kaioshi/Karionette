@@ -149,7 +149,7 @@ bot.command({
 	syntax: config.command_prefix+"sayuni <what you want me to say>",
 	arglen: 1,
 	callback: function (input) {
-		irc.say(input.context, input.data, false);
+		irc.say(input.context, input.data);
 	}
 });
 
@@ -169,7 +169,7 @@ bot.command({
 	syntax: config.command_prefix+"actionuni <what you want me to do>",
 	arglen: 1,
 	callback: function (input) {
-		irc.action(input.context, input.data, false);
+		irc.action(input.context, input.data);
 	}
 });
 
@@ -197,7 +197,7 @@ bot.command({
 			irc.notice(input.nick, "No. Only admins can make me notice an entire channel.");
 			return;
 		}
-		irc.notice(input.args[0], input.data.slice(input.data.indexOf(" ")+1), false);
+		irc.notice(input.args[0], input.data.slice(input.data.indexOf(" ")+1));
 	}
 });
 
@@ -226,7 +226,7 @@ bot.command({
 			help = helpDB.getOne(cmd);
 			if (help && (help.help || help.syntax)) {
 				if (help.help)
-					irc.say(input.context, "[Help] "+help.help, false);
+					irc.say(input.context, "[Help] "+help.help);
 				if (help.syntax)
 					irc.say(input.context, "[Help] Alias syntax: "+config.command_prefix+cmd+" "+help.syntax);
 			} else {

@@ -67,7 +67,7 @@ bot.command({
 			if (body.indexOf("\n") === -1)// this is tvrage's version of an error.
 				irc.say(input.context, "Couldn't find it."); // sort of.
 			else
-				irc.say(input.context, getShowInfo(parseTvRage(body)), false);
+				irc.say(input.context, getShowInfo(parseTvRage(body)));
 		});
 	}
 });

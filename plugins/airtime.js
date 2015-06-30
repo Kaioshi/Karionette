@@ -36,7 +36,7 @@ bot.command({
 				if (resp.titles.japanese)
 					title = (title ? "["+title+" / "+resp.titles.japanese.trim()+"]" : resp.titles.japanese);
 			}
-			irc.say(input.context, title+status+eps+airtime, false);
+			irc.say(input.context, title+status+eps+airtime);
 			resp = null; title = null; status = null; eps = null; airtime = null; date = null; now = null;
 		}).catch(function (error) {
 			irc.say(input.context, error.message);

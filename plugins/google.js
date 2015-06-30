@@ -10,12 +10,12 @@ bot.command({
 		web.google(input.data.trim()).then(function (results) {
 			if (config.google_format) {
 				results[0].b = "\x02";
-				irc.say(input.context, lib.formatOutput(config.google_format, results[0]), false, 1);
+				irc.say(input.context, lib.formatOutput(config.google_format, results[0]), 1);
 			} else {
-				irc.say(input.context, lib.formatOutput("{title} ~ {url} ~ {content}", results[0]), false, 1);
+				irc.say(input.context, lib.formatOutput("{title} ~ {url} ~ {content}", results[0]), 1);
 			}
 		}, function (error) {
-			irc.say(input.context, error.message, false);
+			irc.say(input.context, error.message);
 		}).catch(function (error) {
 			logger.error("Error in ;google -> ", error);
 		});
@@ -42,7 +42,7 @@ bot.command({ // this will stop working soon~
 		web.json(uri).then(function (data) {
 			if (data && data.responseData && data.responseData.results && data.responseData.results[0]) {
 				data = data.responseData.results[0];
-				irc.say(input.context, lib.decode(data.titleNoFormatting)+" ("+data.width+"x"+data.height+"): "+data.url, false);
+				irc.say(input.context, lib.decode(data.titleNoFormatting)+" ("+data.width+"x"+data.height+"): "+data.url);
 			} else {
 				irc.say(input.context, "No image found. :<");
 			}

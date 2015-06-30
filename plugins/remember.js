@@ -29,8 +29,8 @@ bot.command({
 		}
 		old = memDB.getOne(reg[1]);
 		memDB.saveOne(reg[1], [ reg[2], reg[3] ]);
-		if (old) irc.say(input.context, "Updated - "+reg[1]+" "+reg[2]+" \""+reg[3]+"\"", false);
-		else irc.say(input.context, "Added - "+reg[1]+" "+reg[2]+" \""+reg[3]+"\"", false);
+		if (old) irc.say(input.context, "Updated - "+reg[1]+" "+reg[2]+" \""+reg[3]+"\"");
+		else irc.say(input.context, "Added - "+reg[1]+" "+reg[2]+" \""+reg[3]+"\"");
 	}
 });
 
@@ -46,7 +46,7 @@ bot.command({
 		if (!input.args || !input.args[0]) {
 			memories = Object.keys(memDB.getAll());
 			if (memories.length > 0)
-				irc.say(input.context, "I have "+memories.length+" memories: "+lib.sort(memories).join(", "), false);
+				irc.say(input.context, "I have "+memories.length+" memories: "+lib.sort(memories).join(", "));
 			else
 				irc.say(input.context, "I..I don't remember anything. ;~;");
 			return;
@@ -68,10 +68,10 @@ bot.command({
 				irc.say(input.context, "No matches. :<");
 			} else {
 				if (handles.length > 0) {
-					irc.say(input.context, "Memory handles matching \""+term+"\": "+lib.sort(handles).join(", "), false);
+					irc.say(input.context, "Memory handles matching \""+term+"\": "+lib.sort(handles).join(", "));
 				}
 				if (ret.length > 0) {
-					irc.say(input.context, "Memories matching \""+term+"\": "+lib.sort(ret).join(", "), false);
+					irc.say(input.context, "Memories matching \""+term+"\": "+lib.sort(ret).join(", "));
 				}
 			}
 			break;
@@ -90,10 +90,10 @@ bot.command({
 	callback: function (input) {
 		if (memDB.getOne(input.data)) {
 			memDB.removeOne(input.data);
-			irc.say(input.context, "I've forgotten all about "+input.data, false);
+			irc.say(input.context, "I've forgotten all about "+input.data);
 		} else {
 			irc.say(input.context, "I don't remember "+input.data+" in the first place.. :\\ - try \""+
-				config.command_prefix+"memories\" for a list.", false);
+				config.command_prefix+"memories\" for a list.");
 		}
 	}
 });
@@ -112,6 +112,6 @@ bot.command({
 			irc.say(input.context, lib.randSelect(dunno));
 			return;
 		}
-		irc.say(input.context, [ reg[2], memory[0], memory[1] ].join(" "), false);
+		irc.say(input.context, [ reg[2], memory[0], memory[1] ].join(" "));
 	}
 });

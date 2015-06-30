@@ -12,10 +12,10 @@ bot.command({
 		}
 		web.bing(input.data).then(function (results) {
 			if (config.bing_format) {
-				results[0].b = '\x02';
-				irc.say(input.context, lib.formatOutput(config.bing_format, results[0]), false, 1);
+				results[0].b = "\x02";
+				irc.say(input.context, lib.formatOutput(config.bing_format, results[0]), 1);
 			} else {
-				irc.say(input.context, lib.formatOutput("{title} ~ {url} ~ {content}", results[0]), false, 1);
+				irc.say(input.context, lib.formatOutput("{title} ~ {url} ~ {content}", results[0]), 1);
 			}
 		}, function (error) {
 			irc.say(input.context, error.message);

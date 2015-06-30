@@ -32,9 +32,9 @@ bot.command({
 			uri = "http://api.wordnik.com:80/v4/word.json/"+query+"/topExample?useCanonical=false&api_key="+config.api.wordnik;
 			return web.json(uri);
 		}).then(function (resp) {
-			irc.say(input.context, lib.singleSpace(query+definitions), false);
+			irc.say(input.context, lib.singleSpace(query+definitions));
 			if (resp.text && resp.title)
-				irc.say(input.context, lib.decode(lib.singleSpace(resp.text+" - "+resp.title)), false);
+				irc.say(input.context, lib.decode(lib.singleSpace(resp.text+" - "+resp.title)));
 		}, function (error) {
 			irc.say(input.context, error.message);
 		});

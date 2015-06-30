@@ -39,7 +39,7 @@ bot.command({
 	arglen: 1,
 	callback: function (input) {
 		if (learnDB.hasOne(input.data)) {
-			irc.say(input.context, "I've forgotten about "+input.data+".", false);
+			irc.say(input.context, "I've forgotten about "+input.data+".");
 			learnDB.removeOne(input.data);
 		} else {
 			irc.say(input.context, "I'm not familiar with that.");
@@ -54,7 +54,7 @@ bot.command({
 	callback: function (input) {
 		var prefix = getPrefix();
 		if (learnDB.size() > 0)
-			irc.say(input.context, learnDB.getKeys().map(function (key) { return prefix+key; }).join(", "), false);
+			irc.say(input.context, learnDB.getKeys().map(function (key) { return prefix+key; }).join(", "));
 		else
 			irc.say(input.context, "I haven't been taught anything.");
 	}
@@ -73,7 +73,7 @@ bot.event({
 				entry = reg[1];
 			}
 			if (learnDB.hasOne(entry))
-				irc.say(input.context, target+learnDB.getOne(entry), false);
+				irc.say(input.context, target+learnDB.getOne(entry));
 		}
 	}
 });

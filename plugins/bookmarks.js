@@ -259,9 +259,9 @@ bot.command({
 					});
 				} else {
 					if (matchedHandle.length > 0)
-						irc.say(input.context, "Matched by handle: "+lib.sort(matchedHandle).join(", "), false);
+						irc.say(input.context, "Matched by handle: "+lib.sort(matchedHandle).join(", "));
 					if (matchedUrl.length > 0)
-						irc.say(input.context, "Matched by URL: "+lib.sort(matchedUrl).join(", "), false);
+						irc.say(input.context, "Matched by URL: "+lib.sort(matchedUrl).join(", "));
 				}
 			}
 			break;

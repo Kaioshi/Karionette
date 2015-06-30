@@ -22,13 +22,13 @@ bot.command({
 				"&safeSearch=none&type=channel&fields=items&key="+config.api.youtube;
 			web.json(uri).then(function (yt) {
 				if (!yt.items.length)
-					irc.say(input.context, "\""+searchTerm+"\" doesn't seem to be a channel on YouTube.", false);
+					irc.say(input.context, "\""+searchTerm+"\" doesn't seem to be a channel on YouTube.");
 				else {
 					resp = yt.items[0];
 					desc = (resp.snippet.description.length ? ": "+resp.snippet.description.slice(0,140) : "");
 					irc.say(input.context, resp.snippet.title+desc+
 						" - Channel launched on "+resp.snippet.publishedAt.split("T")[0]+
-						" ~ https://youtube.com/channel/"+resp.id.channelId, false);
+						" ~ https://youtube.com/channel/"+resp.id.channelId);
 				}
 			}, function (error) {
 				irc.say(input.context, error.message);
@@ -41,7 +41,7 @@ bot.command({
 				if (config.youtube_format !== undefined) {
 					yt.b = "\x02";
 					yt.nick = input.nick;
-					irc.say(input.context, lib.formatOutput(config.youtube_format, yt), false);
+					irc.say(input.context, lib.formatOutput(config.youtube_format, yt));
 				} else {
 					irc.say(input.context,
 						lib.formatOutput("{title} - [{duration}] {date} - {channel} - {views} views ~ {link}", yt),

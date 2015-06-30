@@ -1,5 +1,5 @@
 "use strict";
-var url = require('url');
+var url = require("url");
 
 bot.command({
 	command: "geoip",
@@ -43,7 +43,7 @@ bot.command({
 				if (resp.city)
 					resp += ", "+resp.city;
 			}
-			irc.say(input.context, resp+".", false);
+			irc.say(input.context, resp+".");
 		}).catch(function (error) {
 			irc.say(input.context, error.message);
 		});

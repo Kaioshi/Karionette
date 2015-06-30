@@ -74,7 +74,7 @@ bot.command({
 			}
 			avg = avg / Object.keys(btc).length;
 			irc.say(input.context, "Bitcoin values: ["+cur+"] Average: "+trimNum(avg)+
-				", high: "+high.val+" ["+high.from+"], low: "+low.val+" ["+low.from+"]" + time, false);
+				", high: "+high.val+" ["+high.from+"], low: "+low.val+" ["+low.from+"]" + time);
 		});
 	}
 });

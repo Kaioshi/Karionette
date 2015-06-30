@@ -36,9 +36,9 @@ function doSearch(type, context, title, synopsis) {
 			eps = " - "+body.chapters+" "+(parseInt(body.chapters, 10) > 1 ? "chapters" : "chapter");
 		}
 		irc.say(context, lib.decode(body.title)+" ~ Rank #"+body.rank+" ["+getGenres(body.genres)+"]"+
-			eps+" - "+body.status+" ~ http://myanimelist.net/"+type+"/"+id, false);
+			eps+" - "+body.status+" ~ http://myanimelist.net/"+type+"/"+id);
 		if (synopsis)
-			irc.say(context, lib.stripHtml(lib.decode(body.synopsis)), false, 1);
+			irc.say(context, lib.stripHtml(lib.decode(body.synopsis)), 1);
 	}, function (error) {
 		irc.say(context, error.message);
 	}).catch(function (error) {

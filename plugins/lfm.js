@@ -79,10 +79,10 @@ bot.command({
 					tags = (tags.length > 0 ? " ~ ["+tags.join(", ")+"]" : "");
 					irc.say(input.context,"Artist: "+result.artist.name+formed+from+tags+
 						" ~ Total Plays: "+lib.commaNum(result.artist.stats.playcount)+
-						", Listeners: "+lib.commaNum(result.artist.stats.listeners), false);
+						", Listeners: "+lib.commaNum(result.artist.stats.listeners));
 					summary = lib.decode(lib.stripHtml(result.artist.bio.summary));
 					summary = (summary.length > 0 ? summary : "There was no artist summary. Did you spell it correctly?");
-					irc.say(input.context, summary, false, 1);
+					irc.say(input.context, summary, 1);
 				});
 				return;
 			case "-bind":
@@ -117,7 +117,7 @@ bot.command({
 									" (Playcount: "+lib.commaNum(track.playcount)+")");
 							}
 						}
-						irc.say(input.context, ret.join(", "), false);
+						irc.say(input.context, ret.join(", "));
 					});
 					return;
 				}
@@ -137,7 +137,7 @@ bot.command({
 						ret.push("#"+(i+1)+" "+track.artist.name+" ~ "+track.name+
 							" (Playcount: "+lib.commaNum(track.playcount)+")");
 					}
-					irc.say(input.context, ret.join(", "), false);
+					irc.say(input.context, ret.join(", "));
 				});
 				return;
 			case "-prev":
@@ -167,7 +167,7 @@ bot.command({
 				now = new Date().valueOf();
 				song.date = timeAgo(then, now);
 			}
-			else if (result.recenttracks.track[tn]['@attr'] && result.recenttracks.track[tn]['@attr'].nowplaying) {
+			else if (result.recenttracks.track[tn]["@attr"] && result.recenttracks.track[tn]["@attr"].nowplaying) {
 				song.date = "right now";
 				song.tense = " is listening to ";
 			}
@@ -176,7 +176,7 @@ bot.command({
 			return web.json(uri);
 		}).then(function (result) {
 			if (result.error) {
-				irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+"\" "+song.date, false);
+				irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+"\" "+song.date);
 				throw Error("Lastfm couldn't find detailed track info - \""+
 					result.message+"\" (Code: "+result.error+"). Pantsu.");
 			}
@@ -205,7 +205,7 @@ bot.command({
 			irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+
 				"\" ["+song.tags.join(", ")+"] ("+song.duration+") ~ "+lib.commaNum(song.date+song.userplays)+
 				" - Total Plays: "+lib.commaNum(song.playcount)+
-				" - Current Listeners: "+lib.commaNum(song.listeners), false);
+				" - Current Listeners: "+lib.commaNum(song.listeners));
 		}, function (error) {
 			irc.say(input.context, error.message);
 		});

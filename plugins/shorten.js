@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 function makeKey(len) {
 	var i = 0, n, ret = "";

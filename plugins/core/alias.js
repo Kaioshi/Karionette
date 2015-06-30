@@ -50,7 +50,7 @@ bot.command({
 				irc.say(input.context, "Help for the \""+cmd+"\" alias has been set.");
 			} else {
 				irc.say(input.context, (help.help ? "[Help] Alias: "+config.command_prefix+cmd+" - "+
-					help.help : "There is no help set for the \""+cmd+"\" alias."), false);
+					help.help : "There is no help set for the \""+cmd+"\" alias."));
 			}
 			break;
 		case "syntax":
@@ -78,7 +78,7 @@ bot.command({
 				irc.say(input.context, "Syntax for the \""+cmd+"\" alias has been set.");
 			} else {
 				irc.say(input.context, (help.syntax ? "[Help] Alias syntax: "+config.command_prefix+cmd+" "+
-					help.syntax : "There is no syntax set for the \""+cmd+"\" alias."), false);
+					help.syntax : "There is no syntax set for the \""+cmd+"\" alias."));
 			}
 			break;
 		case "arglen":
@@ -113,7 +113,7 @@ bot.command({
 			} else {
 				irc.say(input.context, (help.arglen !== undefined ? "[Help] The minimum argument length for "+
 					config.command_prefix+cmd+" is "+help.arglen :
-					"There is no minimum argument length set for the \""+cmd+"\" alias."), false);
+					"There is no minimum argument length set for the \""+cmd+"\" alias."));
 			}
 			break;
 		case "add":
@@ -158,7 +158,7 @@ bot.command({
 			break;
 		case "list":
 			aliasList = aliasDB.getKeys().sort().join(", ") || "There are no aliases yet.";
-			irc.say(input.context, aliasList, false);
+			irc.say(input.context, aliasList);
 			break;
 		case "info":
 			if (!cmd) {
@@ -166,7 +166,7 @@ bot.command({
 				return;
 			}
 			alias = aliasDB.getOne(cmd);
-			irc.say(input.context, (alias ? "The alias \""+cmd+"\" contains: "+alias : "There is no such alias."), false);
+			irc.say(input.context, (alias ? "The alias \""+cmd+"\" contains: "+alias : "There is no such alias."));
 			break;
 		default:
 			irc.say(input.context, bot.cmdHelp("alias", "syntax"));
@@ -365,7 +365,7 @@ bot.command({
 				list.push(varDB.getOne(item).handle);
 			});
 			if (list.length)
-				irc.say(input.context, list.join(", "), false);
+				irc.say(input.context, list.join(", "));
 			else
 				irc.say(input.context, "There are no variables yet.");
 			break;

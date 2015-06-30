@@ -42,18 +42,17 @@ function updateAnnouncements(announce, msg, updates) {
 	for (var i = 0; i < announce.length; i++) {
 		if (announce[i][0] === "#") {
 			if (lib.hasElement(ial.Channels(), announce[i]))
-				updates.push([ "say", announce[i], msg, false ]);
+				updates.push([ "say", announce[i], msg ]);
 			else
 				logger.debug("Tried to send a manga update to "+announce[i]+", but I'm not on it.");
 		} else {
 			if (ial.Channels(announce[i]).length) {
-				updates.push([ "notice", announce[i], msg, false ]); // notice users
+				updates.push([ "notice", announce[i], msg ]); // notice users
 			} else { // user not found :S
 				lib.events.emit("Event: queueMessage", {
 					method: "notice",
 					nick: announce[i],
-					message: msg,
-					sanitise: false
+					message: msg
 				});
 			}
 		}
@@ -117,7 +116,7 @@ function findUpdates(releases, type, notify) {
 	}
 	if (updates.length) {
 		irc.rated(updates);
-	} else if (typeof notify === 'string') {
+	} else if (typeof notify === "string") {
 		irc.say(notify, "Nothing new. :\\");
 	}
 }

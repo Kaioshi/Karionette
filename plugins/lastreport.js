@@ -25,7 +25,7 @@ bot.command({
 			if (globals.lastErrstack) {
 				messages = [];
 				globals.lastErrstack.split("\n").forEach(function (err) {
-					messages.push([ "say", input.context, err, false ]);
+					messages.push([ "say", input.context, err ]);
 				});
 				irc.rated(messages);
 			}

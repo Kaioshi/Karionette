@@ -31,7 +31,7 @@ function startReminder(reminder) {
 	if (time > 0) {
 		setTimeout(function () {
 			if (ial.Channels(reg[2]).length) {
-				irc.say(reg[3], reg[2]+": "+reg[4], false);
+				irc.say(reg[3], reg[2]+": "+reg[4]);
 			} else {
 				lib.events.emit("Event: queueMessage", {
 					method: "say",
@@ -44,7 +44,7 @@ function startReminder(reminder) {
 			removeReminder(reminder);
 		}, time);
 	} else {
-		irc.say(reg[3], reg[2]+": Sorry, I was offline! ;_; late "+reg[4], false);
+		irc.say(reg[3], reg[2]+": Sorry, I was offline! ;_; late "+reg[4]);
 		removeReminder(reminder);
 	}
 }

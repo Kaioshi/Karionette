@@ -22,7 +22,7 @@ function checkGits() {
 		json.forEach(function (entry) {
 			if (latest.indexOf(entry.link) === -1) {
 				aList.forEach(function (target) {
-					announce.push([ "say", target, "git: "+lib.decode(entry.title)+" ~ "+entry.link, false ]);
+					announce.push([ "say", target, "git: "+lib.decode(entry.title)+" ~ "+entry.link ]);
 				});
 				latest.push(entry.link);
 				altered = true;
@@ -62,7 +62,7 @@ bot.command({
 					stdout = stdout.split("\n");
 					for (i = 0, changes = []; i < stdout.length; i++) {
 						if (stdout[i][0] === " " && stdout[i][1] !== " ")
-							changes.push([ "say", input.context, stdout[i].trim(), false ]);
+							changes.push([ "say", input.context, stdout[i].trim() ]);
 					}
 					if (changes.length > 0)
 						irc.rated(changes);
