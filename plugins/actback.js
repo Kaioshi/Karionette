@@ -1,5 +1,6 @@
 "use strict";
 var regexFactory = require("./lib/regexFactory.js"),
+	randDB = new DB.List({filename: "randomThings"}),
 	denyDB = new DB.Json({filename: "actback/deny"}),
 	statsDB = new DB.Json({filename: "actback/stats"}),
 	repliesDB = new DB.Json({filename: "actback/replies"});

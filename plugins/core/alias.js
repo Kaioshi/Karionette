@@ -1,4 +1,7 @@
 "use strict";
+var aliasDB = new DB.Json({filename: "alias/alias"}),
+	varDB = new DB.Json({filename: "alias/vars"}),
+	helpDB = new DB.Json({filename: "alias/help"});
 
 function aliasIsCommand(alias) {
 	var i, commands = bot.cmdList();

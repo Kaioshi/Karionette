@@ -1,5 +1,7 @@
 // Keeps the bot connected
 "use strict";
+var helpDB = new DB.Json({filename: "alias/help"});
+
 bot.event({
 	handle: "corePing",
 	event: "PING",

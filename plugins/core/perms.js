@@ -1,5 +1,8 @@
 // perms fondling
 "use strict";
+var aliasDB = new DB.Json({filename: "alias/alias"}),
+	varDB = new DB.Json({filename: "alias/vars"});
+
 function itemExists(type, item) {
 	var variable, alias;
 	switch (type) {
