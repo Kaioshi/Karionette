@@ -49,7 +49,7 @@ function updateAnnouncements(announce, msg, updates) {
 			if (ial.Channels(announce[i]).length) {
 				updates.push([ "notice", announce[i], msg ]); // notice users
 			} else { // user not found :S
-				lib.events.emit("Event: queueMessage", {
+				emitEvent("Event: queueMessage", {
 					method: "notice",
 					nick: announce[i],
 					message: msg

@@ -1,5 +1,5 @@
 "use strict";
-var fs = require('fs'),
+var fs = require("fs"),
 	seen = {};
 
 function getOldSeen(nick, channel) {
@@ -176,8 +176,7 @@ bot.event({
 		var date, data;
 		if (!input.channel) return; // query
 		date = new Date().valueOf();
-		data = (isAction(input.message) ? "* "+input.nick+" "+input.message
-			: "<"+input.nick+"> "+input.message);
+		data = (isAction(input.message) ? "* "+input.nick+" "+input.message : "<"+input.nick+"> "+input.message);
 		ial.addActive(input.channel, input.nick, date, input.address);
 		setLastMessage(input.nick, input.channel, data, date);
 		data = null; date = null;

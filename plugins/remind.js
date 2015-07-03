@@ -33,7 +33,7 @@ function startReminder(reminder) {
 			if (ial.Channels(reg[2]).length) {
 				irc.say(reg[3], reg[2]+": "+reg[4]);
 			} else {
-				lib.events.emit("Event: queueMessage", {
+				emitEvent("Event: queueMessage", {
 					method: "say",
 					nick: reg[2],
 					channel: reg[3],

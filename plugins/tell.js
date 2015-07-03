@@ -42,7 +42,7 @@ function addMessage(message) {
 
 bot.event({
 	handle: "messageQueueListener",
-	event: "queueMessage",
+	event: "Event: queueMessage",
 	callback: addMessage
 });
 

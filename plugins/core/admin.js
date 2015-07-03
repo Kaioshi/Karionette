@@ -36,7 +36,7 @@ function getErrorAnnounceList() {
 
 bot.event({
 	handle: "errorAnnouncer",
-	event: "Error",
+	event: "Event: Error",
 	callback: function (error) {
 		getErrorAnnounceList().forEach(function (user) {
 			irc.notice(userLogin.getNick(user), "\x02Error\x02: "+error);
@@ -46,7 +46,7 @@ bot.event({
 
 bot.event({
 	handle: "errorStackAnnouncer",
-	event: "Error Stack",
+	event: "Event: Error Stack",
 	callback: function (error) {
 		var announceTo = getErrorAnnounceList(), i, messages;
 		error = error.split("\n");
@@ -106,13 +106,13 @@ bot.command({
 				irc.say(input.context, "There is no such plugin. o.o;");
 				return;
 			}
-			lib.events.emit("Event: Reloading plugin "+plugin);
+			emitEvent("Event: Reloading plugin "+plugin);
 			if (Array.isArray(config.disabled_plugins) && config.disabled_plugins.indexOf(plugin) > -1)
 				irc.say(input.context, "This plugin is in the disabled plugins list - loading it anyway.");
 			irc.reload(plugin);
 			irc.say(input.context, "Reloaded the "+plugin+" plugin.");
 		} else {
-			lib.events.emit("Event: Reloading all plugins");
+			emitEvent("Event: Reloading all plugins");
 			irc.reload();
 			irc.say(input.context, "Reloaded all plugins.");
 		}

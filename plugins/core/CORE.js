@@ -49,14 +49,17 @@ bot.event({
 	}
 });
 
-bot.event({
-	handle: "nickserv",
-	event: "NOTICE",
-	regex: new RegExp("^:"+config.nickserv_nickname+"!"+config.nickserv_hostname+" NOTICE [^ ]+ :This nickname is registered", "i"),
-	callback: function () {
-		irc.say("NickServ", "IDENTIFY " + config.nickserv_password);
-	}
-});
+
+if (config.nickserv_nickname && config.nickserv_hostname && config.nickserv_password) {
+	bot.event({
+		handle: "nickserv",
+		event: "NOTICE",
+		regex: new RegExp("^:"+config.nickserv_nickname+"!"+config.nickserv_hostname+" NOTICE [^ ]+ :This nickname is registered", "i"),
+		callback: function () {
+			irc.say("NickServ", "IDENTIFY " + config.nickserv_password);
+		}
+	});
+}
 
 bot.event({
 	handle: "ctcp",
@@ -116,7 +119,7 @@ bot.event({
 		});
 		if (globals.autojoining.length === 0) {
 			delete globals.autojoining;
-			lib.events.emit("Event: autojoinFinished");
+			emitEvent("autojoinFinished");
 			logger.debug("Finished joining channels");
 		}
 	}

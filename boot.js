@@ -1,5 +1,6 @@
 // this file is so goddamn messy.
 "use strict";
+
 global.globals = {
 	os: process.platform,
 	channels: {},
@@ -13,19 +14,20 @@ if (!require("fs").existsSync("config")) {
 
 var lib = require("./lib/funcs.js")(),
 	config = require("./lib/config.js")(),
-	timers = require("./lib/timers.js")(lib),
+	edgar = require("./lib/edgar.js")(),
+	timers = require("./lib/timers.js")(lib, edgar.emitEvent),
 	ial = require("./lib/ial.js")(lib),
-	logger = require("./lib/logger.js")(lib, config),
+	logger = require("./lib/logger.js")(lib, config, edgar.emitEvent),
+	Plugin = require("./lib/plugin.js")(logger, config),
+	fragDB = require("./lib/fragDB.js")(lib, logger),
 	DB = require("./lib/db.js")(lib, logger),
 	ignore = require("./lib/ignore.js")(DB, lib, ial),
 	web = require("./lib/web.js")(lib, logger, config),
 	words = require("./lib/words.js")(lib, config, logger, web),
 	alias = require("./lib/alias.js")(DB, lib, config, ial, words),
-	fragDB = require("./lib/fragDB.js")(lib, logger),
-	userLogin = require("./lib/login.js")(lib, config, logger, fragDB, ial),
+	userLogin = require("./lib/login.js")(lib, config, logger, fragDB, ial, edgar.event),
 	perms = require("./lib/perms.js")(DB, logger, ial, userLogin),
-	bot = require("./lib/bot.js")(lib, config, logger, ial, perms, words, userLogin, alias, ignore),
-	Plugin = require("./lib/plugin.js")(logger, config),
+	bot = require("./lib/bot.js")(lib, config, logger, edgar, ial, perms, words, userLogin, alias, ignore),
 	replPrompt = "", gc = true, gcInterval = 10000, mwInterval = 30000, repl = true;
 
 processArgs(process.argv.slice(2));
@@ -105,6 +107,7 @@ Plugin.setupSandbox({ // console and setInterval not used by any plugins as of 2
 	irc: global.irc,
 	config: config,
 	setTimeout: setTimeout,
+	emitEvent: edgar.emitEvent,
 	web: web,
 	DB: DB,
 	fragDB: fragDB,
