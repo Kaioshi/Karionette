@@ -37,7 +37,7 @@ function checkGits() {
 
 bot.event({
 	handle: "gitAnnouncerCheck",
-	event: "300s tick",
+	event: "Ticker: 300s tick",
 	callback: checkGits
 });
 

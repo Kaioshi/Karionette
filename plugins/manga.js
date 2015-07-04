@@ -123,7 +123,7 @@ function findUpdates(releases, type, notify) {
 
 bot.event({
 	handle: "mangaCheck",
-	event: "300s tick", // check for updates every 5 min
+	event: "Ticker: 300s tick", // check for updates every 5 min
 	callback: check.all
 });
 

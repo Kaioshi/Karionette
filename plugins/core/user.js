@@ -165,7 +165,7 @@ timers.startTick(900);
 
 bot.event({
 	handle: "saveAllSeen",
-	event: "900s tick",
+	event: "Ticker: 900s tick",
 	callback: saveAllSeen
 });
 
