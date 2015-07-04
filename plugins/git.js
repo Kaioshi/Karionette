@@ -1,6 +1,5 @@
 "use strict";
-var run = require('child_process').execFile,
-	fs = require('fs'),
+var run = require("child_process").execFile, fs = require("fs"),
 	gitDB = new DB.Json({filename: "gitannounce"}),
 	git = (function () {
 		if (fs.existsSync("/usr/bin/git"))

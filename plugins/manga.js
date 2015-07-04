@@ -79,7 +79,7 @@ function setLatest(type, title, release, date) {
 		watched[type][title].latest = [];
 	watched[type][title].latest.push({ title: release.title, link: release.link, date: date });
 	if (watched[type][title].latest.length > 5)
-		logger.debug("Removed "+watched[type][title].latest.shift());
+		watched[type][title].latest.shift();
 }
 
 function findUpdates(releases, type, notify) {

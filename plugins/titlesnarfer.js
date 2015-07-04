@@ -190,12 +190,13 @@ function youtubeIt(context, id, old, record) {
 bot.event({
 	handle: "titleSnarfer",
 	event: "PRIVMSG",
+	condition: function (input) {
+		return input.args === undefined && input.message.toLowerCase().indexOf("http") > -1;
+	},
 	regex: /^:[^ ]+ PRIVMSG #[^ ]+ :.*((?:https?:\/\/)[^\x01 ]+)/i,
 	callback: function (input) {
 		var uri, ext, old, record, videoID;
 
-		if (input.args)
-			return; // don't process urls in commands
 		old = getURL(input.channel, input.match[1]) || false;
 		if (!old)
 			record = [ input.nick, input.channel, input.match[1] ];

@@ -64,22 +64,34 @@ if (config.nickserv_nickname && config.nickserv_hostname && config.nickserv_pass
 bot.event({
 	handle: "ctcp",
 	event: "PRIVMSG",
+	condition: function (input) {
+		return lib.stringContainsAny(input.message, [ "\x01VERSION", "\x01PING", "\x01TIME" ], true);
+	},
 	regex: /^:[^ ]+ PRIVMSG [^ ]+ :\x01(VERSION|PING .*|TIME)\x01$/i,
 	callback: function (input) {
 		var ctcp = input.match[1].split(" ");
 		switch (ctcp[0].toUpperCase()) {
 		case "VERSION":
 			irc.raw("NOTICE "+input.context+" :\x01VERSION Karionette ~ \x02"+lib.randSelect([
+					"Wiggle wiggle wiggle wiggle",
 					"Now with 90% more butts!",
 					"All dem bot butts",
 					"This one time, at band camp..",
 					"Secretly loves fish fingers and custard",
+					"I'm Batman",
+					"Touch it",
+					"Stop touching it",
+					"No wait, touch it",
+					"OK STOP TOUCHING IT",
+					"A little more..",
+					"URRRRGGGHHHhhhhh Ahhhhhhhh ..... oh my god, sorry. I'm so sorry. Let me.. let me wipe that off..",
+					"It's going to fall off",
 					"Dun dun dunnnn",
 					"N-Nya..",
 					"Pantsu?",
 					"PANTSU!",
 					"Needs more Pantsu."])+
-				"\x02 ~ https://github.com/Kaioshi/Karionette.git [based on Marionette by Deide @ EsperNet]\x01");
+				"\x02 ~ https://github.com/Kaioshi/Karionette/ [based on Marionette by Deide @ EsperNet]\x01");
 			break;
 		case "TIME":
 			irc.raw("NOTICE "+input.context+" :\x01TIME "+new Date()+"\x01");

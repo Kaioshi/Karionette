@@ -327,13 +327,17 @@ bot.command({
 bot.event({
 	handle: "actback",
 	event: "PRIVMSG",
+	condition: function (input) {
+		if (!denyDB.hasOne(input.context.toLowerCase()) &&
+			lib.stringContainsAny(input.message, config.nickname.concat(config.nick), true))
+				return true;
+		return false;
+	},
 	regex: regexFactory.actionMatching(config.nickname),
 	callback: function (input) {
 		var stats, randReply, tmp, suppVars, randThings, randReplies, nicks, args, verb, verbs, verbed, verbing,
 			radv, randVerb, randVerbs, randVerbed, randVerbing, obj, randThing, method, reg, adv,
 			parses = 3;
-
-		if (!checkDeny(input.context.toLowerCase())) return; // not allowed to speak there
 
 		randThings = randDB.getAll();
 		randReplies = repliesDB.getAll();
@@ -440,6 +444,12 @@ bot.event({
 bot.event({
 	handle: "actbackquestion",
 	event: "PRIVMSG",
+	condition: function (input) {
+		if (!denyDB.hasOne(input.context.toLowerCase()) &&
+			lib.stringContainsAny(input.message, config.nickname.concat(config.nick), true))
+				return true;
+		return false;
+	},
 	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :(?:(?:(?:"+
 		regexFactory.matchAny(config.nickname)+
 		"[,:]\\s)(\\w+).+)|(?:(\\w+).+)"+
@@ -447,7 +457,6 @@ bot.event({
 		")!?\\?!?$", "i"),
 	callback: function (input) {
 		var m, rep;
-		if (!checkDeny(input.context.toLowerCase())) return; // not allowed to speak there
 
 		m = input.match[1] || input.match[2];
 		rep = questionReply(m);
