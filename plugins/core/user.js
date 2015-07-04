@@ -158,7 +158,7 @@ function removeUserLeft(nick, channel) {
 
 // Check if ACTION
 function isAction(data) {
-	return (data.substring(0, 7) === "\u0001ACTION");
+	return (data.substring(0, 7) === "\x01ACTION");
 }
 
 timers.startTick(900);
@@ -174,9 +174,10 @@ bot.event({
 	event: "PRIVMSG",
 	callback: function (input) {
 		var date, data;
-		if (!input.channel) return; // query
-		date = new Date().valueOf();
-		data = (isAction(input.message) ? "* "+input.nick+" "+input.message : "<"+input.nick+"> "+input.message);
+		if (!input.channel)
+			return; // query
+		date = Date.now();
+		data = (isAction(input.message) ? "* "+input.nick+" "+input.message.slice(8,-1) : "<"+input.nick+"> "+input.message);
 		ial.addActive(input.channel, input.nick, date, input.address);
 		setLastMessage(input.nick, input.channel, data, date);
 		data = null; date = null;
