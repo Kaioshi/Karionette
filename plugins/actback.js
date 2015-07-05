@@ -328,10 +328,11 @@ bot.event({
 	handle: "actback",
 	event: "PRIVMSG",
 	condition: function (input) {
-		if (!denyDB.hasOne(input.context.toLowerCase()) &&
-			lib.stringContainsAny(input.message, config.nickname.concat(config.nick), true))
-				return true;
-		return false;
+		if (input.message.indexOf("\x01") === -1) // \x01ACTION
+			return false;
+		if (denyDB.hasOne(input.context.toLowerCase()))
+			return false;
+		return lib.stringContainsAny(input.message, config.nicks, true);
 	},
 	regex: regexFactory.actionMatching(config.nickname),
 	callback: function (input) {
@@ -442,13 +443,14 @@ bot.event({
 });
 
 bot.event({
-	handle: "actbackquestion",
+	handle: "actbackQuestion",
 	event: "PRIVMSG",
 	condition: function (input) {
-		if (!denyDB.hasOne(input.context.toLowerCase()) &&
-			lib.stringContainsAny(input.message, config.nickname.concat(config.nick), true))
-				return true;
-		return false;
+		if (input.message.indexOf("?") === -1)
+			return false;
+		if (denyDB.hasOne(input.context.toLowerCase()))
+			return false;
+		return lib.stringContainsAny(input.message, config.nickname, true);
 	},
 	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :(?:(?:(?:"+
 		regexFactory.matchAny(config.nickname)+

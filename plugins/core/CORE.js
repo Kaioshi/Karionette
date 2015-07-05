@@ -65,6 +65,8 @@ bot.event({
 	handle: "ctcp",
 	event: "PRIVMSG",
 	condition: function (input) {
+		if (input.context[0] === "#" || input.message.indexOf("\x01") === -1)
+			return false;
 		return lib.stringContainsAny(input.message, [ "\x01VERSION", "\x01PING", "\x01TIME" ], true);
 	},
 	regex: /^:[^ ]+ PRIVMSG [^ ]+ :\x01(VERSION|PING .*|TIME)\x01$/i,

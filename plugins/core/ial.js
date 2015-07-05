@@ -57,11 +57,11 @@ bot.event({
 	callback: function (input) {
 		if (input.nick === config.nick)
 			return;
-		ial.Channels(input.nick).forEach(function (channel) {
-			setTimeout(function () {
+		setTimeout(function () {
+			ial.Channels(input.nick).forEach(function (channel) {
 				ial.Remove(channel, input.nick);
-			}, 200);
-		});
+			});
+		}, 200);
 	}
 });
 
@@ -71,17 +71,11 @@ bot.event({
 	callback: function (input) {
 		if (input.nick === config.nick) { // update our nicks
 			config.nick = input.newnick;
-			if (!config.nickname.some(function (item) { return (item === input.newnick); })) {
-				config.nickname = config.nickname.map(function (nick) {
-					if (nick === input.nick)
-						return input.newnick;
-					return nick;
-				});
-			}
+			if (config.nicks.indexOf(config.nick) === -1)
+				config.nicks.push(config.nick);
 		}
 		ial.Channels(input.nick).forEach(function (channel) {
 			ial.updateUser(channel, input.nick, input.newnick, input.address);
 		});
 	}
 });
-
