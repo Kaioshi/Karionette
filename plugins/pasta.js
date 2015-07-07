@@ -1,7 +1,5 @@
 "use strict";
-var pastaDB = new DB.Json({filename: "pastas"}),
-	fs = require('fs'),
-	template = fs.readFileSync("data/www/templates/list.html").toString();
+var pastaDB = new DB.Json({filename: "pastas"}), fs = require("fs");
 
 function formatOutput(tmpl, obj) {
 	return tmpl.replace(/\{\{([^\{\} ]+)\}\}/g, function (a, b) {
@@ -27,6 +25,7 @@ function writeList(user, list, type) {
 					return "<li><a href='"+(item.link ? item.link : "#")+"'>"+item.name+"</a></li>";
 				}).join("\n")
 		},
+		template = fs.readFileSync("data/www/templates/list.html").toString(),
 		target = user.target.toLowerCase(),
 		path = "data/www/"+type+"/"+target+"/";
 	lib.fs.makePath(path);
@@ -66,12 +65,16 @@ function createList(target, list) {
 	return "Created. o7";
 }
 
-function listContains(list, item) {
+function listIndexOf(list, item) {
 	var i, lowerItem = item.toLowerCase();
-	for (i = 0; i < list.length; i++) {
+	for (i = 0; i < list.length; i++)
 		if (list[i].name.toLowerCase() === lowerItem)
-			return true;
-	}
+			return i;
+	return -1;
+}
+
+function listContains(list, item) {
+	return listIndexOf(list, item) > -1;
 }
 
 function addListItem(context, target, list, item, type) {
@@ -115,6 +118,17 @@ function addListItem(context, target, list, item, type) {
 	irc.say(context, writeList(user, list, type));
 }
 
+function changeListItem(target, list, item, newLink, type) {
+	var index, user = pastaDB.getOne(target);
+	if (!user || !user.lists || !user.lists[list])
+		return "There is no such list.";
+	if ((index = listIndexOf(user.lists[list], item)) === -1)
+		return "That's not on the list.";
+	user.lists[list][index].link = newLink;
+	pastaDB.saveOne(target, user);
+	return writeList(user, list, type);
+}
+
 function remListItem(target, list, item, type) {
 	var i, user;
 	if (!isGoodPath(list))
@@ -135,7 +149,7 @@ function remListItem(target, list, item, type) {
 }
 
 function pastaCmd(input) {
-	var type, user, list, target, cmd;
+	var type, user, list, target, cmd, hReg;
 	if (config.pasta_path === undefined) {
 		irc.say(input.context, "The 'pasta path' config option isn't set. This wont work without that. See config.example");
 		return;
@@ -172,6 +186,25 @@ function pastaCmd(input) {
 			break;
 		}
 		irc.say(input.context, remListItem(target, list, input.args.slice(2).join(" "), type));
+		break;
+	case "relink": // clist relink list entry http://link.here
+		if (input.args.length < 4 || (hReg = /(.*) (https?:\/\/[^ ]+)/i.exec(input.args.slice(2).join(" "))) === null) {
+			irc.say(input.context, "[Help] Syntax: "+config.command_prefix+cmd+" relink <list> <list item> <new link>");
+			break;
+		}
+		irc.say(input.context, changeListItem(target, list, hReg[1], hReg[2], type));
+		break;
+	case "refresh":
+		if (input.args.length < 2) {
+			irc.say(input.context, "[Help] Syntax: "+config.command_prefix+cmd+" refresh <list>");
+			break;
+		}
+		user = pastaDB.getOne(target);
+		if (!user || !user.lists || !user.lists[list]) {
+			irc.say(input.context, "There is no such list.");
+			break;
+		}
+		irc.say(input.context, writeList(user, list, type));
 		break;
 	case "delete":
 		if (input.args.length < 2) {
@@ -239,7 +272,7 @@ bot.command({
 		"Not terribly useful if your bot doesn't run on a webserver, "+
 		"or if you don't know how to point a www-root there. "+
 		"The 'pasta path' option needs to be set in config.",
-	syntax: config.command_prefix+"clist <create/delete/list/show/link/add/remove> - create a list, then add to it. Example: "+
+	syntax: config.command_prefix+"clist <create/delete/list/show/link/refresh/relink/add/remove> - create a list, then add to it. Example: "+
 		config.command_prefix+"clist create anime - "+config.command_prefix+
 		"clist add anime Steins;Gate site:myanimelist.net/anime/ <- this will add Steins;Gate with a link to the first "+
 		"google result for 'Steins;Gate site:myanimelist.net/anime/', or you can "+
@@ -255,7 +288,7 @@ bot.command({
 		"Not terribly useful if your bot doesn't run on a webserver, "+
 		"or if you don't know how to point a www-root to BOTDIR/data/www/. "+
 		"The 'pasta path' option needs to be set in config.",
-	syntax: config.command_prefix+"ulist <create/delete/list/show/link/add/remove> - create a list, then add to it. Example: "+
+	syntax: config.command_prefix+"ulist <create/delete/list/show/link/refresh/relink/add/remove> - create a list, then add to it. Example: "+
 		config.command_prefix+"ulist create anime - "+config.command_prefix+
 		"ulist add anime Steins;Gate site:myanimelist.net/anime/ <- this will add Steins;Gate with a link to the first "+
 		"google result for 'Steins;Gate site:myanimelist.net/anime/', or you can "+
