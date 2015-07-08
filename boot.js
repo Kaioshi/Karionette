@@ -3,7 +3,6 @@
 
 global.globals = {
 	os: process.platform,
-	channels: {},
 	startTime: new Date()
 };
 
@@ -15,8 +14,8 @@ if (!require("fs").existsSync("config")) {
 var lib = require("./lib/funcs.js")(),
 	config = require("./lib/config.js")(),
 	edgar = require("./lib/edgar.js")(),
+	ial = require("./lib/ial.js")(config),
 	timers = require("./lib/timers.js")(lib, edgar.emitEvent),
-	ial = require("./lib/ial.js")(lib),
 	logger = require("./lib/logger.js")(lib, config, edgar.emitEvent),
 	Plugin = require("./lib/plugin.js")(logger, config),
 	fragDB = require("./lib/fragDB.js")(lib, logger),
