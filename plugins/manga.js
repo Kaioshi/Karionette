@@ -41,12 +41,14 @@ timers.startTick(300); // start a 5 minute ticker
 function updateAnnouncements(announce, msg, updates) {
 	for (var i = 0; i < announce.length; i++) {
 		if (announce[i][0] === "#") {
-			if (lib.hasElement(ial.Channels(), announce[i]))
+			// if (lib.hasElement(ial.User(config.nick).channels, announce[i]))
+			if (!ial.User(config.nick).ison(announce[i]))
 				updates.push([ "say", announce[i], msg ]);
 			else
 				logger.debug("Tried to send a manga update to "+announce[i]+", but I'm not on it.");
 		} else {
-			if (ial.Channels(announce[i]).length) {
+			//if (ial.Channels(announce[i]).length) {
+			if (ial.User(announce[i])) {
 				updates.push([ "notice", announce[i], msg ]); // notice users
 			} else { // user not found :S
 				emitEvent("Event: queueMessage", {
@@ -110,7 +112,7 @@ function findUpdates(releases, type, notify) {
 	});
 	if (hits.length) {
 		hits.forEach(function (title) {
-			mangaDB[type].clearCache(title);
+			//mangaDB[type].clearCache(title);
 			watched[type][title] = "";
 		});
 	}

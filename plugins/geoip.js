@@ -18,10 +18,10 @@ bot.command({
 				irc.say(input.context, "You need to give me a hostname in queries.");
 				return;
 			}
-			target = ial.User(input.args[0], input.context);
-			if (target && target.address) {
+			target = ial.User(input.args[0]);
+			if (target) {
 				nick = target.nick;
-				target = target.address.split("@")[1];
+				target = target.hostname;
 			} else {
 				irc.say(input.context, "I don't see a "+input.args[0]+" in here.");
 				irc.say(input.context, bot.cmdHelp("geoip", "syntax"));

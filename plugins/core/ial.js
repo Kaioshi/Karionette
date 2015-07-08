@@ -4,8 +4,10 @@ bot.event({
 	handle: "ialWho",
 	event: "352",
 	callback: function (input) {
-		var who = input.raw.split(" ");
-		ial.Add(who[3], who[7], who[4]+"@"+who[5]);
+		var params = input.raw.split(" ");
+		ial.addUser(params[7], params[4]+"@"+params[5]);
+		ial.User(params[7]).addChannel(params[3]);
+		ial.Channel(params[3]).addNick(params[7]);
 	}
 });
 
@@ -13,12 +15,18 @@ bot.event({
 	handle: "ialJoin",
 	event: "JOIN",
 	callback: function (input) {
+		if (!ial.User(input.nick))
+			ial.addUser(input.nick, input.address);
 		if (input.nick === config.nick) {
+			ial.addChannel(input.channel);
 			if (!config.address)
 				config.address = input.address;
-			irc.raw("WHO "+input.channel);
+			setTimeout(function () {
+				ial.userJoined(input.channel, input.nick);
+				irc.raw("WHO "+input.channel);
+			}, 200);
 		} else {
-			ial.Add(input.channel, input.nick, input.address);
+			ial.userJoined(input.channel, input.nick);
 		}
 	}
 });
@@ -27,13 +35,9 @@ bot.event({
 	handle: "ialPart",
 	event: "PART",
 	callback: function (input) {
-		if (input.nick === config.nick)
-			ial.Remove(input.channel);
-		else {
-			setTimeout(function () {
-				ial.Remove(input.channel, input.nick);
-			}, 200);
-		}
+		setTimeout(function () {
+			ial.userLeft(input.channel, input.nick);
+		}, 200);
 	}
 });
 
@@ -41,13 +45,10 @@ bot.event({
 	handle: "ialKick",
 	event: "KICK",
 	callback: function (input) {
-		if (input.kicked === config.nick)
-			ial.Remove(input.channel);
-		else {
-			setTimeout(function () {
-				ial.Remove(input.channel, input.kicked);
-			}, 200);
-		}
+		ial.Channel(input.context).setActive(input.nick);
+		setTimeout(function () {
+			ial.userLeft(input.channel, input.kicked);
+		}, 200);
 	}
 });
 
@@ -58,9 +59,7 @@ bot.event({
 		if (input.nick === config.nick)
 			return;
 		setTimeout(function () {
-			ial.Channels(input.nick).forEach(function (channel) {
-				ial.Remove(channel, input.nick);
-			});
+			ial.userQuit(input.nick);
 		}, 200);
 	}
 });
@@ -74,8 +73,24 @@ bot.event({
 			if (config.nicks.indexOf(config.nick) === -1)
 				config.nicks.push(config.nick);
 		}
-		ial.Channels(input.nick).forEach(function (channel) {
-			ial.updateUser(channel, input.nick, input.newnick, input.address);
-		});
+		ial.nickChange(input.nick, input.newnick);
+	}
+});
+
+bot.event({
+	handle: "ialTopic",
+	event: "TOPIC",
+	callback: function (input) {
+		ial.Channel(input.context).topic = input.topic;
+		ial.Channel(input.context).setActive(input.nick);
+	}
+});
+
+bot.event({
+	handle: "ialRawTopic",
+	event: "332",
+	callback: function (input) {
+		var params = input.raw.split(" ");
+		ial.Channel(params[3]).topic = params.slice(4).join(" ").slice(1);
 	}
 });

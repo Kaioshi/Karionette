@@ -178,7 +178,7 @@ bot.event({
 			return; // query
 		date = Date.now();
 		data = (isAction(input.message) ? "* "+input.nick+" "+input.message.slice(8,-1) : "<"+input.nick+"> "+input.message);
-		ial.addActive(input.channel, input.nick, date, input.address);
+		ial.Channel(input.channel).setActive(input.nick);
 		setLastMessage(input.nick, input.channel, data, date);
 		data = null; date = null;
 	}
@@ -205,10 +205,8 @@ bot.event({
 	handle: "seenKick",
 	event: "KICK",
 	callback: function (input) {
-		setUserLeft(input.kicked, ial.User(input.kicked, input.channel).address,
-			input.channel, "was kicked",
-			" by "+input.nick+
-			(input.reason.toLowerCase() !== input.kicked.toLowerCase() ? " ("+input.reason+")" : ""));
+		setUserLeft(input.kicked, ial.User(input.kicked).fulluser, input.channel, "was kicked",
+			" by "+input.nick+(input.reason.toLowerCase() !== input.kicked.toLowerCase() ? " ("+input.reason+")" : ""));
 	}
 });
 
@@ -216,13 +214,10 @@ bot.event({
 	handle: "seenNick",
 	event: "NICK",
 	callback: function (input) {
-		var channels = ial.Channels(input.newnick);
-		if (channels && channels.length > 0) {
-			channels.forEach(function (channel) {
-				setUserLeft(input.nick, input.address, channel, "nick changed", " ~ "+input.nick+" -> "+input.newnick);
-				removeUserLeft(input.newnick, channel);
-			});
-		}
+		ial.User(input.newnick).channels.forEach(function (channel) { // TODO: newnick or nick? you decide! WHO'S NEXT? EPIC RAP BATTLES OF HISTOWWWYYY
+			setUserLeft(input.nick, input.address, channel, "nick changed", " ~ "+input.nick+" -> "+input.newnick);
+			removeUserLeft(input.newnick, channel);
+		});
 	}
 });
 
@@ -230,15 +225,12 @@ bot.event({
 	handle: "seenQuit",
 	event: "QUIT",
 	callback: function (input) {
-		var channels = ial.Channels(input.nick);
-		if (channels && channels.length > 0) {
-			channels.forEach(function (channel) {
-				setUserLeft(input.nick, input.address, channel, "quit", (
-					input.reason.slice(0,6) === "Quit: " ? input.reason = " ~ "+input.reason.slice(6) :
-					(input.reason.length > 0 ? " ~ "+input.reason : "")
-				));
-			});
-		}
+		ial.User(input.nick).channels.forEach(function (channel) {
+			setUserLeft(input.nick, input.address, channel, "quit", (
+				input.reason.slice(0,6) === "Quit: " ? input.reason = " ~ "+input.reason.slice(6) :
+				(input.reason.length > 0 ? " ~ "+input.reason : "")
+			));
+		});
 	}
 });
 
