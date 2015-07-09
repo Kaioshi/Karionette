@@ -15,7 +15,7 @@ bot.command({
 
 bot.command({
 	command: "unidentify",
-	help: "Unidentifies you with "+config.nick+". See also: identify, whoami, adduser, deluser",
+	help: "Unidentifies you with "+config.nick+". See also: identify, whoami, adduser, deluser, passwd",
 	syntax: config.command_prefix+"unidentify",
 	callback: function (input) {
 		irc.say(input.nick, logins.unidentify(input.nick));
@@ -24,7 +24,7 @@ bot.command({
 
 bot.command({
 	command: "whoami",
-	help: "Tells you who you're identified as, if you are. See also: identify, unidentify, adduser, deluser",
+	help: "Tells you who you're identified as, if you are. See also: identify, unidentify, adduser, deluser, passwd",
 	syntax: config.command_prefix+"whoami",
 	callback: function (input) {
 		var user = logins.getUsername(input.nick);
@@ -40,7 +40,8 @@ bot.command({
 bot.command({
 	command: "setattr",
 	help: "Sets or shows per-login user defined attributes. See also: unsetattr, getattr",
-	syntax: config.command_prefix+"setattr <attribute> <value> - Attribute keys may not contain spaces - Example: "+config.command_prefix+"setattr errorAnnounce true",
+	syntax: config.command_prefix+"setattr <attribute> <value> - Attribute keys may not contain spaces - Example: "+
+		config.command_prefix+"setattr errorAnnounce true",
 	arglen: 2,
 	callback: function (input) {
 		irc.say(input.context, logins.setAttribute(input.nick, input.args[0], input.args.slice(1).join(" ")));
@@ -69,7 +70,7 @@ bot.command({
 
 bot.command({
 	command: "adduser",
-	help: "Adds a user to the bot. See also: deluser, whoami, identify, unidentify",
+	help: "Adds a user to the bot. See also: deluser, whoami, identify, unidentify, passwd",
 	syntax: config.command_prefix+"adduser <username> <password> [<secret>] - via query. Supply the bot's secret code to be recognised as an admin.",
 	arglen: 2,
 	callback: function (input) {
@@ -86,7 +87,7 @@ bot.command({
 
 bot.command({
 	command: "deluser",
-	help: "Removes a user from the bot. See also: adduser, whoami, identify, unidentify",
+	help: "Removes a user from the bot. See also: adduser, whoami, identify, unidentify, passwd",
 	syntax: config.command_prefix+"deluser <username> [<password>] - via query. Admins don't need the password.",
 	arglen: 1,
 	callback: function (input) {
@@ -99,7 +100,7 @@ bot.command({
 
 bot.command({
 	command: "passwd",
-	help: "Changes your password. Only admins can set passwords for other accounts.",
+	help: "Changes your password. Only admins can set passwords for other accounts. See also: adduser, deluser, whoami, identify, unidentify",
 	syntax: config.command_prefix+"passwd [<account>] <new password> - via query. Must be logged in first.",
 	arglen: 1,
 	callback: function (input) {
@@ -118,11 +119,8 @@ bot.event({
 	handle: "loginNick",
 	event: "NICK",
 	callback: function (input) {
-		if (logins.isLoggedIn(input.nick)) {
-			//setTimeout(function () {
-				logins.nickChange(input.nick, input.newnick);
-			// }, 2000);
-		}
+		if (logins.isLoggedIn(input.nick))
+			logins.nickChange(input.nick, input.newnick);
 	}
 });
 
