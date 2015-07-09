@@ -95,8 +95,8 @@ bot.command({
 			irc.say(input.context, "There is no "+reg[2]+" "+reg[1]+" to claim.");
 			return;
 		}
-		admin = userLogin.isAdmin(input.user);
-		user = userLogin.Check(input.user);
+		admin = logins.isAdmin(input.nick);
+		user = logins.getUsername(input.nick);
 		if (!user) {
 			irc.say(input.context, "You need to be identified with me to claim anything.");
 			return;
@@ -106,9 +106,12 @@ bot.command({
 				irc.say(input.context, "Only admins can claim commands.");
 				return;
 			}
-			if (!perms.DB[reg[1]]) perms.DB[reg[1]] = {};
-			if (!perms.DB[reg[1]][reg[2]]) perms.DB[reg[1]][reg[2]] = {};
-			if (!perms.DB[reg[1]][reg[2]].owner) perms.DB[reg[1]][reg[2]].owner = {};
+			if (!perms.DB[reg[1]])
+				perms.DB[reg[1]] = {};
+			if (!perms.DB[reg[1]][reg[2]])
+				perms.DB[reg[1]][reg[2]] = {};
+			if (!perms.DB[reg[1]][reg[2]].owner)
+				perms.DB[reg[1]][reg[2]].owner = {};
 			perms.DB[reg[1]][reg[2]].owner[user] = true;
 			perms.Save();
 			irc.say(input.context, "You're now the proud new owner of the "+reg[2]+" "+reg[1]+".");

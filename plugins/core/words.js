@@ -53,14 +53,14 @@ bot.command({
 				irc.say(input.context, words[input.args[0]].get(input.args[2]));
 				break;
 			case "add":
-				if (!userLogin.isAdmin(input.user)) {
+				if (!logins.isAdmin(input.nick)) {
 					irc.say(input.context, "Admins only sucka.");
 					return;
 				}
 				irc.say(input.context, words[input.args[0]].add(input.args[2]));
 				break;
 			case "remove":
-				if (!userLogin.isAdmin(input.user)) {
+				if (!logins.isAdmin(input.nick)) {
 					irc.say(input.context, "Admins only sucka!");
 					return;
 				}
@@ -92,14 +92,14 @@ bot.command({
 					irc.say(input.context, entry.base + " - " + entry.s);
 				break;
 			case "remove":
-				if (!userLogin.isAdmin(input.user)) {
+				if (!logins.isAdmin(input.nick)) {
 					irc.say(input.context, "Admins only.");
 					break;
 				}
 				irc.say(input.context, words.noun.remove(input.args[2]));
 				break;
 			case "add":
-				if (!userLogin.isAdmin(input.user)) {
+				if (!logins.isAdmin(input.nick)) {
 					irc.say(input.context, "Admins only.");
 					break;
 				}
@@ -131,21 +131,21 @@ bot.command({
 				else irc.say(input.context, entry.base+" - "+entry.s+" - "+entry.ed+" - "+entry.ing);
 				break;
 			case "remove":
-				if (!userLogin.isAdmin(input.user)) {
+				if (!logins.isAdmin(input.nick)) {
 					irc.say(input.context, "Admins only.");
 					return;
 				}
 				irc.say(input.context, words.verb.remove(input.args[2]));
 				break;
 			case "add":
-				if (!userLogin.isAdmin(input.user)) {
+				if (!logins.isAdmin(input.nick)) {
 					irc.say(input.context, "Admins only.");
 					return;
 				}
 				irc.say(input.context, words.verb.add(input.args.slice(2).join(" ")));
 				break;
 			case "correct":
-				if (!userLogin.isAdmin(input.user)) {
+				if (!logins.isAdmin(input.nick)) {
 					irc.say(input.context, "Admins only.");
 					return;
 				}

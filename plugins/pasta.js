@@ -211,7 +211,7 @@ function pastaCmd(input) {
 			irc.say(input.context, "[Help] Syntax: "+config.command_prefix+cmd+" delete <list>");
 			break;
 		}
-		if (type === "c" && !userLogin.isAdmin(input.user)) {
+		if (type === "c" && !logins.isAdmin(input.nick)) {
 			irc.say(input.context, "Only Admins may remove channel lists.");
 			break;
 		}

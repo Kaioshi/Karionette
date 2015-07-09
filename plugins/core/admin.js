@@ -9,16 +9,13 @@ bot.command({
 	admin: true,
 	arglen: 1,
 	callback: function (input) {
-		var user;
 		switch (input.args[0].toLowerCase()) {
 		case "announce":
-			user = userLogin.Check(input.user);
-			userLogin.setAttribute(user, "errorAnnounce", true);
+			logins.setAttribute(input.nick, "errorAnnounce", true);
 			irc.say(input.context, "k.");
 			break;
 		case "unannounce":
-			user = userLogin.Check(input.user);
-			userLogin.unsetAttribute(user, "errorAnnounce");
+			logins.unsetAttribute(input.nick, "errorAnnounce");
 			irc.say(input.context, "k.");
 			break;
 		default:
@@ -29,8 +26,8 @@ bot.command({
 });
 
 function getErrorAnnounceList() {
-	return userLogin.List(true).filter(function (user) {
-		return userLogin.getAttribute(user, "errorAnnounce");
+	return logins.nickList(true).filter(function (nick) {
+		return logins.getAttribute(nick, "errorAnnounce");
 	});
 }
 
@@ -38,8 +35,8 @@ bot.event({
 	handle: "errorAnnouncer",
 	event: "Event: Error",
 	callback: function (error) {
-		getErrorAnnounceList().forEach(function (user) {
-			irc.notice(userLogin.getNick(user), "\x02Error\x02: "+error);
+		getErrorAnnounceList().forEach(function (nick) {
+			irc.notice(nick, "\x02Error\x02: "+error);
 		});
 	}
 });
@@ -48,12 +45,12 @@ bot.event({
 	handle: "errorStackAnnouncer",
 	event: "Event: Error Stack",
 	callback: function (error) {
-		var announceTo = getErrorAnnounceList(), i, messages;
-		error = error.split("\n");
+		var announceTo = getErrorAnnounceList(), i, messages,
+			errorMessage = error.split("\n");
 		announceTo.forEach(function (user) {
 			messages = [];
-			for (i = 0; i < error.length; i++)
-				messages.push([ "notice", user, error[i] ]);
+			for (i = 0; i < errorMessage.length; i++)
+				messages.push([ "notice", user, errorMessage[i] ]);
 			irc.rated(messages);
 		});
 	}

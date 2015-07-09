@@ -56,7 +56,7 @@ bot.command({
 		var changes, i, target, aList;
 		switch (input.args[0].toLowerCase()) {
 		case "pull":
-			if (userLogin.isAdmin(input.user)) {
+			if (logins.isAdmin(input.nick)) {
 				run(git, [ "pull" ], {}, function (error, stdout) {
 					stdout = stdout.split("\n");
 					for (i = 0, changes = []; i < stdout.length; i++) {

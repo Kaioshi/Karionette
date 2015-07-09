@@ -129,9 +129,9 @@ bot.event({
 		if (globals.autojoining === undefined || !globals.autojoining.length)
 			return;
 		channel = input.raw.slice(input.raw.indexOf("#"));
-		channel = channel.slice(0, channel.indexOf(" "));
+		channel = channel.slice(0, channel.indexOf(" ")).toLowerCase();
 		globals.autojoining = globals.autojoining.filter(function (element) {
-			return (element.toLowerCase() !== channel.toLowerCase());
+			return element.toLowerCase() !== channel;
 		});
 		if (globals.autojoining.length === 0) {
 			delete globals.autojoining;
@@ -141,19 +141,8 @@ bot.event({
 	}
 });
 
-/*
- * COMMANDS:
- *	- say
- *	- sayuni
- *	- action
- *	- notice
- *	- help
- *	- memstats
- *	- uptime
- */
-
 bot.command({
-	command: "say",
+	command: [ "say", "sayuni" ],
 	help: "Makes me say something. Duh!",
 	syntax: config.command_prefix+"say <what you want me to say>",
 	arglen: 1,
@@ -163,17 +152,7 @@ bot.command({
 });
 
 bot.command({
-	command: "sayuni",
-	help: "Makes me say something, Unicode-style. Represent!",
-	syntax: config.command_prefix+"sayuni <what you want me to say>",
-	arglen: 1,
-	callback: function (input) {
-		irc.say(input.context, input.data);
-	}
-});
-
-bot.command({
-	command: "action",
+	command: [ "action", "actionuni" ],
 	help: "Makes me do something. Probably erotic.",
 	syntax: config.command_prefix+"action <what you want me to do>",
 	arglen: 1,
@@ -183,36 +162,12 @@ bot.command({
 });
 
 bot.command({
-	command: "actionuni",
-	help: "Makes me do stuff in a Unicode-kinda way.",
-	syntax: config.command_prefix+"actionuni <what you want me to do>",
-	arglen: 1,
-	callback: function (input) {
-		irc.action(input.context, input.data);
-	}
-});
-
-bot.command({
-	command: "notice",
+	command: [ "notice", "noticeuni" ],
 	help: "Makes me notice things. Like your new shoes!",
 	syntax: config.command_prefix+"notice <target> <what you want me to notice them>",
 	arglen: 1,
 	callback: function (input) {
-		if (input.args[0][0] === "#" && !userLogin.isAdmin(input.user)) {
-			irc.notice(input.nick, "No. Only admins can make me notice an entire channel.");
-			return;
-		}
-		irc.notice(input.args[0], input.data.slice(input.data.indexOf(" ")+1));
-	}
-});
-
-bot.command({
-	command: "noticeuni",
-	help: "Makes me notice things in a Unicode-kinda way.",
-	syntax: config.command_prefix+"noticeuni <target> <what you want me to notice them>",
-	arglen: 1,
-	callback: function (input) {
-		if (input.args[0][0] === "#" && !userLogin.isAdmin(input.user)) {
+		if (input.args[0][0] === "#" && !logins.isAdmin(input.nick)) {
 			irc.notice(input.nick, "No. Only admins can make me notice an entire channel.");
 			return;
 		}
