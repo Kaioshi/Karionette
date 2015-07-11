@@ -21,7 +21,9 @@ function writeList(user, list, type) {
 	var obj = {
 			target: type === "c" ? "#"+user.target : user.target,
 			list: list,
-			data: user.lists[list].map(function (item) {
+			data: user.lists[list].sort(function (a, b) {
+					return a.name.toLocaleString().toLowerCase().localeCompare(b.name.toLocaleString().toLowerCase());
+				}).map(function (item) {
 					return "<li><a href='"+(item.link ? item.link : "#")+"'>"+item.name+"</a></li>";
 				}).join("\n")
 		},
