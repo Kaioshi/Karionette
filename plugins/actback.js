@@ -3,7 +3,8 @@ var regexFactory = require("./lib/regexFactory.js"),
 	randDB = new DB.List({filename: "randomThings"}),
 	denyDB = new DB.Json({filename: "actback/deny"}),
 	statsDB = new DB.Json({filename: "actback/stats"}),
-	repliesDB = new DB.Json({filename: "actback/replies"});
+	repliesDB = new DB.Json({filename: "actback/replies"}),
+	varParseLimit = 3;
 
 function getWpm(line) {
 	return Math.floor((line.length / 5.0) * 1000);
@@ -11,24 +12,7 @@ function getWpm(line) {
 
 function transformObj(args, num) {
 	var me = (config.nick ? config.nick : config.nickname[0]),
-		nonObjs = [
-			me,
-			me+"s",
-			me+"'s",
-			"a",
-			"an",
-			"the",
-			"some",
-			"one",
-			"loads",
-			"lot",
-			"of",
-			"all",
-			"his",
-			"their",
-			"with",
-			"her"
-		],
+		nonObjs = [ me, me+"s", me+"'s", "a", "an", "the", "some", "one", "loads", "lot", "of", "all", "his", "their", "with", "her" ],
 		isNonObj = function (elem) {
 			if (args[num] === undefined)
 				return;
@@ -324,6 +308,99 @@ bot.command({
 	}
 });
 
+function replaceVars(line, context, from, obj, verb) {
+	var reg, tmp;
+	varParseLimit--;
+	tmp = line;
+	while ((reg = /(\{[^\{\|\(\)\[\]\} ]+\})/.exec(tmp))) {
+		line = line.replace(reg[1], replaceSingleVar(reg[1], context, from, obj, verb));
+		tmp = tmp.slice(tmp.indexOf(reg[1])+reg[1].length);
+	}
+	if (varParseLimit > 0 && line.match(/\{[^\[\(\|\)\] ]+\}/))
+		line = replaceVars(line, context, from, obj, verb);
+	else
+		varParseLimit = 3;
+	return lib.singleSpace(line);
+}
+
+function adverb(verb) {
+	if (lib.chance() > 50)
+		return words.adverb.random()+" "+verb;
+	return verb;
+}
+
+function replaceSingleVar(match, context, from, obj, verb) {
+	var tmp;
+	switch (match) {
+	case "{me}": return magicInputFondler(config.nick);
+	case "{from}": return magicInputFondler(from);
+	case "{whippingBoy}": return magicInputFondler(lib.randSelect(config.local_whippingboys));
+	case "{channel}": return magicInputFondler(context);
+	case "{randThing}": return lib.randSelect(randDB.getAll());
+	case "{randNick}": return magicInputFondler(randNick(context, from));
+	case "{randVerb}": return adverb(words.verb.random().base);
+	case "{verb}": return verb.base;
+	case "{randVerbs}": return adverb(words.verb.random().s);
+	case "{verbs}": return verb.s;
+	case "{randVerbed}": return adverb(words.verb.random().ed);
+	case "{verbed}": return verb.ed;
+	case "{randVerbing}": return adverb(words.verb.random().ing);
+	case "{verbing}": return verb.ing;
+	case "{adverb}": return words.adverb.random();
+	case "{adjective}": return words.adjective.random();
+	case "{noun}": return words.noun.random().base;
+	case "{nouns}": return words.noun.random().s;
+	case "{pronoun}": return words.pronoun.random();
+	case "{personalPronoun}": return words.personalPronoun.random();
+	case "{possessivePronoun}": return words.possessivePronoun.random();
+	case "{preposition}": return words.preposition.random();
+	case "{obj}": return obj;
+	default:
+		// parse {#2-39} random number thing.
+		if (match[1] === "#") {
+			tmp = /\{#(\d+)\-(\d+)\}/.exec(match);
+			if (tmp) {
+				tmp[1] = parseInt(tmp[1], 10);
+				tmp[2] = parseInt(tmp[2], 10);
+				if (tmp[1] >= tmp[2])
+					return "{#Min-Max--MinNeedsToBeLowerThanMax}";
+				return lib.randNum(tmp[1], tmp[2]).toString();
+			}
+		}
+	}
+	return match;
+}
+
+function randNick(context, from) {
+	var nicks, index;
+	if (context[0] === "#") {
+		nicks = ial.Active(context);
+		index = nicks.indexOf(from);
+		if (index > -1)
+			nicks.splice(index, 1);
+	}
+	if (nicks === undefined || !nicks.length) {
+		nicks = [
+			"someone", "Spiderman", "Iron Man", "Orgasmo", "Invader Zim", "Jo Brand", "Stephen Fry", "David Mitchell",
+			"Lee Mack", "Joffrey", "Hillary Clinton", "Solid Snake", "Kirby", "a wild Jigglypuff", "Steve Holt",
+			"Bob Loblaw", getWhippingBoy()
+		];
+	}
+	return lib.randSelect(nicks);
+}
+
+function getWhippingBoy() {
+	if (config.local_whippingboys && Array.isArray(config.local_whippingboys) && config.local_whippingboys.length)
+		return lib.randSelect(config.local_whippingboys);
+	return "the local whipping boy";
+}
+
+function magicInputFondler(text) {
+	if (text.indexOf("|") > -1)
+		return text.replace(/\|/g, "℅");
+	return text;
+}
+
 bot.event({
 	handle: "actback",
 	event: "PRIVMSG",
@@ -336,38 +413,15 @@ bot.event({
 	},
 	regex: regexFactory.actionMatching(config.nickname),
 	callback: function (input) {
-		var stats, randReply, tmp, suppVars, randThings, randReplies, nicks, args, verb, verbs, verbed, verbing,
-			radv, randVerb, randVerbs, randVerbed, randVerbing, obj, randThing, method, reg, adv,
-			parses = 3;
+		var line, stats, randReply, tmp, randThings, randReplies, args, verb, obj, randThing, method, adv;
 
 		randThings = randDB.getAll();
 		randReplies = repliesDB.getAll();
-		nicks = (input.context[0] === "#" ? ial.Active(input.context).filter(function (nick) { return (nick !== input.nick); }) : []);
-		nicks = (nicks.length > 0 ? nicks : [
-			"someone", "Spiderman", "Iron Man", "Orgasmo", "Invader Zim", "Jo Brand", "Stephen Fry", "David Mitchell", "Lee Mack", "Joffrey",
-			"Hillary Clinton", "Solid Snake", "Kirby", "a wild Jigglypuff", "Steve Holt", "Bob Loblaw",
-			(config.local_whippingboys && Array.isArray(config.local_whippingboys) && config.local_whippingboys.length > 0 ?
-				lib.randSelect(config.local_whippingboys) :
-				"the local whipping boy")
-		]);
 		args = input.match[0].slice(8,-1).split(" ");
 		verb = args[0];
-		adv = "";
-		radv = (lib.chance() ? words.adverb.random() : "");
-		randVerb = words.verb.random().base;
-		randVerbs = words.verb.random().s;
-		randVerbed = words.verb.random().ed;
-		randVerbing = words.verb.random().ing;
 		obj = transformObj(args, 2);
 		randThing = lib.randSelect(randThings);
 		method = lib.randSelect([ "say", "action"]);
-
-		if (radv) {
-			randVerb = radv + " " + randVerb;
-			randVerbs = radv + " " + randVerbs;
-			randVerbed = radv + " " + randVerbed;
-			randVerbing = radv + " " + randVerbing;
-		}
 		if (verb.indexOf("\"") > -1) verb = verb.replace(/\"/g, "");
 		if (verb.slice(-2) === "ly") {
 			if (words.adverb.get(verb) !== verb && config.api.wordnik) {
@@ -378,11 +432,7 @@ bot.event({
 		}
 		tmp = words.verb.get(verb);
 		if (tmp) {
-			verbs = tmp.s;
-			verbed = tmp.ed;
-			verbing = tmp.ing;
-			verb = tmp.base;
-			tmp = null;
+			verb = tmp;
 		} else {
 			if (config.api.wordnik) {
 				words.lookup("verb", verb);
@@ -392,52 +442,27 @@ bot.event({
 			} else if (verb.slice(-1) === "s") {
 				verb = verb.slice(0, -1);
 			}
-			verbs = verb + "s";
-			verbed = verb + "ed";
-			verbing = verb + "ing";
+			verb = { base: verb, s: verb+"s", ed: verb+"ed", ing: verb+"ing" };
 		}
-		suppVars = {
-			"{from}": input.nick,
-			"{context}": input.context,
-			"{randThing}": randThing,
-			"{randNick}": lib.randSelect(nicks),
-			"{whippingBoy}": lib.randSelect(config.local_whippingboys),
-			"{verb}": adv + verb,
-			"{verbs}": adv + verbs,
-			"{verbed}": adv + verbed,
-			"{verbing}": adv + verbing,
-			"{adverb}": words.adverb.random(),
-			"{adjective}": words.adjective.random(),
-			"{noun}": words.noun.random().base,
-			"{nouns}": words.noun.random().s,
-			"{pronoun}": words.pronoun.random(),
-			"{personalPronoun}": words.personalPronoun.random(),
-			"{possessivePronoun}": words.possessivePronoun.random(),
-			"{preposition}": words.preposition.random(),
-			"{randVerb}": randVerb,
-			"{randVerbs}": randVerbs,
-			"{randVerbed}": randVerbed,
-			"{randVerbing}": randVerbing,
-			"{obj}": obj
-		};
-		if (!randReplies[verbs] && !randReplies.alts[verbs]) {
+		if (!randReplies[verb.s] && !randReplies.alts[verb.s]) {
 			randReply = lib.randSelect(randReplies.defa[method]);
 		} else {
-			if (randReplies.alts[verbs]) {
-				verbs = randReplies.alts[verbs];
+			if (randReplies.alts[verb.s]) {
+				verb.s = randReplies.alts[verb.s];
 			}
-			randReply = lib.randSelect(randReplies[verbs][method]);
+			randReply = lib.randSelect(randReplies[verb.s][method]);
 		}
-		stats = statsDB.getOne(verbs) || 0;
-		statsDB.saveOne(verbs, (stats+1));
-		randReply = lib.supplant(randReply, suppVars);
-		reg = new RegExp(Object.keys(suppVars).join("|"));
-		while (randReply.match(reg) && parses) {
-			parses--;
-			randReply = lib.supplant(randReply, suppVars);
-		}
+		stats = statsDB.getOne(verb.s) || 0;
+		statsDB.saveOne(verb.s, (stats+1));
+		line = replaceVars(randReply, input.context, input.nick, obj, verb);
+		if (line.match(/\{\((.*\|?)\)\}/))
+			line = lib.parseVarList(line);
+		if (line.match(/\{\[(.*\|?)\]\}/))
+			line = lib.molest(line);
+		if (line.indexOf("℅") > -1)
+			line = line.replace(/℅/g, "|");
 		setTimeout(function () {
-			irc[method](input.context, randReply);
+			irc[method](input.context, line);
 		}, getWpm(randReply));
 	}
 });
