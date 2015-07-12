@@ -17,7 +17,7 @@ function constructPath(target, list, type) {
 	return config.pasta_path+type+"/"+target+"/"+list+".html";
 }
 
-function writeList(user, list, type) {
+function writeList(user, list, type, tpl) {
 	var obj = {
 			target: type === "c" ? "#"+user.target : user.target,
 			list: list,
@@ -27,7 +27,7 @@ function writeList(user, list, type) {
 					return "<li><a href='"+(item.link ? item.link : "#")+"'>"+item.name+"</a></li>";
 				}).join("\n")
 		},
-		template = fs.readFileSync("data/www/templates/list.html").toString(),
+		template = fs.readFileSync("data/www/templates/" + tpl + ".html").toString(),
 		target = user.target.toLowerCase(),
 		path = "data/www/"+type+"/"+target+"/";
 	lib.fs.makePath(path);
@@ -52,7 +52,7 @@ function deleteList(user, list, type) {
 	}
 }
 
-function createList(target, list) {
+function createList(target, list, tpl) {
 	var user;
 	if (!isGoodPath(list))
 		return "Bad list name. Lists should be letters and numbers only and no longer than 20 characters.";
@@ -62,6 +62,7 @@ function createList(target, list) {
 	if (user.lists[list] !== undefined)
 		return "That list exists already.";
 	user.target = target;
+	user.template = tpl;
 	user.lists[list] = [];
 	pastaDB.saveOne(target, user);
 	return "Created. o7";
@@ -81,12 +82,14 @@ function listContains(list, item) {
 
 function addListItem(context, target, list, item, type) {
 	var gReg, linkReg, user;
+
 	if (!isGoodPath(list))
 		return "Bad list name. Lists should be letters and numbers only and no longer than 20 characters.";
 	user = pastaDB.getOne(target) || {};
 	user.lists = user.lists || {};
 	user.lists[list] = user.lists[list] || [];
 	user.target = target;
+	user.template = user.template || "list";
 	gReg = /^(.*) (google|bing) (site:[^ ]+)/i.exec(item);
 	if (gReg) {
 		if (listContains(user.lists[list], gReg[1])) {
@@ -100,7 +103,7 @@ function addListItem(context, target, list, item, type) {
 				link: resp[0].url
 			});
 			pastaDB.saveOne(target, user);
-			irc.say(context, writeList(user, list, type));
+			irc.say(context, writeList(user, list, type, user.template));
 		}, function () {
 			irc.say(context, "Google didn't find '"+gReg[1]+"' on "+gReg[3].slice(5));
 		});
@@ -117,7 +120,7 @@ function addListItem(context, target, list, item, type) {
 	}
 	user.lists[list].push(item);
 	pastaDB.saveOne(target, user);
-	irc.say(context, writeList(user, list, type));
+	irc.say(context, writeList(user, list, type, user.template));
 }
 
 function changeListItem(target, list, item, newLink, type) {
@@ -128,7 +131,7 @@ function changeListItem(target, list, item, newLink, type) {
 		return "That's not on the list.";
 	user.lists[list][index].link = newLink;
 	pastaDB.saveOne(target, user);
-	return writeList(user, list, type);
+	return writeList(user, list, type, user.template);
 }
 
 function remListItem(target, list, item, type) {
@@ -141,17 +144,17 @@ function remListItem(target, list, item, type) {
 	item = item.toLowerCase();
 	for (i = 0; i < user.lists[list].length; i++) {
 		if (user.lists[list][i].name.toLowerCase() === item) {
-			user.lists[list].splice(i,1);
+			user.lists[list].splice(i, 1);
 			user.target = target;
 			pastaDB.saveOne(target, user);
-			return writeList(user, list, type);
+			return writeList(user, list, type, user.template);
 		}
 	}
 	return "Couldn't find it.";
 }
 
 function pastaCmd(input) {
-	var type, user, list, target, cmd, hReg;
+	var type, user, list, target, cmd, hReg, template;
 	if (config.pasta_path === undefined) {
 		irc.say(input.context, "The 'pasta path' config option isn't set. This wont work without that. See config.example");
 		return;
@@ -166,13 +169,19 @@ function pastaCmd(input) {
 	}
 	if (input.args[1])
 		list = input.args[1].toLowerCase();
+	if (input.args[2]) {
+		template = input.args[2].toLowerCase();
+	}
+	else {
+		template = "list";
+	}
 	switch (input.args[0]) {
 	case "create": // create a list
 		if (!input.args[1]) {
-			irc.say(input.context, "[Help] Syntax: "+config.command_prefix+cmd+" create <list>");
+			irc.say(input.context, "[Help] Syntax: "+config.command_prefix+cmd+" create <list> [template]");
 			break;
 		}
-		irc.say(input.context, createList(target, list));
+		irc.say(input.context, createList(target, list, template));
 		break;
 	case "add": // add list <line>
 		if (input.args.length < 3) {
@@ -206,7 +215,7 @@ function pastaCmd(input) {
 			irc.say(input.context, "There is no such list.");
 			break;
 		}
-		irc.say(input.context, writeList(user, list, type));
+		irc.say(input.context, writeList(user, list, type, user.template));
 		break;
 	case "delete":
 		if (input.args.length < 2) {
@@ -262,6 +271,24 @@ function pastaCmd(input) {
 			irc.say(input.context, (cmd === "ulist" ? "Your" : "The")+" '"+list+"' list contains: "+
 				lib.commaList(user.lists[list].map(function (listItem) { return listItem.name; })));
 		break;
+	case "template":
+		if (input.args.length < 3) {
+			irc.say(input.context, "[Help] Syntax: "+config.command_prefix+cmd+" template <list> <template>");
+			break;
+		}
+		user = pastaDB.getOne(target);
+		if (!user || !user.lists) {
+			irc.say(input.context, "You haven't made any lists. See "+config.command_prefix+cmd+" create");
+			break;
+		}
+		if (!user.lists[list]) {
+			irc.say(input.context, "There is no '"+list+"' list.");
+			break;
+		}
+		user.template = template;
+		pastaDB.saveOne(target, user);
+		irc.say(input.context, writeList(user, list, type, user.template));
+	break;
 	default:
 		irc.say(input.context, bot.cmdHelp(cmd, "syntax"));
 		break;
