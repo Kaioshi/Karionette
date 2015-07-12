@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'/>
+<title>{{target}}'s {{list}} list</title>
+<script src="./fetch.js"></script>
+<script src="./malify.js"></script>
+<style>
+body {
+	color: #fff;
+	background-color: rgb(38, 38, 38);
+	font-family: "Segoe UI Light","Segoe UI Web Light","Segoe UI Web Regular","Segoe UI","Segoe UI Symbol","HelveticaNeue-Light","Helvetica Neue",Arial,sans-serif;
+}
+
+#list8, #anime-details {
+	width: 48%;
+	box-shadow: 5px 5px 5px rgba(10, 10, 10, 0.7);
+	background-color: #222222;
+	padding: 5px;
+}
+
+/* LIST #8 */
+#list8 {
+	float: left;
+	font-size: 20px;
+}
+#list8 > ul {
+	list-style:none;
+	padding: 0;
+	margin: 0;
+}
+
+#list8 > ul > li {
+	padding: 3px;
+}
+
+#list8 > ul > li:nth-child(odd) {
+	background-color: #2f2f2f;
+}
+
+#list8 ul li a {
+	display:block;
+	height:28px;
+	/*border-left:5px solid #222;
+	border-right:5px solid #222;*/
+	padding-left:10px;
+	text-decoration:none;
+	color:#bfe1f1;
+	transition: color 0.3s ease;
+}
+#list8 ul li a:hover {
+	color: #33CCFF;
+}
+
+#anime-details {
+	float: right;
+}
+
+#anime-details > .cols h3 {
+	display: inline-block;
+	width:100px;
+	margin: 3px 8px 3px 0;
+	text-align: right;
+}
+
+#anime-image {
+	height:400px;
+}
+
+#anime-genres {
+	display: table-caption;
+	margin-left: 115px;
+	margin-top: -25px;
+}
+
+.cols {
+	display: flex;
+}
+
+.cols > div {
+	margin-left: 10px;
+}
+
+</style>
+</head>
+<body>
+<h1>{{target}}'s {{list}} list</h1>
+<div id='list8'>
+	<ul>{{data}}</ul>
+</div>
+<div id="anime-details">
+	<div class="cols">
+		<img id="anime-image" src="placeholder.jpg" />
+		<div>
+			<div><h2 id="anime-title">-</h2></div>
+			<div>
+				<h3># Episodes:</h3>
+				<span id="anime-episodeCount">-</span>
+			</div>
+			<div>
+				<h3>Date:</h3>
+				<span id="anime-date">-</span>
+			</div>
+			<div>
+				<h3>Genres:</h3>
+				<div id="anime-genres">-</div>
+			</div>
+		</div>
+	</div>
+	<div>
+		<h3>Synopsis</h3><div id="anime-synopsis"></div>
+	</div>
+</div>
+</body>
+</html>
