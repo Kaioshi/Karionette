@@ -47,7 +47,7 @@ bot.command({
 				irc.say(input.context, words[input.args[0]].random());
 				break;
 			case "count":
-				irc.say(input.context, "I know of "+words[input.args[0]].list.length+" "+input.args[0]+"s.");
+				irc.say(input.context, "I know of "+words[input.args[0]].list.size()+" "+input.args[0]+"s.");
 				break;
 			case "get":
 				irc.say(input.context, words[input.args[0]].get(input.args[2]));
@@ -78,7 +78,7 @@ bot.command({
 		case "noun":
 			switch (input.args[1]) {
 			case "count":
-				irc.say(input.context, "I know of " + words.noun.list.length + " nouns.");
+				irc.say(input.context, "I know of " + words.noun.list.size() + " nouns.");
 				break;
 			case "random":
 				entry = words.noun.random();
@@ -119,7 +119,7 @@ bot.command({
 		case "verb":
 			switch (input.args[1]) {
 			case "count":
-				irc.say(input.context, "I know of "+words.verb.list.length+" verbs.");
+				irc.say(input.context, "I know of "+words.verb.list.size()+" verbs.");
 				break;
 			case "random":
 				entry = words.verb.random();
