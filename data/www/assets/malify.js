@@ -36,7 +36,8 @@
             var a = document.createElement("a");
             a.href = malLink;
             a.textContent = anime.title;
-            animeTitle.appendChild(a);
+
+            animeTitle.replaceChild(a, animeTitle.firstChild);
             animeImage.src = anime.cover_image;
             animeSynopsis.textContent = anime.synopsis;
             animeEpisodeCount.textContent = anime.episode_count;
@@ -50,7 +51,9 @@
 
         return function click(ev) {
             var animeDetails;
-            ev.preventDefault();
+            if (ev) {
+                ev.preventDefault();
+            }
             if (data) {
                 return populateDetails(data);
             }
@@ -87,7 +90,6 @@
     // Wait for the DOM to load
     document.addEventListener("DOMContentLoaded", function () {
         var anchorList = document.querySelectorAll("#list8 > ul > li > a");
-        console.log(anchorList);
         var detEl = document.getElementById("anime-details");
         var anchors = Array.prototype.slice.call(anchorList);
         anchors.forEach(function (anchor) {
