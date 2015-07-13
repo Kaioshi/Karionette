@@ -51,7 +51,6 @@
         return function click(ev) {
             var animeDetails;
             ev.preventDefault();
-            ev.stopPropogation();
             if (data) {
                 return populateDetails(data);
             }
@@ -87,9 +86,8 @@
 
     // Wait for the DOM to load
     document.addEventListener("DOMContentLoaded", function () {
-        // Populating for testing...
-        var anchorList = document.querySelector("#list8 > ul > li > a");
-
+        var anchorList = document.querySelectorAll("#list8 > ul > li > a");
+        console.log(anchorList);
         var detEl = document.getElementById("anime-details");
         var anchors = Array.prototype.slice.call(anchorList);
         anchors.forEach(function (anchor) {
