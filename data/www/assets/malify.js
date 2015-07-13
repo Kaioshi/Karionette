@@ -40,8 +40,8 @@
          * @param  {Object\JSON} anime The parsed API result
          * @return {void}
          */
-        function populateDetails(anime) {
-            createTitle(anime.title, this.href);
+        function populateDetails(anime, url) {
+            createTitle(anime.title, url);
             animeImage.src = anime.cover_image;
             animeSynopsis.textContent = anime.synopsis;
             animeEpisodeCount.textContent = anime.episode_count;
@@ -54,27 +54,20 @@
         }
 
         return function click(ev) {
-            var animeDetails;
+            var animeDetails, collectData;
             if (ev) {
                 ev.preventDefault();
             }
             if (data) {
-                return populateDetails(data);
+                return populateDetails(data, this.href);
             }
 
             animeDetails = extractDetails(this.href);
             malID = animeDetails[1];
             malSlug = animeDetails[2];
 
-            window.fetch("https://hbrd-v1.p.mashape.com/search/anime?query=" + malSlug, {headers: {
-                "Accept": "application/json",
-                "X-Mashape-Key": "pOnzc9sQllmshN4WOeZ9MHUH49Znp1sYQV9jsnyBgJtYLYJfeq"
-              }})
-                .then(function (response) {
-                    return response.json();
-                })
-                .then(function (parsed) {
-                    var anime = parsed[attempt];
+            collectData = function (parsed) {
+                var anime = parsed[attempt];
                     if (anime.mal_id == malID) {
                         data = anime;
                         click.call(this);
@@ -85,11 +78,18 @@
                             + malID
                             + " didn't match the Hummingbird result: "
                             + anime.mal_id);
-                })
-                .catch(function (ex) {
-                    console.error(ex.message);
-                    console.info("Next result to attempt:", ++attempt);
-                });
+            };
+
+            window.fetch("https://hbrd-v1.p.mashape.com/search/anime?query=" + malSlug, {headers: {
+                "Accept": "application/json",
+                "X-Mashape-Key": "pOnzc9sQllmshN4WOeZ9MHUH49Znp1sYQV9jsnyBgJtYLYJfeq"
+            }})
+            .then(function (response) { return response.json(); })
+            .then(collectData.bind(this))
+            .catch(function (ex) {
+                console.error(ex.message);
+                console.info("Next result to attempt:", ++attempt);
+            });
         };
     }
 
