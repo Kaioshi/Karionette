@@ -6,9 +6,10 @@
     /**
      * Click Handler Factory
      * @param  {DOMElement} element The anime details element
+     * @param  {String}     malLink The URL to MAL
      * @return {Function}           The Click Handler
      */
-    function makeAnchorClickHandler(element) {
+    function makeAnchorClickHandler(element, malLink) {
         var data, malID, malSlug,
             animeTitle = element.querySelector("#anime-title"),
             animeImage = element.querySelector("#anime-image"),
@@ -32,7 +33,10 @@
          * @return {void}
          */
         function populateDetails(anime) {
-            animeTitle.textContent = anime.title;
+            var a = document.createElement("a");
+            a.href = malLink;
+            a.textContent = anime.title;
+            animeTitle.appendChild(a);
             animeImage.src = anime.cover_image;
             animeSynopsis.textContent = anime.synopsis;
             animeEpisodeCount.textContent = anime.episode_count;
@@ -44,10 +48,10 @@
                     .join(", ");
         }
 
-        return function click() {
+        return function click(ev) {
             var animeDetails;
+            ev.preventDefault();
             if (data) {
-                console.log("DATA:", data);
                 return populateDetails(data);
             }
 
@@ -66,7 +70,7 @@
                     var anime = parsed[0];
                     if (anime.mal_id == malID) {
                         data = anime;
-                        hover.call(this);
+                        click.call(this);
                         return true;
                     }
                     throw new Error("Mal ID: "
@@ -88,7 +92,7 @@
         var detEl = document.getElementById("anime-details");
         var anchors = Array.prototype.slice.call(anchorList);
         anchors.forEach(function (anchor) {
-            anchor.addEventListener("click", makeAnchorClickHandler(detEl));
+            anchor.addEventListener("click", makeAnchorClickHandler(detEl, anchor.href));
         });
 
     });
