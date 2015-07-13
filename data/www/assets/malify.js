@@ -9,7 +9,7 @@
      * @param  {String}     malLink The URL to MAL
      * @return {Function}           The Click Handler
      */
-    function makeAnchorClickHandler(element, malLink) {
+    function makeAnchorClickHandler(element) {
         var data, malID, malSlug,
             attempt = 0,
             animeTitle = element.querySelector("#anime-title"),
@@ -28,17 +28,20 @@
             return url.match(/(?:http:\/\/(?:www.)?)?myanimelist.net\/anime\/(\d+)\/([\w\d\(\)_]+)/i);
         }
 
+        function createTitle(title, link) {
+            var a = document.createElement("a");
+            a.href = link;
+            a.textContent = title;
+            animeTitle.replaceChild(a, animeTitle.firstChild);
+        }
+
         /**
          * Insert anime data into the DOM
          * @param  {Object\JSON} anime The parsed API result
          * @return {void}
          */
         function populateDetails(anime) {
-            var a = document.createElement("a");
-            a.href = malLink;
-            a.textContent = anime.title;
-
-            animeTitle.replaceChild(a, animeTitle.firstChild);
+            createTitle(anime.title, this.href);
             animeImage.src = anime.cover_image;
             animeSynopsis.textContent = anime.synopsis;
             animeEpisodeCount.textContent = anime.episode_count;
@@ -77,6 +80,7 @@
                         click.call(this);
                         return true;
                     }
+                    createTitle("Not Found; Click Here", this.href);
                     throw new Error("Mal ID: "
                             + malID
                             + " didn't match the Hummingbird result: "
@@ -95,7 +99,7 @@
         var detEl = document.getElementById("anime-details");
         var anchors = Array.prototype.slice.call(anchorList);
         anchors.forEach(function (anchor) {
-            anchor.addEventListener("click", makeAnchorClickHandler(detEl, anchor.href));
+            anchor.addEventListener("click", makeAnchorClickHandler(detEl));
         });
 
     });
