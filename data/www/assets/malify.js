@@ -51,6 +51,7 @@
         return function click(ev) {
             var animeDetails;
             ev.preventDefault();
+            ev.stopPropogation();
             if (data) {
                 return populateDetails(data);
             }
