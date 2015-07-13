@@ -4,11 +4,11 @@
 (function malify() {
     "use strict";
     /**
-     * Hover Handler Factory
+     * Click Handler Factory
      * @param  {DOMElement} element The anime details element
-     * @return {Function}           The Hover Handler
+     * @return {Function}           The Click Handler
      */
-    function makeAnchorHoverHandler(element) {
+    function makeAnchorClickHandler(element) {
         var data, malID, malSlug,
             animeTitle = element.querySelector("#anime-title"),
             animeImage = element.querySelector("#anime-image"),
@@ -44,7 +44,7 @@
                     .join(", ");
         }
 
-        return function hover() {
+        return function click() {
             var animeDetails;
             if (data) {
                 console.log("DATA:", data);
@@ -88,7 +88,7 @@
         var detEl = document.getElementById("anime-details");
         var anchors = Array.prototype.slice.call(anchorList);
         anchors.forEach(function (anchor) {
-            anchor.addEventListener("mouseover", makeAnchorHoverHandler(detEl));
+            anchor.addEventListener("click", makeAnchorClickHandler(detEl));
         });
 
     });
