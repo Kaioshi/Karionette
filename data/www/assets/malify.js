@@ -11,6 +11,7 @@
      */
     function makeAnchorClickHandler(element, malLink) {
         var data, malID, malSlug,
+            attempt = 0,
             animeTitle = element.querySelector("#anime-title"),
             animeImage = element.querySelector("#anime-image"),
             animeSynopsis = element.querySelector("#anime-synopsis"),
@@ -60,7 +61,7 @@
 
             animeDetails = extractDetails(this.href);
             malID = animeDetails[1];
-            malSlug = animeDetails[2];
+            malSlug = this.textContent;
 
             window.fetch("https://hbrd-v1.p.mashape.com/search/anime?query=" + malSlug, {headers: {
                 "Accept": "application/json",
@@ -70,7 +71,7 @@
                     return response.json();
                 })
                 .then(function (parsed) {
-                    var anime = parsed[0];
+                    var anime = parsed[attempt];
                     if (anime.mal_id == malID) {
                         data = anime;
                         click.call(this);
@@ -83,6 +84,10 @@
                 })
                 .catch(function (ex) {
                     console.error(ex.message);
+                    console.info("Attempting result", ++attempt);
+                    if (attempt < 6) {
+                        click.call(this);
+                    }
                 });
         };
     }
