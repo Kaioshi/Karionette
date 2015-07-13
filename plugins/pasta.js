@@ -303,7 +303,7 @@ bot.command({
 		"The 'pasta path' option needs to be set in config.",
 	syntax: config.command_prefix+"clist <create/delete/list/show/link/refresh/relink/add/remove> - create a list, then add to it. Example: "+
 		config.command_prefix+"clist create anime - "+config.command_prefix+
-		"clist add anime Steins;Gate site:myanimelist.net/anime/ <- this will add Steins;Gate with a link to the first "+
+		"clist add anime Steins;Gate google site:myanimelist.net/anime/ <- this will add Steins;Gate with a link to the first "+
 		"google result for 'Steins;Gate site:myanimelist.net/anime/', or you can "+
 		config.command_prefix+"clist add anime Steins;Gate http://myanimelist.net/anime/9253/Steins;Gate, "+
 		" if the google result was wrong.",
@@ -319,7 +319,7 @@ bot.command({
 		"The 'pasta path' option needs to be set in config.",
 	syntax: config.command_prefix+"ulist <create/delete/list/show/link/refresh/relink/add/remove> - create a list, then add to it. Example: "+
 		config.command_prefix+"ulist create anime - "+config.command_prefix+
-		"ulist add anime Steins;Gate site:myanimelist.net/anime/ <- this will add Steins;Gate with a link to the first "+
+		"ulist add anime Steins;Gate google site:myanimelist.net/anime/ <- this will add Steins;Gate with a link to the first "+
 		"google result for 'Steins;Gate site:myanimelist.net/anime/', or you can "+
 		config.command_prefix+"ulist add anime Steins;Gate http://myanimelist.net/anime/9253/Steins;Gate, "+
 		" if the google result was wrong.",

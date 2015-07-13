@@ -28,7 +28,13 @@
             return url.match(/(?:http:\/\/(?:www.)?)?myanimelist.net\/anime\/(\d+)\/([\w\d\(\)_]+)/i);
         }
 
-        function createTitle(title, link) {
+        /**
+         * Update the title
+         * @param  {string} title The content of the title
+         * @param  {string} link  URL of the title
+         * @return {void}
+         */
+        function updateTitle(title, link) {
             var a = document.createElement("a");
             a.href = link;
             a.textContent = title;
@@ -41,7 +47,7 @@
          * @return {void}
          */
         function populateDetails(anime, url) {
-            createTitle(anime.title, url);
+            updateTitle(anime.title, url);
             animeImage.src = anime.cover_image;
             animeSynopsis.textContent = anime.synopsis;
             animeEpisodeCount.textContent = anime.episode_count;
@@ -73,7 +79,8 @@
                         click.call(this);
                         return true;
                     }
-                    createTitle("Not Found; Click Here", this.href);
+                    updateTitle("Not Found; Click Here", this.href);
+                    animeImage.src = "../../assets/placeholder.jpg";
                     throw new Error("Mal ID: "
                             + malID
                             + " didn't match the Hummingbird result: "
