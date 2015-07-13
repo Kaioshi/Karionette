@@ -9,7 +9,7 @@ var run = require("child_process").execFile, fs = require("fs"),
 	})();
 
 function checkGits() {
-	var toTrim, aList = gitDB.getOne("announceList");
+	var aList = gitDB.getOne("announceList");
 	if (gitDB.size() === 0 || !aList || !aList.length)
 		return;
 	web.fetch("https://github.com/Kaioshi/Karionette/commits/master.atom")
@@ -29,8 +29,6 @@ function checkGits() {
 		});
 		if (altered) {
 			irc.rated(announce);
-			if ((toTrim = latest.length-21) > 0)
-				latest = latest.slice(toTrim); // don't need more than 21 entries
 			gitDB.saveOne("latest", latest);
 		}
 	});
