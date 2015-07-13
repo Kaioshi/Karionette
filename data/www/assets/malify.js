@@ -61,7 +61,7 @@
 
             animeDetails = extractDetails(this.href);
             malID = animeDetails[1];
-            malSlug = this.textContent;
+            malSlug = animeDetails[2];
 
             window.fetch("https://hbrd-v1.p.mashape.com/search/anime?query=" + malSlug, {headers: {
                 "Accept": "application/json",
@@ -84,10 +84,7 @@
                 })
                 .catch(function (ex) {
                     console.error(ex.message);
-                    console.info("Attempting result", ++attempt);
-                    if (attempt < 6) {
-                        click.call(this);
-                    }
+                    console.info("Next result to attempt:", ++attempt);
                 });
         };
     }
