@@ -463,7 +463,7 @@ bot.event({
 			line = line.replace(/℅/g, "|");
 		setTimeout(function () {
 			irc[method](input.context, line);
-		}, getWpm(randReply));
+		}, getWpm(line));
 	}
 });
 
