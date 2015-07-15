@@ -9,7 +9,7 @@
      * @param  {String}     malLink The URL to MAL
      * @return {Function}           The Click Handler
      */
-    function makeAnchorClickHandler(element, malLink) {
+    function makeAnchorClickHandler(element) {
         var data, malID, malSlug,
             attempt = 0,
             animeTitle = element.querySelector("#anime-title"),
@@ -29,16 +29,25 @@
         }
 
         /**
+         * Update the title
+         * @param  {string} title The content of the title
+         * @param  {string} link  URL of the title
+         * @return {void}
+         */
+        function updateTitle(title, link) {
+            var a = document.createElement("a");
+            a.href = link;
+            a.textContent = title;
+            animeTitle.replaceChild(a, animeTitle.firstChild);
+        }
+
+        /**
          * Insert anime data into the DOM
          * @param  {Object\JSON} anime The parsed API result
          * @return {void}
          */
-        function populateDetails(anime) {
-            var a = document.createElement("a");
-            a.href = malLink;
-            a.textContent = anime.title;
-
-            animeTitle.replaceChild(a, animeTitle.firstChild);
+        function populateDetails(anime, url) {
+            updateTitle(anime.title, url);
             animeImage.src = anime.cover_image;
             animeSynopsis.textContent = anime.synopsis;
             animeEpisodeCount.textContent = anime.episode_count;
@@ -51,41 +60,43 @@
         }
 
         return function click(ev) {
-            var animeDetails;
+            var animeDetails, collectData;
             if (ev) {
                 ev.preventDefault();
             }
             if (data) {
-                return populateDetails(data);
+                return populateDetails(data, this.href);
             }
 
             animeDetails = extractDetails(this.href);
             malID = animeDetails[1];
             malSlug = animeDetails[2];
 
-            window.fetch("https://hbrd-v1.p.mashape.com/search/anime?query=" + malSlug, {headers: {
-                "Accept": "application/json",
-                "X-Mashape-Key": "pOnzc9sQllmshN4WOeZ9MHUH49Znp1sYQV9jsnyBgJtYLYJfeq"
-              }})
-                .then(function (response) {
-                    return response.json();
-                })
-                .then(function (parsed) {
-                    var anime = parsed[attempt];
+            collectData = function (parsed) {
+                var anime = parsed[attempt];
                     if (anime.mal_id == malID) {
                         data = anime;
                         click.call(this);
                         return true;
                     }
+                    updateTitle("Not Found; Click Here", this.href);
+                    animeImage.src = "../../assets/placeholder.jpg";
                     throw new Error("Mal ID: "
                             + malID
                             + " didn't match the Hummingbird result: "
                             + anime.mal_id);
-                })
-                .catch(function (ex) {
-                    console.error(ex.message);
-                    console.info("Next result to attempt:", ++attempt);
-                });
+            };
+
+            window.fetch("https://hbrd-v1.p.mashape.com/search/anime?query=" + malSlug, {headers: {
+                "Accept": "application/json",
+                "X-Mashape-Key": "pOnzc9sQllmshN4WOeZ9MHUH49Znp1sYQV9jsnyBgJtYLYJfeq"
+            }})
+            .then(function (response) { return response.json(); })
+            .then(collectData.bind(this))
+            .catch(function (ex) {
+                console.error(ex.message);
+                console.info("Next result to attempt:", ++attempt);
+            });
         };
     }
 
@@ -95,7 +106,7 @@
         var detEl = document.getElementById("anime-details");
         var anchors = Array.prototype.slice.call(anchorList);
         anchors.forEach(function (anchor) {
-            anchor.addEventListener("click", makeAnchorClickHandler(detEl, anchor.href));
+            anchor.addEventListener("click", makeAnchorClickHandler(detEl));
         });
 
     });
