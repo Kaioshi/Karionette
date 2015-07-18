@@ -56,10 +56,12 @@ bot.event({
 	handle: "ialQuit",
 	event: "QUIT",
 	callback: function (input) {
+		var uid;
 		if (input.nick === config.nick)
 			return;
+		uid = ial.User(input.nick).uid;
 		setTimeout(function () {
-			ial.userQuit(input.nick);
+			ial.userQuit(input.nick, uid);
 		}, 200);
 	}
 });
