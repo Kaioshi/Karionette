@@ -1,4 +1,5 @@
 "use strict";
+var randDB = new DB.List({filename: "randomThings"});
 
 bot.command({
 	command: "random",
