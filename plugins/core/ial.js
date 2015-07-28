@@ -19,14 +19,14 @@ bot.command({
 			}
 			results = ial.regexSearch(reg);
 			if (results.length)
-				irc.say(input.context, "Matches: "+lib.commaList(results));
+				irc.say(input.context, "Matches: "+lib.commaList(lib.sort(results)));
 			else
 				irc.say(input.context, "No matches.");
 			break;
 		case "scan":
 			results = ial.maskSearch(input.args[1]);
 			if (results.length)
-				irc.say(input.context, "Matches: "+lib.commaList(results));
+				irc.say(input.context, "Matches: "+lib.commaList(lib.sort(results)));
 			else
 				irc.say(input.context, "No matches.");
 			break;
