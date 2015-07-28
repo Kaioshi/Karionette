@@ -5,6 +5,7 @@ bot.command({
 	command: "ial",
 	help: "Allows admins to poke the bot's internal address list.",
 	syntax: config.command_prefix+"ial <scan> [<user!mask@*.here>]",
+	admin: true,
 	arglen: 2,
 	callback: function ialCommand(input) {
 		var reg, results;
