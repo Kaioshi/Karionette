@@ -4,11 +4,11 @@
 bot.command({
 	command: "ial",
 	help: "Allows admins to poke the bot's internal address list.",
-	syntax: config.command_prefix+"ial <scan> [<user!mask@*.here>]",
+	syntax: config.command_prefix+"ial <scan / scanre> [<user!mask@*.here> / <RegExp here>]",
 	admin: true,
 	arglen: 2,
 	callback: function ialCommand(input) {
-		var reg, results;
+		var reg, results, user;
 		switch (input.args[0].toLowerCase()) {
 		case "scanre": // regex scan
 			try {
@@ -19,14 +19,14 @@ bot.command({
 			}
 			results = ial.regexSearch(reg);
 			if (results.length)
-				irc.say(input.context, "Matches: "+lib.commaList(lib.sort(results)));
+				irc.say(input.context, results.length+" matches: "+lib.commaList(lib.sort(results)));
 			else
 				irc.say(input.context, "No matches.");
 			break;
 		case "scan":
 			results = ial.maskSearch(input.args[1]);
 			if (results.length)
-				irc.say(input.context, "Matches: "+lib.commaList(lib.sort(results)));
+				irc.say(input.context, results.length+" matches: "+lib.commaList(lib.sort(results)));
 			else
 				irc.say(input.context, "No matches.");
 			break;
