@@ -256,7 +256,7 @@ bot.command({
 	help: "Add or remove titlesnarfer filters.",
 	syntax: config.command_prefix+"tsfilter <add/remove> <title / domain> <match> or "+
 		config.command_prefix+"tsfilter list [titles / domains] - Example: "+
-		config.command_prefix+"tsfilter add Imgur: The most awesome images on the Internet",
+		config.command_prefix+"tsfilter add title Imgur: The most awesome images on the Internet",
 	admin: true,
 	arglen: 1,
 	callback: function titlefilter(input) {
