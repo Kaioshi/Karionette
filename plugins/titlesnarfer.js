@@ -198,11 +198,20 @@ bot.event({
 				return;
 			}
 			break;
-		}
-		if (uri.path.length > 1 && uri.path.indexOf(".") > -1) {
-			ext = uri.path.slice(uri.path.lastIndexOf(".")+1);
-			if (ext.length <= 4 && !ext.match(/htm|html|asp|aspx|php|php3|php5/i))
-				return; // avoid trying to grab mp4s etc.
+		case "i.imgur.com":
+			ext = uri.href.slice(uri.href.lastIndexOf("."));
+			if (ext.match(/\.gif|\.gifv|\.jpg|\.jpeg|\.png|\.webm/i)) {
+				uri.path = uri.path.slice(0, -ext.length);
+				uri.href = uri.href.slice(0, -ext.length);
+			}
+			break;
+		default:
+			if (uri.path.length > 1 && uri.path.indexOf(".") > -1) {
+				ext = uri.path.slice(uri.path.lastIndexOf(".")+1);
+				if (ext.length <= 4 && !ext.match(/htm|html|asp|aspx|php|php3|php5/i))
+					return; // avoid trying to grab mp4s etc.
+			}
+			break;
 		}
 		sayTitle(input.context, uri, false, old, record, 10000);
 	}
