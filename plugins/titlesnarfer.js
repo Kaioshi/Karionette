@@ -2,6 +2,7 @@
 "use strict";
 var url = require("url"),
 	fs = require("fs"),
+	titleFilterDB = new DB.Json({filename: "titlefilters"}),
 	ytReg = /v=([^ &\?]+)/i,
 	ytBReg = /^\/([^ &\?]+)/,
 	titleReg, sayTitle;
@@ -16,22 +17,16 @@ if (config.titlesnarfer_inline) {
 				return;
 			}
 			reg = titleReg.exec(body.replace(/\n|\t|\r/g, ""));
-			if (!reg || !reg[1])
+			if (!reg || !reg[1]) {
+				if (record)
+					recordURL(record[0], record[1], record[2]);
 				return;
+			}
 			title = lib.singleSpace(lib.decode(reg[1]));
-			if (title.toLowerCase().indexOf(uri.host) > -1) {
-				reg = new RegExp(" "+uri.host+" ?", "ig");
-				title = title.replace(reg, "");
-			}
-			if (imgur) { // I know there are a lot of imgur corner cases, but it's really common.
-				if (title.slice(-8) === " - Imgur") // deal with it
-					title = title.slice(0,-8);
-				if (title === "imgur: the simple image sharer")
-					return;
-			}
-			irc.say(context, title+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""));
 			if (record)
 				recordURL(record[0], record[1], record[2], title);
+			if (!isFilteredTitle(title))
+				irc.say(context, title+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""));
 		});
 	};
 } else {
@@ -44,39 +39,12 @@ if (config.titlesnarfer_inline) {
 				return;
 			}
 			title = lib.decode(result.title);
-			if (imgur) {
-				if (title === "imgur: the simple image sharer")
-					return;
-				if (title.slice(-8) === " - Imgur")
-					title = title.slice(0, -8);
-			} else if (title.toLowerCase().indexOf(uri.host) > -1) {
-				title = title.replace(new RegExp(" " + uri.host + " ?", "ig"), "");
-			}
-			irc.say(context, title + " ~ " + uri.host.replace("www.", "")+(old ? " (" + old + ")" : ""));
 			if (record)
 				recordURL(record[0], record[1], record[2], title);
+			if (!isFilteredTitle(title))
+				irc.say(context, title + " ~ " + uri.host.replace("www.", "")+(old ? " (" + old + ")" : ""));
 		});
 	};
-}
-
-if (fs.existsSync("data/urls.json")) {
-	convertUrls();
-}
-
-function convertUrls() {
-	var db = JSON.parse(fs.readFileSync("data/urls.json").toString()),
-		i, fn;
-	if (!fs.existsSync("data/urls/"))
-		fs.mkdirSync("data/urls/");
-	Object.keys(db).forEach(function (channel) {
-		Object.keys(db[channel]).forEach(function (nick) {
-			fn = "data/urls/"+channel.toLowerCase()+".txt";
-			for (i = 0; i < db[channel][nick].length; i++) {
-				fs.appendFileSync(fn, db[channel][nick][i][0]+" "+nick+" "+new Date(db[channel][nick][i][1]).valueOf()+"\n");
-			}
-		});
-	});
-	fs.unlinkSync("data/urls.json");
 }
 
 function lastUrl(channel, nick, match) {
@@ -102,7 +70,7 @@ function lastUrl(channel, nick, match) {
 				}
 			}
 		}
-	} else {
+	} else if (i >= 1) {
 		index = i-1; // lowest entry, probably.
 		while (!urls[index])
 			index--; // mmm tailing newlines
@@ -120,7 +88,8 @@ function lastUrl(channel, nick, match) {
 function urlStats(channel, nick, match) {
 	var i, urls, count, lnick, entry,
 		fn = "data/urls/"+channel.toLowerCase()+".txt";
-	if (!fs.existsSync(fn)) return "I haven't seen any URLs here.";
+	if (!fs.existsSync(fn))
+		return "I haven't seen any URLs here.";
 	urls = fs.readFileSync(fn).toString().split("\n");
 	i = urls.length; count = 0;
 	if (nick) {
@@ -143,14 +112,16 @@ function urlStats(channel, nick, match) {
 
 function recordURL(nick, channel, url, title) {
 	var fn = "data/urls/"+channel.toLowerCase()+".txt";
-	if (!fs.existsSync(fn)) fs.writeFileSync(fn, "");
+	if (!fs.existsSync(fn))
+		fs.writeFileSync(fn, "");
 	fs.appendFileSync(fn, url+" "+nick+" "+new Date().valueOf()+(title ? " "+title+"\n" : "\n"));
 }
 
-function getURL(channel, url) {
+function getURL(channel, url) { // make this less bad.
 	var i, l, urls, entry,
 		fn = "data/urls/"+channel.toLowerCase()+".txt";
-	if (!fs.existsSync(fn)) return;
+	if (!fs.existsSync(fn))
+		return;
 	urls = fs.readFileSync(fn).toString().split("\n");
 	l = urls.length; i = 0;
 	for (;i < l; i++) {
@@ -194,14 +165,21 @@ bot.event({
 		return input.args === undefined && input.message.toLowerCase().indexOf("http") > -1;
 	},
 	regex: /^:[^ ]+ PRIVMSG #[^ ]+ :.*((?:https?:\/\/)[^\x01 ]+)/i,
-	callback: function (input) {
-		var uri, ext, old, record, videoID;
+	callback: function titlesnarfer(input) {
+		var uri, ext, old, record, videoID, domain;
 
 		old = getURL(input.channel, input.match[1]) || false;
 		if (!old)
 			record = [ input.nick, input.channel, input.match[1] ];
 		uri = url.parse(input.match[1]);
-		switch (uri.host.replace(/www\./gi, "")) {
+		domain = uri.host.replace(/www\./gi, "");
+		// check domain filter
+		if (isFilteredDomain(domain)) {
+			if (record)
+				recordURL(record[0], record[1], record[2]);
+			return;
+		}
+		switch (domain) {
 		case "youtube.com":
 			if (!config.api.youtube)
 				break;
@@ -220,16 +198,6 @@ bot.event({
 				return;
 			}
 			break;
-		case "i.imgur.com":
-			ext = uri.href.slice(uri.href.lastIndexOf("."));
-			if (ext.match(/\.gif|\.gifv|\.jpg|\.jpeg|\.png|\.webm/i)) {
-				uri.path = uri.path.slice(0, -ext.length);
-				uri.href = uri.href.slice(0, -ext.length);
-			}
-		/* fall through */
-		case "imgur.com":
-			sayTitle(input.context, uri, true, old, record, 10000);
-			return;
 		}
 		if (uri.path.length > 1 && uri.path.indexOf(".") > -1) {
 			ext = uri.path.slice(uri.path.lastIndexOf(".")+1);
@@ -245,7 +213,7 @@ bot.command({
 	help: "Shows the last URLs people posted!",
 	syntax: config.command_prefix+"lasturl [<nick>] [<term>] - Example: "+
 		config.command_prefix+"lasturl ranma goatse",
-	callback: function (input) {
+	callback: function lasturl(input) {
 		var searchTerm, target;
 		if (!input.channel) {
 			irc.say(input.context, "This can only be used in channels.");
@@ -262,7 +230,7 @@ bot.command({
 	help: "Shows URL stats!",
 	syntax: config.command_prefix+"urlstats [<nick>] [<term>] - Example: "+
 		config.command_prefix+"urlstats ranma imgur",
-	callback: function (input) {
+	callback: function urlstats(input) {
 		var searchTerm, target;
 		if (!input.channel) {
 			irc.say(input.context, "This can only be used in channels.");
@@ -273,3 +241,136 @@ bot.command({
 		irc.say(input.context, urlStats(input.channel, target, searchTerm));
 	}
 });
+
+bot.command({
+	command: "tsfilter",
+	help: "Add or remove titlesnarfer filters.",
+	syntax: config.command_prefix+"tsfilter <add/remove> <title / domain> <match> or "+
+		config.command_prefix+"tsfilter list [titles / domains] - Example: "+
+		config.command_prefix+"tsfilter add Imgur: The most awesome images on the Internet",
+	admin: true,
+	arglen: 1,
+	callback: function titlefilter(input) {
+		switch (input.args[0].toLowerCase()) {
+		case "add":
+			if (input.args.length >= 3)
+				tsfilterAdd(input);
+			else
+				irc.say(input.context, bot.cmdHelp("tsfilter", "syntax"));
+			break;
+		case "remove":
+			if (input.args.length >= 3)
+				tsfilterRemove(input);
+			else
+				irc.say(input.context, bot.cmdHelp("tsfilter", "syntax"));
+			break;
+		case "list":
+			tsfilterList(input);
+			break;
+		default:
+			irc.say(input.context, bot.cmdHelp("tsfilter", "syntax"));
+			break;
+		}
+	}
+});
+
+function isFilteredDomain(domain) {
+	var domains = titleFilterDB.getOne("domains") || [];
+	return domains.indexOf(domain) > -1;
+}
+
+function isFilteredTitle(title) {
+	var titles = titleFilterDB.getOne("titles") || [];
+	return titles.indexOf(title) > -1;
+}
+
+function tsfilterAdd(input) {
+	var domains, titles,
+		args = input.args.slice(1),
+		data = input.data.slice(input.data.indexOf(" ")+1);
+	switch (args[0].toLowerCase()) {
+	case "domain":
+		domains = titleFilterDB.getOne("domains") || [];
+		if (domains.indexOf(args[1]) > -1) {
+			irc.say(input.context, "That domain is already being filtered.");
+			break;
+		}
+		domains.push(args[1]);
+		titleFilterDB.saveOne("domains", domains);
+		irc.say(input.context, "Added. o7");
+		break;
+	case "title":
+		data = data.slice(data.indexOf(" ")+1);
+		titles = titleFilterDB.getOne("titles") || [];
+		if (titles.indexOf(data) > -1) {
+			irc.say(input.context, "That title is already being filtered.");
+			break;
+		}
+		titles.push(data);
+		titleFilterDB.saveOne("titles", titles);
+		irc.say(input.context, "Added. o7");
+		break;
+	default:
+		irc.say(input.context, bot.cmdHelp("tsfilter", "syntax"));
+		break;
+	}
+}
+
+function tsfilterRemove(input) {
+	var index, domains, titles,
+		args = input.args.slice(1),
+		data = input.data.slice(input.data.indexOf(" ")+1);
+	switch (args[0].toLowerCase()) {
+	case "domain":
+		domains = titleFilterDB.getOne("domains") || [];
+		if ((index = domains.indexOf(args[1])) === -1) {
+			irc.say(input.context, "That domain is not being filtered.");
+			break;
+		}
+		domains.splice(index, 1);
+		titleFilterDB.saveOne("domains", domains);
+		irc.say(input.context, "Removed. o7");
+		break;
+	case "title":
+		data = data.slice(data.indexOf(" ")+1);
+		titles = titleFilterDB.getOne("titles") || [];
+		if ((index = titles.indexOf(data)) === -1) {
+			irc.say(input.context, "That title is not being filtered.");
+			break;
+		}
+		titles.splice(index, 1);
+		titleFilterDB.saveOne("titles", titles);
+		irc.say(input.context, "Removed. o7");
+		break;
+	default:
+		irc.say(input.context, bot.cmdHelp("tsfilter", "syntax"));
+		break;
+	}
+}
+
+function tsfilterList(input) {
+	var titles, titlesCount, domains, domainsCount;
+	switch (input.args[1]) {
+	case "titles":
+		titles = titleFilterDB.getOne("titles");
+		if (titles && titles.length)
+			irc.say(input.context, "Filtered titles: "+titles.map(function (title) { return "\""+title+"\""; }).join(" || "));
+		else
+			irc.say(input.context, "No titles are being filtered.");
+		break;
+	case "domains":
+		domains = titleFilterDB.getOne("domains");
+		if (domains && domains.length)
+			irc.say(input.context, "Filtered domains: "+lib.commaList(domains));
+		else
+			irc.say(input.context, "No titles are being filter via domain match.");
+		break;
+	default: // summary
+		titles = titleFilterDB.getOne("titles");
+		titlesCount = (titles && titles.length ? titles.length : 0);
+		domains = titleFilterDB.getOne("domains");
+		domainsCount = (domains && domains.length ? domains.length : 0);
+		irc.say(input.context, "The titlesnarfer is filtering "+titlesCount+" titles and "+domainsCount+" domains.");
+		break;
+	}
+}
