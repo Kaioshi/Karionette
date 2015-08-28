@@ -26,7 +26,7 @@ if (config.titlesnarfer_inline) {
 			if (record)
 				recordURL(record[0], record[1], record[2], title);
 			if (!isFilteredTitle(title))
-				irc.say(context, title+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""));
+				irc.say(context, trimTitle(title)+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""));
 		});
 	};
 } else {
@@ -42,7 +42,7 @@ if (config.titlesnarfer_inline) {
 			if (record)
 				recordURL(record[0], record[1], record[2], title);
 			if (!isFilteredTitle(title))
-				irc.say(context, title + " ~ " + uri.host.replace("www.", "")+(old ? " (" + old + ")" : ""));
+				irc.say(context, trimTitle(title)+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""));
 		});
 	};
 }
@@ -253,10 +253,11 @@ bot.command({
 
 bot.command({
 	command: "tsfilter",
-	help: "Add or remove titlesnarfer filters.",
-	syntax: config.command_prefix+"tsfilter <add/remove> <title / domain> <match> or "+
-		config.command_prefix+"tsfilter list [titles / domains] - Example: "+
-		config.command_prefix+"tsfilter add title Imgur: The most awesome images on the Internet",
+	help: "Add or remove titlesnarfer filters. Doesn't apply to processed YouTube results.",
+	syntax: config.command_prefix+"tsfilter <add/remove> <trim / title / domain> <match> or "+
+		config.command_prefix+"tsfilter list [titles / trims / domains] - Example: "+
+		config.command_prefix+"tsfilter add title Imgur: The most awesome images on the Internet - or "+
+		config.command_prefix+"tsfilter add trim Wikipedia, the free encyclopedia",
 	admin: true,
 	arglen: 1,
 	callback: function titlefilter(input) {
@@ -293,8 +294,18 @@ function isFilteredTitle(title) {
 	return titles.indexOf(title) > -1;
 }
 
+function trimTitle(title) {
+	var i, trims = titleFilterDB.getOne("trims");
+	if (trims === undefined || !trims.length)
+		return title;
+	for (i = 0; i < trims.length; i++)
+		if (title.indexOf(trims[i]) > -1)
+			title = title.replace(trims[i], "");
+	return lib.singleSpace(title);
+}
+
 function tsfilterAdd(input) {
-	var domains, titles,
+	var domains, titles, trims,
 		args = input.args.slice(1),
 		data = input.data.slice(input.data.indexOf(" ")+1);
 	switch (args[0].toLowerCase()) {
@@ -319,6 +330,17 @@ function tsfilterAdd(input) {
 		titleFilterDB.saveOne("titles", titles);
 		irc.say(input.context, "Added. o7");
 		break;
+	case "trim":
+		data = data.slice(data.indexOf(" ")+1);
+		trims = titleFilterDB.getOne("trims") || [];
+		if (trims.indexOf(data) > -1) {
+			irc.say(input.context, "That's already being trimmed.");
+			break;
+		}
+		trims.push(data);
+		titleFilterDB.saveOne("trims", trims);
+		irc.say(input.context, "Added. o7");
+		break;
 	default:
 		irc.say(input.context, bot.cmdHelp("tsfilter", "syntax"));
 		break;
@@ -326,7 +348,7 @@ function tsfilterAdd(input) {
 }
 
 function tsfilterRemove(input) {
-	var index, domains, titles,
+	var index, domains, titles, trims,
 		args = input.args.slice(1),
 		data = input.data.slice(input.data.indexOf(" ")+1);
 	switch (args[0].toLowerCase()) {
@@ -351,6 +373,17 @@ function tsfilterRemove(input) {
 		titleFilterDB.saveOne("titles", titles);
 		irc.say(input.context, "Removed. o7");
 		break;
+	case "trim":
+		data = data.slice(data.indexOf(" ")+1);
+		trims = titleFilterDB.getOne("trims") || [];
+		if ((index = trims.indexOf(data)) === -1) {
+			irc.say(input.context, "That isn't being trimmed.");
+			break;
+		}
+		trims.splice(index, 1);
+		titleFilterDB.saveOne("trims", trims);
+		irc.say(input.context, "Removed. o7");
+		break;
 	default:
 		irc.say(input.context, bot.cmdHelp("tsfilter", "syntax"));
 		break;
@@ -358,7 +391,7 @@ function tsfilterRemove(input) {
 }
 
 function tsfilterList(input) {
-	var titles, titlesCount, domains, domainsCount;
+	var trims, trimsCount, titles, titlesCount, domains, domainsCount;
 	switch (input.args[1]) {
 	case "titles":
 		titles = titleFilterDB.getOne("titles");
@@ -366,6 +399,13 @@ function tsfilterList(input) {
 			irc.say(input.context, "Filtered titles: "+titles.map(function (title) { return "\""+title+"\""; }).join(" || "));
 		else
 			irc.say(input.context, "No titles are being filtered.");
+		break;
+	case "trims":
+		trims = titleFilterDB.getOne("trims");
+		if (trims && trims.length)
+			irc.say(input.context, "Bits trimmed from titles: "+trims.map(function (trim) { return "\""+trim+"\""; }).join(" || "));
+		else
+			irc.say(input.context, "Nothing is being trimmed.");
 		break;
 	case "domains":
 		domains = titleFilterDB.getOne("domains");
@@ -377,9 +417,12 @@ function tsfilterList(input) {
 	default: // summary
 		titles = titleFilterDB.getOne("titles");
 		titlesCount = (titles && titles.length ? titles.length : 0);
+		trims = titleFilterDB.getOne("trims");
+		trimsCount = (trims && trims.length ? trims.length : 0);
 		domains = titleFilterDB.getOne("domains");
 		domainsCount = (domains && domains.length ? domains.length : 0);
-		irc.say(input.context, "The titlesnarfer is filtering "+titlesCount+" titles and "+domainsCount+" domains.");
+		irc.say(input.context, "The titlesnarfer is filtering "+titlesCount+" titles, "+domainsCount+" domains and trimming "+
+			trimsCount+" items from reported titles.");
 		break;
 	}
 }
