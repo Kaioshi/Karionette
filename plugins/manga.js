@@ -160,7 +160,7 @@ bot.command({
 });
 
 function parseMangaCmd(input) {
-	var type, title, ltitle, titles, target, ltarget, i, l;
+	var type, title, ltitle, titles, target, ltarget, i, l, changed;
 
 	switch (input.command) {
 	case "mf":
@@ -231,13 +231,15 @@ function parseMangaCmd(input) {
 						watched[type[1]][ltitle].announce.splice(i, 1);
 						irc.say(input.context, "Removed. o7");
 					}
+					changed = true;
 					mangaDB[type[1]].saveOne(ltitle, watched[type[1]][ltitle]);
 					break;
 				}
 			}
 			watched[type[1]][ltitle] = "";
 			mangaDB[type[1]].clearCache();
-			irc.say(input.context, target+" isn't on the announce list for "+title+".");
+			if (!changed)
+				irc.say(input.context, target+" isn't on the announce list for "+title+".");
 			break;
 		case "list":
 			if (input.args.length < 3) {
