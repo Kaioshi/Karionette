@@ -1,6 +1,12 @@
 // http://api.tvmaze.com/search/shows?q=girls
 "use strict";
 
+function zero(n) {
+	if (n <= 9)
+		return "0"+n;
+	return n.toString();
+}
+
 bot.command({
 	command: [ "tvmaze", "tvr" ],
 	help: "Looks up broadcast times etc.",
@@ -14,13 +20,13 @@ bot.command({
 		} else {
 			showName = input.data;
 		}
-		web.json("http://api.tvmaze.com/search/shows?q="+showName).then(function (json) {
-			var resp, show;
-			if (!json.length) {
+		web.fetch("http://api.tvmaze.com/singlesearch/shows?q="+showName+"&embed=nextepisode").then(function (body) {
+			var resp, show, next;
+			if (!body.length) {
 				irc.say(input.context, "Couldn't find \""+showName+"\".");
 				return;
 			}
-			show = json[0].show;
+			show = JSON.parse(body);
 			resp = [
 				show.name+(show.genres.length ? " ["+show.genres.join(", ")+"]" : ""),
 				"Type: "+show.type,
@@ -29,8 +35,10 @@ bot.command({
 				"Runtime: "+show.runtime,
 				"Network: "+show.network.name+" ("+show.network.country.name+")"
 			];
-			if (show.status === "Running")
-				resp.push("Schedule: "+show.schedule.time+" on "+lib.commaList(show.schedule.days));
+			if (show.status === "Running" && show._embedded !== undefined) {
+				next = show._embedded.nextepisode;
+				resp.push("Next episode: S"+zero(next.season)+"E"+zero(next.number)+" \""+next.name+"\" airs on "+next.airdate+" at "+next.airtime);
+			}
 			irc.say(input.context, resp.join(" - "));
 			if (showSummary)
 				irc.say(input.context, "Summary: "+lib.stripHtml(show.summary), 1);
