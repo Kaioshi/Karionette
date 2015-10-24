@@ -15,20 +15,23 @@ bot.command({
 			showName = input.data;
 		}
 		web.json("http://api.tvmaze.com/search/shows?q="+showName).then(function (json) {
-			var show, genres, schedule, status, type, network, runtime, prem;
+			var resp, show;
 			if (!json.length) {
 				irc.say(input.context, "Couldn't find \""+showName+"\".");
 				return;
 			}
 			show = json[0].show;
-			genres = " ["+show.genres.join(", ")+"]";
-			type = "Type: "+show.type;
-			prem = "Premiered: "+show.premiered;
-			status = "Status: "+show.status;
-			runtime = "Runtime: "+show.runtime;
-			network = "Network: "+show.network.name+" ("+show.network.country.name+")";
-			schedule = "Schedule: "+show.schedule.time+" on "+lib.commaList(show.schedule.days);
-			irc.say(input.context, [ show.name+genres, status, type, prem, network, schedule ].join(" - "));
+			resp = [
+				show.name+(show.genres.length ? " ["+show.genres.join(", ")+"]" : ""),
+				"Type: "+show.type,
+				"Premiered: "+show.premiered,
+				"Status: "+(show.status === "Running" ? "Ongoing" : show.status),
+				"Runtime: "+show.runtime,
+				"Network: "+show.network.name+" ("+show.network.country.name+")"
+			];
+			if (show.status === "Running")
+				resp.push("Schedule: "+show.schedule.time+" on "+lib.commaList(show.schedule.days));
+			irc.say(input.context, resp.join(" - "));
 			if (showSummary)
 				irc.say(input.context, "Summary: "+lib.stripHtml(show.summary), 1);
 		}).catch(function (err) {
