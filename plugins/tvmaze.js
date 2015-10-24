@@ -21,7 +21,7 @@ bot.command({
 				return;
 			}
 			show = json[0].show;
-			genres = " ["+lib.commaList(show.genres)+"]";
+			genres = " ["+show.genres.join(", ")+"]";
 			type = "Type: "+show.type;
 			prem = "Premiered: "+show.premiered;
 			status = "Status: "+show.status;
