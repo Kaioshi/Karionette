@@ -38,6 +38,16 @@ bot.command({
 });
 
 bot.command({
+	command: "who",
+	help: "Tells you who is logged in as what user.",
+	syntax: config.command_prefix+"who",
+	admin: true,
+	callback: function who(input) {
+		irc.notice(input.nick, logins.userList().join(", "));
+	}
+});
+
+bot.command({
 	command: "setattr",
 	help: "Sets or shows per-login user defined attributes. See also: unsetattr, getattr",
 	syntax: config.command_prefix+"setattr <attribute> <value> - Attribute keys may not contain spaces - Example: "+
