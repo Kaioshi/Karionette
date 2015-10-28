@@ -32,12 +32,14 @@ bot.command({
 				"Type: "+show.type,
 				"Premiered: "+show.premiered,
 				"Status: "+(show.status === "Running" ? "Ongoing" : show.status),
-				"Runtime: "+show.runtime,
+				"Runtime: "+show.runtime+"m",
 				"Network: "+show.network.name+" ("+show.network.country.name+")"
 			];
 			if (show.status === "Running" && show._embedded !== undefined) {
 				next = show._embedded.nextepisode;
-				resp.push("Next episode: S"+zero(next.season)+"E"+zero(next.number)+" \""+next.name+"\" airs on "+next.airdate+" at "+next.airtime);
+				resp.push("Next episode: S"+zero(next.season)+"E"+zero(next.number)+
+					" \""+next.name+"\" airs "+(next.airtime.length ? "in "+
+					lib.duration(Date.now(), new Date(next.airstamp), true) : "on "+next.airdate));
 			}
 			irc.say(input.context, resp.join(" - "));
 			if (showSummary)
