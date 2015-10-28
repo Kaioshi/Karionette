@@ -118,9 +118,9 @@ bot.command({
 				irc.say(input.context, "There aren't any quotes for "+input.context+" ~ add some!");
 				return;
 			}
-			quote = input.args.slice(1).join(" ");
+			quote = input.args.slice(1).join(" ").toLowerCase();
 			for (matches = [], i = 0; i < quotes.length; i++) {
-				if (quotes[i].quote.indexOf(quote) > -1) {
+				if (quotes[i].quote.toLowerCase().indexOf(quote) > -1) {
 					matches.push(quotes[i]);
 				}
 			}
