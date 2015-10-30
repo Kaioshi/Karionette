@@ -1,29 +1,37 @@
 ﻿// Urban dictionary look-up
 "use strict";
+
+function bestAnswersByScore(ud) {
+	var i, ret = [];
+	for (i = 0; i < ud.length; i++) {
+		if (ud[i].thumbs_down > ud[i].thumbs_up || ud[i].thumbs_down > (ud[i].thumbs_up/2))
+			ud.splice(i,1);
+	}
+	ud.sort(function (a, b) {
+		if (a.thumbs_up > b.thumbs_up)
+			return 1;
+		if (a.thumbs_up < b.thumbs_up)
+			return -1;
+		return 0;
+	}).forEach(function (entry) {
+		ret.push(lib.singleSpace(entry.definition.replace(/\r|\n/g, " ")));
+	});
+	if (!ret.length)
+		return "Pantsu.";
+	return ret.join(" -- ");
+}
+
 bot.command({
 	command: "ud",
-	help: "Look up something from Urban dictionary!",
-	syntax: config.command_prefix+"ud <term> - Example: "+config.command_prefix+
-		"ud scrobble",
+	help: "Looks up things on Urban Dictionary! Often NSFW.",
+	syntax: config.command_prefix+"ud <term> - Example: "+config.command_prefix+"ud the big lebowski",
 	arglen: 1,
-	callback: function (input) {
-		var i, tmp, def;
-		web.json("http://api.urbandictionary.com/v0/define?term="+input.data).then(function (result) {
-			if (result.result_type === "no_results" || result.list.length === 0)
-				irc.say(input.context, "Pantsu.");
-			else {
-				tmp = "1) "+lib.singleSpace(result.list[0].definition.replace(/\n|\r|\t/g, " "));
-				if (result.list.length > 1) {
-					for (i = 1; i < result.list.length; i++) {
-						if (tmp.length >= 300)
-							break;
-						def = lib.singleSpace(result.list[i].definition.replace(/\n|\r|\t/g, " "));
-						if (def.length <= (300-tmp.length))
-							tmp += " "+(i+1)+") "+def;
-					}
-				}
-				irc.say(input.context, tmp);
-			}
+	callback: function ud(input) {
+		web.json("http://api.urbandictionary.com/v0/define?term="+input.data).then(function (json) {
+			irc.say(input.context, bestAnswersByScore(json.list), 1);
+		}).catch(function (err) {
+			irc.say(input.context, "Somethin' done broke.");
+			logger.error(err, err);
 		});
 	}
 });
