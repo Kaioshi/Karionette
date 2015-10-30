@@ -8,7 +8,7 @@ bot.command({
 	admin: true,
 	arglen: 2,
 	callback: function ialCommand(input) {
-		var reg, results, user;
+		var reg, results, ch;
 		switch (input.args[0].toLowerCase()) {
 		case "scanre": // regex scan
 			try {
@@ -30,6 +30,39 @@ bot.command({
 			else
 				irc.say(input.context, "No matches.");
 			break;
+		case "opped":
+			ch = ial.Channel(input.args[1]);
+			if (!ch) {
+				irc.say(input.context, "I'm not on "+input.args[1]);
+				return;
+			}
+			if (!ch.opped.length)
+				irc.say(input.context, input.args[1]+" has no ops.");
+			else
+				irc.say(input.context, input.args[1]+" opped: "+ch.opped.join(", "));
+			break;
+		case "voiced":
+			ch = ial.Channel(input.args[1]);
+			if (!ch) {
+				irc.say(input.context, "I'm not on "+input.args[1]);
+				return;
+			}
+			if (!ch.voiced.length)
+				irc.say(input.context, input.args[1]+" has no voiced users.");
+			else
+				irc.say(input.context, input.args[1]+" voiced: "+ch.voiced.join(", "));
+			break;
+		case "halfopped":
+			ch = ial.Channel(input.args[1]);
+			if (!ch) {
+				irc.say(input.context, "I'm not on "+input.args[1]);
+				return;
+			}
+			if (!ch.halfopped.length)
+				irc.say(input.context, input.args[1]+" has no halfopped users.");
+			else
+				irc.say(input.context, input.args[1]+" halfopped: "+ch.halfopped.join(", "));
+			break;
 		default:
 			irc.say(input.context, bot.cmdHelp("ial", "syntax"));
 			break;
@@ -45,6 +78,22 @@ bot.event({
 		ial.addUser(params[7], params[4]+"@"+params[5]);
 		ial.User(params[7]).addChannel(params[3]);
 		ial.Channel(params[3]).addNick(params[7]);
+		if (params[8].length > 1) {
+			switch (params[8][1]) {
+			case "@":
+				ial.Channel(params[3]).giveStatus("opped", params[7]);
+				break;
+			case "%":
+				ial.Channel(params[3]).giveStatus("halfopped", params[7]);
+				break;
+			case "+":
+				ial.Channel(params[3]).giveStatus("voiced", params[7]);
+				break;
+			default:
+				logger.debug("Unhandled user mode symbol: "+params[8]+" on "+params[7]+" in "+params[3]);
+				break;
+			}
+		}
 	}
 });
 
@@ -113,6 +162,50 @@ bot.event({
 				config.nicks.push(config.nick);
 		}
 		ial.nickChange(input.nick, input.newnick);
+	}
+});
+
+bot.event({
+	handle: "ialMode",
+	event: "MODE",
+	condition: function ialModeCondition(input) {
+		if (input.channel && input.affected.length)
+			return true;
+	},
+	callback: function ialMode(input) {
+		var i, give = false, affected = input.affected.slice();
+		for (i = 0; i < input.mode.length; i++) {
+			if (input.mode[i] === "+") {
+				give = true;
+				continue;
+			}
+			if (input.mode[i] === "-") {
+				give = false;
+				continue;
+			}
+			switch (input.mode[i]) {
+			case "o":
+				if (give)
+					ial.Channel(input.channel).giveStatus("opped", affected.shift());
+				else
+					ial.Channel(input.channel).removeStatus("opped", affected.shift());
+				break;
+			case "h":
+				if (give)
+					ial.Channel(input.channel).giveStatus("halfopped", affected.shift());
+				else
+					ial.Channel(input.channel).removeStatus("halfopped", affected.shift());
+				break;
+			case "v":
+				if (give)
+					ial.Channel(input.channel).giveStatus("voiced", affected.shift());
+				else
+					ial.Channel(input.channel).removeStatus("voiced", affected.shift());
+				break;
+			default:
+				break;
+			}
+		}
 	}
 });
 
