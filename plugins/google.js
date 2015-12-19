@@ -40,7 +40,8 @@ bot.command({
 	arglen: 1,
 	callback: function googleImageSearch(input) {
 		web.googleImage(input.data.trim()).then(function (results) {
-			irc.say(input.context, lib.formatOutput("{title} ~ {url}", results[0]), 1);
+            let image = results[0].substring(0, results[0].lastIndexOf("?"));
+			irc.say(input.context, lib.formatOutput("{title} ~ {url}", image), 1);
 		}, function (error) {
 			irc.say(input.context, error.message);
 		}).catch(function (error) {
