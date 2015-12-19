@@ -1,10 +1,11 @@
-﻿// Returns first Google search result
+﻿/* global web, irc, bot, logger, lib, config */
+// Returns first Google search result
 "use strict";
 
 bot.command({
 	command: [ "g", "google" ],
 	help: "Google search - returns the first hit.",
-	syntax: config.command_prefix+"g <search term> - Example: "+config.command_prefix+"g puppies",
+	syntax: `${config.command_prefix}g <search term> - Example: ${config.command_prefix}g puppies`,
 	arglen: 1,
 	callback: function googleSearch(input) {
 		web.google(input.data.trim()).then(function (results) {
@@ -22,20 +23,20 @@ bot.command({
 	}
 });
 
-bot.command({ // for ranmabutts
+bot.command({// for ranmabutts
 	command: "gr",
 	help: "Constructs a google query",
-	syntax: config.command_prefix+"gr <search term> - Example: "+config.command_prefix+"gr puppies vs. kittens?",
+	syntax: `${config.command_prefix}gr <search term> - Example: ${config.command_prefix}gr puppies vs. kittens?`,
 	arglen: 1,
 	callback: function googleSearchForRanma(input) {
-		irc.say(input.context, "https://google.com/search?q="+encodeURIComponent(input.data.trim()));
+		irc.say(input.context, `https://google.com/search?q=${encodeURIComponent(input.data.trim())}`);
 	}
 });
 
 bot.command({
 	command: "gi",
 	help: "Google image search - returns the first hit.",
-	syntax: config.command_prefix+"gi puppies",
+	syntax: `${config.command_prefix}gi puppies`,
 	arglen: 1,
 	callback: function googleImageSearch(input) {
 		web.googleImage(input.data.trim()).then(function (results) {
