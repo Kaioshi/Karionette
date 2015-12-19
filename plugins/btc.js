@@ -5,10 +5,9 @@ function currencyURL(code) {
     return `https://api.bitcoinaverage.com/exchanges/${code}`;
 }
 
-var CURRENCY = {};
 var KEYS = ["AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "IDR", "ILS", "MXN", "NOK", "NZD", "PLN", "RON", "RUB", "SEK", "SGD", "USD", "ZAR"];
 
-KEYS.forEach(code => CURRENCY[code] = currencyURL(code));
+var CURRENCY = KEYS.reduce((acc, code) => { acc[code] = currencyURL(code); return acc; }, {});
 
 function trimNum(n) {
 	var i;
