@@ -40,11 +40,11 @@ bot.command({
 	arglen: 1,
 	callback: function googleImageSearch(input) {
 		web.googleImage(input.data.trim()).then(function (results) {
-            let url = results[0].url,
-                questionIndex = url.lastIndexOf("?");
-            if (url.lastIndexOf(".") < questionIndex) {
-                results[0].url = url.substring(0, questionIndex);
-            }
+			let url = results[0].url,
+				questionIndex = url.lastIndexOf("?");
+			if (url.lastIndexOf(".") < questionIndex) {
+				results[0].url = url.substring(0, questionIndex);
+			}
 			irc.say(input.context, lib.formatOutput("{title} ~ {url}", results[0]), 1);
 		}, function (error) {
 			irc.say(input.context, error.message);
