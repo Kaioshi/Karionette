@@ -1,0 +1,7 @@
+typings/
+.vscode/
+node_modules/
+ps.sh
+jsconfig.json
+data/
+config
