@@ -254,7 +254,7 @@ bot.command({
 bot.command({
 	command: "tsfilter",
 	help: "Add or remove titlesnarfer filters. Doesn't apply to processed YouTube results.",
-	syntax: config.command_prefix+"tsfilter <add/remove> <trim / title / domain> <match> or "+
+	syntax: config.command_prefix+"tsfilter <add/remove> <trim / title / domain> <string> or "+
 		config.command_prefix+"tsfilter list [titles / trims / domains] - Example: "+
 		config.command_prefix+"tsfilter add title Imgur: The most awesome images on the Internet - or "+
 		config.command_prefix+"tsfilter add trim Wikipedia, the free encyclopedia",
@@ -285,8 +285,13 @@ bot.command({
 });
 
 function isFilteredDomain(domain) {
-	var domains = titleFilterDB.getOne("domains") || [];
-	return domains.indexOf(domain) > -1;
+	var i, domains = titleFilterDB.getOne("domains") || [];
+	if (domains.indexOf(domain) > -1)
+		return true;
+	for (i = 0; i < domains.length; i++) {
+		if (domain.indexOf(domains[i]) > -1 && domain.slice(domain.length-domains[i].length) === domains[i])
+			return true;
+	}
 }
 
 function isFilteredTitle(title) {
