@@ -5,6 +5,7 @@ var url = require("url"),
 	titleFilterDB = new DB.Json({filename: "titlefilters"}),
 	ytReg = /v=([^ &\?]+)/i,
 	ytBReg = /^\/([^ &\?]+)/,
+	recentURLs = {},
 	titleReg, sayTitle;
 
 if (config.titlesnarfer_inline) {
@@ -32,6 +33,15 @@ if (config.titlesnarfer_inline) {
 } else {
 	sayTitle = function (context, uri, imgur, old, record) {
 		var title;
+		if (recentURLs[uri.href]) {
+			if ((Date.now() - recentURLs[uri.href]) < 10000) { // announced in the last 10 seconds
+				logger.debug("Announced "+uri.href+" within the last 10 seconds, not announcing.");
+				if (record)
+					recordURL(record[0], record[1], record[2]);
+				return;
+			}
+		}
+		recentURLs[uri.href] = Date.now();
 		web.json("http://felt.ninja:5036/?singlespace=1&uri="+uri.href).then(function (result) {
 			if (result.error) {
 				if (record)
