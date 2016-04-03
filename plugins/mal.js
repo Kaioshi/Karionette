@@ -23,7 +23,7 @@ function doSearch(type, context, title, synopsis) {
 			logger.debug("Need a better regex! URL: "+results[0].url);
 			return;
 		}
-		return web.json("http://api.atarashiiapp.com/2/"+type+"/"+id);
+		return web.json("https://myanimelistrt.azurewebsites.net/2/"+type+"/"+id);
 	}).then(function (body) {
 		if (body.error) {
 			irc.say(context, "The unofficial MAL API said: "+body.error+" - "+body.details);
