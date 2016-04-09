@@ -214,8 +214,9 @@ bot.command({
 bot.command({
 	command: "nodeversion",
 	help: "Shows the node version I'm running.",
+	admin: true,
 	callback: function (input) {
-		irc.say(input.context, lib.nodeVersion());
+		irc.notice(input.nick, lib.nodeVersion());
 	}
 });
 
