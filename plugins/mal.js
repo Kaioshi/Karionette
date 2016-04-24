@@ -10,7 +10,7 @@ function getGenres(genres) {
 	return ret.join(", ");
 }
 
-function doSearch(type, context, title, synopsis) {
+function doSearch(type, context, title, synopsis, google) {
 	var id, eps;
 	web.google("site:myanimelist.net/"+type+"/ "+title).then(function (results) {
 		id = new RegExp("http://myanimelist\\.net/"+type+"/([0-9]+)/?", "i").exec(results[0].url);
@@ -23,8 +23,14 @@ function doSearch(type, context, title, synopsis) {
 			logger.debug("Need a better regex! URL: "+results[0].url);
 			return;
 		}
-		return web.json("https://myanimelistrt.azurewebsites.net/2/"+type+"/"+id);
+		if (google) {
+			irc.say(context, results[0].title.replace(" - MyAnimeList.net", "")+" - "+results[0].url+" - "+results[0].content);
+		} else {
+			return web.json("https://myanimelistrt.azurewebsites.net/2/"+type+"/"+id);
+		}
 	}).then(function (body) {
+		if (!body)
+			return;
 		if (body.error) {
 			irc.say(context, "The unofficial MAL API said: "+body.error+" - "+body.details);
 			return;
