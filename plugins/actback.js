@@ -314,7 +314,7 @@ function replaceVars(line, context, from, obj, verb) {
 	tmp = line;
 	while ((reg = /(\{[^\{\|\(\)\[\]\} ]+\})/.exec(tmp))) {
 		line = line.replace(reg[1], replaceSingleVar(reg[1], context, from, obj, verb));
-		tmp = tmp.slice(tmp.indexOf(reg[1])+reg[1].length);
+		tmp = tmp.slice(tmp.indexOf(reg[1]) + reg[1].length);
 	}
 	if (varParseLimit > 0 && line.match(/\{[^\[\(\|\)\] ]+\}/))
 		line = replaceVars(line, context, from, obj, verb);
@@ -329,7 +329,7 @@ function adverb(verb) {
 	return verb;
 }
 
-function replaceSingleVar(match, context, from, obj, verb) {
+function replaceSingleVar(match, context, from, obj, verb, modverb) {
 	var tmp;
 	switch (match) {
 	case "{me}": return magicInputFondler(config.nick);
@@ -346,6 +346,7 @@ function replaceSingleVar(match, context, from, obj, verb) {
 	case "{verbed}": return verb.ed;
 	case "{randVerbing}": return adverb(words.verb.random().ing);
 	case "{verbing}": return verb.ing;
+	case "{modverb}": return modverb || words.adjective.random();
 	case "{adverb}": return words.adverb.random();
 	case "{adjective}": return words.adjective.random();
 	case "{noun}": return words.noun.random().base;
@@ -413,22 +414,22 @@ bot.event({
 	},
 	regex: regexFactory.actionMatching(config.nickname),
 	callback: function (input) {
-		var line, stats, randReply, tmp, randThings, randReplies, args, verb, obj, randThing, method, adv;
+		var line, stats, randReply, tmp, randReplies,
+			args, verb, obj, method, adverb;
 
-		randThings = randDB.getAll();
 		randReplies = repliesDB.getAll();
 		args = input.match[0].slice(8,-1).split(" ");
 		verb = args[0];
 		obj = transformObj(args, 2);
-		randThing = lib.randSelect(randThings);
 		method = lib.randSelect([ "say", "action"]);
 		if (verb.indexOf("\"") > -1) verb = verb.replace(/\"/g, "");
+		// Check for adverb
 		if (verb.slice(-2) === "ly") {
 			if (words.adverb.get(verb) !== verb && config.api.wordnik) {
 				words.lookup("adverb", verb);
 			}
-			adv = args[1] + " ";
-			verb = args[2];
+			adverb = args[0];
+			verb = args[1];
 		}
 		tmp = words.verb.get(verb);
 		if (tmp) {
@@ -454,7 +455,7 @@ bot.event({
 		}
 		stats = statsDB.getOne(verb.s) || 0;
 		statsDB.saveOne(verb.s, (stats+1));
-		line = replaceVars(randReply, input.context, input.nick, obj, verb);
+		line = replaceVars(randReply, input.context, input.nick, obj, verb, adverb.slice(0, -2));
 		if (line.match(/\{\((.*\|?)\)\}/))
 			line = lib.parseVarList(line);
 		if (line.match(/\{\[(.*\|?)\]\}/))

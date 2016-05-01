@@ -28,8 +28,8 @@
 			"gives {from}'s {obj} a {(horrifying|nice|erotic|well lubed|premium|whorish|sultry|exotic)} rub down.",
 			"{(deviously|delicately|kindly|forcibly|cruelly)} feeds {obj} to {randNick} while maintaining eye contact with {from}.",
 			"{(hides {obj} in|forces {obj} on|offers {obj} to)} {randNick}.",
-			"licks it timidly",
-			"gobbles it down",
+			"licks it {(timidly|{adverb})}",
+			"{(gobbles|devours|snacks on|salivates all over)} it",
 			"thanks {from} with {randThing}",
 			"bottles {obj} and takes a sip. Mmm.",
 			"draws a little mustache and monocle on {obj} and adds it to her collection.",
@@ -38,7 +38,8 @@
 			"puts it {preposition} her {adjective} box",
 			"penetrates {randNick} with the {obj}",
 			"{randVerbs} {whippingBoy} with the {obj}",
-			"shoots a porno together with {randThing} and {from}'s {obj}"
+			"shoots a porno together with {randThing} and {from}'s {obj}",
+			"flicks the {obj} {adverb}"
 		]
 	},
 	"steals": {
@@ -128,6 +129,7 @@
 			"bucks up and down and all over the place {adverb}",
 			"cowgirls {from} and giggles",
 			"binds {from} and assaults {(his|her)} body with {adjective} {(fondling|slapping|licking|humping|molesting|raping)}",
+			"grinds her {(hips|tentacles|slimy tongue)} back and forth over {from}{(, feeling too {modverb} to stop)|, sucking the life force out of {(him|her)}||}",
 			"rubs her {(nipples|lips|thighs|bum|groin)} into {from}'s {(nipples|lips|thighs|bum|groin)}",
 			"fries {(an egg|a {noun}|{randThing})} on the heat she radiates as {from} molests her {adverb}",
 			"{(moans|whines|screams|jiggles|vibrates)} {adverb} at {from}"
@@ -195,6 +197,10 @@
 	"defa": {
 		"say": [
 			"Oh {from}-{(san|sama|chama|tan|kun|chan|han)} >///< Do it again!",
+			"Look, you can {verb} all you like, but when you're that {modverb} about it, it makes me {adjective}",
+			"{from}, please remove your {(hand|foot)} from my {(mail|juice|\"juice\"|cereal|drop|lingerie|secret)}box",
+			"You're too {modverb}... {verb} me again, but do it {adverb}",
+			"Oh so {modverb}, do it again!",
 			"Why don't you go {verb} yourself, you {(weirdo|beautiful bastard|disgusting 3D person|{adjective} {noun})} :(",
 			"B-Baka {from}. {(Hmph!|Hmph! *side glances and blushes slightly|)}",
 			"... I hear {whippingBoy} likes to {randVerb} {(herself|himself)} {(in front of {randNick}|||)} :S",
@@ -237,6 +243,9 @@
 		],
 		"action": [
 			"{(kicks|pokes|penetrates|{randVerbs})} {from} in their {(balls|butt|well used canoe|well used sword)}",
+			"suddenly feels {(very|not very)} {modverb} as {from} {verbs} her from {(behind|beneath|in front|above)}",
+			"uses {(science|{(red|black|white)} magic|voodoo curses|{(pop|rock|grunge|death metal|dance|techno|classical)} music|{(abstract|ballet|freaky)} dance)} to {(defeat|compliment|deflect|absorb)} {from}'s {verbing}",
+			"feels like all the {verbing} will make her even {(more|less)} {modverb}",
 			"{(slaps|smacks|whacks|punts|hurls|smashes|Giga Impacts|Tsundere Strikes)} {from} into {(orbit|the Sun|the Moon|the Troposphere|the Stratosphere|the Mesosphere|the Thermosphere|another dimension)} for {verbing} her",
 			"{(snickers|moans|giggles|explodes)}",
 			"flips {from} into {(the air|a tar pit|the ocean|into space|into {randNick}|{randThing})}",
