@@ -415,7 +415,7 @@ bot.event({
 	regex: regexFactory.actionMatching(config.nickname),
 	callback: function (input) {
 		var line, stats, randReply, tmp, randReplies,
-			args, verb, obj, method, adverb;
+			args, verb, obj, method, modverb;
 
 		randReplies = repliesDB.getAll();
 		args = input.match[0].slice(8,-1).split(" ");
@@ -428,7 +428,7 @@ bot.event({
 			if (words.adverb.get(verb) !== verb && config.api.wordnik) {
 				words.lookup("adverb", verb);
 			}
-			adverb = args[0];
+			modverb = args[0].slice(0, -2);
 			verb = args[1];
 		}
 		tmp = words.verb.get(verb);
@@ -455,7 +455,7 @@ bot.event({
 		}
 		stats = statsDB.getOne(verb.s) || 0;
 		statsDB.saveOne(verb.s, (stats+1));
-		line = replaceVars(randReply, input.context, input.nick, obj, verb, adverb.slice(0, -2));
+		line = replaceVars(randReply, input.context, input.nick, obj, verb, modverb);
 		if (line.match(/\{\((.*\|?)\)\}/))
 			line = lib.parseVarList(line);
 		if (line.match(/\{\[(.*\|?)\]\}/))
