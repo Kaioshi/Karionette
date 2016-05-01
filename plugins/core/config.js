@@ -109,7 +109,6 @@ function changeConfig(field, entry) { // for user input to config
 			logger.error("Tried to set config."+field+" to a non-boolean value ("+entry+")");
 			return false;
 		}
-		return false;
 	default: // should not end up here
 		logger.debug("Got to default in changeConfig()");
 		return false;

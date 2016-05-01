@@ -75,27 +75,27 @@ bot.event({
 		switch (ctcp[0].toUpperCase()) {
 		case "VERSION":
 			irc.raw("NOTICE "+input.context+" :\x01VERSION Karionette ~ \x02"+lib.randSelect([
-					"Wiggle wiggle wiggle wiggle",
-					"Now with 90% more butts!",
-					"All dem bot butts",
-					"This one time, at band camp..",
-					"I'm on a boat!",
-					"Secretly loves fish fingers and custard",
-					"I'm Batman",
-					"Touch it",
-					"LIKE A BOSS",
-					"Stop touching it",
-					"No wait, touch it",
-					"OK STOP TOUCHING IT",
-					"A little more..",
-					"URRRRGGGHHHhhhhh Ahhhhhhhh ..... oh my god, sorry. I'm so sorry. Let me.. let me wipe that off..",
-					"It's going to fall off",
-					"Dun dun dunnnn",
-					"N-Nya..",
-					"Pantsu?",
-					"PANTSU!",
-					"Needs more Pantsu."])+
-				"\x02 ~ https://github.com/Kaioshi/Karionette/ [based on Marionette by Deide @ EsperNet]\x01");
+				"Wiggle wiggle wiggle wiggle",
+				"Now with 90% more butts!",
+				"All dem bot butts",
+				"This one time, at band camp..",
+				"I'm on a boat!",
+				"Secretly loves fish fingers and custard",
+				"I'm Batman",
+				"Touch it",
+				"LIKE A BOSS",
+				"Stop touching it",
+				"No wait, touch it",
+				"OK STOP TOUCHING IT",
+				"A little more..",
+				"URRRRGGGHHHhhhhh Ahhhhhhhh ..... oh my god, sorry. I'm so sorry. Let me.. let me wipe that off..",
+				"It's going to fall off",
+				"Dun dun dunnnn",
+				"N-Nya..",
+				"Pantsu?",
+				"PANTSU!",
+				"Needs more Pantsu."])+
+					"\x02 ~ https://github.com/Kaioshi/Karionette/ [based on Marionette by Deide @ EsperNet]\x01");
 			break;
 		case "TIME":
 			irc.raw("NOTICE "+input.context+" :\x01TIME "+new Date()+"\x01");

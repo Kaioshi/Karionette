@@ -6,26 +6,26 @@ var aliasDB = new DB.Json({filename: "alias/alias"}),
 function itemExists(type, item) {
 	var variable, alias;
 	switch (type) {
-		case "variable":
-			variable = varDB.getOne("{"+item.toLowerCase()+"}");
-			if (variable) {
-				variable = null;
-				return true;
-			}
-			break;
-		case "alias":
-			alias = aliasDB.getOne(item);
-			if (alias) {
-				alias = null;
-				return true;
-			}
-			break;
-		case "command":
-			if (bot.cmdExists(item)) return true;
-			break;
-		default:
-			logger.debug("[perms/itemExists] called with "+item+" item. this is not a thing.");
-			break;
+	case "variable":
+		variable = varDB.getOne("{"+item.toLowerCase()+"}");
+		if (variable) {
+			variable = null;
+			return true;
+		}
+		break;
+	case "alias":
+		alias = aliasDB.getOne(item);
+		if (alias) {
+			alias = null;
+			return true;
+		}
+		break;
+	case "command":
+		if (bot.cmdExists(item)) return true;
+		break;
+	default:
+		logger.debug("[perms/itemExists] called with "+item+" item. this is not a thing.");
+		break;
 	}
 }
 
