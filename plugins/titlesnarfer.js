@@ -32,16 +32,16 @@ if (config.titlesnarfer_inline) {
 	};
 } else {
 	sayTitle = function (context, uri, imgur, old, record) {
-		var title;
+		var title, now = Date.now();
 		if (recentURLs[uri.href]) {
-			if ((Date.now() - recentURLs[uri.href]) < 10000) { // announced in the last 10 seconds
+			if ((now - recentURLs[uri.href]) < 10000) { // announced in the last 10 seconds
 				logger.debug("Announced "+uri.href+" within the last 10 seconds, not announcing.");
 				if (record)
 					recordURL(record[0], record[1], record[2]);
 				return;
 			}
 		}
-		recentURLs[uri.href] = Date.now();
+		recentURLs[uri.href] = now;
 		web.json("http://felt.ninja:5036/?singlespace=1&uri="+uri.href).then(function (result) {
 			if (result.error) {
 				if (record)
@@ -125,7 +125,7 @@ function recordURL(nick, channel, url, title) {
 	var fn = "data/urls/"+channel.toLowerCase()+".txt";
 	if (!fs.existsSync(fn))
 		fs.writeFileSync(fn, "");
-	fs.appendFileSync(fn, url+" "+nick+" "+Date().now()+(title ? " "+title+"\n" : "\n"));
+	fs.appendFileSync(fn, url+" "+nick+" "+Date.now()+(title ? " "+title+"\n" : "\n"));
 }
 
 function getURL(channel, url) { // make this less bad.
@@ -170,15 +170,15 @@ function youtubeIt(context, id, old, record) {
 }
 
 function findURL(line) {
-	var ret, end, lowerLine = line.toLowerCase(),
-		httpIndex = lowerLine.indexOf("http");
-	if (httpIndex === -1)
+	var ret, end, httpIndex, httpsIndex,
+		lowerLine = line.toLowerCase();
+	if ((httpIndex = lowerLine.indexOf("http://")) === -1 && (httpsIndex = lowerLine.indexOf("https://") === -1))
 		return;
-	if (lowerLine.indexOf("http://") === -1 && lowerLine.indexOf("https://") === -1)
-		return;
-	ret = line.slice(httpIndex);
-	end = ret.indexOf(" ");
-	if (end > -1)
+	if (httpIndex > -1 && httpsIndex > -1) // both exist, pick the first one
+		ret = line.slice((httpIndex > httpsIndex ? httpsIndex : httpIndex));
+	else
+		ret = line.slice((httpIndex > -1 ? httpIndex : httpsIndex));
+	if ((end = ret.indexOf(" ")) !== -1)
 		ret = ret.slice(0, end);
 	ret = url.parse(ret);
 	if (!ret.protocol)
