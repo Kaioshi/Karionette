@@ -168,20 +168,41 @@ function youtubeIt(context, id, old, record) {
 	});
 }
 
+function findURL(line) {
+	var ret, end, lowerLine = line.toLowerCase(),
+		httpIndex = lowerLine.indexOf("http");
+	if (httpIndex === -1)
+		return;
+	if (lowerLine.indexOf("http://") === -1 && lowerLine.indexOf("https://") === -1)
+		return;
+	ret = line.slice(httpIndex);
+	end = ret.indexOf(" ");
+	if (end > -1)
+		ret = ret.slice(0, end);
+	ret = url.parse(ret);
+	if (!ret.protocol)
+		return;
+	return ret.href;
+}
+
 bot.event({
 	handle: "titleSnarfer",
 	event: "PRIVMSG",
 	condition: function (input) {
-		return input.args === undefined && input.message.toLowerCase().indexOf("http") > -1;
+		if (input.args !== undefined)
+			return false;
+		input.url = findURL(input.message);
+		if (!input.url)
+			return false;
+		return true;
 	},
-	regex: /^:[^ ]+ PRIVMSG #[^ ]+ :.*((?:https?:\/\/)[^\x01 ]+)/i,
 	callback: function titlesnarfer(input) {
 		var uri, ext, old, record, videoID, domain;
-
-		old = getURL(input.channel, input.match[1]) || false;
+		
+		old = getURL(input.channel, input.url) || false;
 		if (!old)
-			record = [ input.nick, input.channel, input.match[1] ];
-		uri = url.parse(input.match[1]);
+			record = [ input.nick, input.channel, input.url ];
+		uri = url.parse(input.url);
 		domain = uri.host.replace(/www\./gi, "");
 		// check domain filter
 		if (isFilteredDomain(domain)) {
