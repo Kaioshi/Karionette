@@ -64,7 +64,8 @@ function lastUrl(channel, nick, match) {
 		return "I haven't seen any URLs here.";
 	urls = fs.readFileSync(fn).toString().split("\n");
 	i = urls.length;
-	if (match) match = match.toLowerCase();
+	if (match)
+		match = match.toLowerCase();
 	if (nick) {
 		lnick = nick.toLowerCase();
 		while (i > 1) { // start from the bottom up since they're more recent.
@@ -124,7 +125,7 @@ function recordURL(nick, channel, url, title) {
 	var fn = "data/urls/"+channel.toLowerCase()+".txt";
 	if (!fs.existsSync(fn))
 		fs.writeFileSync(fn, "");
-	fs.appendFileSync(fn, url+" "+nick+" "+new Date().valueOf()+(title ? " "+title+"\n" : "\n"));
+	fs.appendFileSync(fn, url+" "+nick+" "+Date().now()+(title ? " "+title+"\n" : "\n"));
 }
 
 function getURL(channel, url) { // make this less bad.
@@ -182,7 +183,7 @@ function findURL(line) {
 	ret = url.parse(ret);
 	if (!ret.protocol)
 		return;
-	return ret.href;
+	return ret;
 }
 
 bot.event({
@@ -197,13 +198,12 @@ bot.event({
 		return true;
 	},
 	callback: function titlesnarfer(input) {
-		var uri, ext, old, record, videoID, domain;
-		
-		old = getURL(input.channel, input.url) || false;
+		var ext, old, record, videoID, domain;
+
+		old = getURL(input.channel, input.url.href) || false;
 		if (!old)
-			record = [ input.nick, input.channel, input.url ];
-		uri = url.parse(input.url);
-		domain = uri.host.replace(/www\./gi, "");
+			record = [ input.nick, input.channel, input.url.href ];
+		domain = input.url.host.replace(/www\./gi, "");
 		// check domain filter
 		if (isFilteredDomain(domain)) {
 			if (record)
@@ -214,7 +214,7 @@ bot.event({
 		case "youtube.com":
 			if (!config.api.youtube)
 				break;
-			videoID = ytReg.exec(uri.path);
+			videoID = ytReg.exec(input.url.path);
 			if (videoID) {
 				youtubeIt(input.context, videoID[1], old, record);
 				return;
@@ -223,28 +223,28 @@ bot.event({
 		case "youtu.be":
 			if (!config.api.youtube)
 				break;
-			videoID = ytBReg.exec(uri.path);
+			videoID = ytBReg.exec(input.url.path);
 			if (videoID) {
 				youtubeIt(input.context, videoID[1], old, record);
 				return;
 			}
 			break;
 		case "i.imgur.com":
-			ext = uri.href.slice(uri.href.lastIndexOf("."));
+			ext = input.url.href.slice(input.url.href.lastIndexOf("."));
 			if (ext.match(/\.gif|\.gifv|\.jpg|\.jpeg|\.png|\.webm/i)) {
-				uri.path = uri.path.slice(0, -ext.length);
-				uri.href = uri.href.slice(0, -ext.length);
+				input.url.path = input.url.path.slice(0, -ext.length);
+				input.url.href = input.url.href.slice(0, -ext.length);
 			}
 			break;
 		default:
-			if (uri.path.length > 1 && uri.path.indexOf(".") > -1) {
-				ext = uri.path.slice(uri.path.lastIndexOf(".")+1);
+			if (input.url.path.length > 1 && input.url.path.indexOf(".") > -1) {
+				ext = input.url.path.slice(input.url.path.lastIndexOf(".")+1);
 				if (ext.length <= 4 && !ext.match(/htm|html|asp|aspx|php|php3|php5/i))
 					return; // avoid trying to grab mp4s etc.
 			}
 			break;
 		}
-		sayTitle(input.context, uri, false, old, record, 10000);
+		sayTitle(input.context, input.url, false, old, record, 10000);
 	}
 });
 
