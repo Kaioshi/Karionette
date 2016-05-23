@@ -53,6 +53,8 @@ if (config.titlesnarfer_inline) {
 				recordURL(record[0], record[1], record[2], title);
 			if (!isFilteredTitle(title))
 				irc.say(context, trimTitle(title)+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""));
+		}).catch(function (err) {
+			logger.error("sayTitle failed: "+err, err);
 		});
 	};
 }
@@ -165,6 +167,8 @@ function youtubeIt(context, id, old, record) {
 		if (error.reason === "keyInvalid")
 			irc.say(context, "You need a youtube API key in the config. See https://developers.google.com/youtube/v3/getting-started");
 		// probably a wrong link past here, we don't care
+	}).catch(function (error) {
+		logger.error("youtubeIt failed: "+error, error);
 	});
 }
 
@@ -180,7 +184,7 @@ function findURL(line) {
 	if ((end = ret.indexOf(" ")) !== -1)
 		ret = ret.slice(0, end);
 	ret = url.parse(ret);
-	if (!ret.protocol)
+	if (!ret.protocol || !ret.host)
 		return;
 	return ret;
 }
