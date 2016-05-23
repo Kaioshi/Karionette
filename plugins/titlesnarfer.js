@@ -42,7 +42,7 @@ if (config.titlesnarfer_inline) {
 			}
 		}
 		recentURLs[uri.href] = now;
-		web.json("http://felt.ninja:5036/?singlespace=1&uri="+uri.href).then(function (result) {
+		web.json("http://felt.ninja:5036/?singlespace=1&uri="+uri.href).then(function (result) { // THIS PROMISE NEEDS AN ERROR FUNCTION
 			if (result.error) {
 				if (record)
 					recordURL(record[0], record[1], record[2]);
@@ -164,15 +164,14 @@ function youtubeIt(context, id, old, record) {
 	}, function (error) {
 		if (error.reason === "keyInvalid")
 			irc.say(context, "You need a youtube API key in the config. See https://developers.google.com/youtube/v3/getting-started");
-		else
-			irc.say(context, error.message+": "+error.reason);
+		// probably a wrong link past here, we don't care
 	});
 }
 
 function findURL(line) {
 	var ret, end, httpIndex, httpsIndex,
 		lowerLine = line.toLowerCase();
-	if ((httpIndex = lowerLine.indexOf("http://")) === -1 && (httpsIndex = lowerLine.indexOf("https://") === -1))
+	if ((httpIndex = lowerLine.indexOf("http://")) === -1 && (httpsIndex = lowerLine.indexOf("https://")) === -1)
 		return;
 	if (httpIndex > -1 && httpsIndex > -1) // both exist, pick the first one
 		ret = line.slice((httpIndex > httpsIndex ? httpsIndex : httpIndex));
