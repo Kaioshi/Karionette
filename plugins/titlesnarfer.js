@@ -10,8 +10,11 @@ var url = require("url"),
 
 if (config.titlesnarfer_inline) {
 	titleReg = /<title?[^>]+>([^<]+)<\/title>/i;
-	sayTitle = function (context, uri, imgur, old, record, length) {
+	sayTitle = function (context, uri, old, record, length) {
 		var reg, title;
+		
+		if (urlIsTooRecent(uri.href, record))
+			return;
 		web.fetch(uri.href, length).then(function (body) {
 			if (!body) {
 				logger.warn(uri.href + " - returned no body.");
@@ -31,17 +34,11 @@ if (config.titlesnarfer_inline) {
 		});
 	};
 } else {
-	sayTitle = function (context, uri, imgur, old, record) {
-		var title, now = Date.now();
-		if (recentURLs[uri.href]) {
-			if ((now - recentURLs[uri.href]) < 10000) { // announced in the last 10 seconds
-				logger.debug("Announced "+uri.href+" within the last 10 seconds, not announcing.");
-				if (record)
-					recordURL(record[0], record[1], record[2]);
-				return;
-			}
-		}
-		recentURLs[uri.href] = now;
+	sayTitle = function (context, uri, old, record) {
+		var title;
+		
+		if (urlIsTooRecent(uri.href, record))
+			return;
 		web.json("http://felt.ninja:5036/?singlespace=1&uri="+uri.href).then(function (result) { // THIS PROMISE NEEDS AN ERROR FUNCTION
 			if (result.error) {
 				if (record)
@@ -57,6 +54,18 @@ if (config.titlesnarfer_inline) {
 			logger.error("sayTitle failed: "+err, err);
 		});
 	};
+}
+
+function urlIsTooRecent(link, record) {
+	var now = Date.now();
+	if (recentURLs[link]) {
+		if ((now - recentURLs[link]) < 10000) { // announced within the last 10 seconds
+			if (record)
+				recordURL(record[0], record[1], record[2]);
+			return true;
+		}
+	}
+	recentURLs[link] = now;
 }
 
 function lastUrl(channel, nick, match) {
@@ -125,8 +134,10 @@ function urlStats(channel, nick, match) {
 
 function recordURL(nick, channel, url, title) {
 	var fn = "data/urls/"+channel.toLowerCase()+".txt";
-	if (!fs.existsSync(fn))
+	if (!fs.existsSync(fn)) {
+		lib.fs.makePath(fn);
 		fs.writeFileSync(fn, "");
+	}
 	fs.appendFileSync(fn, url+" "+nick+" "+Date.now()+(title ? " "+title+"\n" : "\n"));
 }
 
@@ -247,7 +258,7 @@ bot.event({
 			}
 			break;
 		}
-		sayTitle(input.context, input.url, false, old, record, 10000);
+		sayTitle(input.context, input.url, old, record, 10000);
 	}
 });
 
