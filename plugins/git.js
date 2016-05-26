@@ -1,12 +1,6 @@
 "use strict";
-var run = require("child_process").execFile, fs = require("fs"),
-	gitDB = new DB.Json({filename: "gitannounce"}),
-	git = (function () {
-		if (fs.existsSync("/usr/bin/git"))
-			return "/usr/bin/git";
-		if (fs.existsSync("/usr/local/bin"))
-			return "/usr/local/bin/git";
-	})();
+var run = require("child_process").execFile,
+	gitDB = new DB.Json({filename: "gitannounce"});
 
 function checkGits() {
 	var aList = gitDB.getOne("announceList");
@@ -56,21 +50,17 @@ bot.command({
 		var changes, i, target, aList;
 		switch (input.args[0].toLowerCase()) {
 		case "pull":
-			if (logins.isAdmin(input.nick)) {
-				run(git, [ "pull" ], {}, function (error, stdout) {
-					stdout = stdout.split("\n");
-					for (i = 0, changes = []; i < stdout.length; i++) {
-						if (stdout[i][0] === " " && stdout[i][1] !== " ")
-							changes.push([ "say", input.context, stdout[i].trim() ]);
-					}
-					if (changes.length > 0)
-						irc.rated(changes);
-					else
-						irc.say(input.context, "Nothing changed.");
-				});
-			} else {
-				irc.say(input.context, "Only admins may pull the git.");
-			}
+			run("git", [ "pull" ], {}, function (error, stdout) {
+				stdout = stdout.split("\n");
+				for (i = 0, changes = []; i < stdout.length; i++) {
+					if (stdout[i][0] === " " && stdout[i][1] !== " ")
+						changes.push([ "say", input.context, stdout[i].trim() ]);
+				}
+				if (changes.length > 0)
+					irc.rated(changes);
+				else
+					irc.say(input.context, "Nothing changed.");
+			});
 			break;
 		case "announce": // toggle
 			target = input.context.toLowerCase();
