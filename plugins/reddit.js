@@ -40,8 +40,8 @@ function checkSubs() {
 				if (releases[i].updated === entries[sub].lastAnnounced)
 					index = i;
 			} // either lastAnnounced is unset or there were way too many new posts since last announce
-			if (index === -1 || index > 10) {
-				let n = (releases.length > 10 ? 10 : releases.length);
+			if (index === -1 || index > 5) {
+				let n = (releases.length > 5 ? 5 : releases.length);
 				announceReleases(entries[sub], releases.slice(0, n));
 			} else {
 				announceReleases(entries[sub], releases.slice(0, index));
