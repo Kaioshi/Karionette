@@ -55,7 +55,7 @@ bot.command({
 				stdout = stdout.split("\n");
 				let stats = "";
 				for (i = 0; i < stdout.length; i++) {
-					if (stdout[i].indexOf(" files changed") > -1)
+					if (stdout[i].indexOf(" files changed") > -1 || stdout[i].indexOf(" file changed") > -1)
 						stats = stdout[i].trim();
 				}
 				if (stats)
