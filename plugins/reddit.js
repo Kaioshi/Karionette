@@ -29,7 +29,6 @@ function announceReleases(entry, releases) {
 function checkSubs() {
 	if (!subDB.size())
 		return;
-	logger.debug("Checking "+subDB.size()+" subreddits for updates.");
 	let entries = subDB.getAll();
 	Object.keys(entries).forEach(function (sub) {
 		web.fetch(r(sub)).then(web.atom2json).then(function (releases) {
