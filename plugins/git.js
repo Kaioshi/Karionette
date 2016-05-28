@@ -51,6 +51,7 @@ bot.command({
 		switch (input.args[0].toLowerCase()) {
 		case "fap": // quiet pull ;)
 			run("git", ["pull"], {}, function (error, stdout) {
+				globals.gitOutput = stdout;
 				stdout = stdout.split("\n");
 				let stats = "";
 				for (i = 0; i < stdout.length; i++) {
