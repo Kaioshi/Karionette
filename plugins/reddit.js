@@ -174,3 +174,16 @@ bot.command({
 		}
 	}
 });
+
+// ;nocontext - pulls a random nocontext
+bot.command({
+	command: "nocontext",
+	help: "Pulls a random r/nocontext title.",
+	syntax: `${config.command_prefix}nocontext`,
+	callback: function nocontext(input) {
+		web.fetch("https://www.reddit.com/r/nocontext/random/.rss")
+		.then(web.atom2json).then(function (result) {
+			irc.say(input.context, lib.decode(result[0].title));
+		});
+	}
+});
