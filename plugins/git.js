@@ -43,12 +43,26 @@ bot.event({ // check for updates when we start and joins are done
 bot.command({
 	command: "git",
 	help: "git pull for people too lazy to open a shell. Admin only.",
-	syntax: config.command_prefix+"git pull / "+config.command_prefix+"git announce",
+	syntax: config.command_prefix+"git pull / fap (quieter pull) "+config.command_prefix+"git announce",
 	admin: true,
 	arglen: 1,
 	callback: function (input) {
 		var changes, i, target, aList;
 		switch (input.args[0].toLowerCase()) {
+		case "fap": // quiet pull ;)
+			run("git", ["pull"], {}, function (error, stdout) {
+				stdout = stdout.split("\n");
+				let stats = "";
+				for (i = 0; i < stdout.length; i++) {
+					if (stdout[i].indexOf(" files changed") > -1)
+						stats = stdout[i].trim();
+				}
+				if (stats)
+					irc.say(input.context, stats);
+				else
+					irc.say(input.context, "Already up-to-date.");
+			});
+			break;
 		case "pull":
 			run("git", [ "pull" ], {}, function (error, stdout) {
 				stdout = stdout.split("\n");
@@ -59,7 +73,7 @@ bot.command({
 				if (changes.length > 0)
 					irc.rated(changes);
 				else
-					irc.say(input.context, "Nothing changed.");
+					irc.say(input.context, "Already up-to-date.");
 			});
 			break;
 		case "announce": // toggle
