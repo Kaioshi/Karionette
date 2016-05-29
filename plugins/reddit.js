@@ -29,27 +29,33 @@ function announceReleases(entry, releases) {
 function checkSubs() {
 	if (!subDB.size())
 		return;
-	let entries = subDB.getAll();
+	let entries = subDB.getAll(),
+		delay = 2000;
 	Object.keys(entries).forEach(function (sub) {
-		web.fetch(r(sub)).then(web.atom2json).then(function (releases) {
-			if (!releases.length) // no posts
-				return;
-			let index = -1;
-			for (let i = 0; i < releases.length; i++) {
-				if (releases[i].updated === entries[sub].lastAnnounced)
-					index = i;
-			} // either lastAnnounced is unset or there were way too many new posts since last announce
-			if (index === -1 || index > 5) {
-				let n = (releases.length > 5 ? 5 : releases.length);
-				announceReleases(entries[sub], releases.slice(0, n));
-			} else {
-				announceReleases(entries[sub], releases.slice(0, index));
-			}
-			entries[sub].lastAnnounced = releases[0].updated;
-			subDB.saveOne(sub, entries[sub]);
-		}).catch(function (error) {
-			logger.error(error, error);
-		});
+		setTimeout(function () {
+			web.fetch(r(sub)).then(web.atom2json).then(function (releases) {
+				if (!releases.length) // no posts
+					return;
+				if (entries[sub].lastAnnounced === releases[0].updated) // nothing new
+					return;
+				let index = -1;
+				for (let i = 0; i < releases.length; i++) {
+					if (releases[i].updated === entries[sub].lastAnnounced)
+						index = i;
+				} // either lastAnnounced is unset or there were way too many new posts since last announce
+				if (index === -1 || index > 5) {
+					let n = (releases.length > 5 ? 5 : releases.length);
+					announceReleases(entries[sub], releases.slice(0, n));
+				} else {
+					announceReleases(entries[sub], releases.slice(0, index));
+				}
+				entries[sub].lastAnnounced = releases[0].updated;
+				subDB.saveOne(sub, entries[sub]);
+			}).catch(function (error) {
+				logger.error(r(sub)+" - "+error, error);
+			});
+		}, delay);
+		delay += 2000;
 	});
 }
 
