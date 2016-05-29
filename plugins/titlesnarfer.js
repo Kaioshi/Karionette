@@ -9,10 +9,10 @@ var url = require("url"),
 	titleReg, sayTitle;
 
 if (config.titlesnarfer_inline) {
+	logger.info("Using inline title fetcher");
 	titleReg = /<title?[^>]+>([^<]+)<\/title>/i;
 	sayTitle = function (context, uri, old, record, length) {
 		var reg, title;
-		
 		if (urlIsTooRecent(uri.href, record))
 			return;
 		web.fetch(uri.href, length).then(function (body) {
@@ -31,12 +31,14 @@ if (config.titlesnarfer_inline) {
 				recordURL(record[0], record[1], record[2], title);
 			if (!isFilteredTitle(title))
 				irc.say(context, trimTitle(title)+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""));
+		}).catch(function (error) {
+			logger.error("sayTitle failed: "+error, error);
 		});
 	};
 } else {
+	logger.info("Using felt.ninja title fetcher");
 	sayTitle = function (context, uri, old, record) {
 		var title;
-		
 		if (urlIsTooRecent(uri.href, record))
 			return;
 		web.json("http://felt.ninja:5036/?singlespace=1&uri="+uri.href).then(function (result) { // THIS PROMISE NEEDS AN ERROR FUNCTION
