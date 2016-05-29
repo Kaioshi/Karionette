@@ -10,6 +10,16 @@ function getWpm(line) {
 	return Math.floor((line.length / 5.0) * 1000);
 }
 
+function sayNocontext(context) {
+	web.fetch("https://www.reddit.com/r/nocontext/random/.rss")
+	.then(web.atom2json).then(function (result) {
+		let line = lib.decode(result[0].title);
+		setTimeout(function () {
+			irc.say(context, line);
+		}, getWpm(line));
+	});
+}
+
 function transformObj(args, num) {
 	var me = (config.nick ? config.nick : config.nickname[0]),
 		nonObjs = [ me, me+"s", me+"'s", "a", "an", "the", "some", "one", "loads", "lot", "of", "all", "his", "their", "with", "her" ],
@@ -417,6 +427,10 @@ bot.event({
 		var line, stats, randReply, tmp, randReplies,
 			args, verb, obj, method, modverb;
 
+		if (Math.random()*100 <= 20) {
+			sayNocontext(input.context);
+			return;
+		}
 		randReplies = repliesDB.getAll();
 		args = input.match[0].slice(8,-1).split(" ");
 		verb = args[0];
