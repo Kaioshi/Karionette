@@ -15,7 +15,7 @@ if (config.titlesnarfer_inline) {
 		var reg, title;
 		if (urlIsTooRecent(uri.href, record))
 			return;
-		web.fetch(uri.href, length).then(function (body) {
+		web.fetch(uri.href, {}, length).then(function (body) {
 			if (!body) {
 				logger.warn(uri.href + " - returned no body.");
 				return;
