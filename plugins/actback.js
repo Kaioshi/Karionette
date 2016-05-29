@@ -17,6 +17,8 @@ function sayNocontext(context) {
 		setTimeout(function () {
 			irc.say(context, line);
 		}, getWpm(line));
+	}).catch(function (error) {
+		logger.error("[sayNocontext] "+error, error);
 	});
 }
 
