@@ -57,7 +57,7 @@ function checkSubs() {
 				subDB.saveOne(sub, entries[sub]);
 			}
 			size--;
-			if (size === 0)
+			if (size === 0 && announcements.length)
 				irc.rated(announcements, 1000);
 		}).catch(function (error) {
 			logger.error(r(sub)+" - "+error, error);
