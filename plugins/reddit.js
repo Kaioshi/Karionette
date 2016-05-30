@@ -7,84 +7,100 @@ function r(sub) {
 	return "https://www.reddit.com/r/"+sub+"/new/.rss";
 }
 
-function shortenURL(link) {
+function getPostID(link) {
 	let reg = /^https:\/\/www\.reddit\.com\/r\/[^\/]+\/comments\/([^\/]+)\/[^\/]+\//.exec(link);
-	if (!reg)
+	if (!reg) {
+		logger.warn("Couldn't extract PostID from "+link);
 		return link;
-	return "https://redd.it/"+reg[1];
+	}
+	return reg[1];
 }
 
 function announceReleases(entry, releases) {
 	let announce = [];
 	releases.forEach(function (post) {
 		entry.announce.forEach(function (target) { // ranma is at least half to blame for this format.
-			let releaseMsg = shortenURL(post.link)+" - r/"+entry.subreddit+" - "+post.name.slice(3)+" ~ "+post.title;
-			announce.push([ "say", target, lib.decode(releaseMsg) ]); // like, 70%. or more. probably more.
+			let releaseMsg = "https://redd.it/"+getPostID(post.link)+" - r/"+entry.subreddit+" - "+post.name.slice(3)+" ~ "+post.title;
+			if (target[0] === "#")
+				announce.push([ "say", target, lib.decode(releaseMsg) ]); // like, 70%. or more. probably more.
+			else if (ial.User(target)) // only if they're online
+				announce.push([ "notice", target, lib.decode(releaseMsg) ]);
 		});
 	});
-	if (announce.length)
-		irc.rated(announce);
+	return announce;
 }
 
 function checkSubs() {
-	if (!subDB.size())
+	let entries, announcements, size = subDB.size();
+	if (!size)
 		return;
-	let entries = subDB.getAll(),
-		delay = 2000;
+	entries = subDB.getAll();
+	announcements = [];
 	Object.keys(entries).forEach(function (sub) {
-		setTimeout(function () {
-			web.fetch(r(sub)).then(web.atom2json).then(function (releases) {
-				if (!releases.length) // no posts
-					return;
-				if (entries[sub].lastAnnounced === releases[0].updated) // nothing new
-					return;
-				let index = -1;
-				for (let i = 0; i < releases.length; i++) {
-					if (releases[i].updated === entries[sub].lastAnnounced)
-						index = i;
-				} // either lastAnnounced is unset or there were way too many new posts since last announce
-				if (index === -1 || index > 5) {
-					let n = (releases.length > 5 ? 5 : releases.length);
-					announceReleases(entries[sub], releases.slice(0, n));
-				} else {
-					announceReleases(entries[sub], releases.slice(0, index));
+		if (!entries[sub].announce.length)
+			return; // noone to announce to - so we don't care
+		web.fetch(r(sub)).then(web.atom2json).then(function (releases) {
+			if (!releases.length) // no posts
+				return;
+			let newPosts = [],
+				seen = entries[sub].seen || [];
+			for (let i = 0; i < releases.length; i++) {
+				let postID = getPostID(releases[i].link);
+				if (seen.indexOf(postID) === -1) {// new post
+					newPosts.push(releases[i]);
+					seen.push(postID);
 				}
-				entries[sub].lastAnnounced = releases[0].updated;
+			}
+			if (newPosts.length) {
+				announcements = announcements.concat(announceReleases(entries[sub], newPosts));
+				entries[sub].seen = seen;
 				subDB.saveOne(sub, entries[sub]);
-			}).catch(function (error) {
-				logger.error(r(sub)+" - "+error, error);
-			});
-		}, delay);
-		delay += 2000;
+			}
+			size--;
+			if (size === 0)
+				irc.rated(announcements, 1000);
+		}).catch(function (error) {
+			logger.error(r(sub)+" - "+error, error);
+		});
 	});
 }
 
-function addSub(sub, user, channel) {
-	var entry, lchan = channel.toLowerCase(), lsub = sub.toLowerCase();
+function subscribe(nick, sub) {
+	let entry = subDB.getOne(sub);
+	if (!entry)
+		return "I'm not watching r/"+sub;
+	entry.announce.push(nick.toLowerCase());
+	if (entry.announce.length === 1) // first entry!
+		checkSubs();
+	subDB.saveOne(sub, entry);
+	return "Added! o7";
+}
 
-	if (subDB.hasOne(lsub)) {
-		entry = subDB.getOne(lsub);
-		if (entry.announce.indexOf(lchan) > -1)
-			return "I'm already watching r/"+sub+" in here.";
-		entry.announce.push(lchan);
-		subDB.saveOne(lsub, entry);
-		return "Added "+channel+" to the announce list for r/"+sub;
-	}
+function unsubscribe(nick, sub) {
+	let entry = subDB.getOne(sub);
+	if (!entry)
+		return "I'm not watching r/"+sub;
+	let lnick = nick.toLowerCase(),
+		index = entry.announce.indexOf(lnick);
+	if (index === -1)
+		return "You're not on the announce list for r/"+sub;
+	entry.announce.splice(index, 1);
+	subDB.saveOne(sub, entry);
+	return "Removed. o7";
+}
 
-	subDB.saveOne(lsub, {
-		subreddit: lsub,
+function addSubreddit(sub, user) {
+	subDB.saveOne(sub, {
+		subreddit: sub,
 		addedBy: user,
-		addedIn: lchan,
-		announce: [ lchan ]
+		announce: []
 	});
-	checkSubs();
-	return "Added. o7";
+	return "Added! To get announcements from r/"+sub+", users need to "+config.command_prefix+"subreddit subscribe "+sub;
 }
 
-function removeSub(sub) {
-	var lsub = sub.toLowerCase();
-	if (subDB.hasOne(lsub)) {
-		subDB.removeOne(lsub);
+function removeSubreddit(sub) {
+	if (subDB.hasOne(sub)) {
+		subDB.removeOne(sub);
 		return "Removed. o7";
 	}
 	return "I'm not watching r/"+sub;
@@ -94,22 +110,20 @@ function reddits(subs) {
 	return lib.commaList(subs.map(sub => "r/"+sub));
 }
 
-function listSubs(target) {
-	var ltarget, entries, ret;
+function listSubreddits(target) {
+	if (!subDB.size())
+		return "I'm not announcing updates to any subreddits.";
 	if (target) { // go through the entries and list them if they're announced to target
-		ltarget = target.toLowerCase();
-		entries = subDB.getAll();
-		ret = [];
+		let entries = subDB.getAll(),
+			ret = [];
 		Object.keys(entries).forEach(function (entry) {
-			if (entries[entry].announce.indexOf(ltarget) > -1)
+			if (entries[entry].announce.indexOf(target) > -1)
 				ret.push(entries[entry].subreddit);
 		});
 		if (!ret.length)
 			return "I'm not announcing any subreddit updates to "+target+".";
 		return reddits(ret)+" updates are being sent to "+target+".";
 	}
-	if (!subDB.size())
-		return "I'm not announcing updates to any subreddits.";
 	return "I'm announcing updates to "+reddits(subDB.getKeys())+".";
 }
 
@@ -130,26 +144,28 @@ bot.event({
 bot.command({
 	command: "subreddit",
 	help: "Subreddit announcer.",
-	syntax: `${config.command_prefix}subreddit <add/remove/list> [subreddit] - Example: ${config.command_prefix}subreddit add aww`,
-	admin: true,
+	syntax: `${config.command_prefix}subreddit <add/remove/subscribe/unsubscribe/list> [subreddit] [target] - Example: ${config.command_prefix}subreddit add aww - add and remove are admin only.`,
 	arglen: 1,
 	callback: function subreddit(input) {
-		var lsub;
 		switch (input.args[0].toLowerCase()) {
 		case "list":
 			if (input.args[1] !== undefined)
-				irc.say(input.context, listSubs(input.args[1]));
+				irc.say(input.context, listSubreddits(input.args[1].toLowerCase()));
 			else
-				irc.say(input.context, listSubs());
+				irc.say(input.context, listSubreddits());
 			break;
 		case "add":
+			if (!logins.isAdmin(input.nick)) {
+				irc.say(input.context, "You need to be an admin to add or remove subreddits I track. See subscribe if you want announcements from a tracked subreddit.");
+				return;
+			}
 			if (input.args[1] === undefined) {
 				irc.say(input.context, bot.cmdHelp("subreddit", "syntax"));
 				return;
 			}
-			lsub = input.args[1].toLowerCase();
-			if (subDB.hasOne(lsub)) { // don't need to check if it's already tracked
-				irc.say(input.context, addSub(lsub, input.user, input.context));
+			let lsub = input.args[1].toLowerCase();
+			if (subDB.hasOne(lsub)) {
+				irc.say(input.context, "I'm already watching for updates to r/"+lsub);
 				return;
 			} // need to check if the sub exists
 			web.fetch(r(lsub)).then(function (body) {
@@ -161,18 +177,36 @@ bot.command({
 					irc.say(input.context, "r/"+input.args[1]+" is a banned subreddit.");
 					return;
 				}
-				irc.say(input.context, addSub(lsub, input.user, input.context));
+				irc.say(input.context, addSubreddit(lsub, input.user, input.context));
 			}).catch(function (error) {
 				logger.error(error, error);
 				irc.say(input.context, "Something has gone awry.");
 			});
 			break;
 		case "remove":
+			if (!logins.isAdmin(input.nick)) {
+				irc.say(input.context, "You need to be an admin to add or remove subreddits I track. See subscribe if you want announcements from a tracked subreddit.");
+				return;
+			}
 			if (input.args[1] === undefined) {
 				irc.say(input.context, bot.cmdHelp("subreddit", "syntax"));
 				return;
 			}
-			irc.say(input.context, removeSub(input.args[1]));
+			irc.say(input.context, removeSubreddit(input.args[1].toLowerCase()));
+			break;
+		case "subscribe":
+			if (input.args[1] === undefined) {
+				irc.say(input.context, bot.cmdHelp("subreddit", "syntax"));
+				return;
+			}
+			irc.say(input.context, subscribe(input.nick, input.args[1].toLowerCase()));
+			break;
+		case "unsubscribe":
+			if (input.args[1] === undefined) {
+				irc.say(input.context, bot.cmdHelp("subreddit", "syntax"));
+				return;
+			}
+			irc.say(input.context, unsubscribe(input.nick, input.args[1].toLowerCase()));
 			break;
 		default:
 			irc.say(input.context, bot.cmdHelp("subreddit", "syntax"));
