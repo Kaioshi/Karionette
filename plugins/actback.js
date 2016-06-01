@@ -12,7 +12,7 @@ function getWpm(line) {
 
 function sayNocontext(context) {
 	web.atom2json("https://www.reddit.com/r/nocontext/random/.rss").then(function (results) {
-		let line = lib.decode(results.items[0].title);
+		let line = lib.randSelect(ial.Active(context))+": "+lib.decode(results.items[0].title);
 		setTimeout(function () {
 			irc.say(context, line);
 		}, getWpm(line));
