@@ -6,22 +6,18 @@ function checkGits() {
 	var aList = gitDB.getOne("announceList");
 	if (gitDB.size() === 0 || !aList || !aList.length)
 		return;
-	web.fetch("https://github.com/Kaioshi/Karionette/commits/master.atom")
-	.then(web.atom2json)
-	.then(function (json) {
-		var altered = false,
-			latest = gitDB.getOne("latest") || [],
+	web.atom2json("https://github.com/Kaioshi/Karionette/commits/master.atom").then(function (results) {
+		let latest = gitDB.getOne("latest") || [],
 			announce = [];
-		json.forEach(function (entry) {
+		results.items.forEach(function (entry) {
 			if (latest.indexOf(entry.link) === -1) {
 				aList.forEach(function (target) {
 					announce.push([ "say", target, "git: "+lib.decode(entry.title)+" ~ "+entry.link ]);
 				});
 				latest.push(entry.link);
-				altered = true;
 			}
 		});
-		if (altered) {
+		if (announce.length) {
 			irc.rated(announce);
 			gitDB.saveOne("latest", latest);
 		}

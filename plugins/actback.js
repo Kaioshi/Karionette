@@ -11,9 +11,8 @@ function getWpm(line) {
 }
 
 function sayNocontext(context) {
-	web.fetch("https://www.reddit.com/r/nocontext/random/.rss")
-	.then(web.atom2json).then(function (result) {
-		let line = lib.decode(result[0].title);
+	web.atom2json("https://www.reddit.com/r/nocontext/random/.rss").then(function (results) {
+		let line = lib.decode(results.items[0].title);
 		setTimeout(function () {
 			irc.say(context, line);
 		}, getWpm(line));
