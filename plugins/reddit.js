@@ -31,23 +31,25 @@ function announceReleases(entry, releases) {
 }
 
 function checkSubs() {
-	let entries, announcements, size = subDB.size();
-	if (!size)
+	if (!subDB.size())
 		return;
-	entries = subDB.getAll();
-	announcements = [];
-	Object.keys(entries).forEach(function (sub) {
-		if (!entries[sub].announce.length)
-			return; // noone to announce to - so we don't care
-		web.fetch(r(sub)).then(web.atom2json).then(function (releases) {
-			if (!releases.length) // no posts
+	let entries = subDB.getAll();
+	let validEntries = Object.keys(entries).filter(function (entry) {
+		return entries[entry].announce !== undefined && entries[entry].announce.length;
+	});
+	Promise.all(validEntries.map(function (entry) { return web.atom2json(r(entry), entry); }))
+	.then(function (results) {
+		let announcements = [];
+		results.forEach(function (release) {
+			if (!release.items.length) // no posts
 				return;
 			let newPosts = [],
+				sub = release.name,
 				seen = entries[sub].seen || [];
-			for (let i = 0; i < releases.length; i++) {
-				let postID = getPostID(releases[i].link);
+			for (let i = 0; i < release.items.length; i++) {
+				let postID = getPostID(release.items[i].link);
 				if (seen.indexOf(postID) === -1) {// new post
-					newPosts.push(releases[i]);
+					newPosts.push(release.items[i]);
 					seen.push(postID);
 				}
 			}
@@ -56,12 +58,11 @@ function checkSubs() {
 				entries[sub].seen = seen;
 				subDB.saveOne(sub, entries[sub]);
 			}
-			size--;
-			if (size === 0 && announcements.length)
-				irc.rated(announcements, 1000);
-		}).catch(function (error) {
-			logger.error(r(sub)+" - "+error, error);
 		});
+		if (announcements.length)
+			irc.rated(announcements, 1000);
+	}).catch(function (error) {
+		logger.error(error, error);
 	});
 }
 
@@ -115,9 +116,10 @@ function listSubreddits(target) {
 		return "I'm not announcing updates to any subreddits.";
 	if (target) { // go through the entries and list them if they're announced to target
 		let entries = subDB.getAll(),
+			ltarget = target.toLowerCase(),
 			ret = [];
 		Object.keys(entries).forEach(function (entry) {
-			if (entries[entry].announce.indexOf(target) > -1)
+			if (entries[entry].announce.indexOf(ltarget) > -1)
 				ret.push(entries[entry].subreddit);
 		});
 		if (!ret.length)
@@ -150,7 +152,7 @@ bot.command({
 		switch (input.args[0].toLowerCase()) {
 		case "list":
 			if (input.args[1] !== undefined)
-				irc.say(input.context, listSubreddits(input.args[1].toLowerCase()));
+				irc.say(input.context, listSubreddits(input.args[1]));
 			else
 				irc.say(input.context, listSubreddits());
 			break;
@@ -221,9 +223,10 @@ bot.command({
 	help: "Pulls a random r/nocontext title.",
 	syntax: `${config.command_prefix}nocontext`,
 	callback: function nocontext(input) {
-		web.fetch("https://www.reddit.com/r/nocontext/random/.rss")
-		.then(web.atom2json).then(function (result) {
-			irc.say(input.context, lib.decode(result[0].title));
+		web.atom2json("https://www.reddit.com/r/nocontext/random/.rss").then(function (result) {
+			irc.say(input.context, lib.decode(result.items[0].title));
+		}).catch(function (error) {
+			logger.error(";nocontext: "+error, error);
 		});
 	}
 });
