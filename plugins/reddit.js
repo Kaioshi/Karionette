@@ -56,11 +56,12 @@ function checkSubs() {
 			if (newPosts.length) {
 				announcements = announcements.concat(announceReleases(entries[sub], newPosts));
 				entries[sub].seen = seen;
-				subDB.saveOne(sub, entries[sub]);
 			}
 		});
-		if (announcements.length)
+		if (announcements.length) {
+			subDB.saveAll(entries);
 			irc.rated(announcements, 1000);
+		}
 	}).catch(function (error) {
 		logger.error(error, error);
 	});
