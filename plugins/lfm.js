@@ -203,7 +203,7 @@ bot.command({
 				song.tags.push("No tags found");
 			}
 			irc.say(input.context, user+song.tense+"\""+song.artist+" ~ "+song.track+
-				"\" ["+song.tags.join(", ")+"] ("+song.duration+") ~ "+lib.commaNum(song.date+song.userplays)+
+				"\" ["+song.tags.join(", ")+"] ("+song.duration+") ~ "+song.date+song.userplays+
 				" - Total Plays: "+lib.commaNum(song.playcount)+
 				" - Current Listeners: "+lib.commaNum(song.listeners));
 		}, function (error) {
