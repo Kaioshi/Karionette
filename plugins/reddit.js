@@ -130,7 +130,7 @@ function listSubreddits(target) {
 	return "I'm announcing updates to "+reddits(subDB.getKeys())+".";
 }
 
-timers.startTick(300); // 5 minute ticker
+ticker.start(300); // 5 minute ticker
 
 bot.event({
 	handle: "subredditCheck",

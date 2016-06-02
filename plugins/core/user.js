@@ -161,7 +161,7 @@ function isAction(data) {
 	return (data.substring(0, 7) === "\x01ACTION");
 }
 
-timers.startTick(900);
+ticker.start(900);
 
 bot.event({
 	handle: "saveAllSeen",

@@ -36,7 +36,7 @@ var	mangaDB = {
 		}
 	};
 
-timers.startTick(300); // start a 5 minute ticker
+ticker.start(300); // start a 5 minute ticker
 
 function updateAnnouncements(announce, msg, updates) {
 	for (var i = 0; i < announce.length; i++) {
