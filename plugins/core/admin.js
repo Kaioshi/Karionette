@@ -1,6 +1,4 @@
 "use strict";
-var fs = require("fs"),
-	ignore = require("./lib/ignore.js")(DB, lib, ial);
 
 bot.command({
 	command: "errors",
@@ -99,7 +97,7 @@ bot.command({
 		var plugin;
 		if (input.args) {
 			plugin = input.args[0];
-			if (!fs.existsSync("plugins/"+plugin+".js") && !fs.existsSync("plugins/core/"+plugin+".js")) {
+			if (!lib.fs.exists("plugins/"+plugin+".js") && !lib.fs.exists("plugins/core/"+plugin+".js")) {
 				irc.say(input.context, "There is no such plugin. o.o;");
 				return;
 			}
