@@ -11,12 +11,12 @@ if (!require("fs").existsSync("config")) {
 	process.exit(1);
 }
 
-var lib = require("./lib/funcs.js")(),
-	config = require("./lib/config.js")(),
+let config = require("./lib/config.js")(),
 	edgar = require("./lib/edgar.js")(),
+	logger = require("./lib/logger.js")(config, edgar),
 	ial = require("./lib/ial.js")(config),
-	timers = require("./lib/timers.js")(lib, edgar.emitEvent),
-	logger = require("./lib/logger.js")(lib, config, edgar.emitEvent),
+	lib = require("./lib/funcs.js")(logger),
+	ticker = require("./lib/ticker.js")(lib, edgar),
 	Plugin = require("./lib/plugin.js")(logger, config),
 	fragDB = require("./lib/fragDB.js")(lib, logger),
 	DB = require("./lib/db.js")(lib, logger),
@@ -112,8 +112,9 @@ Plugin.setupSandbox({ // console and setInterval not used by any plugins as of 2
 	fragDB: fragDB,
 	lib: lib,
 	ial: ial,
+	ignore: ignore,
 	logins: logins,
-	timers: timers,
+	ticker: ticker,
 	require: require,
 	bot: bot,
 	logger: logger,
