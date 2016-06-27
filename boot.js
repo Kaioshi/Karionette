@@ -15,9 +15,9 @@ process.on("uncaughtException", function caughtUncaughtException(err) {
 
 plugin = require("./plugin.js")(global.globals);
 plugin.loadCorePlugins([ // the order matters
-	"bot", "ticker", "config", "logger", "lib", "web", "db", "words",
-	"ial", "alias", "ignore", "logins", "perms", "bot-parse", "irc", "admin",
-	"core-events", "logins-events", "ial-events", "perms-events", "alias-events", "config-events"
+	"bot", "ticker", "config", "logger", "lib", "web", "db", "words", "ial", "alias", "ignore",
+	"logins", "perms", "bot-parse", "irc", "admin", "words-events", "core-events", "logins-events",
+	"seen-events", "ial-events", "perms-events", "alias-events", "config-events"
 ]);
 plugin.loadOptionalPlugins();
 
