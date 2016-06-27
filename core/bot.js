@@ -1,151 +1,163 @@
 "use strict";
 
-module.exports = function (config, logger, edgar, ial, perms, words, logins, alias, ignore) {
-	var bot = {};
+// commandList is kept up to date so that we don't have to Object.keys(commands)
+// every time a command is attempted.
+let bot = {}, events = {}, commandList = [], commands = {}, commandAliases = {};
 
-	function cleanNick(nick) { // removes trailing : , from nicks.
-		var nickCompletionCharacters = [ ",", ":" ];
-		if (nickCompletionCharacters.indexOf(nick[nick.length-1]) > -1)
-			return nick.slice(1, -1);
-		return nick.slice(1);
-	}
-
-	function getCommand(input) {
-		var command, pos, tmp1, tmp2;
-		tmp1 = input[3].slice(1).toLowerCase();
-		if (tmp1[0] === config.command_prefix) {
-			pos = 3;
-			command = tmp1.slice(1);
-		} else if (input[4]) {
-			tmp2 = cleanNick(input[3]);
-			tmp1 = input[4].toLowerCase();
-			if (tmp2 === config.nick || config.nickname.some(nick => nick.toLowerCase() === tmp2.toLowerCase())) {
-				pos = 4;
-				command = tmp1;
-			}
-		}
-		if (command) {
-			if (edgar.isCommand(command))
-				return [ "command", command, pos ];
-			if (alias.db.hasOne(command))
-				return [ "alias", command, pos ];
-		}
-	}
-
-	function arglenCheck(command, args) {
-		var needed = edgar.commandArglen(command);
-		if (needed > 0 && (args === undefined || needed > args.length))
+function objContains(obj, items) {
+	for (let i = 0; i < items.length; i++) {
+		if (obj[items[i]] === undefined)
 			return false;
-		return true;
 	}
+	return true;
+}
 
-	bot.parse = function botParse(input) {
-		var type, params, aliasSyntax, cmd,
-			permission = true;
-		input = input.trim();
-		logger.filter(input);
-		if (ignore.check(input))
-			return; // ignored
-		params = { raw: input };
-		input = input.split(" ");
-		if (input[0][0] === ":") {
-			type = input[1];
-			if (type === "PRIVMSG" && (cmd = getCommand(input)) !== undefined) {
-				params.command = cmd;
-				if (params.command[0] === "alias") {
-					if (!perms.Check(input[0].slice(1), "alias", params.command[1]))
-						permission = false;
-					params.alias = params.command[1];
-					params.aliasArgs = input.slice(params.command[2]+1).join(" ");
-					aliasSyntax = alias.syntax(params.alias, params.aliasArgs.length);
-					params.raw = alias.transform(params.raw, params.command[1], alias.db.getOne(params.alias), params.aliasArgs);
-					input = params.raw.split(" ");
-					params.command = input[3].slice(2);
-				} else {
-					if (params.command[2] === 4) {
-						params.data = input.slice(4).join(" ");
-						params.args = input.slice(5);
-					}
-					params.command = params.command[1];
-				}
-			}
-		} else {
-			type = input[0]; // Y U NO :, PING
-		}
-		// fill in mojojojo
-		if (input[0].indexOf("!") > -1) {
-			params.nick = input[0].slice(1, input[0].indexOf("!"));
-			params.address = input[0].slice(input[0].indexOf("!")+1);
-			params.user = input[0].slice(1);
-			params.context = (input[2][0] !== ":" ? input[2] : input[2].slice(1));
-			if (!params.data)
-				params.data = params.raw.slice(params.raw.indexOf(" :")+2);
-			if (params.context[0] !== "#")
-				params.context = params.nick;
-			else
-				params.channel = params.context;
-		}
-		switch (type) {
-		case "PRIVMSG":
-			params.message = input.slice(3).join(" ").slice(1);
-			if (params.command) {
-				if (edgar.commandNeedsAdmin(params.command) && !logins.isAdmin(params.nick)) {
-					irc.say(params.context, "Bitch_, please.");
-					break;
-				}
-				if (!params.args)
-					params.args = input.slice(4);
-				params.data = params.data.slice(params.data.indexOf(" ")+1);
-				if (params.args.length === 0)
-					delete params.args;
-				if (edgar.isCommandAlias(params.command))
-					params.command = edgar.commandAlias(params.command);
-				if (!permission) {
-					irc.say(params.context, "You don't have permission to do that.");
-					break;
-				}
-				if (aliasSyntax) {// no command should happen if an alias syntax was wrong
-					irc.say(params.context, aliasSyntax);
-				} else if (!arglenCheck(params.command, params.args)) {
-					irc.say(params.context, this.cmdHelp(params.command, "syntax"));
-				} else {
-					edgar.emitCommand(params.command, params);
-				}
-			}
-			break;
-		case "PING":
-			params.challenge = input[1].slice(1);
-			break;
-		case "MODE":
-			params.mode = (input[3][0] !== ":" ? input[3] : input[3].slice(1));
-			params.affected = input.slice(4);
-			break;
-		case "TOPIC":
-			params.topic = input.slice(3).join(" ").slice(1);
-			break;
-		case "PART":
-			params.reason = (input[3] ? input.slice(3).join(" ").slice(1) : "");
-			break;
-		case "NICK":
-			params.newnick = input[2].slice(1);
-			break;
-		case "QUIT":
-			params.reason = input.slice(2).join(" ").slice(1);
-			break;
-		case "KICK":
-			params.kicked = input[3];
-			params.reason = input.slice(4).join(" ").slice(1);
-			break;
-		}
-		edgar.emitEvent(type, params);
-		params = null;
-	};
-	bot.emitCustomEvent = edgar.emitEvent;
-	bot.cmdExists = edgar.isCommand;
-	bot.cmdHelp = edgar.commandHelp;
-	bot.cmdList = edgar.commandList;
-	bot.event = edgar.event;
-	bot.command = edgar.command;
+function hasEvent(e) {
+	return events[e] !== undefined;
+}
 
-	return bot;
-};
+function eventsIndexOf(trigger, handle) {
+	if (events[trigger] === undefined)
+		return -1;
+	for (let i = 0; i < events[trigger].length; i++) {
+		if (handle === events[trigger][i].handle)
+			return i;
+	}
+	return -1;
+}
+
+function registerEvent(e) {
+	unregisterEvent(e.event, e.handle); // There Can Be Only Juan
+	events[e.event] = events[e.event] || [];
+	events[e.event].push(e);
+}
+
+function unregisterEvent(trigger, handle) {
+	let index = eventsIndexOf(trigger, handle);
+	if (index > -1)
+		events[trigger].splice(index, 1);
+}
+
+function registerCommand(c) {
+	if (Array.isArray(c.command)) {
+		unregisterCommand(c.command[0]);
+		commands[c.command[0]] = c;
+		c.command.slice(1).forEach(function (cmd) {
+			commandAliases[cmd] = c.command[0];
+		});
+	} else {
+		unregisterCommand(c.command);
+		commands[c.command] = c;
+	}
+	updateCommandList();
+}
+
+function unregisterCommand(cmd) {
+	if (commands[cmd] === undefined)
+		return;
+	delete commands[cmd];
+	Object.keys(commandAliases).forEach(function (entry) {
+		if (commandAliases[entry] === cmd)
+			delete commandAliases[entry];
+	});
+	updateCommandList();
+}
+
+function updateCommandList() {
+	commandList = Object.keys(commands).concat(Object.keys(commandAliases));
+}
+
+function emitCommand(c, input) {
+	if (commands[c])
+		commands[c].callback(input);
+}
+
+function emitEvent(e, input) {
+	if (events[e] === undefined || !events[e].length)
+		return;
+	for (let i = 0; i < events[e].length; i++) {
+		if (events[e][i].condition === undefined || events[e][i].condition(input)) {
+			if (events[e][i].regex) {
+				let match = events[e][i].regex.exec(input.raw);
+				if (match) {
+					input.match = match;
+					events[e][i].callback(input);
+				}
+			} else {
+				events[e][i].callback(input);
+			}
+		}
+	}
+}
+
+function commandNeedsAdmin(cmd) {
+	if (bot.cmdExists(cmd)) {
+		if (commandAliases[cmd])
+			return commands[commandAliases[cmd]].admin || false;
+		return commands[cmd].admin || false;
+	}
+	return false;
+}
+
+function commandArglen(cmd) {
+	if (bot.cmdExists(cmd)) {
+		if (commandAliases[cmd])
+			return commands[commandAliases[cmd]].arglen || 0;
+		return commands[cmd].arglen || 0;
+	}
+}
+
+function commandAlias(cmd) {
+	return commandAliases[cmd];
+}
+
+function isCommandAlias(cmd) {
+	return Object.keys(commandAliases).indexOf(cmd) > -1;
+}
+
+function cmdHelp(cmd, type) {
+	let command = commandAliases[cmd] || cmd;
+	if (!commands[command] || !commands[command][type])
+		return;
+	switch (type) {
+	case "help": return "[Help] "+commands[command][type];
+	case "syntax": return "[Help] Syntax: "+commands[command][type];
+	case "options": return "[Help] Options: "+commands[command][type];
+	default: return;
+	}
+}
+
+function cmdList() {
+	return Object.keys(commands); // not including command aliases in this
+}
+
+function cmdExists(cmd) {
+	return commandList.indexOf(cmd) > -1;
+}
+
+function event(e) {
+	if (!objContains(e, [ "handle", "event", "callback" ]))
+		return;
+	registerEvent(e);
+}
+
+function command(c) {
+	if (!objContains(c, [ "command", "help", "callback" ]))
+		return;
+	registerCommand(c);
+}
+
+bot.emitEvent = emitEvent;
+bot.commandNeedsAdmin = commandNeedsAdmin;
+bot.commandArglen = commandArglen;
+bot.commandAlias = commandAlias;
+bot.isCommandAlias = isCommandAlias;
+bot.cmdHelp = cmdHelp;
+bot.cmdList = cmdList;
+bot.cmdExists = cmdExists;
+bot.event = event;
+bot.command = command;
+bot.hasEvent = hasEvent;
+bot.emitCommand = emitCommand;
+
+plugin.declareGlobal("bot", "bot", bot); // this is a problem~
