@@ -1,24 +1,15 @@
 // perms fondling
 "use strict";
-var aliasDB = new DB.Json({filename: "alias/alias"}),
-	varDB = new DB.Json({filename: "alias/vars"});
 
 function itemExists(type, item) {
-	var variable, alias;
 	switch (type) {
 	case "variable":
-		variable = varDB.getOne("{"+item.toLowerCase()+"}");
-		if (variable) {
-			variable = null;
+		if (alias.varDB.hasOne(`{${item.toLowerCase()}}`))
 			return true;
-		}
 		break;
 	case "alias":
-		alias = aliasDB.getOne(item);
-		if (alias) {
-			alias = null;
+		if (alias.db.hasOne(item))
 			return true;
-		}
 		break;
 	case "command":
 		if (bot.cmdExists(item)) return true;
@@ -35,7 +26,7 @@ bot.command({
 	syntax: config.command_prefix+"perms <allow/deny/owner> <add/remove> <alias/variable/command> <name of alias/variable/command> "+
 		"<username> - Example: "+config.command_prefix+"perms deny add alias whip ranma",
 	callback: function (input) {
-		var reg, result;
+		let reg, result;
 		reg = /^(allow|deny|owner) (add|remove) (alias|variable|command) ([^ ]+) ([^ ]+)/.exec(input.data);
 		if (!reg) {
 			irc.say(input.context, bot.cmdHelp("perms", "syntax"));
@@ -60,7 +51,7 @@ bot.command({
 	help: "Shows permission information on an alias, variable or command. See also: perms, claim",
 	syntax: config.command_prefix+"inspect <variable/alias/command> <name of variable/alias/command>",
 	callback: function (input) {
-		var reg, result;
+		let reg, result;
 		reg = /^(variable|alias|command) ([^ ]+)/.exec(input.data.toLowerCase());
 		if (!reg) {
 			irc.say(input.context, bot.cmdHelp("inspect", "syntax"));
@@ -85,7 +76,7 @@ bot.command({
 	syntax: config.command_prefix+"claim <alias/variable/command> <name of alias/variable/command>",
 	arglen: 2,
 	callback: function (input) {
-		var reg, admin, user;
+		let reg, admin, user;
 		reg = /^(alias|variable|command) ([^ ]+)/.exec(input.data.toLowerCase());
 		if (!reg) {
 			irc.say(input.context, bot.cmdHelp("claim", "syntax"));
