@@ -3,7 +3,8 @@ let	seen = {};
 
 function getOldSeen(nick, channel) {
 	let seenDB, entry;
-	if (!fs.existsSync("data/users/"+channel+".json")) return;
+	if (!fs.existsSync("data/users/"+channel+".json"))
+		return;
 	seenDB = new DB.Json({filename: "users/"+channel});
 	entry = seenDB.getOne(nick.toLowerCase());
 	if (entry) {
@@ -177,9 +178,7 @@ bot.event({
 			return; // query
 		date = Date.now();
 		data = (isAction(input.message) ? "* "+input.nick+" "+input.message.slice(8,-1) : "<"+input.nick+"> "+input.message);
-		ial.Channel(input.channel).setActive(input.nick);
 		setLastMessage(input.nick, input.channel, data, date);
-		data = null; date = null;
 	}
 });
 
@@ -269,6 +268,6 @@ bot.command({
 });
 
 // Save Cache on Exit
-lib.events.on("closing", function () {
+process.on("closing", function () {
 	saveAllSeen();
 });
