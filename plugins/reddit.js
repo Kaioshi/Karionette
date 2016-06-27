@@ -32,7 +32,7 @@ function announceReleases(entry, releases, sub) {
 				announce.push([ "say", target, lib.decode(releaseMsg) ]);
 			else {
 				if (ial.User(target)) // only if they're online
-					announce.push([ "say", target, lib.decode(releaseMsg) ]);
+					announce.push([ "notice", target, lib.decode(releaseMsg) ]);
 				else
 					bot.queueMessage({ method: "notice", nick: target, message: lib.decode(releaseMsg) });
 			}
