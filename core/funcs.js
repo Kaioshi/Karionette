@@ -3,7 +3,6 @@
 var fs = require("fs"),
 	memProfcache = {},
 	timedCache = {},
-	EventEmitter = require("events"),
 	memuseLast = process.memoryUsage().rss;
 
 function firstHit(arr) {
@@ -34,9 +33,9 @@ function inteSupp (str, obj) { // this matches on the entire '{word}' rather tha
 	});
 }
 
-module.exports = function (logger) {
+module.exports = function (logger, EventEmitter) {
 	return {
-		events: new EventEmitter(),
+		events: EventEmitter,
 		decode: require("./entities.js").decode,
 		formatOutput: function (template, replacements, discard) {
 			return template.replace(/\{([^\{\} ]+)\}/g, function (a, b) {

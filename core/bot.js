@@ -1,6 +1,6 @@
 "use strict";
 
-module.exports = function (lib, config, logger, edgar, ial, perms, words, logins, alias, ignore) {
+module.exports = function (config, logger, edgar, ial, perms, words, logins, alias, ignore) {
 	var bot = {};
 
 	function cleanNick(nick) { // removes trailing : , from nicks.
@@ -19,7 +19,7 @@ module.exports = function (lib, config, logger, edgar, ial, perms, words, logins
 		} else if (input[4]) {
 			tmp2 = cleanNick(input[3]);
 			tmp1 = input[4].toLowerCase();
-			if (tmp2 === config.nick || lib.hasElement(config.nickname, tmp2)) {
+			if (tmp2 === config.nick || config.nickname.some(nick => nick.toLowerCase() === tmp2.toLowerCase())) {
 				pos = 4;
 				command = tmp1;
 			}

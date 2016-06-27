@@ -6,14 +6,13 @@
  * commandAliases["echo"] -> "say"
  */
 
-module.exports = function () {
+module.exports = function (EventEmitter) {
 	// commandList is kept up to date so that we don't have to Object.keys(commands)
 	// every time a command is attempted.
 	var edgar = {}, events = {}, commandList = [], commands = {}, commandAliases = {};
 
 	function objContains(obj, items) {
-		var i;
-		for (i = 0; i < items.length; i++) {
+		for (let i = 0; i < items.length; i++) {
 			if (obj[items[i]] === undefined)
 				return false;
 		}
@@ -97,6 +96,19 @@ module.exports = function () {
 			}
 		}
 	};
+	
+	// this is just a relay to things I don't want to pull all of edgar to get to.
+	// EventEmitter.emit("Event", { event: "event Name", input: args })
+	EventEmitter.on("Event", function (e) {
+		if (e && e.event && typeof e.event === "string") {
+			if (e.input)
+				edgar.emitEvent("Event "+e.event, e.input);
+			else
+				edgar.emitEvent(e.event);
+		} else {
+			console.log(new Date().toLocaleTimeString()+" invalid event sent to edgar", e);
+		}
+	});
 
 	edgar.commandNeedsAdmin = function commandNeedsAdmin(cmd) {
 		if (edgar.isCommand(cmd)) {

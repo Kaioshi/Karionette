@@ -1,7 +1,7 @@
 "use strict";
 var fs = require("fs");
 
-module.exports = function (config, edgar) {
+module.exports = function (config, emitEvent) {
 	var logDay = new Date().getDate(), logFile;
 
 	if (!fs.existsSync("data/logs"))
@@ -72,11 +72,11 @@ module.exports = function (config, edgar) {
 		misc: function (line, options) { this.log("Misc", line, true, options); },
 		error: function (line, err, options) {
 			globals.lastError = new Date().toLocaleTimeString()+" [Error] "+line;
-			edgar.emitEvent("Event: Error", line);
+			emitEvent("Event: Error", line);
 			this.log("Error", "\u001b[31m"+line+"\u001b[0m", true, options);
 			if (err && err.stack) {
 				globals.lastErrstack = err.stack;
-				edgar.emitEvent("Event: Error Stack", err.stack);
+				emitEvent("Event: Error Stack", err.stack);
 				this.log("Error", "\u001b[30;1m" + err.stack + "\u001b[0m", true, options);
 			}
 		},

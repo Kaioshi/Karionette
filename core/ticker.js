@@ -1,6 +1,6 @@
 // tickers!
 "use strict";
-module.exports = function (lib, edgar) {
+module.exports = function (emitEvent) {
 	let	tickers = {};
 
 	return {
@@ -8,7 +8,8 @@ module.exports = function (lib, edgar) {
 			if (tickers[interval])
 				return; // already running this ticker
 			tickers[interval] = setInterval(function () {
-				edgar.emitEvent("Ticker: "+interval+"s tick");
+				//lib.events.emit("Event", { event: "Ticker: "+interval+"s tick" });
+				emitEvent("Ticker: "+interval+"s tick");
 			}, parseInt(interval, 10)*1000);
 		},
 		stop: function stopTicker(interval) {
