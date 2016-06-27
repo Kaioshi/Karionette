@@ -1,167 +1,198 @@
 "use strict";
-/**
- * couldn't think of a name other than "events", which is taken globally. Edgar it is.
- * events["PRIVMSG"] -> [ { handle: foo, cb: callback() }, ... ]
- * commands["say"] -> { help, syntax, callback }
- * commandAliases["echo"] -> "say"
- */
 
-module.exports = function (EventEmitter) {
-	// commandList is kept up to date so that we don't have to Object.keys(commands)
-	// every time a command is attempted.
-	var edgar = {}, events = {}, commandList = [], commands = {}, commandAliases = {};
+function cleanNick(nick) { // removes trailing : , from nicks.
+	let nickCompletionCharacters = [ ",", ":" ];
+	if (nickCompletionCharacters.indexOf(nick[nick.length-1]) > -1)
+		return nick.slice(1, -1);
+	return nick.slice(1);
+}
 
-	function objContains(obj, items) {
-		for (let i = 0; i < items.length; i++) {
-			if (obj[items[i]] === undefined)
-				return false;
-		}
-		return true;
-	}
-
-	function eventsIndexOf(trigger, handle) {
-		var i;
-		if (events[trigger] === undefined)
-			return -1;
-		for (i = 0; i < events[trigger].length; i++) {
-			if (handle === events[trigger][i].handle)
-				return i;
-		}
-		return -1;
-	}
-
-	function registerEvent(e) {
-		unregisterEvent(e.event, e.handle); // There Can Be Only Juan
-		events[e.event] = events[e.event] || [];
-		events[e.event].push(e);
-	}
-
-	function unregisterEvent(trigger, handle) {
-		var index = eventsIndexOf(trigger, handle);
-		if (index > -1)
-			events[trigger].splice(index, 1);
-	}
-
-	function registerCommand(c) {
-		if (Array.isArray(c.command)) {
-			unregisterCommand(c.command[0]);
-			commands[c.command[0]] = c;
-			c.command.slice(1).forEach(function (cmd) {
-				commandAliases[cmd] = c.command[0];
-			});
-		} else {
-			unregisterCommand(c.command);
-			commands[c.command] = c;
-		}
-		updateCommandList();
-	}
-
-	function unregisterCommand(cmd) {
-		if (commands[cmd] === undefined)
-			return;
-		delete commands[cmd];
-		Object.keys(commandAliases).forEach(function (entry) {
-			if (commandAliases[entry] === cmd)
-				delete commandAliases[entry];
-		});
-		updateCommandList();
-	}
-
-	function updateCommandList() {
-		commandList = Object.keys(commands).concat(Object.keys(commandAliases));
-	}
-
-	function runRegexEvent(e, input) {
-		var match = e.regex.exec(input.raw);
-		if (match) {
-			input.match = match;
-			e.callback(input);
+function getCommand(input) {
+	let command, pos, tmp1, tmp2;
+	tmp1 = input[3].slice(1).toLowerCase();
+	if (tmp1[0] === config.command_prefix) {
+		pos = 3;
+		command = tmp1.slice(1);
+	} else if (input[4]) {
+		tmp2 = cleanNick(input[3]);
+		tmp1 = input[4].toLowerCase();
+		if (tmp2 === config.nick || config.nickname.some(nick => nick.toLowerCase() === tmp2.toLowerCase())) {
+			pos = 4;
+			command = tmp1;
 		}
 	}
+	if (command) {
+		if (bot.cmdExists(command))
+			return [ "command", command, pos ];
+		if (alias.db.hasOne(command))
+			return [ "alias", command, pos ];
+	}
+}
 
-	edgar.emitCommand = function emitCommand(c, input) {
-		commands[c].callback(input);
-	};
-
-	edgar.emitEvent = function emit(e, input) {
-		var i;
-		if (events[e] !== undefined && events[e].length) {
-			for (i = 0; i < events[e].length; i++) {
-				if (events[e][i].condition === undefined || events[e][i].condition(input)) {
-					if (events[e][i].regex)
-						runRegexEvent(events[e][i], input);
-					else
-						events[e][i].callback(input);
-				}
-			}
-		}
-	};
-	
-	// this is just a relay to things I don't want to pull all of edgar to get to.
-	// EventEmitter.emit("Event", { event: "event Name", input: args })
-	EventEmitter.on("Event", function (e) {
-		if (e && e.event && typeof e.event === "string") {
-			if (e.input)
-				edgar.emitEvent("Event "+e.event, e.input);
-			else
-				edgar.emitEvent(e.event);
-		} else {
-			console.log(new Date().toLocaleTimeString()+" invalid event sent to edgar", e);
-		}
-	});
-
-	edgar.commandNeedsAdmin = function commandNeedsAdmin(cmd) {
-		if (edgar.isCommand(cmd)) {
-			if (commandAliases[cmd])
-				return commands[commandAliases[cmd]].admin || false;
-			return commands[cmd].admin || false;
-		}
+function arglenCheck(command, args) {
+	let needed = bot.commandArglen(command);
+	if (needed > 0 && (args === undefined || needed > args.length))
 		return false;
-	};
+	return true;
+}
 
-	edgar.commandArglen = function commandArglen(cmd) {
-		if (edgar.isCommand(cmd)) {
-			if (commandAliases[cmd])
-				return commands[commandAliases[cmd]].arglen || 0;
-			return commands[cmd].arglen || 0;
+function handleMessage(inputLine, input, params) {
+	let cmd, permission = true, aliasSyntax;
+	if ((cmd = getCommand(input)) !== undefined) {
+		params.command = cmd;
+		if (params.command[0] === "alias") {
+			if (!perms.Check(params.user, "alias", params.command[1]))
+				permission = false;
+			params.alias = params.command[1];
+			params.aliasArgs = input.slice(params.command[2]+1).join(" ");
+			aliasSyntax = alias.syntax(params.alias, params.aliasArgs.length);
+			params.raw = alias.transform(params.raw, params.command[1], alias.db.getOne(params.alias), params.aliasArgs);
+			params.data = params.raw.slice(params.raw.indexOf(" :")+2);
+			input = params.raw.split(" ");
+			params.command = input[3].slice(2);
+		} else {
+			if (params.command[2] === 4) {
+				params.data = input.slice(4).join(" ");
+				params.args = input.slice(5);
+			}
+			params.command = params.command[1];
 		}
-	};
-
-	edgar.commandAlias = function commandAlias(cmd) {
-		return commandAliases[cmd];
-	};
-
-	edgar.isCommandAlias = function isCommandAlias(cmd) {
-		return Object.keys(commandAliases).indexOf(cmd) > -1;
-	};
-
-	edgar.commandHelp = function commandHelp(cmd, type) {
-		var command = commandAliases[cmd] || cmd;
-		if (!commands[command] || !commands[command][type])
+	}
+	params.message = input.slice(3).join(" ").slice(1);
+	if (params.command) {
+		if (bot.commandNeedsAdmin(params.command) && !logins.isAdmin(params.nick)) {
+			irc.say(params.context, "Bitch_, please.");
+			logger.denied(inputLine);
 			return;
-		switch (type) {
-		case "help": return "[Help] "+commands[command][type];
-		case "syntax": return "[Help] Syntax: "+commands[command][type];
-		case "options": return "[Help] Options: "+commands[command][type];
-		default: return;
 		}
-	};
-	edgar.commandList = function () {
-		return Object.keys(commands); // not including command aliases in this
-	};
-	edgar.isCommand = function isCommand(cmd) {
-		return commandList.indexOf(cmd) > -1;
-	};
-	edgar.event = function (e) {
-		if (!objContains(e, [ "handle", "event", "callback" ]))
+		if (!params.args)
+			params.args = input.slice(4);
+		params.data = params.data.slice(params.data.indexOf(" ")+1);
+		if (params.args.length === 0)
+			delete params.args;
+		if (bot.isCommandAlias(params.command))
+			params.command = bot.commandAlias(params.command);
+		if (!permission) {
+			irc.say(params.context, "You don't have permission to do that.");
+			logger.denied(inputLine);
 			return;
-		registerEvent(e);
-	};
-	edgar.command = function (c) {
-		if (!objContains(c, [ "command", "help", "callback" ]))
-			return;
-		registerCommand(c);
-	};
+		}
+		logger.chat(inputLine);
+		if (aliasSyntax) {// no command should happen if an alias syntax was wrong
+			irc.say(params.context, aliasSyntax);
+		} else if (!arglenCheck(params.command, params.args)) {
+			irc.say(params.context, bot.cmdHelp(params.command, "syntax"));
+		} else {
+			bot.emitCommand(params.command, params);
+		}
+	} else {
+		logger.chat(inputLine);
+	}
+}
 
-	return edgar;
+function logLine(type, inputLine) {
+	switch (type) {
+	case "PRIVMSG":
+		logger.chat(inputLine);
+		break;
+	case "MODE":
+		logger.traffic(inputLine);
+		break;
+	case "TOPIC":
+		logger.traffic(inputLine);
+		break;
+	case "JOIN":
+		logger.traffic(inputLine);
+		break;
+	case "PART":
+		logger.traffic(inputLine);
+		break;
+	case "NICK":
+		logger.traffic(inputLine);
+		break;
+	case "QUIT":
+		logger.traffic(inputLine);
+		break;
+	case "KICK":
+		logger.traffic(inputLine);
+		break;
+	default:
+		logger.server(inputLine);
+		break;
+	}
+}
+
+bot.parse = function botParse(inputLine) {
+	let type, params, input, bangIndex;
+
+	if (inputLine.slice(0,4) === "PING") {
+		irc.pong(inputLine.slice(6));
+		return;
+	}
+
+	input = inputLine.trim().split(" ");
+	if (ignore.check(input)) {
+		logger.ignored(inputLine);
+		return; // ignored
+	}
+	type = input[0][0] === ":" ? input[1] : input[0];
+	if (!bot.hasEvent(type)) {
+		logLine(type, inputLine);
+		return;
+	}
+	//params = pool.get();
+	params = { raw: inputLine };
+	//params.raw = inputLine;
+	// fill in mojojojo
+	bangIndex = input[0].indexOf("!");
+	if (bangIndex > -1) {
+		params.nick = input[0].slice(1, bangIndex);
+		params.address = input[0].slice(bangIndex+1);
+		params.user = input[0].slice(1);
+		params.context = (input[2][0] !== ":" ? input[2] : input[2].slice(1));
+		if (!params.data)
+			params.data = params.raw.slice(params.raw.indexOf(" :")+2);
+		if (params.context[0] !== "#")
+			params.context = params.nick;
+		else
+			params.channel = params.context;
+	}
+	switch (type) {
+	case "PRIVMSG":
+		handleMessage(inputLine, input, params);
+		break;
+	case "MODE":
+		params.mode = (input[3][0] !== ":" ? input[3] : input[3].slice(1));
+		params.affected = input.slice(4);
+		logger.traffic(inputLine);
+		break;
+	case "TOPIC":
+		params.topic = input.slice(3).join(" ").slice(1);
+		logger.traffic(inputLine);
+		break;
+	case "JOIN":
+		logger.traffic(inputLine);
+		break;
+	case "PART":
+		params.reason = (input[3] ? input.slice(3).join(" ").slice(1) : "");
+		logger.traffic(inputLine);
+		break;
+	case "NICK":
+		params.newnick = input[2].slice(1);
+		logger.traffic(inputLine);
+		break;
+	case "QUIT":
+		params.reason = input.slice(2).join(" ").slice(1);
+		logger.traffic(inputLine);
+		break;
+	case "KICK":
+		params.kicked = input[3];
+		params.reason = input.slice(4).join(" ").slice(1);
+		logger.traffic(inputLine);
+		break;
+	default:
+		logger.server(inputLine);
+		break;
+	}
+	bot.emitEvent(type, params);
 };
