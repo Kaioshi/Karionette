@@ -1,7 +1,7 @@
 // Unofficial MAL-API (clone) Fondler
 "use strict";
 function getGenres(genres) {
-	var ret = [];
+	let ret = [];
 	genres.forEach(function (item) {
 		if (!ret.some(function (entry) { return (entry === item); })) {
 			ret.push(item);
@@ -11,7 +11,7 @@ function getGenres(genres) {
 }
 
 function doSearch(type, context, title, synopsis, google) {
-	var id, eps;
+	let id, eps;
 	web.google("site:myanimelist.net/"+type+"/ "+title).then(function (results) {
 		id = new RegExp("http://myanimelist\\.net/"+type+"/([0-9]+)/?", "i").exec(results[0].url);
 		if (!id)

@@ -1,5 +1,5 @@
 "use strict";
-var randDB = new DB.List({filename: "randomThings"});
+let randDB = new DB.List({filename: "randomThings"});
 
 bot.command({
 	command: "random",
@@ -21,7 +21,7 @@ bot.command({
 		"thing add ranma's dodgy undies",
 	arglen: 2,
 	callback: function (input) {
-		var entry;
+		let entry;
 		switch (input.args[0].toLowerCase()) {
 		case "add":
 			randDB.saveOne(input.args.slice(1).join(" "));

@@ -1,77 +1,124 @@
 // Subreddit announcer
 "use strict";
 
-var subDB = new DB.Json({filename: "subreddits"});
+let subDB = new DB.Json({filename: "subreddits"});
 
 function r(sub) {
-	return "https://www.reddit.com/r/"+sub+"/new/.rss";
+	return "https://www.reddit.com/r/"+sub+"/new/.json?limit=10";
 }
 
-function getPostID(link) {
-	let reg = /^https:\/\/www\.reddit\.com\/r\/[^\/]+\/comments\/([^\/]+)\/[^\/]+\//.exec(link);
-	if (!reg) {
-		logger.warn("Couldn't extract PostID from "+link);
+function shortenRedditLink(link, sub, id) {
+	if (link.indexOf("reddituploads.com") > -1)
+		return "https://redd.it/"+id;
+	if (link.indexOf("www.reddit.com/r/") === -1)
 		return link;
+	let reg = /https\:\/\/www\.reddit\.com\/r\/([^\/]+)\/comments\/([^\/]+)\//.exec(link);
+	if (reg && reg[2]) {
+		if (reg[1].toLowerCase() !== sub)
+			return "https://redd.it/"+reg[2]+" (r/"+reg[1]+")";
+		return "https://redd.it/"+reg[2];
 	}
-	return reg[1];
+	return link;
 }
 
-function announceReleases(entry, releases) {
+function announceReleases(entry, releases, sub) {
 	let announce = [];
-	releases.forEach(function (post) {
-		entry.announce.forEach(function (target) { // ranma is at least half to blame for this format.
-			let releaseMsg = "https://redd.it/"+getPostID(post.link)+" - r/"+entry.subreddit+" - "+post.name.slice(3)+" ~ "+post.title;
-			if (target[0] === "#")
-				announce.push([ "say", target, lib.decode(releaseMsg) ]); // like, 70%. or more. probably more.
-			else if (ial.User(target)) // only if they're online
-				announce.push([ "notice", target, lib.decode(releaseMsg) ]);
-		});
-	});
+	for (let i = 0; i < releases.length; i++) {
+		let post = releases[i];
+		for (let k = 0; k < entry.announce.length; k++) {
+			let target = entry.announce[k],
+				releaseMsg = "r/"+sub+" - "+post.title+" ~ "+shortenRedditLink(post.link, entry.subreddit, post.id);
+			if (target[0] === "#" && ial.User(config.nick).ison(target))
+				announce.push([ "say", target, lib.decode(releaseMsg) ]);
+			else {
+				if (ial.User(target)) // only if they're online
+					announce.push([ "say", target, lib.decode(releaseMsg) ]);
+				else
+					bot.queueMessage({ method: "notice", nick: target, message: lib.decode(releaseMsg) });
+			}
+		}
+	}
 	return announce;
+}
+
+function findNewPosts(fetched, entries) {
+	let announcements = [];
+	for (let i = 0; i < fetched.length; i++) {
+		if (!fetched[i].posts.length) // no posts
+			continue;
+		let release = fetched[i],
+			newPosts = [],
+			sub = release.sub.toLowerCase(),
+			seen = entries[sub].seen || [];
+		for (let k = 0; k < release.posts.length; k++) {
+			let post = release.posts[k];
+			if (seen.indexOf(post.id) === -1) {// new post
+				newPosts.push(post);
+				seen.push(post.id);
+			}
+		}
+		if (newPosts.length) {
+			announcements = announcements.concat(announceReleases(entries[sub], newPosts, release.sub));
+			if (seen.length > 10) // don't need more than the last 10 entries since we only fetch 10
+				seen = seen.slice(seen.length-10);
+			entries[sub].seen = seen;
+		}
+	}
+	if (announcements.length) {
+		subDB.saveAll(entries);
+		irc.rated(announcements, 1000);
+	}
+}
+
+function trimJson(res) {
+	let ret = [],
+		hits = res.data.children;
+	for (let i = 0; i < hits.length; i++) {
+		ret.push({
+			id: hits[i].data.id,
+			title: hits[i].data.title,
+			link: hits[i].data.url
+		});
+	}
+	res = null;
+	return { sub: hits[0].data.subreddit, posts: ret };
+}
+
+function fetchJson(sub) {
+	return web.json(r(sub)).then(trimJson);
+}
+
+function getSubsToCheck(entries) {
+	let keys = Object.keys(entries),
+		ret = [];
+	for (let i = 0; i < keys.length; i++) {
+		if (entries[keys[i]].announce && entries[keys[i]].announce.length)
+			ret.push(fetchJson(keys[i]));
+	}
+	return ret;
 }
 
 function checkSubs() {
 	if (!subDB.size())
 		return;
 	let entries = subDB.getAll();
-	let validEntries = Object.keys(entries).filter(function (entry) {
-		return entries[entry].announce !== undefined && entries[entry].announce.length;
-	});
-	Promise.all(validEntries.map(function (entry) { return web.atom2json(r(entry), entry); }))
-	.then(function (results) {
-		let announcements = [];
-		results.forEach(function (release) {
-			if (!release.items.length) // no posts
-				return;
-			let newPosts = [],
-				sub = release.name,
-				seen = entries[sub].seen || [];
-			for (let i = 0; i < release.items.length; i++) {
-				let postID = getPostID(release.items[i].link);
-				if (seen.indexOf(postID) === -1) {// new post
-					newPosts.push(release.items[i]);
-					seen.push(postID);
-				}
-			}
-			if (newPosts.length) {
-				announcements = announcements.concat(announceReleases(entries[sub], newPosts));
-				entries[sub].seen = seen;
-			}
-		});
-		if (announcements.length) {
-			subDB.saveAll(entries);
-			irc.rated(announcements, 1000);
-		}
+	Promise.all(getSubsToCheck(entries))
+	.then(function (fetched) {
+		findNewPosts(fetched, entries);
 	}).catch(function (error) {
-		logger.error(error, error);
+		logger.error("checkSubs: "+error, error);
 	});
 }
 
 function subscribe(nick, sub) {
-	let entry = subDB.getOne(sub);
+	let entry = subDB.getOne(sub),
+		lnick;
 	if (!entry)
 		return "I'm not watching r/"+sub;
-	entry.announce.push(nick.toLowerCase());
+	lnick = nick.toLowerCase();
+	if (entry.announce.indexOf(lnick) > -1)
+		return "You're already on the announce list for r/"+sub;
+	entry.announce.push(lnick);
 	if (entry.announce.length === 1) // first entry!
 		checkSubs();
 	subDB.saveOne(sub, entry);
@@ -95,7 +142,8 @@ function addSubreddit(sub, user) {
 	subDB.saveOne(sub, {
 		subreddit: sub,
 		addedBy: user,
-		announce: []
+		announce: [],
+		seen: []
 	});
 	return "Added! To get announcements from r/"+sub+", users need to "+config.command_prefix+"subreddit subscribe "+sub;
 }
@@ -211,6 +259,9 @@ bot.command({
 			}
 			irc.say(input.context, unsubscribe(input.nick, input.args[1].toLowerCase()));
 			break;
+		case "check":
+			checkSubs();
+			break;
 		default:
 			irc.say(input.context, bot.cmdHelp("subreddit", "syntax"));
 			break;
@@ -224,8 +275,8 @@ bot.command({
 	help: "Pulls a random r/nocontext title.",
 	syntax: `${config.command_prefix}nocontext`,
 	callback: function nocontext(input) {
-		web.atom2json("https://www.reddit.com/r/nocontext/random/.rss").then(function (result) {
-			irc.say(input.context, lib.decode(result.items[0].title));
+		web.json("https://www.reddit.com/r/nocontext/random/.json").then(function (result) {
+			irc.say(input.context, result[0].data.children[0].data.title);
 		}).catch(function (error) {
 			logger.error(";nocontext: "+error, error);
 		});

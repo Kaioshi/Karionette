@@ -7,7 +7,7 @@ bot.command({
 	admin: true,
 	arglen: 1,
 	callback: function (input) {
-		var messages;
+		let messages;
 		switch (input.args[0]) {
 		case "err":
 		case "error":

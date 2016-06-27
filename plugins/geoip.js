@@ -1,5 +1,5 @@
 "use strict";
-var url = require("url");
+let url = require("url");
 
 bot.command({
 	command: "geoip",
@@ -7,7 +7,7 @@ bot.command({
 	syntax: config.command_prefix + "geoip <nick/hostname/IP/url>",
 	arglen: 1,
 	callback: function (input) {
-		var uri, target, nick, blame;
+		let uri, target, nick, blame;
 		if (input.args[0].match(/\.|\:/)) {
 			if (input.args[0].match(/https?:\/\/[^ ]+/))
 				target = url.parse(input.args[0]).host;

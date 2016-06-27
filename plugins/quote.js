@@ -1,6 +1,6 @@
 // collects quotes
 "use strict";
-var quoteDB = new DB.Json({filename: "quotes"});
+let quoteDB = new DB.Json({filename: "quotes"});
 
 function zero(n) {
 	return (n > 9 ? n : "0"+n);
@@ -19,7 +19,7 @@ bot.command({
 		config.command_prefix+"quote add <Mari> mitches be like, \">implying\"",
 	arglen: 1,
 	callback: function (input) {
-		var i, k, quote, quotes, tmp, matches, time, removeQuoteByIndex;
+		let i, k, quote, quotes, tmp, matches, time, removeQuoteByIndex;
 		if (!input.channel) {
 			irc.say(input.context, "You can only use this in a channel for now, sorry.");
 			return;
@@ -54,7 +54,7 @@ bot.command({
 			break;
 		case "remove":
 			removeQuoteByIndex = function (quotes, index) {
-				var i;
+				let i;
 				quotes.splice(index,1);
 				if (!quotes.length)
 					quoteDB.removeOne(input.context);

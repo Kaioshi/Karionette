@@ -1,65 +1,63 @@
 ﻿// Tell someone something on join if saved message for them
 "use strict";
-var msgDB = new DB.Json({filename: "messages"}),
-	messages = msgDB.getAll();
+let msgDB = new DB.Json({filename: "messages"});
 
-function checkMessages(nick, context) {
-	var i, l, send, lnick = nick.toLowerCase();
-	if (!messages[lnick]) return;
-	i = 0; l = messages[lnick].length;
-	for (; i < l; i++) {
-		if (messages[lnick][i].channel) {
-			if (context[0] === "#" && context.toLowerCase() === messages[lnick][i].channel) {
-				if (!send) send = [];
-				if (messages[lnick][i].time !== undefined) {
-					messages[lnick][i].message = messages[lnick][i].nick+", message from "+messages[lnick][i].from+" ("+
-						lib.duration(messages[lnick][i].time, false, true)+" ago): "+messages[lnick][i].message;
-				}
-				send.push([ messages[lnick][i].method, context, messages[lnick][i].message ]);
-				messages[lnick].splice(i, 1); i--; l--;
-			}
-		} else {
-			if (!send) send = [];
-			send.push([ messages[lnick][i].method, nick, messages[lnick][i].message ]);
-			messages[lnick].splice(i, 1); i--; l--;
+function checkMessages(input, context, newnick) {
+	let lnick, lcontext, msgs, send, len;
+	context = context || input.context;
+	if (context[0] !== "#") // only checking channels~
+		return;
+	lnick = newnick ? input.newnick.toLowerCase() : input.nick.toLowerCase();
+	msgs = msgDB.getOne(lnick);
+	if (!msgs)
+		return;
+	len = msgs.length;
+	if (!len)
+		return;
+	lcontext = context.toLowerCase();
+	for (let i = 0; i < len; i++) {
+		if (!msgs[i].channel) { // another plugin must have queued a message
+			send = send || [];
+			send.push([ msgs[i].method, msgs[i].nick, msgs[i].message ]);
+			msgs.splice(i, 1); i--; len--;
+			continue;
 		}
+		if (lcontext !== msgs[i].channel)
+			continue;
+		send = send || [];
+		send.push([
+			msgs[i].method,
+			msgs[i].channel,
+			msgs[i].nick+", message from "+msgs[i].from+" ("+lib.duration(msgs[i].time, false, true)+" ago): "+msgs[i].message
+		]);
+		msgs.splice(i, 1); i--; len--;
 	}
-	if (send && send.length) {
-		irc.rated(send);
-		if (!messages[lnick].length)
-			delete messages[lnick];
-		msgDB.saveAll(messages);
-	}
+	if (send) {
+		irc.rated(send, 1000);
+		if (!msgs.length)
+			msgDB.removeOne(lnick);
+		else
+			msgDB.saveOne(lnick, msgs); // DON'T LOOK AT ME
+	} // I'm sorry
 }
 
 function addMessage(message) {
-	var lnick = message.nick.toLowerCase();
-	if (!messages[lnick])
-		messages[lnick] = [];
-	messages[lnick].push(message);
-	msgDB.saveAll(messages);
+	let lnick = message.nick.toLowerCase(),
+		msgs = msgDB.getOne(lnick) || [];
+	msgs.push(message);
+	msgDB.saveOne(lnick, msgs);
 }
-
-bot.event({
-	handle: "messageQueueListener",
-	event: "Event: queueMessage",
-	callback: addMessage
-});
 
 bot.event({
 	handle: "messageMsg",
 	event: "PRIVMSG",
-	callback: function (input) {
-		checkMessages(input.nick, input.context);
-	}
+	callback: checkMessages
 });
 
 bot.event({
 	handle: "messageJoin",
 	event: "JOIN",
-	callback: function (input) {
-		checkMessages(input.nick, input.context);
-	}
+	callback: checkMessages
 });
 
 bot.event({
@@ -68,9 +66,9 @@ bot.event({
 	callback: function (input) {
 		setTimeout(function () {
 			ial.Channels(input.newnick).forEach(function (channel) {
-				checkMessages(input.newnick, channel);
+				checkMessages(input, channel, true);
 			});
-		}, 250); // <- making sure IAL is updated first
+		}, 250); // <- give IAL time to update
 	}
 });
 
@@ -100,3 +98,5 @@ bot.command({
 		irc.say(input.context, "I'll tell them when I see them next.");
 	}
 });
+
+bot.queueMessage = addMessage;

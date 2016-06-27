@@ -61,7 +61,7 @@ bot.command({
 	help: "Flips a motherflipper",
 	syntax: config.command_prefix+"flip <text>",
 	callback: function (input) {
-		var i, c, r, last, result,
+		let i, c, r, last, result,
 			target = input.data.toLowerCase(),
 			flipTable = {
 				a : "\u0250",

@@ -1,4 +1,4 @@
-﻿/* global web, irc, bot, logger, lib, config */
+﻿/* commands: google, g, gi, gr */
 // Returns first Google search result
 "use strict";
 
@@ -8,7 +8,7 @@ bot.command({
 	syntax: `${config.command_prefix}g <search term> - Example: ${config.command_prefix}g puppies`,
 	arglen: 1,
 	callback: function googleSearch(input) {
-		web.google(input.data.trim()).then(function (results) {
+		return web.google(input.data.trim()).then(function (results) {
 			if (config.google_format) {
 				results[0].b = "\x02";
 				irc.say(input.context, lib.formatOutput(config.google_format, results[0]), 1);
@@ -39,7 +39,7 @@ bot.command({
 	syntax: `${config.command_prefix}gi puppies`,
 	arglen: 1,
 	callback: function googleImageSearch(input) {
-		web.googleImage(input.data.trim()).then(function (results) {
+		return web.googleImage(input.data.trim()).then(function (results) {
 			let url = results[0].url,
 				questionIndex = url.lastIndexOf("?");
 			if (url.lastIndexOf(".") < questionIndex) {

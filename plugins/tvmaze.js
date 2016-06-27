@@ -13,7 +13,7 @@ bot.command({
 	syntax: config.command_prefix+"tvmaze [-s] <show name> - Example: "+config.command_prefix+"tvmaze -s Heroes Reborn",
 	arglen: 1,
 	callback: function tvmaze(input) {
-		var showName, showSummary = false;
+		let showName, showSummary = false;
 		if (input.args[0].toLowerCase() === "-s") {
 			showName = input.args.slice(1).join(" ");
 			showSummary = true;
@@ -21,7 +21,7 @@ bot.command({
 			showName = input.data;
 		}
 		web.fetch("http://api.tvmaze.com/singlesearch/shows?q="+showName+"&embed=nextepisode").then(function (body) {
-			var resp, show, next;
+			let resp, show, next;
 			if (!body.length) {
 				irc.say(input.context, "Couldn't find \""+showName+"\".");
 				return;

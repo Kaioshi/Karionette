@@ -1,6 +1,6 @@
 // v0.11 plugin by coding amateur ranma. collects ecchi
 "use strict";
-var hottieDB = new DB.Json({filename: "hotties"}),
+let hottieDB = new DB.Json({filename: "hotties"}),
 	help = {
 		tag: "[Help] Syntax: "+config.command_prefix+"hottie tag <url> +tag1 +tag2 -tag3 - adds the \
 			first two, removes last. Tags may not have spaces.",
@@ -22,7 +22,7 @@ function makeTime(time) {
 }
 
 function convertHotties(ch) {
-	var changed = 0, hotties = hottieDB.getAll(),
+	let changed = 0, hotties = hottieDB.getAll(),
 		url, tags, i, l, k, n, tmp, context, entry;
 	for (context in hotties) {
 		i = 0; l = hotties[context].length;
@@ -60,7 +60,7 @@ bot.command({
 		+config.command_prefix+"hottie add https://i.imgur.com/tdGsifl.gif Spongebob",
 	arglen: 1,
 	callback: function (input) {
-		var i, l, k, n, hottie, hotties, tmp, first, ptagMatch, tagMatch, urlMatch, time, addTag, remTag;
+		let i, l, k, n, hottie, hotties, tmp, first, ptagMatch, tagMatch, urlMatch, time, addTag, remTag;
 		if (!input.channel) {
 			irc.say(input.context, "You can only use this in a channel.");
 			return;

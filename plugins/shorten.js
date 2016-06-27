@@ -1,7 +1,7 @@
 "use strict";
 
 function makeKey(len) {
-	var i = 0, n, ret = "";
+	let i = 0, n, ret = "";
 	len = len || 8;
 	for (; i < len; i++) {
 		n = Math.floor(Math.random()*9);
@@ -14,7 +14,7 @@ function makeKey(len) {
 }
 
 function makeUrl(url) {
-	var word, ext = url.slice(url.lastIndexOf("."));
+	let word, ext = url.slice(url.lastIndexOf("."));
 	switch (ext) {
 	case ".png":
 	case ".gif":
@@ -62,7 +62,7 @@ bot.command({
 		config.command_prefix+"shorten http://some.really.long.url/with-a-bunch-of-crap-at-the-end",
 	arglen: 1,
 	callback: function (input) {
-		var gd, url;
+		let gd, url;
 		switch (input.args[0].toLowerCase()) {
 		case "-p":
 		case "-preview":

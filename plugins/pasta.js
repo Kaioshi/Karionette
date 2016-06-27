@@ -1,5 +1,5 @@
 "use strict";
-var pastaDB = new DB.Json({filename: "pastas"}), fs = require("fs");
+let pastaDB = new DB.Json({filename: "pastas"}), fs = require("fs");
 
 function formatOutput(tmpl, obj) {
 	return tmpl.replace(/\{\{([^\{\} ]+)\}\}/g, function (a, b) {
@@ -18,7 +18,7 @@ function constructPath(target, list, type) {
 }
 
 function writeList(user, list, type, tpl) {
-	var obj = {
+	let obj = {
 			target: type === "c" ? "#"+user.target : user.target,
 			list: list,
 			data: user.lists[list].sort(function (a, b) {
@@ -41,7 +41,7 @@ function writeList(user, list, type, tpl) {
 }
 
 function deleteList(user, list, type) {
-	var path = "data/www/"+type+"/"+user.target+"/"+list+".html";
+	let path = "data/www/"+type+"/"+user.target+"/"+list+".html";
 	if (fs.existsSync(path)) {
 		try {
 			fs.unlinkSync(path);
@@ -53,7 +53,7 @@ function deleteList(user, list, type) {
 }
 
 function createList(target, list, tpl) {
-	var user;
+	let user;
 	if (!isGoodPath(list))
 		return "Bad list name. Lists should be letters and numbers only and no longer than 20 characters.";
 	user = pastaDB.getOne(target);
@@ -69,7 +69,7 @@ function createList(target, list, tpl) {
 }
 
 function listIndexOf(list, item) {
-	var i, lowerItem = item.toLowerCase();
+	let i, lowerItem = item.toLowerCase();
 	for (i = 0; i < list.length; i++)
 		if (list[i].name.toLowerCase() === lowerItem)
 			return i;
@@ -81,7 +81,7 @@ function listContains(list, item) {
 }
 
 function addListItem(context, target, list, item, type) {
-	var gReg, linkReg, user;
+	let gReg, linkReg, user;
 
 	if (!isGoodPath(list))
 		return "Bad list name. Lists should be letters and numbers only and no longer than 20 characters.";
@@ -124,7 +124,7 @@ function addListItem(context, target, list, item, type) {
 }
 
 function changeListItem(target, list, item, newLink, type) {
-	var index, user = pastaDB.getOne(target);
+	let index, user = pastaDB.getOne(target);
 	if (!user || !user.lists || !user.lists[list])
 		return "There is no such list.";
 	if ((index = listIndexOf(user.lists[list], item)) === -1)
@@ -135,7 +135,7 @@ function changeListItem(target, list, item, newLink, type) {
 }
 
 function remListItem(target, list, item, type) {
-	var i, user;
+	let i, user;
 	if (!isGoodPath(list))
 		return "Bad list name. Lists should be letters and numbers only and no longer than 20 characters.";
 	user = pastaDB.getOne(target);
@@ -154,7 +154,7 @@ function remListItem(target, list, item, type) {
 }
 
 function pastaCmd(input) {
-	var type, user, list, target, cmd, hReg, template;
+	let type, user, list, target, cmd, hReg, template;
 	if (config.pasta_path === undefined) {
 		irc.say(input.context, "The 'pasta path' config option isn't set. This wont work without that. See config.example");
 		return;

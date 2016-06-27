@@ -1,7 +1,6 @@
-// url title snarfer
+// url title snarfer XXX rewrite needed
 "use strict";
-var url = require("url"),
-	fs = require("fs"),
+let url = require("url"),
 	titleFilterDB = new DB.Json({filename: "titlefilters"}),
 	ytReg = /v=([^ &\?]+)/i,
 	ytBReg = /^\/([^ &\?]+)/,
@@ -9,13 +8,12 @@ var url = require("url"),
 	titleReg, sayTitle;
 
 if (config.titlesnarfer_inline) {
-	logger.info("Using inline title fetcher");
 	titleReg = /<title?[^>]+>([^<]+)<\/title>/i;
 	sayTitle = function (context, uri, old, record, length) {
-		var reg, title;
+		let reg, title;
 		if (urlIsTooRecent(uri.href, record))
 			return;
-		web.fetch(uri.href, {}, length).then(function (body) {
+		return web.fetch(uri.href, {}, length).then(function (body) {
 			if (!body) {
 				logger.warn(uri.href + " - returned no body.");
 				return;
@@ -36,12 +34,11 @@ if (config.titlesnarfer_inline) {
 		});
 	};
 } else {
-	logger.info("Using felt.ninja title fetcher");
 	sayTitle = function (context, uri, old, record) {
-		var title;
+		let title;
 		if (urlIsTooRecent(uri.href, record))
 			return;
-		web.json("http://felt.ninja:5036/?singlespace=1&uri="+uri.href).then(function (result) { // THIS PROMISE NEEDS AN ERROR FUNCTION
+		return web.json("http://felt.ninja:5036/?singlespace=1&uri="+uri.href).then(function (result) { // THIS PROMISE NEEDS AN ERROR FUNCTION
 			if (result.error) {
 				if (record)
 					recordURL(record[0], record[1], record[2]);
@@ -59,7 +56,7 @@ if (config.titlesnarfer_inline) {
 }
 
 function urlIsTooRecent(link, record) {
-	var now = Date.now();
+	let now = Date.now();
 	if (recentURLs[link]) {
 		if ((now - recentURLs[link]) < 10000) { // announced within the last 10 seconds
 			if (record)
@@ -71,7 +68,7 @@ function urlIsTooRecent(link, record) {
 }
 
 function lastUrl(channel, nick, match) {
-	var i, urls, mostRecent, index, entry, lnick,
+	let i, urls, mostRecent, index, entry, lnick,
 		fn = "data/urls/"+channel.toLowerCase()+".txt";
 	if (!fs.existsSync(fn))
 		return "I haven't seen any URLs here.";
@@ -110,7 +107,7 @@ function lastUrl(channel, nick, match) {
 }
 
 function urlStats(channel, nick, match) {
-	var i, urls, count, lnick, entry,
+	let i, urls, count, lnick, entry,
 		fn = "data/urls/"+channel.toLowerCase()+".txt";
 	if (!fs.existsSync(fn))
 		return "I haven't seen any URLs here.";
@@ -135,7 +132,7 @@ function urlStats(channel, nick, match) {
 }
 
 function recordURL(nick, channel, url, title) {
-	var fn = "data/urls/"+channel.toLowerCase()+".txt";
+	let fn = "data/urls/"+channel.toLowerCase()+".txt";
 	if (!fs.existsSync(fn)) {
 		lib.fs.makePath(fn);
 		fs.writeFileSync(fn, "");
@@ -144,7 +141,7 @@ function recordURL(nick, channel, url, title) {
 }
 
 function getURL(channel, url) { // make this less bad.
-	var i, l, urls, entry,
+	let i, l, urls, entry,
 		fn = "data/urls/"+channel.toLowerCase()+".txt";
 	if (!fs.existsSync(fn))
 		return;
@@ -163,8 +160,8 @@ function getURL(channel, url) { // make this less bad.
 }
 
 function youtubeIt(context, id, old, record) {
-	var resp;
-	web.youtubeByID(id).then(function (yt) {
+	return web.youtubeByID(id).then(function (yt) {
+		let resp;
 		yt.date = yt.date.split("T")[0];
 		yt.views = lib.commaNum(yt.views);
 		if (config.titlesnarfer_youtube_format !== undefined) {
@@ -186,7 +183,7 @@ function youtubeIt(context, id, old, record) {
 }
 
 function findURL(line) {
-	var ret, end, httpIndex, httpsIndex,
+	let ret, end, httpIndex, httpsIndex,
 		lowerLine = line.toLowerCase();
 	if ((httpIndex = lowerLine.indexOf("http://")) === -1 && (httpsIndex = lowerLine.indexOf("https://")) === -1)
 		return;
@@ -209,18 +206,19 @@ bot.event({
 		if (input.args !== undefined)
 			return false;
 		input.url = findURL(input.message);
-		if (!input.url)
+		if (!input.url) {
+			delete input.url;
 			return false;
+		}
 		return true;
 	},
 	callback: function titlesnarfer(input) {
-		var ext, old, record, videoID, domain;
+		let ext, old, record, videoID, domain;
 
 		old = getURL(input.channel, input.url.href) || false;
 		if (!old)
 			record = [ input.nick, input.channel, input.url.href ];
 		domain = input.url.host.replace(/www\./gi, "");
-		// check domain filter
 		if (isFilteredDomain(domain)) {
 			if (record)
 				recordURL(record[0], record[1], record[2]);
@@ -231,19 +229,15 @@ bot.event({
 			if (!config.api.youtube)
 				break;
 			videoID = ytReg.exec(input.url.path);
-			if (videoID) {
-				youtubeIt(input.context, videoID[1], old, record);
-				return;
-			}
+			if (videoID)
+				return youtubeIt(input.context, videoID[1], old, record);
 			break;
 		case "youtu.be":
 			if (!config.api.youtube)
 				break;
 			videoID = ytBReg.exec(input.url.path);
-			if (videoID) {
-				youtubeIt(input.context, videoID[1], old, record);
-				return;
-			}
+			if (videoID)
+				return youtubeIt(input.context, videoID[1], old, record);
 			break;
 		case "i.imgur.com":
 			ext = input.url.href.slice(input.url.href.lastIndexOf("."));
@@ -260,7 +254,7 @@ bot.event({
 			}
 			break;
 		}
-		sayTitle(input.context, input.url, old, record, 10000);
+		return sayTitle(input.context, input.url, old, record, 10000);
 	}
 });
 
@@ -270,7 +264,7 @@ bot.command({
 	syntax: config.command_prefix+"lasturl [<nick>] [<term>] - Example: "+
 		config.command_prefix+"lasturl ranma goatse",
 	callback: function lasturl(input) {
-		var searchTerm, target;
+		let searchTerm, target;
 		if (!input.channel) {
 			irc.say(input.context, "This can only be used in channels.");
 			return;
@@ -287,7 +281,7 @@ bot.command({
 	syntax: config.command_prefix+"urlstats [<nick>] [<term>] - Example: "+
 		config.command_prefix+"urlstats ranma imgur",
 	callback: function urlstats(input) {
-		var searchTerm, target;
+		let searchTerm, target;
 		if (!input.channel) {
 			irc.say(input.context, "This can only be used in channels.");
 			return;
@@ -332,7 +326,7 @@ bot.command({
 });
 
 function isFilteredDomain(domain) {
-	var i, domains = titleFilterDB.getOne("domains") || [];
+	let i, domains = titleFilterDB.getOne("domains") || [];
 	if (domains.indexOf(domain) > -1)
 		return true;
 	for (i = 0; i < domains.length; i++) {
@@ -342,12 +336,12 @@ function isFilteredDomain(domain) {
 }
 
 function isFilteredTitle(title) {
-	var titles = titleFilterDB.getOne("titles") || [];
+	let titles = titleFilterDB.getOne("titles") || [];
 	return titles.indexOf(title) > -1;
 }
 
 function trimTitle(title) {
-	var i, trims = titleFilterDB.getOne("trims");
+	let i, trims = titleFilterDB.getOne("trims");
 	if (trims === undefined || !trims.length)
 		return title;
 	for (i = 0; i < trims.length; i++)
@@ -357,7 +351,7 @@ function trimTitle(title) {
 }
 
 function tsfilterAdd(input) {
-	var domains, titles, trims,
+	let domains, titles, trims,
 		args = input.args.slice(1),
 		data = input.data.slice(input.data.indexOf(" ")+1);
 	switch (args[0].toLowerCase()) {
@@ -400,7 +394,7 @@ function tsfilterAdd(input) {
 }
 
 function tsfilterRemove(input) {
-	var index, domains, titles, trims,
+	let index, domains, titles, trims,
 		args = input.args.slice(1),
 		data = input.data.slice(input.data.indexOf(" ")+1);
 	switch (args[0].toLowerCase()) {
@@ -443,7 +437,7 @@ function tsfilterRemove(input) {
 }
 
 function tsfilterList(input) {
-	var trims, trimsCount, titles, titlesCount, domains, domainsCount;
+	let trims, trimsCount, titles, titlesCount, domains, domainsCount;
 	switch (input.args[1]) {
 	case "titles":
 		titles = titleFilterDB.getOne("titles");

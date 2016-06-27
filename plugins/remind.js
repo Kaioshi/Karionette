@@ -1,6 +1,6 @@
 // Reminders!
 "use strict";
-var reminders,
+let reminders,
 	reminderDB = new DB.List({filename: "reminders", queue: true});
 
 function transformTime(timeUnits, time) {
@@ -24,7 +24,7 @@ function loadReminders() {
 }
 
 function startReminder(reminder) {
-	var reg = /^([0-9]+) ([^ ]+)@([^ ]+) (.*)$/.exec(reminder),
+	let reg = /^([0-9]+) ([^ ]+)@([^ ]+) (.*)$/.exec(reminder),
 		now = new Date().valueOf(),
 		time = new Date(parseInt(reg[1])).valueOf();
 	time = time-now;
@@ -33,12 +33,11 @@ function startReminder(reminder) {
 			if (ial.Channels(reg[2]).length) {
 				irc.say(reg[3], reg[2]+": "+reg[4]);
 			} else {
-				emitEvent("Event: queueMessage", {
+				bot.queueMessage({
 					method: "say",
 					nick: reg[2],
 					channel: reg[3],
-					message: reg[2]+", you weren't here! ;_; late "+reg[4],
-					sanitise: false
+					message: reg[2]+", you weren't here! ;_; late "+reg[4]
 				});
 			}
 			removeReminder(reminder);
@@ -50,7 +49,7 @@ function startReminder(reminder) {
 }
 
 function removeReminder(reminder) {
-	var i;
+	let i;
 	for (i = 0; i < reminders.length; i++) {
 		if (reminders[i] === reminder) {
 			reminders.splice(i,1);
@@ -82,7 +81,7 @@ bot.command({
 	help: "Reminds you to do something in",
 	syntax: config.command_prefix+"remind me in <N seconds/minutes/hours> to/that <reminder here>",
 	callback: function (input) {
-		var time, timeUnits, what, rMatch;
+		let time, timeUnits, what, rMatch;
 
 		rMatch = /^me in (\d*) (seconds?|minutes?|hours?) (to|that) (.*)$/i.exec(input.data);
 		if (rMatch) {

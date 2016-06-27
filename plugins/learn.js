@@ -1,7 +1,7 @@
 // ;learn keyword =/is/as string here
 // !keyword [@ nick]
 "use strict";
-var learnDB = new DB.Json({filename: "learnedThings"}),
+let learnDB = new DB.Json({filename: "learnedThings"}),
 	learnRegex = /^([^=]+) = (.*)$/,
 	knowledgeRegex = /^([^@]+) @ (.*)$/;
 
@@ -18,7 +18,7 @@ bot.command({
 		"mari @ Nick to make me yell it at someone.",
 	arglen: 3,
 	callback: function (input) {
-		var learn = learnRegex.exec(input.data);
+		let learn = learnRegex.exec(input.data);
 		if (!learn) {
 			irc.say(input.context, bot.cmdHelp("learn", "syntax"));
 			return;
@@ -52,7 +52,7 @@ bot.command({
 	help: "Shows a list of things I've "+config.command_prefix+"learn'd. See also: learn, unlearn",
 	syntax: config.command_prefix+"facts",
 	callback: function (input) {
-		var prefix = getPrefix();
+		let prefix = getPrefix();
 		if (learnDB.size() > 0)
 			irc.say(input.context, learnDB.getKeys().map(function (key) { return prefix+key; }).join(", "));
 		else
@@ -63,8 +63,11 @@ bot.command({
 bot.event({
 	handle: "learnChecker",
 	event: "PRIVMSG",
+	condition: function (input) {
+		return input.message[0] === getPrefix();
+	},
 	callback: function (input) {
-		var entry, reg, target = "";
+		let entry, reg, target = "";
 		if (input.message[0] === getPrefix()) {
 			entry = input.message.slice(1);
 			reg = knowledgeRegex.exec(entry);

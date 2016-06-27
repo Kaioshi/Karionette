@@ -8,7 +8,7 @@ bot.command({
 		"yt we like big booty mitches",
 	arglen: 1,
 	callback: function (input) {
-		var uri, resp, desc, searchTerm;
+		let uri, resp, desc, searchTerm;
 		if (config.api.youtube === undefined) {
 			irc.say(input.context, "You need a YouTube API key in the config. Get one: "+
 				"https://developers.google.com/youtube/v3/getting-started");
@@ -20,7 +20,7 @@ bot.command({
 			searchTerm = input.args.slice(1).join(" ");
 			uri = "https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q="+searchTerm+
 				"&safeSearch=none&type=channel&fields=items&key="+config.api.youtube;
-			web.json(uri).then(function (yt) {
+			return web.json(uri).then(function (yt) {
 				if (!yt.items.length)
 					irc.say(input.context, "\""+searchTerm+"\" doesn't seem to be a channel on YouTube.");
 				else {
@@ -33,9 +33,8 @@ bot.command({
 			}, function (error) {
 				irc.say(input.context, error.message);
 			});
-			break;
 		default:
-			web.youtubeSearch(input.data).then(function (yt) {
+			return web.youtubeSearch(input.data).then(function (yt) {
 				yt.date = yt.date.split("T")[0];
 				yt.views = lib.commaNum(yt.views);
 				if (config.youtube_format !== undefined) {
@@ -50,7 +49,6 @@ bot.command({
 			}, function (error) {
 				irc.say(input.context, error.message);
 			});
-			break;
 		}
 	}
 });

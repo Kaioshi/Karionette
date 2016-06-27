@@ -1,6 +1,6 @@
 // rp thing
 "use strict";
-var playerDB = new DB.Json({filename: "rp-players"}),
+let playerDB = new DB.Json({filename: "rp-players"}),
 	ethnicities = [ "Harikki", "Draskan", "Satlani", "Nasikan", "Atrisian", "Merekese" ],
 	races = [
 		"Human",
@@ -12,7 +12,7 @@ var playerDB = new DB.Json({filename: "rp-players"}),
 	];
 
 function validateEthnicity(ethnicity) {
-	var i;
+	let i;
 	for (i = 0; i < ethnicities.length; i++) {
 		if (ethnicity.toLowerCase() === ethnicities[i].toLowerCase()) {
 			return ethnicities[i];
@@ -21,7 +21,7 @@ function validateEthnicity(ethnicity) {
 }
 
 function validateRace(race) {
-	var i;
+	let i;
 	for (i = 0; i < races.length; i++) {
 		if (race.toLowerCase() === races[i].toLowerCase()) {
 			return races[i];
@@ -30,14 +30,14 @@ function validateRace(race) {
 }
 
 function adjustAge(race, age) {
-	var valid = getRaceAges(race);
+	let valid = getRaceAges(race);
 	if (age < valid[0]) return valid[0];
 	if (age > valid[1]) return valid[1];
 	return age;
 }
 
 function randNum(min, max) {
-	var ret = 0;
+	let ret = 0;
 	if (min >= max) return min;
 	while (ret < min) {
 		ret = Math.floor(Math.random()*max);
@@ -71,18 +71,18 @@ function getRaceAges(race) {
 }
 
 function validAge(race, age) {
-	var valid = getRaceAges(race);
+	let valid = getRaceAges(race);
 	if (age >= valid[0] && age <= valid[1]) return true;
 	return false;
 }
 
 function randAge(race) {
-	var valid = getRaceAges(race);
+	let valid = getRaceAges(race);
 	return randNum(valid[0], valid[1]);
 }
 
 function createPlayer(nick) {
-	var player = {
+	let player = {
 		nick: nick,
 		race: lib.randSelect(races),
 		ethnicity: lib.randSelect(ethnicities)
@@ -98,7 +98,7 @@ bot.command({
 	help: "Generates random characters for #roleplay",
 	syntax: config.command_prefix+"gencharacter",
 	callback: function (input) {
-		var player = createPlayer(input.nick);
+		let player = createPlayer(input.nick);
 		playerDB.saveOne(input.nick.toLowerCase(), player);
 		irc.say(input.context, "Random character created! "+input.nick+" is a "+
 			player.age+" year old "+player.gender+" "+player.ethnicity+" "+player.race+".");
@@ -111,7 +111,7 @@ bot.command({
 	syntax: config.command_prefix+"setchar <age/race/ethnicity/gender/description>",
 	arglen: 1,
 	callback: function (input) {
-		var player, age, race, gender, ethnicity, ages, valid;
+		let player, age, race, gender, ethnicity, ages, valid;
 		player = playerDB.getOne(input.nick.toLowerCase());
 		if (!player)
 			return "I'm not familiar with your character. Is your nick correct?";
@@ -210,7 +210,7 @@ bot.command({
 	syntax: config.command_prefix+"look <nick>",
 	arglen: 1,
 	callback: function (input) {
-		var player;
+		let player;
 		player = playerDB.getOne(input.args[0].toLowerCase());
 		if (!player) {
 			irc.say(input.context, "I don't see a character associated with the nick "+input.args[0]+".");

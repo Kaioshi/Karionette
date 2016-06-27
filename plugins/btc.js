@@ -5,12 +5,12 @@ function currencyURL(code) {
     return `https://api.bitcoinaverage.com/exchanges/${code}`;
 }
 
-var KEYS = ["AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "IDR", "ILS", "MXN", "NOK", "NZD", "PLN", "RON", "RUB", "SEK", "SGD", "USD", "ZAR"];
+let KEYS = ["AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "IDR", "ILS", "MXN", "NOK", "NZD", "PLN", "RON", "RUB", "SEK", "SGD", "USD", "ZAR"];
 
-var CURRENCY = KEYS.reduce((acc, code) => { acc[code] = currencyURL(code); return acc; }, {});
+let CURRENCY = KEYS.reduce((acc, code) => { acc[code] = currencyURL(code); return acc; }, {});
 
 function trimNum(n) {
-	var i;
+	let i;
 	n = n.toString();
 	i = n.indexOf(".");
 	if (i === -1)
@@ -25,7 +25,7 @@ bot.command({
 	help: "Retrieves high and low of bitcoin value. Defaults to USD if no argument is given",
 	syntax: `${config.command_prefix}btc [<currency code>] - Example: ${config.command_prefix}btc AUD`,
 	callback: function (input) {
-		var provider, rate, cur, time, avg, high, low;
+		let provider, rate, cur, time, avg, high, low;
 		if (input.args && input.args[0] !== undefined)
 			cur = input.args[0].toUpperCase();
 		else

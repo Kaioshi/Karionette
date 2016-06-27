@@ -12,7 +12,7 @@ bot.command({
 			else
 				throw Error("Couldn't find it. :\\");
 		}).then(function (resp) {
-			var status = "", title = "", airtime = "", date, now, eps = "";
+			let status = "", title = "", airtime = "", date, now, eps = "";
 			if (resp.status_code)
 				throw Error("Couldn't find it. :<");
 			if (resp.status)

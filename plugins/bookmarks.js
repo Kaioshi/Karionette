@@ -1,6 +1,6 @@
 // per-user / per-channel / global "bookmarks"
 "use strict";
-var bookmarkDB = new DB.Json({filename: "bookmarks"}),
+let bookmarkDB = new DB.Json({filename: "bookmarks"}),
 	bmhelp = {
 		add: "[Help] Syntax: "+config.command_prefix+
 			"bm -add [-c(hannel)|-u(ser)] <bookmark handle> <http://url.here.pantsu.org> - "+
@@ -32,7 +32,7 @@ function isUrl(text) {
 }
 
 function handleBookmark(args) {
-	var i = 0, l = args.length, handle = [], urls = [];
+	let i = 0, l = args.length, handle = [], urls = [];
 	for (; i < l; i++) {
 		if (isUrl(args[i]) || urls.length !== 0)
 			urls.push(args[i]);
@@ -48,7 +48,7 @@ function handleBookmark(args) {
 }
 
 function showBookmark(context, target, handle) {
-	var bookmarks, result;
+	let bookmarks, result;
 	if (!target || !handle) {
 		irc.say(context, bot.cmdHelp("bm", "syntax"));
 		return;
@@ -76,7 +76,7 @@ bot.command({
 		config.command_prefix+"bm -a ranma's dodgy undies http://imgur.com/dodgy_undies.png",
 	arglen: 1,
 	callback: function (input) {
-		var bookmarks, bookmark, i, keys, overwrite, dupes, url, removed,
+		let bookmarks, bookmark, i, keys, overwrite, dupes, url, removed,
 			handle, target, matchedUrl, matchedHandle;
 		switch (input.args[0].toLowerCase()) {
 		case "-a":

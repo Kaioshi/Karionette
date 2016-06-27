@@ -2,7 +2,7 @@
 "use strict";
 
 function bestAnswersByScore(ud) {
-	var i, ret = [];
+	let i, ret = [];
 	for (i = 0; i < ud.length; i++) {
 		if (ud[i].thumbs_down > ud[i].thumbs_up || ud[i].thumbs_down > (ud[i].thumbs_up/2))
 			ud.splice(i,1);

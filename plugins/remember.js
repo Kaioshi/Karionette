@@ -1,6 +1,6 @@
 // remembers things
 "use strict";
-var memDB = new DB.Json({filename: "remember"}),
+let memDB = new DB.Json({filename: "remember"}),
 	dunno = [
 		"I dunno.",
 		"no idea",
@@ -21,7 +21,7 @@ bot.command({
 	syntax: config.command_prefix+"remember <memory handle> <as/are/is/were> <thing to remember> - Example: "+
 			config.command_prefix+"remember Uni's pantsu as being striped white and blue.",
 	callback: function (input) {
-		var old,
+		let old,
 			reg = /(.*) (as|is|are|were) (.*)/.exec(input.data);
 		if (!reg) {
 			irc.say(input.context, bot.cmdHelp("remember", "syntax"));
@@ -40,7 +40,7 @@ bot.command({
 	syntax: config.command_prefix+"memories [-find <string>] - no arg to list memories"+
 		" - Example: "+config.command_prefix+"memories -f pantsu",
 	callback: function (input) {
-		var memories, term,
+		let memories, term,
 			handles = [],
 			ret = [];
 		if (!input.args || !input.args[0]) {
@@ -105,7 +105,7 @@ bot.command({
 			config.command_prefix+"wtf is the colour of ranma's pantsu",
 	arglen: 2,
 	callback: function (input) {
-		var reg, memory;
+		let reg, memory;
 		reg = /(were|are|was|is) (.*)/.exec(input.data);
 		memory = memDB.getOne(reg[2]);
 		if (!memory) {

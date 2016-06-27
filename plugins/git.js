@@ -1,10 +1,12 @@
 "use strict";
-var run = require("child_process").execFile,
+let run = require("child_process").execFile,
 	gitDB = new DB.Json({filename: "gitannounce"});
 
 function checkGits() {
-	var aList = gitDB.getOne("announceList");
-	if (gitDB.size() === 0 || !aList || !aList.length)
+	if (gitDB.size() === 0)
+		return;
+	let aList = gitDB.getOne("announceList");
+	if (!aList.length)
 		return;
 	web.atom2json("https://github.com/Kaioshi/Karionette/commits/master.atom").then(function (results) {
 		let latest = gitDB.getOne("latest") || [],
@@ -43,7 +45,7 @@ bot.command({
 	admin: true,
 	arglen: 1,
 	callback: function (input) {
-		var changes, i, target, aList;
+		let changes, i, target, aList;
 		switch (input.args[0].toLowerCase()) {
 		case "fap": // quiet pull ;)
 			run("git", ["pull"], {}, function (error, stdout) {
