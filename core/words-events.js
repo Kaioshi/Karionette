@@ -1,7 +1,8 @@
 // word motherflipper!
 "use strict";
+
 function tokenizeLine(line) {
-	var ret = [], hit = false,
+	let ret = [], hit = false,
 		type = [
 			"noun", "verb", "adjective", "adverb", "preposition",
 			"pronoun", "possessivePronoun", "personalPronoun"
@@ -34,7 +35,7 @@ bot.command({
 		config.command_prefix+"word verb correct fondle fondles fondled fondling",
 	arglen: 1,
 	callback: function (input) {
-		var entry;
+		let entry;
 		if (input.args[0] === "personalpronoun") input.args[0] = "personalPronoun";     // ugliest hack
 		if (input.args[0] === "possessivepronoun") input.args[0] = "possessivePronoun"; // ever.
 		if (input.args[0].match(/^adjective$|^adverb$|^pronoun$|^possessivePronoun$|^personalPronoun$/)) {
