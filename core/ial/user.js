@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = (function () {
-	var uidCounter = 0;
+	let uidCounter = 0;
 
 	function User(nick, userhost) {
 		this.nick = nick;
@@ -19,15 +19,15 @@ module.exports = (function () {
 	};
 
 	User.prototype.ison = function ison(channel) {
-		var lch = channel.toLowerCase, i;
-		for (i = 0; i < this.channels.length; i++)
+		let lch = channel.toLowerCase;
+		for (let i = 0; i < this.channels.length; i++)
 			if (this.channels[i].toLowerCase() === lch)
 				return true;
 		return false;
 	};
 
 	User.prototype.removeChannel = function removeChannel(ch) {
-		var index;
+		let index;
 		if ((index = this.channels.indexOf(ch)) > -1)
 			this.channels.splice(index, 1);
 	};

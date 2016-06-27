@@ -7,6 +7,7 @@ module.exports = (function () {
 		this.opped = [];
 		this.voiced = [];
 		this.halfopped = [];
+		this.ircop = [];
 		this.active = {};
 	}
 
@@ -28,7 +29,7 @@ module.exports = (function () {
 	};
 
 	Channel.prototype.removeStatus = function removeStatus(status, nick) {
-		var index;
+		let index;
 		if ((index = this[status].indexOf(nick)) > -1)
 			this[status].splice(index, 1);
 	};
@@ -39,7 +40,7 @@ module.exports = (function () {
 	};
 
 	Channel.prototype.removeNick = function removeNick(nick) {
-		var index, i, listTypes = [ "nicks", "opped", "halfopped", "voiced" ];
+		let index, i, listTypes = [ "nicks", "opped", "halfopped", "voiced", "ircop" ];
 		for (i = 0; i < listTypes.length; i++) {
 			index = -1;
 			if ((index = this[listTypes[i]].indexOf(nick)) > -1)
@@ -50,7 +51,7 @@ module.exports = (function () {
 	};
 
 	Channel.prototype.updateNick = function updateNick(oldnick, newnick) {
-		var index, i, listTypes = [ "nicks", "opped", "halfopped", "voiced" ];
+		let index, i, listTypes = [ "nicks", "opped", "halfopped", "voiced", "ircop" ];
 		for (i = 0; i < listTypes.length; i++) {
 			index = -1;
 			if ((index = this[listTypes[i]].indexOf(oldnick)) > -1)
