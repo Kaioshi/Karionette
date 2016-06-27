@@ -1,5 +1,4 @@
 "use strict";
-var fs = require("fs");
 
 function validNick(nick) {
 	if (nick[0] === "-")
@@ -8,7 +7,7 @@ function validNick(nick) {
 }
 
 function singleSpace(text) { // "foo  bar " -> "foo bar"
-	var i, ret;
+	let i, ret;
 	if (text.indexOf("  ") > -1) {
 		i = 0; ret = ""; text = text.split(" ");
 		while (i < text.length) {
@@ -27,7 +26,7 @@ function singleSpace(text) { // "foo  bar " -> "foo bar"
 }
 
 function parseEntry(entry) {
-	var ret = [];
+	let ret = [];
 	// these need to be arrays
 	switch (entry[0].toLowerCase()) {
 	case "autojoin":
@@ -49,14 +48,13 @@ function parseEntry(entry) {
 }
 
 function validateConfigEntry(field, entry) {
-	var i;
 	switch (field) {
 	case "nickname":
 		if (!Array.isArray(entry)) {
 			console.error(" * Invalid nickname entry in config - should look like: \"nickname: nick1, nick2, nick3\"");
 			return false;
 		}
-		for (i = 0; i < entry.length; i++) {
+		for (let i = 0; i < entry.length; i++) {
 			if (!validNick(entry[i])) {
 				console.log(" * Invalid nick characters found in nick: \""+entry[i]+
 					"\" - Allowed: a-z A-Z 0-9 _ - [ ] { } ^ ` | - no spaces.");
@@ -69,11 +67,11 @@ function validateConfigEntry(field, entry) {
 }
 
 function parseConf(conf) {
-	var i, entry, config = {};
-	for (i = 0; i < conf.length; i++) {
+	let config = {};
+	for (let i = 0; i < conf.length; i++) {
 		if (!conf[i] || conf[i][0] === "#")
 			continue;
-		entry = [ conf[i].slice(0, conf[i].indexOf(": ")), conf[i].slice(conf[i].indexOf(": ")+2) ];
+		let entry = [ conf[i].slice(0, conf[i].indexOf(": ")), conf[i].slice(conf[i].indexOf(": ")+2) ];
 		if (entry[0].length > 4 && entry[0].slice(0,3) === "api") {
 			config.api = config.api || {};
 			config.api[entry[0].slice(entry[0].indexOf(" ")+1)] = parseEntry(entry);
@@ -92,61 +90,59 @@ function parseConf(conf) {
 	return config;
 }
 
-module.exports = function () {
-	var irc_config;
+let irc_config;
 
-	irc_config = parseConf(singleSpace(fs.readFileSync("config").toString()).split("\n"));
-	irc_config.saveChanges = function () { // saves changes and returns how many changes were made.
-		var field, entry, i, l, changes, // while preserving the file layout.
-			newconf = {}, fields = [],
-			oldconfig = fs.readFileSync("config").toString().split("\n");
+irc_config = parseConf(singleSpace(fs.readFileSync("config").toString()).split("\n"));
+irc_config.saveChanges = function () { // saves changes and returns how many changes were made.
+	let field, entry, i, l, changes, // while preserving the file layout.
+		newconf = {}, fields = [],
+		oldconfig = fs.readFileSync("config").toString().split("\n");
 
-		Object.keys(irc_config).forEach(function (field) {
-			if (field !== "nick" && field !== "address" && field !== "saveChanges") {
-				if (field === "api") {
-					Object.keys(irc_config[field]).forEach(function (subfield) {
-						entry = field+" "+subfield;
-						entry = entry.replace(/_/g, " ");
-						newconf[entry] = irc_config[field][subfield];
-					});
-				} else {
-					entry = field.replace(/_/g, " ");
-					if (Array.isArray(irc_config[field]))
-						newconf[entry] = irc_config[field].join(", ");
-					else
-						newconf[entry] = irc_config[field].toString();
-				}
-			}
-		});
-		// change existing entries
-		changes = 0;
-		for (i = 0, l = oldconfig.length; i < l; i++) {
-			if (!oldconfig[i] || oldconfig[i][0] === "#")
-				continue;
-			field = oldconfig[i].slice(0, oldconfig[i].indexOf(": "));
-			fields.push(field);
-			entry = oldconfig[i].slice(oldconfig[i].indexOf(": ")+2);
-			if (newconf[field] === undefined) { // deleted entry
-				oldconfig.splice(i, 1); i--; l--;
-				changes++;
-			} else if (newconf[field] !== entry) {
-				oldconfig[i] = field+": "+newconf[field];
-				changes++;
+	Object.keys(irc_config).forEach(function (field) {
+		if (field !== "nick" && field !== "address" && field !== "saveChanges") {
+			if (field === "api") {
+				Object.keys(irc_config[field]).forEach(function (subfield) {
+					entry = field+" "+subfield;
+					entry = entry.replace(/_/g, " ");
+					newconf[entry] = irc_config[field][subfield];
+				});
+			} else {
+				entry = field.replace(/_/g, " ");
+				if (Array.isArray(irc_config[field]))
+					newconf[entry] = irc_config[field].join(", ");
+				else
+					newconf[entry] = irc_config[field].toString();
 			}
 		}
-		// append any new entries
-		Object.keys(newconf).forEach(function (field) {
-			if (fields.indexOf(field) === -1) {
-				oldconfig.push(field+": "+newconf[field]);
-				changes++;
-			}
-		});
+	});
+	// change existing entries
+	changes = 0;
+	for (i = 0, l = oldconfig.length; i < l; i++) {
+		if (!oldconfig[i] || oldconfig[i][0] === "#")
+			continue;
+		field = oldconfig[i].slice(0, oldconfig[i].indexOf(": "));
+		fields.push(field);
+		entry = oldconfig[i].slice(oldconfig[i].indexOf(": ")+2);
+		if (newconf[field] === undefined) { // deleted entry
+			oldconfig.splice(i, 1); i--; l--;
+			changes++;
+		} else if (newconf[field] !== entry) {
+			oldconfig[i] = field+": "+newconf[field];
+			changes++;
+		}
+	}
+	// append any new entries
+	Object.keys(newconf).forEach(function (field) {
+		if (fields.indexOf(field) === -1) {
+			oldconfig.push(field+": "+newconf[field]);
+			changes++;
+		}
+	});
 
-		if (changes)
-			fs.writeFileSync("config", oldconfig.join("\n"));
-		oldconfig = null; newconf = null;
-		return changes;
-	};
-
-	return irc_config;
+	if (changes)
+		fs.writeFileSync("config", oldconfig.join("\n"));
+	oldconfig = null; newconf = null;
+	return changes;
 };
+
+plugin.declareGlobal("config", "config", irc_config);
