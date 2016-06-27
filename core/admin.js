@@ -43,7 +43,7 @@ bot.event({
 	handle: "errorStackAnnouncer",
 	event: "Event: Error Stack",
 	callback: function (error) {
-		var announceTo = getErrorAnnounceList(), i, messages,
+		let announceTo = getErrorAnnounceList(), i, messages,
 			errorMessage = error.split("\n");
 		announceTo.forEach(function (user) {
 			messages = [];
@@ -91,26 +91,22 @@ bot.command({
 bot.command({
 	command: "reload",
 	help: "Reloads plugins, or a single plugin.",
-	syntax: config.command_prefix+"reload [<plugin>]",
+	syntax: config.command_prefix+"reload [<dir>/<plugin>] Example: "+config.command_prefix+"reload core/admin",
 	admin: true,
+	arglen: 1,
 	callback: function (input) {
-		var plugin;
-		if (input.args) {
-			plugin = input.args[0];
-			if (!lib.fs.exists("plugins/"+plugin+".js") && !lib.fs.exists("plugins/core/"+plugin+".js")) {
-				irc.say(input.context, "There is no such plugin. o.o;");
-				return;
-			}
-			emitEvent("Event: Reloading plugin "+plugin);
-			if (Array.isArray(config.disabled_plugins) && config.disabled_plugins.indexOf(plugin) > -1)
-				irc.say(input.context, "This plugin is in the disabled plugins list - loading it anyway.");
-			irc.reload(plugin);
-			irc.say(input.context, "Reloaded the "+plugin+" plugin.");
-		} else {
-			emitEvent("Event: Reloading all plugins");
-			irc.reload();
-			irc.say(input.context, "Reloaded all plugins.");
+		let p = input.args[0];
+		if (p.slice(-3) !== ".js")
+			p += ".js";
+		if (!fs.existsSync(input.args[0])) {
+			irc.say(input.context, "There is no such plugin. o.o;");
+			return;
 		}
+		bot.emitEvent("Event: Reloading plugin "+input.args[0].slice(0,-3));
+		if (plugin.load(input.args[0]))
+			irc.say(input.context, "Reloaded the "+input.args[0]+" plugin.");
+		else
+			irc.say(input.context, "Something broke.");
 	}
 });
 
