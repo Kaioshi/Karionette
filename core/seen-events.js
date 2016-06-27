@@ -1,9 +1,8 @@
 "use strict";
-var fs = require("fs"),
-	seen = {};
+let	seen = {};
 
 function getOldSeen(nick, channel) {
-	var seenDB, entry;
+	let seenDB, entry;
 	if (!fs.existsSync("data/users/"+channel+".json")) return;
 	seenDB = new DB.Json({filename: "users/"+channel});
 	entry = seenDB.getOne(nick.toLowerCase());
@@ -21,7 +20,7 @@ function getOldSeen(nick, channel) {
 }
 
 function convertSeen(entry, channel) {
-	var line;
+	let line;
 
 	function quote(text) {
 		return "\""+text+"\"";
@@ -56,7 +55,7 @@ function convertSeen(entry, channel) {
 }
 
 function loadSeen(channel) {
-	var filename = "data/users/"+channel+".txt";
+	let filename = "data/users/"+channel+".txt";
 	if (fs.existsSync(filename)) {
 		seen[channel] = fs.readFileSync(filename).toString().split("\n");
 	} else {
@@ -65,7 +64,7 @@ function loadSeen(channel) {
 }
 
 function saveSeen(channel) {
-	var filename = "data/users/"+channel+".txt";
+	let filename = "data/users/"+channel+".txt";
 	if (seen[channel] && seen[channel].length > 0) {
 		try {
 			fs.writeFileSync(filename, seen[channel].join("\n"));
@@ -86,7 +85,7 @@ function saveAllSeen() {
 }
 
 function findUserIndex(nick, channel) {
-	var i;
+	let i;
 	if (!seen[channel]) loadSeen(channel);
 	if (!nick) {
 		logger.warn("findUserIndex("+[nick, channel].join(", ")+") called incorrectly.");
@@ -102,7 +101,7 @@ function findUserIndex(nick, channel) {
 }
 
 function getSeen(nick, channel) {
-	var reg, id = findUserIndex(nick, channel);
+	let reg, id = findUserIndex(nick, channel);
 	if (id === -1) {
 		logger.debug("Didn't find such a guy. Checking old DB.");
 		return getOldSeen(nick, channel);
@@ -120,7 +119,7 @@ function getSeen(nick, channel) {
 }
 
 function setLastMessage(nick, channel, message, date) {
-	var entry = nick+" "+date+" message: \""+message+"\"",
+	let entry = nick+" "+date+" message: \""+message+"\"",
 		id = findUserIndex(nick, channel);
 	if (id === -1) {
 		seen[channel].push(entry);
@@ -131,7 +130,7 @@ function setLastMessage(nick, channel, message, date) {
 }
 
 function setUserLeft(nick, address, channel, type, message) {
-	var leftid,
+	let leftid,
 		entry,
 		id = findUserIndex(nick, channel);
 	if (id === -1) return; // no messages from them so we don't care when they left~
@@ -146,7 +145,7 @@ function setUserLeft(nick, address, channel, type, message) {
 }
 
 function removeUserLeft(nick, channel) {
-	var leftid,
+	let leftid,
 		id = findUserIndex(nick, channel);
 	if (id === -1) return;
 	leftid = seen[channel][id].indexOf("left: ");
@@ -173,7 +172,7 @@ bot.event({
 	handle: "seenMsg",
 	event: "PRIVMSG",
 	callback: function (input) {
-		var date, data;
+		let date, data;
 		if (!input.channel)
 			return; // query
 		date = Date.now();
@@ -241,7 +240,7 @@ bot.command({
 	syntax: config.command_prefix+"seen <nick>",
 	arglen: 1,
 	callback: function (input) {
-		var user, chan, target, seen;
+		let user, chan, target, seen;
 		if (input.channel && input.args[1]) {
 			chan = input.args[0];
 			target = input.args[1].replace("?", "");
