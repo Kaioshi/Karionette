@@ -27,7 +27,7 @@ bot.command({
 	help: "Tells you who you're identified as, if you are. See also: identify, unidentify, adduser, deluser, passwd",
 	syntax: config.command_prefix+"whoami",
 	callback: function (input) {
-		var user = logins.getUsername(input.nick);
+		let user = logins.getUsername(input.nick);
 		if (user)
 			irc.say(input.context, "I recognize you as \""+user+"\".");
 		else {
