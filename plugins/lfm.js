@@ -1,8 +1,8 @@
 "use strict";
-var lfmBindingsDB = new DB.Json({filename: "lfm"});
+let lfmBindingsDB = new DB.Json({filename: "lfm"});
 
 function dura(ms) {
-	var secs = Math.floor(ms/1000),
+	let secs = Math.floor(ms/1000),
 		mins = Math.floor(secs/60),
 		hours = Math.floor(mins/60),
 		ret = [];
@@ -17,7 +17,7 @@ function dura(ms) {
 }
 
 function timeAgo(then, now) {
-	var dura = now - then,
+	let dura = now - then,
 		secs = Math.floor(dura/1000),
 		mins = Math.floor(secs/60),
 		hours = Math.floor(mins/60),
@@ -42,7 +42,7 @@ bot.command({
 	syntax: config.command_prefix+"lfm [-bind / -prev / -top / -artist] [<account>|<artist>] - Example: "+
 		config.command_prefix+"lfm plonk420",
 	callback: function (input) {
-		var uri, user, i, method, artist, track, formed, summary,
+		let uri, user, i, method, artist, track, formed, summary,
 			keys, ret, song, then, now, tags, from, max, tn = 0;
 
 		if (config.api.lfm.length < 1) {
@@ -142,6 +142,7 @@ bot.command({
 				return;
 			case "-prev":
 				tn = 1;
+			/* fall through */
 			default:
 				user = (tn === 0 ? input.data : (input.args[1] || lfmBindingsDB.getOne(input.nick)));
 				break;
