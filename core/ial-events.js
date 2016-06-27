@@ -8,7 +8,7 @@ bot.command({
 	admin: true,
 	arglen: 2,
 	callback: function ialCommand(input) {
-		var reg, results, ch;
+		let reg, results, ch;
 		switch (input.args[0].toLowerCase()) {
 		case "scanre": // regex scan
 			try {
@@ -74,23 +74,27 @@ bot.event({
 	handle: "ialWho",
 	event: "352",
 	callback: function ialWho(input) {
-		var params = input.raw.split(" ");
-		ial.addUser(params[7], params[4]+"@"+params[5]);
-		ial.User(params[7]).addChannel(params[3]);
-		ial.Channel(params[3]).addNick(params[7]);
-		if (params[8].length > 1) {
-			switch (params[8][1]) {
+		let params = input.raw.split(" "),
+			nick = params[7], channel = params[3], status = params[8];
+		ial.addUser(nick, params[4]+"@"+params[5]);
+		ial.User(nick).addChannel(channel);
+		ial.Channel(channel).addNick(nick);
+		if (status.length > 1) {
+			switch (status[1]) {
 			case "@":
-				ial.Channel(params[3]).giveStatus("opped", params[7]);
+				ial.Channel(channel).giveStatus("opped", nick);
 				break;
 			case "%":
-				ial.Channel(params[3]).giveStatus("halfopped", params[7]);
+				ial.Channel(channel).giveStatus("halfopped", nick);
 				break;
 			case "+":
-				ial.Channel(params[3]).giveStatus("voiced", params[7]);
+				ial.Channel(channel).giveStatus("voiced", nick);
+				break;
+			case "*":
+				ial.Channel(channel).giveStatus("ircop", nick);
 				break;
 			default:
-				logger.debug("Unhandled user mode symbol: "+params[8]+" on "+params[7]+" in "+params[3]);
+				logger.debug("Unhandled user mode symbol: "+status+" on "+nick+" in "+channel);
 				break;
 			}
 		}
@@ -104,25 +108,30 @@ bot.event({
 		if (!ial.User(input.nick))
 			ial.addUser(input.nick, input.address);
 		if (input.nick === config.nick) {
-			ial.addChannel(input.channel);
+			let ch = input.channel,
+				nick = input.nick;
+			ial.addChannel(ch);
 			if (!config.address)
 				config.address = input.address;
 			setTimeout(function () {
-				ial.userJoined(input.channel, input.nick);
-				irc.raw("WHO "+input.channel);
-			}, 200);
+				ial.userJoined(ch, nick);
+				irc.raw("WHO "+ch);
+			}, 50);
 		} else {
 			ial.userJoined(input.channel, input.nick);
 		}
 	}
 });
-// TODO: these need the same treatment as ialQuit
+
 bot.event({
 	handle: "ialPart",
 	event: "PART",
 	callback: function ialPart(input) {
+		let ch = input.channel,
+			nick = input.nick,
+			uid = ial.User(nick).uid;
 		setTimeout(function () {
-			ial.userLeft(input.channel, input.nick);
+			ial.userLeft(ch, nick, uid);
 		}, 200);
 	}
 });
@@ -131,9 +140,12 @@ bot.event({
 	handle: "ialKick",
 	event: "KICK",
 	callback: function ialKick(input) {
+		let ch = input.channel,
+			kicked = input.kicked,
+			uid = ial.User(kicked).uid;
 		ial.Channel(input.context).setActive(input.nick);
 		setTimeout(function () {
-			ial.userLeft(input.channel, input.kicked);
+			ial.userLeft(ch, kicked, uid);
 		}, 200);
 	}
 });
@@ -142,12 +154,11 @@ bot.event({
 	handle: "ialQuit",
 	event: "QUIT",
 	callback: function ialQuit(input) {
-		var uid;
 		if (input.nick === config.nick)
 			return;
-		uid = ial.User(input.nick).uid;
+		let nick = input.nick, uid = ial.User(nick).uid;
 		setTimeout(function () {
-			ial.userQuit(input.nick, uid);
+			ial.userQuit(nick, uid);
 		}, 200);
 	}
 });
@@ -173,7 +184,7 @@ bot.event({
 			return true;
 	},
 	callback: function ialMode(input) {
-		var i, give = false, affected = input.affected.slice();
+		let i, give = false, affected = input.affected.slice();
 		for (i = 0; i < input.mode.length; i++) {
 			if (input.mode[i] === "+") {
 				give = true;
@@ -222,7 +233,17 @@ bot.event({
 	handle: "ialRawTopic",
 	event: "332",
 	callback: function ialRawTopic(input) {
-		var params = input.raw.split(" ");
+		let params = input.raw.split(" ");
 		ial.Channel(params[3]).topic = params.slice(4).join(" ").slice(1);
+	}
+});
+
+bot.event({
+	handle: "ialMsg",
+	event: "PRIVMSG",
+	callback: function (input) {
+		if (!input.channel)
+			return; // query
+		ial.Channel(input.channel).setActive(input.nick);
 	}
 });
