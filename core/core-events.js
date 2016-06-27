@@ -1,6 +1,4 @@
-// Keeps the bot connected
 "use strict";
-var helpDB = new DB.Json({filename: "alias/help"});
 
 bot.event({
 	handle: "corePing",
@@ -14,7 +12,7 @@ bot.event({
 	handle: "nickChange",
 	event: "433",
 	callback: function (input) {
-		var i, changeNick;
+		let i, changeNick;
 		/*
 		 * must be the one we set in config, and we're not connected yet.
 		 * since it's tracked after that point, and only when it's changed
@@ -45,7 +43,6 @@ bot.event({
 				}
 			}
 		}
-		input = null;
 	}
 });
 
@@ -71,7 +68,7 @@ bot.event({
 	},
 	regex: /^:[^ ]+ PRIVMSG [^ ]+ :\x01(VERSION|PING .*|TIME)\x01$/i,
 	callback: function (input) {
-		var ctcp = input.match[1].split(" ");
+		let ctcp = input.match[1].split(" ");
 		switch (ctcp[0].toUpperCase()) {
 		case "VERSION":
 			irc.raw("NOTICE "+input.context+" :\x01VERSION Karionette ~ \x02"+lib.randSelect([
@@ -125,7 +122,7 @@ bot.event({
 	handle: "coreWhoFinished",
 	event: "315",
 	callback: function (input) {
-		var channel;
+		let channel;
 		if (globals.autojoining === undefined || !globals.autojoining.length)
 			return;
 		channel = input.raw.slice(input.raw.indexOf("#"));
@@ -135,7 +132,7 @@ bot.event({
 		});
 		if (globals.autojoining.length === 0) {
 			delete globals.autojoining;
-			emitEvent("autojoinFinished");
+			bot.emitEvent("autojoinFinished");
 			logger.debug("Finished joining channels");
 		}
 	}
@@ -180,7 +177,7 @@ bot.command({
 	help: "Seriously?",
 	syntax: config.command_prefix+"help [<command or alias you want help with>] - supply no command in order to list commands (does not list aliases).",
 	callback: function (input) {
-		var cmd, help, syntax, options;
+		let cmd, help, syntax, options;
 		if (!input.args) { // show all commands
 			irc.say(input.context, "Available commands: "+bot.cmdList().sort().join(", "));
 			return;
@@ -197,7 +194,7 @@ bot.command({
 				irc.say(input.context, options);
 		} else {
 			// maybe it's an alias! with alias help set!
-			help = helpDB.getOne(cmd);
+			help = alias.helpDB.getOne(cmd);
 			if (help && (help.help || help.syntax)) {
 				if (help.help)
 					irc.say(input.context, "[Help] "+help.help);
