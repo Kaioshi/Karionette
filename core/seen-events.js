@@ -212,9 +212,10 @@ bot.event({
 	handle: "seenNick",
 	event: "NICK",
 	callback: function (input) {
-		ial.User(input.newnick).channels.forEach(function (channel) { // TODO: newnick or nick? you decide! WHO'S NEXT? EPIC RAP BATTLES OF HISTOWWWYYY
-			setUserLeft(input.nick, input.address, channel, "nick changed", " ~ "+input.nick+" -> "+input.newnick);
-			removeUserLeft(input.newnick, channel);
+		let nick = input.nick, address = input.address, newnick = input.newnick;
+		ial.User(nick).channels.forEach(function (channel) { // TODO: newnick or nick? you decide! WHO'S NEXT? EPIC RAP BATTLES OF HISTOWWWYYY
+			setUserLeft(nick, address, channel, "nick changed", " ~ "+nick+" -> "+newnick);
+			removeUserLeft(newnick, channel);
 		});
 	}
 });
