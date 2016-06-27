@@ -1,7 +1,7 @@
 "use strict";
 // config fondler
 
-var configHelp = {
+let configHelp = {
 	"command prefix": "Character used before commands. Currently: "+config.command_prefix,
 	"server": "Server the bot connects to. Currently: "+config.server,
 	"port": "Port the bot connects on. Currently: "+config.port,
@@ -58,7 +58,7 @@ function configEntryToString(entry) {
 }
 
 function changeConfig(field, entry) { // for user input to config
-	var type, api;
+	let type, api;
 	// these are auto generated or a function.
 	if (field.match(/nick$|saveChanges|address/i))
 		return false;
@@ -109,6 +109,7 @@ function changeConfig(field, entry) { // for user input to config
 			logger.error("Tried to set config."+field+" to a non-boolean value ("+entry+")");
 			return false;
 		}
+		break;
 	default: // should not end up here
 		logger.debug("Got to default in changeConfig()");
 		return false;
@@ -116,10 +117,8 @@ function changeConfig(field, entry) { // for user input to config
 }
 
 function needsCensor(field) {
-	switch (field) {
-	case "nickserv password":
+	if (field === "nickserv password")
 		return true;
-	}
 }
 
 function needsRestart(field) {
@@ -145,16 +144,17 @@ bot.command({
 	admin: true,
 	arglen: 1,
 	callback: function (input) {
-		var line, field, entry, index, entries, term, ret, send;
+		let field, entry, term;
 		switch (input.args[0].toLowerCase()) {
 		case "find":
-			if (!input.args[1]) {
+			if (input.args[1] === undefined) {
 				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"config find <term> - Example: "+
 					config.command_prefix+"config find youtube");
 				return;
 			}
+			let entries = Object.keys(config),
+				ret = [], send = [];
 			term = input.args.slice(1).join(" ").toLowerCase();
-			entries = Object.keys(config); ret = []; send = [];
 			entries.forEach(function (entry) {
 				if (entry.indexOf(term) === -1)
 					return;
@@ -186,8 +186,8 @@ bot.command({
 			}
 			break;
 		case "set":
-			line = input.args.slice(1).join(" ");
-			index = line.indexOf(":");
+			let line = input.args.slice(1).join(" "),
+				index = line.indexOf(":");
 			if (!input.args[1] || !input.args[2] || index === -1) {
 				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
 					"config set <field>: <new setting> - Example: "+config.command_prefix+
