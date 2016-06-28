@@ -1,9 +1,115 @@
 // internal address list take 2. maintains both user/channel lists as "first class"
 "use strict";
 
-let Channel = require("./core/ial/channel.js"),
-	User = require("./core/ial/user.js"),
-	channels = {}, users = {}, ial;
+let uidCounter = 0, channels = {}, users = {}, ial;
+
+class Channel {
+	constructor(ch) {
+		this.channel = ch;
+		this.nicks = [];
+		this.opped = [];
+		this.voiced = [];
+		this.halfopped = [];
+		this.ircop = [];
+		this.active = {};
+	}
+
+	isop(nick) {
+		return this.opped.indexOf(nick) > -1;
+	}
+
+	isvoice(nick) {
+		return this.voiced.indexOf(nick) > -1;
+	}
+
+	ishalfop(nick) {
+		return this.halfopped.indexOf(nick) > -1;
+	}
+
+	isircop(nick) {
+		return this.ircop.indexOf(nick) > -1;
+	}
+
+	giveStatus(status, nick) {
+		if (this[status].indexOf(nick) === -1)
+			this[status].push(nick);
+	}
+
+	removeStatus(status, nick) {
+		let index;
+		if ((index = this[status].indexOf(nick)) > -1)
+			this[status].splice(index, 1);
+	}
+
+	addNick(nick) {
+		if (this.nicks.indexOf(nick) === -1)
+			this.nicks.push(nick);
+	}
+
+	removeNick(nick) {
+		let index, listTypes = [ "nicks", "opped", "halfopped", "voiced", "ircop" ];
+		for (let i = 0; i < listTypes.length; i++) {
+			index = -1;
+			if ((index = this[listTypes[i]].indexOf(nick)) > -1)
+				this[listTypes[i]].splice(index, 1);
+		}
+		if (this.active[nick])
+			delete this.active[nick];
+	}
+
+	updateNick(oldnick, newnick) {
+		let index, listTypes = [ "nicks", "opped", "halfopped", "voiced", "ircop" ];
+		for (let i = 0; i < listTypes.length; i++) {
+			index = -1;
+			if ((index = this[listTypes[i]].indexOf(oldnick)) > -1)
+				this[listTypes[i]][index] = newnick;
+		}
+		if (this.active[oldnick]) {
+			this.active[newnick] = this.active[oldnick];
+			delete this.active[oldnick];
+		}
+	}
+
+	setActive(nick) {
+		this.active[nick] = Date.now();
+	}
+}
+
+class User {
+	constructor(nick, userhost) {
+		this.nick = nick;
+		this.userhost = userhost;
+		this.fulluser = nick+"!"+userhost;
+		this.username = userhost.slice(0, userhost.indexOf("@"));
+		this.hostname = userhost.slice(userhost.indexOf("@")+1);
+		this.channels = [];
+		this.uid = ++uidCounter;
+	}
+
+	nickChange(newnick) {
+		this.nick = newnick;
+		this.fulluser = newnick+"!"+this.userhost;
+	}
+
+	ison(channel) {
+		let lch = channel.toLowerCase();
+		for (let i = 0; i < this.channels.length; i++)
+			if (this.channels[i].toLowerCase() === lch)
+				return true;
+		return false;
+	}
+
+	removeChannel(ch) {
+		let index;
+		if ((index = this.channels.indexOf(ch)) > -1)
+			this.channels.splice(index, 1);
+	}
+
+	addChannel(ch) {
+		if (this.channels.indexOf(ch) === -1)
+			this.channels.push(ch);
+	}
+}
 
 globals.users = users;
 globals.channels = channels;
