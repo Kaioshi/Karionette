@@ -8,7 +8,7 @@ let mangaDB = {
 	check = {
 		all: function (notify) {
 			let all = [ "mangafox", "mangastream", "batoto" ]
-				.filter(function (m) { return mangaDB[m].getKeys().length; });
+				.filter(function (m) { return mangaDB[m].size(); });
 			if (!all.length) {
 				logger.debug("Nothing to check");
 				return;
@@ -22,7 +22,7 @@ let mangaDB = {
 			});
 		},
 		one: function (type, notify) {
-			if (!mangaDB[type].getKeys().length) {
+			if (!mangaDB[type].size()) {
 				if (notify)
 					irc.say(notify, "I'm not tracking any releases on "+type+".");
 				return;
@@ -54,7 +54,7 @@ function convertFromFragDB() { // XXX remove this after ranma has run it
 function updateAnnouncements(announce, msg, updates) {
 	for (let i = 0; i < announce.length; i++) {
 		if (announce[i][0] === "#") {
-			if (!ial.User(config.nick).ison(announce[i]))
+			if (ial.User(config.nick).ison(announce[i]))
 				updates.push([ "say", announce[i], msg ]);
 			else
 				logger.debug("Tried to send a manga update to "+announce[i]+", but I'm not on it.");
@@ -73,10 +73,10 @@ function updateAnnouncements(announce, msg, updates) {
 }
 
 function isNewRelease(date, latest, title) {
-	let i, newest;
+	let newest;
 	if (!latest || !Array.isArray(latest) || !latest.length)
 		return true;
-	for (i = 0, newest = 0; i < latest.length; i++) {
+	for (let i = 0, newest = 0; i < latest.length; i++) {
 		if (latest[i].title === title)
 			return false;
 		if (latest[i].date > newest)
@@ -94,29 +94,42 @@ function setLatest(entry, release, date) {
 		entry.latest.shift();
 }
 
+function findMatch(line, matches) {
+	let lline = line.toLowerCase();
+	for (let i = 0; i < matches.length; i++) {
+		let index = lline.indexOf(matches[i]);
+		if (index > -1) // returns the correct release title case
+			return [ i, lline.slice(index, index+matches[i].length) ];
+	}
+	return false;
+}
+
 function findUpdates(releases, type, notify) {
-	let updates = [];
-	Object.keys(releases).forEach(function (r) {
-		mangaDB[type].getKeys().forEach(function (title) {
-			let date, reltitle,
-				mangaEntry = mangaDB[type].getOne(title),
-				index = releases[r].title.toLowerCase().indexOf(title);
-			if (index === -1)
-				return; // NEXT!
-			reltitle = releases[r].title.slice(index, index+title.length);
-			date = new Date(releases[r].date).valueOf();
-			if (isNewRelease(date, mangaEntry.latest, releases[r].title)) { // new release~
-				mangaEntry.title = reltitle; // make the case nice if the user put in something weird.
-				index = releases[r].link.indexOf("?"); // weird unrequired trailing ?foo=butts&butts=foo stuff.
-				if (index > -1)
-					releases[r].link = releases[r].link.slice(0, index);
-				setLatest(mangaEntry, releases[r], date);
-				mangaDB[type].saveOne(title, mangaEntry);
-				updateAnnouncements(mangaEntry.announce, lib.decode(releases[r].title)+" is out! \\o/ ~ "+releases[r].link, updates);
-			}
-		});
-	});
+	let updates = [], loops = 0,
+		manga = mangaDB[type].getAll(),
+		keys = Object.keys(manga);
+	for (let i = 0; i < releases.length; i++) {
+		let release,
+			match = findMatch(releases[i].title, keys),
+			reltitle, title, date;
+		loops++;
+		if (!match)
+			continue;
+		release = releases[i];
+		title = keys[match[0]];
+		reltitle = match[1];
+		date = new Date(release.date).valueOf();
+		if (isNewRelease(date, manga[title].latest, release.title)) {
+			let index = release.link.indexOf("?"); // weird unrequired trailing ?foo=butts&butts=foo stuff.
+			if (index > -1)
+				release.link = release.link.slice(0, index);
+			manga[title].title = reltitle; // make the case nice if the user put in something weird.
+			setLatest(manga[title], release, date);
+			updateAnnouncements(manga[title].announce, lib.decode(release.title)+" is out! \\o/ ~ "+release.link, updates);
+		}
+	}
 	if (updates.length) {
+		mangaDB[type].saveAll(manga);
 		irc.rated(updates);
 	} else if (typeof notify === "string") {
 		irc.say(notify, "Nothing new. :\\");
