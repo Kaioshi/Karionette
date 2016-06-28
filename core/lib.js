@@ -106,25 +106,6 @@ lib = {
 		res2 = null; reg = null;
 		return lib.singleSpace(result);
 	},
-	mix: function (from, to, overwrite) {
-		let property;
-		for (property in from) {
-			if (!to[property] || overwrite) {
-				to[property] = from[property];
-			}
-		}
-		return to;
-	},
-	parseJSON: function (obj) {
-		return new Promise(function (resolve, reject) {
-			try {
-				let json = JSON.parse(obj);
-				resolve(json);
-			} catch (error) {
-				reject(error);
-			}
-		});
-	},
 	stringContainsAny: function (string, matches, ignoreCase) {
 		let i, line = string.slice();
 		if (ignoreCase)
