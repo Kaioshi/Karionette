@@ -21,44 +21,33 @@ function shortenRedditLink(link, sub, id) {
 	return link;
 }
 
-function announceReleases(entry, releases, sub) {
-	let announce = [];
-	for (let i = 0; i < releases.length; i++) {
-		let post = releases[i];
-		for (let k = 0; k < entry.announce.length; k++) {
-			let target = entry.announce[k],
-				releaseMsg = "r/"+sub+" - "+post.title+" ~ "+shortenRedditLink(post.link, entry.subreddit, post.id);
-			if (target[0] === "#" && ial.User(config.nick).ison(target))
-				announce.push([ "say", target, lib.decode(releaseMsg) ]);
-			else {
-				if (ial.User(target)) // only if they're online
-					announce.push([ "notice", target, lib.decode(releaseMsg) ]);
-				else
-					bot.queueMessage({ method: "notice", nick: target, message: lib.decode(releaseMsg) });
-			}
-		}
-	}
-	return announce;
-}
-
 function findNewPosts(fetched, entries) {
 	let announcements = [];
 	for (let i = 0; i < fetched.length; i++) {
 		if (!fetched[i].posts.length) // no posts
 			continue;
 		let release = fetched[i],
-			newPosts = [],
+			changed = false,
 			sub = release.sub.toLowerCase(),
 			seen = entries[sub].seen || [];
 		for (let k = 0; k < release.posts.length; k++) {
 			let post = release.posts[k];
-			if (seen.indexOf(post.id) === -1) {// new post
-				newPosts.push(post);
-				seen.push(post.id);
+			if (seen.indexOf(post.id) > -1) // seen it
+				continue;
+			changed = true;
+			seen.push(post.id);
+			for (let n = 0; n < entries[sub].announce.length; n++) {
+				let nick = entries[sub].announce[n];
+				if (!ial.User(nick))
+					continue;
+				announcements.push([
+					"notice",
+					nick,
+					lib.decode(`r/${sub} - ${post.title} ~ ${shortenRedditLink(post.link, entries[sub].subreddit, post.id)}`)
+				]);
 			}
 		}
-		if (newPosts.length) {
-			announcements = announcements.concat(announceReleases(entries[sub], newPosts, release.sub));
+		if (changed) {
 			if (seen.length > 20)
 				seen = seen.slice(-20);
 			entries[sub].seen = seen;
@@ -139,6 +128,8 @@ function unsubscribe(nick, sub) {
 }
 
 function addSubreddit(sub, user) {
+	if (sub === "all")
+		return "r/all produces too much traffic for this kind of thing.";
 	subDB.saveOne(sub, {
 		subreddit: sub,
 		addedBy: user,
