@@ -59,8 +59,8 @@ function findNewPosts(fetched, entries) {
 		}
 		if (newPosts.length) {
 			announcements = announcements.concat(announceReleases(entries[sub], newPosts, release.sub));
-			if (seen.length > 10) // don't need more than the last 10 entries since we only fetch 10
-				seen = seen.slice(seen.length-10);
+			if (seen.length > 20)
+				seen = seen.slice(-20);
 			entries[sub].seen = seen;
 		}
 	}
