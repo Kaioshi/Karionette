@@ -11,19 +11,19 @@ function getWpm(line) {
 	return Math.floor((line.length / 5.0) * 1000);
 }
 
-function sayNocontext(input) {
-	logger.debug("NOCONTEXT!!!");
-	return web.json("https://www.reddit.com/r/nocontext/random/.json").then(function (result) {
-		let line, title = result[0].data.children[0].data.title, target;
-		if (input.context[0] === "#") {
-			target = ial.Active(input.context);
+function sayNocontext(context) {
+	web.json("https://www.reddit.com/r/nocontext/random/.json").then(function (result) {
+		let line, target,
+			title = result[0].data.children[0].data.title;
+		if (context[0] === "#") {
+			target = ial.Active(context);
 			target = target.length ? lib.randSelect(target)+": " : "";
 			line = target+lib.decode(title);
 		} else { // probably a query
 			line = lib.decode(title);
 		}
-		return lib.delay(function () {
-			irc.say(input.context, line);
+		setTimeout(function () {
+			irc.say(context, line);
 		}, getWpm(line));
 	}).catch(function (error) {
 		logger.error("[sayNocontext] "+error, error);
@@ -208,8 +208,10 @@ bot.event({
 		let line, stats, randReply, tmp, randReplies,
 			args, verb, obj, method, modverb;
 
-		if (Math.random()*100 <= 20)
-			return sayNocontext(input);
+		if (Math.random()*100 <= 20) {
+			sayNocontext(input.context);
+			return;
+		}
 		randReplies = repliesDB.getAll();
 		args = input.match[0].slice(8,-1).split(" ");
 		verb = args[0];
@@ -256,7 +258,7 @@ bot.event({
 		if (line.indexOf("℅") > -1)
 			line = line.replace(/℅/g, "|");
 		randReplies = null;
-		return lib.delay(function () {
+		setTimeout(function () {
 			irc[method](input.context, line);
 		}, getWpm(line));
 	}
