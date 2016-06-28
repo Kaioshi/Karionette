@@ -140,9 +140,7 @@ bot.parse = function botParse(inputLine) {
 		logLine(type, inputLine);
 		return;
 	}
-	//params = pool.get();
 	params = { raw: inputLine };
-	//params.raw = inputLine;
 	// fill in mojojojo
 	bangIndex = input[0].indexOf("!");
 	if (bangIndex > -1) {

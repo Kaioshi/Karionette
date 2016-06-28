@@ -23,11 +23,11 @@ web.fetch = function fetch(uri, opts) {
 			if (error && error.code === "ENOENT") {
 				logger.error("You need to install curl on the system.");
 				throw new Error("curl is not installed.");
-			} if (stderr.length) {
-				reject(new Error(stderr.replace(/\n|\t|\r|curl: /g, "")));
-			} else {
-				resolve(stdout);
 			}
+			if (stderr.length)
+				reject(new Error(stderr.replace(/\n|\t|\r|curl: /g, "")));
+			else
+				resolve(stdout);
 		});
 	});
 };
@@ -44,10 +44,11 @@ function googleSearch(uri) {
 			throw new Error(`Couldn't find it. ${lib.randSelect(notFoundFeels)}`);
 		let ret = [];
 		for (let i = 0; i < g.items.length; i++) {
+			let item = g.items[i];
 			ret.push({
-				title: lib.singleSpace(g.items[i].title),
-				url: g.items[i].link,
-				content: String(g.items[i].snippet).replace(/\x01|\n|\t|\r/g, "")
+				title: lib.singleSpace(item.title),
+				url: item.link,
+				content: String(item.snippet).replace(/\x01|\n|\t|\r/g, "")
 			});
 		}
 		return ret;
