@@ -10,7 +10,10 @@ if (!require("fs").existsSync("config")) {
 }
 
 process.on("uncaughtException", function caughtUncaughtException(err) {
-	console.error(err);
+	if (plugin && plugin.sandbox && plugin.sandbox.logger)
+		plugin.sandbox.logger.error(err, err);
+	else
+		console.error(err, err.stack);
 });
 
 plugin = require("./plugin.js")(global.globals);

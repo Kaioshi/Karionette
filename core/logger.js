@@ -75,8 +75,10 @@ logger = {
 	misc: function (line, options) { this.log("Misc", line, true, options); },
 	error: function (line, err, options) {
 		this.log("Error", "\u001b[31m"+line+"\u001b[0m", true, options);
+		bot.emitEvent("Event: Error", line);
 		if (err && err.stack) {
 			this.log("Error", "\u001b[30;1m" + err.stack + "\u001b[0m", true, options);
+			bot.emitEvent("Event: Error Stack", err.stack);
 		}
 	},
 	warning: function (line, options) { this.warn(line, options); },
