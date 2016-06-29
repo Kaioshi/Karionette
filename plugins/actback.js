@@ -127,7 +127,7 @@ function replaceSingleVar(match, context, from, obj, verb, modverb) {
 	case "{from}": return magicInputFondler(from);
 	case "{whippingBoy}": return magicInputFondler(lib.randSelect(config.local_whippingboys));
 	case "{channel}": return magicInputFondler(context);
-	case "{randThing}": return lib.randSelect(randDB.getAll());
+	case "{randThing}": return randDB.random();
 	case "{randNick}": return magicInputFondler(randNick(context, from));
 	case "{randVerb}": return adverb(words.verb.random().base);
 	case "{verb}": return verb.base;
@@ -147,8 +147,7 @@ function replaceSingleVar(match, context, from, obj, verb, modverb) {
 	case "{possessivePronoun}": return words.possessivePronoun.random();
 	case "{preposition}": return words.preposition.random();
 	case "{obj}": return obj;
-	default:
-		// parse {#2-39} random number thing.
+	default: // parse {#2-39} random number thing.
 		if (match[1] === "#") {
 			tmp = /\{#(\d+)\-(\d+)\}/.exec(match);
 			if (tmp) {

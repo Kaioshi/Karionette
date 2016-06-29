@@ -105,14 +105,12 @@ function findMatch(line, matches) {
 }
 
 function findUpdates(releases, type, notify) {
-	let updates = [], loops = 0,
+	let updates = [],
 		manga = mangaDB[type].getAll(),
 		keys = Object.keys(manga);
 	for (let i = 0; i < releases.length; i++) {
-		let release,
-			match = findMatch(releases[i].title, keys),
-			reltitle, title, date;
-		loops++;
+		let match = findMatch(releases[i].title, keys),
+			release, reltitle, title, date;
 		if (!match)
 			continue;
 		release = releases[i];
