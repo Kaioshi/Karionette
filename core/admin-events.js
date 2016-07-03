@@ -43,12 +43,12 @@ bot.event({
 	handle: "errorStackAnnouncer",
 	event: "Event: Error Stack",
 	callback: function (error) {
-		let announceTo = getErrorAnnounceList(), i, messages,
+		let announceTo = getErrorAnnounceList(),
 			errorMessage = error.split("\n");
-		announceTo.forEach(function (user) {
-			messages = [];
-			for (i = 0; i < errorMessage.length; i++)
-				messages.push([ "notice", user, errorMessage[i] ]);
+		announceTo.forEach(function (nick) {
+			let messages = [];
+			for (let i = 0; i < errorMessage.length; i++)
+				messages.push([ "notice", nick, errorMessage[i] ]);
 			irc.rated(messages);
 		});
 	}
