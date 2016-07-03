@@ -1,7 +1,8 @@
-﻿"use strict";
+"use strict";
 
-let net = require("net"),
-	connected = false,
+const net = require("net");
+const sanityCheck = /\n|\r|\t/g;
+let connected = false,
 	connectInterval,
 	bufferedData = "",
 	socket = new net.Socket();
@@ -20,6 +21,11 @@ function handleData(data) {
 		bufferedData = data; // so we dump the remainder on the front of the next one
 }
 
+function sanitise(message) {
+	if (sanityCheck.test(message))
+		message = message.replace(sanityCheck, "");
+}
+
 // Send a message via the open socket
 function send(data, opts) {
 	if (!data || data.length === 0) {
@@ -30,14 +36,17 @@ function send(data, opts) {
 		logger.error("Tried to send data > 510 chars in length: " + data);
 		return;
 	}
-	data = sanitise(data); // remove \n \r \t
+	sanitise(data); // remove \n \r \t
 	if (opts) {
-		if (opts.nolog)
+		if (opts.nolog) {
 			socket.write(data+"\r\n", "utf8");
-		else if (opts.silent)
-			socket.write(data+"\r\n", "utf8", logger.sent(data, true));
+		} else if (opts.silent) {
+			socket.write(data+"\r\n", "utf8");
+			logger.sent(data, true);
+		}
 	} else {
-		socket.write(data+"\r\n", "utf8", logger.sent(data));
+		socket.write(data+"\r\n", "utf8");
+		logger.sent(data);
 	}
 }
 
@@ -84,20 +93,14 @@ function configureSocket() {
 function openConnection(params) {
 	configureSocket();
 	socket.connect(params.port, params.server, function () {
-		send("NICK " + sanitise(params.nickname));
-		send("USER " + sanitise(params.username) + " localhost * :" + sanitise(params.realname));
+		send("NICK "+params.nickname);
+		send("USER "+params.username+" localhost * :"+params.realname);
 		connected = true;
 		if (connectInterval) {
 			clearInterval(connectInterval);
 			connectInterval = null;
 		}
 	});
-}
-
-function sanitise(message) {
-	if (message.indexOf("\n") > -1 || message.indexOf("\t") > -1 || message.indexOf("\r") > -1)
-		return message.replace(/\n|\t|\r/g, "");
-	return message;
 }
 
 function getMaxMessageLength(prefix) {
@@ -110,6 +113,10 @@ function sendMessage(type, context, message, maxmsgs) {
 	let sliceAt, prefix, max;
 	if (typeof message !== "string") {
 		logger.error("Tried to send a non-String message: type -> "+typeof message);
+		return;
+	}
+	if (!message) {
+		logger.error("Tried to send an empty message: "+[type, context, message].join(", "));
 		return;
 	}
 	prefix = type+" "+context+" :";
@@ -131,7 +138,7 @@ function sendMessage(type, context, message, maxmsgs) {
 	}
 }
 
-plugin.declareGlobal("irc", "irc", {
+const irc = {
 	open: openConnection,
 	quit: function quitConnection(msg) {
 		connected = false;
@@ -139,12 +146,12 @@ plugin.declareGlobal("irc", "irc", {
 		send("QUIT :" + msg);
 		socket.end();
 	},
-	raw: function raw(stuff) {
-		send(stuff);
+	raw: function raw(message) {
+		send(message);
 	},
 	// IRC COMMANDS
-	pong: function pong(server) {
-		send("PONG :" + server, { nolog: true });
+	pong: function pong(challenge) {
+		send("PONG :"+challenge, { nolog: true });
 	},
 	join: function join(channel, key) {
 		if (key) {
@@ -178,9 +185,6 @@ plugin.declareGlobal("irc", "irc", {
 				clearInterval(repeater);
 		}, delay);
 	},
-	reply: function reply(input, message, maxReplies) {
-		this.say(input.context, input.from + ": " + message, maxReplies);
-	},
 	action: function action(channel, actionMsg, maxActions) {
 		this.say(channel, "\x01ACTION "+actionMsg+"\x01", maxActions);
 	},
@@ -188,34 +192,36 @@ plugin.declareGlobal("irc", "irc", {
 		sendMessage("NOTICE", target, noticeMsg, maxNotices);
 	},
 	// OP/DEOP/etc TODO: make op/deop/ban etc take multiple nicks/banmasks
-	op: function op(target, nick) {
-		send("MODE "+target+" +o "+nick);
-	},
-	deop: function deop(target, nick) {
-		send("MODE "+target+" -o "+nick);
-	},
-	voice: function voice(target, nick) {
-		send("MODE "+target+" +v "+nick);
-	},
-	devoice: function devoice(target, nick) {
-		send("MODE "+target+" -v "+nick);
-	},
-	halfop: function halfop(target, nick) {
-		send("MODE "+target+" +h "+nick);
-	},
-	dehalfop: function dehalfop(target, nick) {
-		send("MODE "+target+" -h "+nick);
-	},
-	kick: function kick(target, nick, reason) {
-		send("KICK "+target+" "+nick+" :"+reason);
-	},
-	ban: function ban(target, banmask) {
-		send("MODE "+target+" +b "+banmask);
-	},
-	unban: function unban(target, banmask) {
-		send("MODE "+target+" -b "+banmask);
-	},
-	topic: function topic(target, message) {
-		send("TOPIC "+target+" :"+message);
-	}
-});
+	// op: function op(target, nick) { // UNUSED FROM HERE ON
+	// 	send("MODE "+target+" +o "+nick);
+	// },
+	// deop: function deop(target, nick) {
+	// 	send("MODE "+target+" -o "+nick);
+	// },
+	// voice: function voice(target, nick) {
+	// 	send("MODE "+target+" +v "+nick);
+	// },
+	// devoice: function devoice(target, nick) {
+	// 	send("MODE "+target+" -v "+nick);
+	// },
+	// halfop: function halfop(target, nick) {
+	// 	send("MODE "+target+" +h "+nick);
+	// },
+	// dehalfop: function dehalfop(target, nick) {
+	// 	send("MODE "+target+" -h "+nick);
+	// },
+	// kick: function kick(target, nick, reason) {
+	// 	send("KICK "+target+" "+nick+" :"+reason);
+	// },
+	// ban: function ban(target, banmask) {
+	// 	send("MODE "+target+" +b "+banmask);
+	// },
+	// unban: function unban(target, banmask) {
+	// 	send("MODE "+target+" -b "+banmask);
+	// },
+	// topic: function topic(target, message) {
+	// 	send("TOPIC "+target+" :"+message);
+	// }
+};
+
+plugin.declareGlobal("irc", "irc", irc);
