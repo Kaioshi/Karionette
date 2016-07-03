@@ -1,4 +1,6 @@
 "use strict";
+let nickServConfigured = (config.nickserv_nickname && config.nickserv_hostname && config.nickserv_password),
+	ghostAttempts = 0;
 
 bot.event({
 	handle: "corePing",
@@ -8,52 +10,123 @@ bot.event({
 	}
 });
 
-bot.event({
-	handle: "nickChange",
-	event: "433",
-	callback: function (input) {
-		let i, changeNick;
-		/*
-		 * must be the one we set in config, and we're not connected yet.
-		 * since it's tracked after that point, and only when it's changed
-		 * successfully.
-		 */
-		input.args = input.raw.split(" ");
-		if (input.args[3] === config.nick) {
-			if (config.nickname.length === 0 || config.nickname.length === 1) {
-				// we've used all possible nicks, lets try config.nick_.
-				setTimeout(function () {
-					config.nick = config.nick+"_";
-					irc.raw("NICK "+config.nick);
-				}, 1000);
-			} else {
-				changeNick = function (newNick) {
-					setTimeout(function () {
-						irc.raw("NICK "+newNick);
-					}, 1000);
-				};
-				for (i = 0; i < config.nickname.length; i++) {
-					logger.debug(config.nickname[i]+" - "+i);
-					if (config.nickname[i] === config.nick) {
-						config.nickname.splice(i, 1);
-					} else {
-						config.nick = config.nickname[i];
-						changeNick(config.nick);
-					}
-				}
+function isNickServ(nick, hostname) {
+	if (config.nickserv_nickname.toLowerCase() === nick.toLowerCase() &&
+		config.nickserv_hostname.toLowerCase() === hostname.toLowerCase())
+		return true;
+}
+
+function getNickBack(nick) {
+	ghostAttempts++;
+	if (ghostAttempts >= 3) {
+		logger.info("Tried to ghost "+nick+" 3 times, giving up.");
+		return;
+	}
+	logger.info("Attempting to get nickname back.. (Try #"+ghostAttempts+")");
+	bot.event({
+		handle: "waitingForLogin",
+		event: "376",
+		once: true,
+		callback: function () {
+			irc.raw("WHOIS "+config.nickserv_nickname);
+		}
+	});
+
+	bot.event({
+		handle: "grabWhois",
+		event: "311",
+		once: true,
+		callback: function (input) {
+			let args = input.raw.split(" "),
+				nickserv_nick = args[3],
+				nickserv_hostname = args[4]+"@"+args[5];
+			if (!isNickServ(nickserv_nick, nickserv_hostname))
+				return;
+			irc.say(config.nickserv_nickname, `IDENTIFY ${nick} ${config.nickserv_password}`);
+		}
+	});
+
+	bot.event({
+		handle: "confirmIdentify",
+		event: "NOTICE",
+		once: true,
+		condition: function (input) {
+			if (!input.nick) // server notice
+				return false;
+			if (isNickServ(input.nick, input.address)) {
+				if (input.data.slice(0,22) === "You are now identified")
+					return true;
 			}
+		},
+		callback: function () {
+			irc.say(config.nickserv_nickname, `GHOST ${nick}`);
+		}
+	});
+
+	bot.event({
+		handle: "confirmGhosting",
+		event: "NOTICE",
+		once: true,
+		condition: function (input) {
+			if (!input.nick) // server notice
+				return false;
+			if (isNickServ(input.nick, input.address)) {
+				if (input.data.slice(-17) === "has been ghosted.")
+					return true;
+			}
+		},
+		callback: function () {
+			irc.raw("NICK "+nick);
+		}
+	});
+
+	bot.event({
+		handle: "confirmNickTaken",
+		event: "NICK",
+		once: true,
+		condition: function (input) {
+			if (input.newnick === nick)
+				return true;
+		},
+		callback: function () {
+			logger.info("Successfully reacquired "+config.nickname[0]+". \\o/");
+			ghostAttempts = 0;
+		}
+	});
+}
+/**
+ * need to determine if our nick is taken. try to register with nickserv if so
+ * and kill the person using for our nick. register an event to wait for that
+ * to finish, then re-take our nick.
+ */
+bot.event({
+	handle: "nickInUse",
+	event: "433",
+	callback: function nickInUse(input) {
+		if (nickServConfigured)
+			getNickBack(config.nickname[0]);
+		if (input.raw.split(" ")[3].toLowerCase() === config.nick.toLowerCase()) {
+			config.nick = config.nick+"_";
+			irc.raw("NICK "+config.nick);
 		}
 	}
 });
 
 
-if (config.nickserv_nickname && config.nickserv_hostname && config.nickserv_password) {
+if (nickServConfigured) {
 	bot.event({
-		handle: "nickserv",
+		handle: "nickservIdentify",
 		event: "NOTICE",
-		regex: new RegExp("^:"+config.nickserv_nickname+"!"+config.nickserv_hostname+" NOTICE [^ ]+ :This nickname is registered", "i"),
+		condition: function (input) {
+			if (!input.nick) // server notice
+				return false;
+			if (isNickServ(input.nick, input.address)) {
+				if (input.data.slice(0,27) === "This nickname is registered")
+					return true;
+			}
+		},
 		callback: function () {
-			irc.say("NickServ", "IDENTIFY " + config.nickserv_password);
+			irc.say(config.nickserv_nickname, "IDENTIFY " + config.nickserv_password);
 		}
 	});
 }
