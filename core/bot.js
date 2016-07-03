@@ -86,6 +86,8 @@ function emitEvent(e, input) {
 			} else {
 				events[e][i].callback(input);
 			}
+			if (events[e][i].once)
+				unregisterEvent(events[e][i].event, events[e][i].handle);
 		}
 	}
 }
