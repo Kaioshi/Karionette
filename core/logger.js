@@ -1,6 +1,6 @@
 "use strict";
 let	logDay = new Date().getDate(),
-	logFile, logger;
+	logFile;
 
 if (!fs.existsSync("data/logs"))
 	fs.mkdirSync("data/logs");
@@ -14,11 +14,11 @@ function logFileDate(d) {
 function writeLog(date, line) {      // XXX: Can not use logger.* functions in this call.
 	if (date.getDate() !== logDay) { // Recursive loops, yo!
 		logDay = date.getDate();     // new day, new log, new dog, new.. fog.. pog. whatever.
-		logFile = "data/logs/" + logFileDate(date) + ".log";
+		logFile = "data/logs/"+logFileDate(date)+".log";
 		fs.writeFileSync(logFile, "");
 	}
 	if (logFile === undefined)
-		logFile = "data/logs/" + logFileDate(date) + ".log";
+		logFile = "data/logs/"+logFileDate(date)+".log";
 	fs.appendFile(logFile, line.replace(/\u001b\[[0-9]+m/g, "") + "\n");
 }
 
@@ -42,27 +42,23 @@ function shd(text) { // colourful
 	return "\u001b[90m["+text+"\u001b[90m]\u001b[0m";
 }
 
-logger = {
+const logger = {
 	log: function (type, line, out, lineOpt) {
 		let date = new Date();
 		if (type)
 			line = shd(type)+" "+line;
 		if (config.logging_timestamp && (!lineOpt || lineOpt.timestamp !== false))
-			line = date.toLocaleTimeString() + " " + line;
-		if (type !== "MemR")
-			writeLog(date, line);
-		if (out) {
-			if (lineOpt) { // logger.info("stuff", {newline: false});
-				if (lineOpt.newline === false)
-					process.stdout.write(line);
-				else
-					console.log(line);
-			} else {
-				console.log(line);
-			}
-		}
+			line = date.toLocaleTimeString()+" "+line;
+		if (out)
+			process.stdout.write(line+"\n");
+		writeLog(date, line);
 	},
-	memr: function (line) { this.log("MemR", line, config.logging_timestamp); },
+	memr: function (line) {
+		let date = "";
+		if (config.logging_timestamp)
+			date = new Date().toLocaleTimeString()+" ";
+		process.stdout.write(`${date}${shd("MemR")} ${line}\n`);
+	},
 	chat: function (line) { this.log("Chat", line, config.logging_chat); },
 	denied: function (line) { this.log("Denied", line, true); },
 	ignored: function (line) { this.log("Ignored", line, true); },
