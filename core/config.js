@@ -1,28 +1,28 @@
-"use strict";
+"use strict"; // TODO: redo this.
+const validNickTest = /(^[a-zA-Z0-9_\-\[\]\{\}\^`\|]*$)/;
 
 function validNick(nick) {
 	if (nick[0] === "-")
 		return false;
-	return /(^[a-zA-Z0-9_\-\[\]\{\}\^`\|]*$)/.test(nick);
+	return validNickTest.test(nick);
 }
 
-function singleSpace(text) { // "foo  bar " -> "foo bar"
-	let i, ret;
-	if (text.indexOf("  ") > -1) {
-		i = 0; ret = ""; text = text.split(" ");
-		while (i < text.length) {
-			if (text[i].length > 0)
-				ret += text[i]+" ";
-			i++;
+function singleSpace(lineOfText) { // "foo  bar " -> "foo bar"
+	let str = lineOfText;
+	if (str.indexOf("  ") > -1) {
+		let i, ret = [];
+		str = str.split(" ");
+		for (i = 0; i < str.length; i++) {
+			if (str[i].length > 0)
+				ret.push(str[i]);
 		}
-		return ret.slice(0, -1);
-	} else {
-		if (text[0] === " ")
-			text = text.slice(1);
-		if (text[text.length-1] === " ")
-			text = text.slice(0,-1);
+		return ret.join(" ");
 	}
-	return text;
+	if (str[0] === " ")
+		str = str.slice(1);
+	if (str[str.length-1] === " ")
+		return str.slice(0, -1);
+	return str;
 }
 
 function parseEntry(entry) {
@@ -30,7 +30,6 @@ function parseEntry(entry) {
 	// these need to be arrays
 	switch (entry[0].toLowerCase()) {
 	case "autojoin":
-	case "nickname":
 	case "local_whippingboys":
 	case "enabled_plugins":
 	case "disabled_plugins":
@@ -50,16 +49,10 @@ function parseEntry(entry) {
 function validateConfigEntry(field, entry) {
 	switch (field) {
 	case "nickname":
-		if (!Array.isArray(entry)) {
-			console.error(" * Invalid nickname entry in config - should look like: \"nickname: nick1, nick2, nick3\"");
+		if (!validNick(entry)) {
+			console.log(" * Invalid nick characters found in nick: \""+entry+
+				"\" - Allowed: a-z A-Z 0-9 _ - [ ] { } ^ ` | - no spaces.");
 			return false;
-		}
-		for (let i = 0; i < entry.length; i++) {
-			if (!validNick(entry[i])) {
-				console.log(" * Invalid nick characters found in nick: \""+entry[i]+
-					"\" - Allowed: a-z A-Z 0-9 _ - [ ] { } ^ ` | - no spaces.");
-				return false;
-			}
 		}
 		break;
 	}
@@ -85,8 +78,7 @@ function parseConf(conf) {
 			config[entry[0]] = entry[1];
 		}
 	}
-	config.nick = config.nickname[0];
-	config.nicks = config.nickname;
+	config.nick = config.nickname;
 	return config;
 }
 

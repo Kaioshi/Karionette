@@ -6,8 +6,7 @@ let configHelp = {
 	"server": "Server the bot connects to. Currently: "+config.server,
 	"port": "Port the bot connects on. Currently: "+config.port,
 	"realname": "Bot's \"realname\", shows up in /whois. Currently: "+config.realname,
-	"nickname": "Comma separated list of nicks for the bot. Uses the first one by default, switches if it's taken. Currently: "+
-		config.nickname.join(", "),
+	"nickname": "Bot's nickname. Adds _ if taken. Currently: "+config.nickname,
 	"username": "Bot's username, shows up in /whois and join/part etc. Currently: "+config.username,
 	"autojoin": "Comma separated list of channels for the bot to join after connecting. Currently: "+config.autojoin.join(", "),
 	"secret": "Secret password to become admin.",
@@ -109,7 +108,6 @@ function changeConfig(field, entry) { // for user input to config
 			logger.error("Tried to set config."+field+" to a non-boolean value ("+entry+")");
 			return false;
 		}
-		break;
 	default: // should not end up here
 		logger.debug("Got to default in changeConfig()");
 		return false;
@@ -146,7 +144,7 @@ bot.command({
 	callback: function (input) {
 		let field, entry, term;
 		switch (input.args[0].toLowerCase()) {
-		case "find":
+		case "find": {
 			if (input.args[1] === undefined) {
 				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+"config find <term> - Example: "+
 					config.command_prefix+"config find youtube");
@@ -185,7 +183,8 @@ bot.command({
 				irc.say(input.context, "No config entry matched \""+term+"\".");
 			}
 			break;
-		case "set":
+		}
+		case "set": {
 			let line = input.args.slice(1).join(" "),
 				index = line.indexOf(":");
 			if (!input.args[1] || !input.args[2] || index === -1) {
@@ -201,6 +200,7 @@ bot.command({
 			else
 				irc.say(input.context, "Nope.");
 			break;
+		}
 		case "help":
 			term = input.args.slice(1).join(" ").toLowerCase();
 			if (!term)
