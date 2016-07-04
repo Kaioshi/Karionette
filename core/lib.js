@@ -1,7 +1,6 @@
-﻿"use strict";
+"use strict";
 // General Helpers
-let lib,
-	memProfcache = {},
+let memProfcache = {},
 	timedCache = {},
 	memuseLast = process.memoryUsage().rss;
 
@@ -33,7 +32,7 @@ function inteSupp (str, obj) { // this matches on the entire '{word}' rather tha
 	});
 }
 
-lib = {
+const lib = {
 	decode: require("./lib/entities.js").decode,
 	delay: function libDelay(fn, delay) { // promise version of setTimeout
 		return new Promise(function (resolve) {
@@ -118,20 +117,22 @@ lib = {
 		}
 		return false;
 	},
-	singleSpace: function (text) {
-		let i, ret;
-		if (text.indexOf("  ") > -1) {
-			ret = ""; text = text.split(" ");
-			for (i = 0; i < text.length; i++)
-				if (text[i].length)
-					ret += text[i]+" ";
-			return ret.slice(0, -1);
+	singleSpace: function (lineOfText) { // the new champion!
+		let str = lineOfText;
+		if (str.indexOf("  ") > -1) {
+			let i, ret = [];
+			str = str.split(" ");
+			for (i = 0; i < str.length; i++) {
+				if (str[i].length > 0)
+					ret.push(str[i]);
+			}
+			return ret.join(" ");
 		}
-		if (text[0] === " ")
-			text = text.slice(1);
-		if (text[text.length-1] === " ")
-			text = text.slice(0,-1);
-		return text;
+		if (str[0] === " ")
+			str = str.slice(1);
+		if (str[str.length-1] === " ")
+			return str.slice(0, -1);
+		return str;
 	},
 	validNick: function (nick) { // returns true or false if the nick contains valid characters
 		if (nick[0] === "-")
@@ -157,7 +158,7 @@ lib = {
 		if (raw) return process.memoryUsage().rss;
 		return (((process.memoryUsage().rss) / 1024) / 1024).toString().slice(0, 5);
 	},
-	memProf: function (desc) {
+	memProf: function (desc) { // this doesn't work, really. too much going on at any given time. sadface
 		let diff;
 		if (!memProfcache[desc]) {
 			memProfcache[desc] = process.memoryUsage().rss;
@@ -189,15 +190,13 @@ lib = {
 		memuse = null; report = null; diff = null;
 	},
 	timeReport: function(handle) {
-		let diff, now;
+		let diff;
 		if (!timedCache[handle]) {
-			timedCache[handle] = new Date().valueOf();
+			timedCache[handle] = Date.now();
 			return;
 		}
-		now = new Date().valueOf();
-		diff = (now-timedCache[handle]);
+		diff = (Date.now()-timedCache[handle]);
 		logger.debug(handle+" took "+diff+"ms");
-		diff = null; now = null;
 		delete timedCache[handle];
 	},
 	datestamp: function () {
@@ -253,7 +252,6 @@ lib = {
 		return duration;
 	},
 	fs: {
-		exists: fs.existsSync,
 		makePath: function (p) {
 			let i, path, curPath;
 			if (fs.existsSync(p))
