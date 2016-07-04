@@ -93,7 +93,7 @@ if (useGc) {
 plugin.sandbox.irc.open({
 	server: plugin.sandbox.config.server,
 	port: plugin.sandbox.config.port,
-	nickname: plugin.sandbox.config.nickname[0],
+	nickname: plugin.sandbox.config.nickname,
 	username: plugin.sandbox.config.username,
 	realname: plugin.sandbox.config.realname
 });

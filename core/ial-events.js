@@ -167,11 +167,8 @@ bot.event({
 	handle: "ialNick",
 	event: "NICK",
 	callback: function ialNick(input) {
-		if (input.nick === config.nick) { // update our nicks
+		if (input.nick === config.nick) // update our nicks
 			config.nick = input.newnick;
-			if (config.nicks.indexOf(config.nick) === -1)
-				config.nicks.push(config.nick);
-		}
 		ial.nickChange(input.nick, input.newnick);
 	}
 });

@@ -16,7 +16,7 @@ function getCommand(input) {
 	} else if (input[4]) {
 		tmp2 = cleanNick(input[3]);
 		tmp1 = input[4].toLowerCase();
-		if (tmp2 === config.nick || config.nickname.some(nick => nick.toLowerCase() === tmp2.toLowerCase())) {
+		if (tmp2.toLowerCase() === config.nick.toLowerCase()) {
 			pos = 4;
 			command = tmp1;
 		}

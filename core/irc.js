@@ -75,7 +75,7 @@ function configureSocket() {
 					openConnection({
 						server: config.server,
 						port: config.port,
-						nickname: config.nickname[0],
+						nickname: config.nickname,
 						username: config.username,
 						realname: config.realname
 					});

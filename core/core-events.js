@@ -1,6 +1,6 @@
 "use strict";
-let nickServConfigured = (config.nickserv_nickname && config.nickserv_hostname && config.nickserv_password),
-	ghostAttempts = 0;
+const nickServConfigured = (config.nickserv_nickname && config.nickserv_hostname && config.nickserv_password);
+let ghostAttempts = 0;
 
 bot.event({
 	handle: "corePing",
@@ -89,7 +89,7 @@ function getNickBack(nick) {
 				return true;
 		},
 		callback: function () {
-			logger.info("Successfully reacquired "+config.nickname[0]+". \\o/");
+			logger.info("Successfully reacquired "+config.nickname+". \\o/");
 			ghostAttempts = 0;
 		}
 	});
@@ -104,7 +104,7 @@ bot.event({
 	event: "433",
 	callback: function nickInUse(input) {
 		if (nickServConfigured)
-			getNickBack(config.nickname[0]);
+			getNickBack(config.nickname);
 		if (input.raw.split(" ")[3].toLowerCase() === config.nick.toLowerCase()) {
 			config.nick = config.nick+"_";
 			irc.raw("NICK "+config.nick);
