@@ -5,16 +5,18 @@ server: irc.esper.net
 port: 6667
 
 realname: Karionette
-# make sure there's at least 3 nicks - comma separated
-nickname: Kari, Kari_,  Kari`
+# if this is taken, Kari_ or nickname_ will be used.
+nickname: Kari
 username: Kyuuuuuuu
 
 # Autojoin channels
 autojoin: #anime, #pyoshi
 
-# NickServ details, case-insensitive. Hostname can be a regex.
+# NickServ details, case-insensitive - looking for exact match.
+# * if the bot's nick is taken and it successfully logs in, it will ghost them
+#   and take the nick back.
 #nickserv nickname: NickServ
-#nickserv hostname: NickServ@services\.
+#nickserv hostname: NickServ@services.esper.net
 #nickserv password: password
 
 #api wordnik: <your key here> - needed for word discovery and ;define - go to http://developer.wordnik.com to get one
