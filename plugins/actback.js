@@ -1,6 +1,5 @@
 "use strict";
-let regexFactory = require("./lib/regexFactory.js"),
-	randDB = new DB.List({filename: "randomThings"}),
+let randDB = new DB.List({filename: "randomThings"}),
 	denyDB = new DB.Json({filename: "actback/deny"}),
 	statsDB = new DB.Json({filename: "actback/stats"}),
 	repliesDB = new DB.Json({filename: "actback/replies"}),
@@ -13,34 +12,32 @@ function getWpm(line) {
 
 function sayNocontext(context) {
 	web.json("https://www.reddit.com/r/nocontext/random/.json").then(function (result) {
-		let line, target,
-			title = result[0].data.children[0].data.title;
-		if (context[0] === "#") {
+		let target = "",
+			line = lib.decode(result[0].data.children[0].data.title);
+		if (context[0] === "#" && lib.chance() > 50) {
 			target = ial.Active(context);
-			target = target.length ? lib.randSelect(target)+": " : "";
-			line = target+lib.decode(title);
-		} else { // probably a query
-			line = lib.decode(title);
+			if (target.length)
+				target = lib.randSelect(target)+", ";
 		}
 		setTimeout(function () {
-			irc.say(context, line);
+			irc.say(context, target+line);
 		}, getWpm(line));
 	}).catch(function (error) {
 		logger.error("[sayNocontext] "+error, error);
 	});
 }
 
-function transformObj(args, num) {
-	let me = (config.nick ? config.nick : config.nickname[0]),
-		nonObjs = [ me, me+"s", me+"'s", "a", "an", "the", "some", "one", "loads", "lot", "of", "all", "his", "their", "with", "her" ],
-		isNonObj = function (elem) {
-			if (args[num] === undefined)
-				return;
-			return (elem.toLowerCase() === args[num].toLowerCase());
-		};
-	while (nonObjs.some(isNonObj))
-		num++;
-	return args[num];
+function transformObj(line) {
+	let me = config.nick.toLowerCase(),
+		args = line.toLowerCase().split(" "),
+		nonObjs = [ me, me+"s", me+"'s", "in", "on", "a", "an", "the", "some",
+			"upon", "atop", "one", "loads", "lot", "of", "all", "his", "their", "with", "her" ];
+	for (let i = 0; i < args.length; i++) { // return the first nonObj
+		if (!args[i].length || nonObjs.indexOf(args[i]) > -1)
+			continue;
+		return args[i];
+	}
+	return null;
 }
 
 function questionReply(question) {
@@ -146,7 +143,7 @@ function replaceSingleVar(match, context, from, obj, verb, modverb) {
 	case "{personalPronoun}": return words.personalPronoun.random();
 	case "{possessivePronoun}": return words.possessivePronoun.random();
 	case "{preposition}": return words.preposition.random();
-	case "{obj}": return obj;
+	case "{obj}": return obj || randDB.random();
 	default: // parse {#2-39} random number thing.
 		if (match[1] === "#") {
 			tmp = /\{#(\d+)\-(\d+)\}/.exec(match);
@@ -192,17 +189,27 @@ function magicInputFondler(text) {
 	return text;
 }
 
+function actionMatching(input) { // this regex took over an hour. I hate you, regex. I love you, regex.
+	const match = new RegExp("(.*) ("+config.nick+")(?:\\S|\\'s|,|\\!)?(?!\\S) ?(.*)", "i")
+		.exec(input.message.slice(8,-1));
+	if (match) {
+		input.match = match;
+		return true;
+	}
+}
+
 bot.event({
 	handle: "actback",
 	event: "PRIVMSG",
 	condition: function (input) {
-		if (input.message.indexOf("\x01") === -1) // \x01ACTION
+		if (input.message.indexOf("\x01ACTION") === -1) // \x01ACTION
 			return false;
+		if (input.message.toLowerCase().indexOf(config.nick.toLowerCase()) === -1)
+			return;
 		if (denyDB.hasOne(input.context.toLowerCase()))
 			return false;
-		return lib.stringContainsAny(input.message, config.nicks, true);
+		return actionMatching(input); // doing this in a function so the regex updates w/nick changes
 	},
-	regex: regexFactory.actionMatching(config.nickname),
 	callback: function (input) {
 		let line, stats, randReply, tmp, randReplies,
 			args, verb, obj, method, modverb;
@@ -212,9 +219,9 @@ bot.event({
 			return;
 		}
 		randReplies = repliesDB.getAll();
-		args = input.match[0].slice(8,-1).split(" ");
+		args = input.match[0].split(" ");
 		verb = args[0];
-		obj = transformObj(args, 2);
+		obj = input.match[3] && input.match[3].length ? transformObj(input.match[3]) : null;
 		method = lib.randSelect([ "say", "action"]);
 		if (verb.indexOf("\"") > -1) verb = verb.replace(/\"/g, "");
 		// Check for adverb
@@ -263,29 +270,34 @@ bot.event({
 	}
 });
 
+function questionMatching(input) {
+	const match = new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :(?:(?:(?:"+config.nick+
+		"[,:]\\s)(\\w+).+)|(?:(\\w+).+)"+config.nick+")!?\\?!?$", "i")
+		.exec(input.raw);
+	if (match) {
+		input.match = match;
+		return true;
+	}
+}
+
 bot.event({
 	handle: "actbackQuestion",
 	event: "PRIVMSG",
 	condition: function (input) {
 		if (input.message.indexOf("?") === -1)
 			return false;
+		if (input.message.toLowerCase().indexOf(config.nick.toLowerCase()) === -1)
+			return false;
 		if (denyDB.hasOne(input.context.toLowerCase()))
 			return false;
-		return lib.stringContainsAny(input.message, config.nickname, true);
+		return questionMatching(input);
 	},
-	regex: new RegExp("^:[^ ]+ PRIVMSG [^ ]+ :(?:(?:(?:"+
-		regexFactory.matchAny(config.nickname)+
-		"[,:]\\s)(\\w+).+)|(?:(\\w+).+)"+
-		regexFactory.matchAny(config.nickname)+
-		")!?\\?!?$", "i"),
 	callback: function (input) {
-		let m, rep;
-
-		m = input.match[1] || input.match[2];
-		rep = replaceVars(questionReply(m), input.context, input.nick);
-
-		return lib.delay(function () {
-			irc.say(input.context, rep);
+		let context = input.context,
+			m = input.match[1] || input.match[2],
+			rep = replaceVars(questionReply(m), input.context, input.nick);
+		setTimeout(function () {
+			irc.say(context, rep);
 		}, getWpm(rep));
 	}
 });
