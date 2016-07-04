@@ -1,6 +1,11 @@
 "use strict"; // uses words, DB, lib, config, ial
 let argsDone = false,
 	varParseLimit = 3;
+const randNicks = [
+	"someone", "Spiderman", "Iron Man", "Orgasmo", "Invader Zim", "Jo Brand", "Stephen Fry", "David Mitchell",
+	"Lee Mack", "Joffrey", "Hillary Clinton", "Solid Snake", "Kirby", "a wild Jigglypuff", "Steve Holt",
+	"Bob Loblaw"
+];
 
 function magicInputFondler(text) {
 	if (text.indexOf("|") > -1)
@@ -14,7 +19,7 @@ let aliasDB = new DB.Json({filename: "alias/alias"}),
 	randDB = new DB.List({filename: "randomThings"});
 
 function getWhippingBoy() {
-	if (config.local_whippingboys && Array.isArray(config.local_whippingboys) && config.local_whippingboys.length)
+	if (config.local_whippingboys && config.local_whippingboys.length)
 		return lib.randSelect(config.local_whippingboys);
 	return "the local whipping boy";
 }
@@ -27,13 +32,8 @@ function randNick(context, from) {
 		if (index > -1)
 			nicks.splice(index, 1);
 	}
-	if (nicks === undefined || !nicks.length) {
-		nicks = [
-			"someone", "Spiderman", "Iron Man", "Orgasmo", "Invader Zim", "Jo Brand", "Stephen Fry", "David Mitchell",
-			"Lee Mack", "Joffrey", "Hillary Clinton", "Solid Snake", "Kirby", "a wild Jigglypuff", "Steve Holt",
-			"Bob Loblaw", getWhippingBoy()
-		];
-	}
+	if (nicks === undefined || !nicks.length)
+		return Math.random()*100 < 50 ? lib.randSelect(randNicks) : getWhippingBoy();
 	return lib.randSelect(nicks);
 }
 
