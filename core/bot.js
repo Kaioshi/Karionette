@@ -73,6 +73,7 @@ function emitCommand(c, input) {
 }
 
 function emitEvent(e, input) {
+	let toRemove;
 	if (events[e] === undefined || !events[e].length)
 		return;
 	for (let i = 0; i < events[e].length; i++) {
@@ -86,10 +87,14 @@ function emitEvent(e, input) {
 			} else {
 				events[e][i].callback(input);
 			}
-			if (events[e][i].once)
-				unregisterEvent(events[e][i].event, events[e][i].handle);
+			if (events[e][i].once) {
+				toRemove = toRemove || [];
+				toRemove.push([events[e][i].event, events[e][i].handle]);
+			}
 		}
 	}
+	if (toRemove)
+		toRemove.forEach(ev => unregisterEvent(ev[0], ev[1]));
 }
 
 function commandNeedsAdmin(cmd) {
