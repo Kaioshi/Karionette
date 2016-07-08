@@ -1,9 +1,8 @@
 "use strict";
 
 module.exports = function (globals) {
-	let vm = require("vm"),
+	const vm = require("vm"),
 		fs = require("fs"),
-		vmContext,
 		plugin = {
 			sandbox: {
 				console: console,
@@ -15,7 +14,8 @@ module.exports = function (globals) {
 				process: process,
 				globals: globals
 			}
-		},
+		};
+	let vmContext,
 		logInfo = function (line) {
 			if (plugin.sandbox.logger) {
 				logInfo = plugin.sandbox.logger.plugin;
@@ -43,23 +43,9 @@ module.exports = function (globals) {
 			return false;
 		}
 		try {
-			let plug = fs.readFileSync(fn).toString();
-			return plug;
+			return fs.readFileSync(fn).toString();
 		} catch (error) {
 			logError("Couldn't read "+fn+": "+error.message, error);
-			return false;
-		}
-	}
-
-	function loadPluginFromSource(fn, plug) {
-		try {
-			logInfo("Loading "+fn+" ...");
-			let src = "(function () {"+plug+"})()";
-			vm.runInContext(src, vmContext, {filename: fn});
-			src = null;
-			return true;
-		} catch (error) {
-			logError("Error in "+fn+": "+error.message, error);
 			return false;
 		}
 	}
@@ -68,32 +54,36 @@ module.exports = function (globals) {
 		let plug = readPlugin(fn);
 		if (plug === false)
 			return;
-		return loadPluginFromSource(fn, plug);
+		try {
+			logInfo("Loading "+fn+" ...");
+			let src = "(function () {"+plug+"})()";
+			vm.runInContext(src, vmContext, {filename: fn});
+			src = null; plug = null;
+			return true;
+		} catch (error) {
+			logError("Error in "+fn+": "+error.message, error);
+			return false;
+		}
 	}
 
 	function loadCorePlugins(pluginOrder) {
 		pluginOrder.forEach(plug => loadPlugin("core/"+plug+".js"));
 	}
 
-	function pluginIsAllowed(plug, disabled_plugins) {
-		if (!disabled_plugins.length)
-			return true;
-		for (let i = 0; i < disabled_plugins.length; i++)
-			if (disabled_plugins[i].toLowerCase() === plug)
-				return false;
+	function pluginIsAllowed(plug) {
+		if (plug.slice(-3) !== ".js")
+			return false;
+		if (plugin.sandbox.config.enabled_plugins && plugin.sandbox.config.enabled_plugins.length)
+			return !plugin.sandbox.config.enabled_plugins.some(p => p.toLowerCase() !== plug.slice(0, -3).toLowerCase());
+		if (plugin.sandbox.config.disabled_plugins && plugin.sandbox.config.disabled_plugins.length)
+			return !plugin.sandbox.config.disabled_plugins.some(p => p.toLowerCase() === plug.slice(0, -3).toLowerCase());
 		return true;
 	}
 
 	function loadOptionalPlugins() {
-		const pluginList = fs.readdirSync("./plugins"),
-			disabled_plugins = plugin.sandbox.config.disabled_plugins || [];
-		for (let i = 0; i < pluginList.length; i++) {
-			const plug = pluginList[i];
-			if (plug.slice(-3) !== ".js")
-				continue;
-			if (pluginIsAllowed(plug.slice(0,-3).toLowerCase(), disabled_plugins))
-				loadPlugin("plugins/"+plug);
-		}
+		fs.readdirSync("./plugins")
+			.filter(pluginIsAllowed)
+			.forEach(plug => loadPlugin("plugins/"+plug));
 	}
 
 	plugin.sandbox.plugin = {
