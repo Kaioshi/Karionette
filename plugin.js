@@ -15,21 +15,23 @@ module.exports = function (globals) {
 				process: process,
 				globals: globals
 			}
+		},
+		logInfo = function (line) {
+			if (plugin.sandbox.logger) {
+				logInfo = plugin.sandbox.logger.plugin;
+				logInfo(line);
+			} else {
+				process.stdout.write(new Date().toLocaleTimeString()+" [Plugin] "+line+"\n");
+			}
+		},
+		logError = function (line, error) {
+			if (plugin.sandbox.logger) {
+				logError = plugin.sandbox.logger.error;
+				logError(line, error);
+			} else {
+				console.error(new Date().toLocaleTimeString()+" [Error] "+line, error);
+			}
 		};
-
-	function logError(line, error) {
-		if (plugin.sandbox.logger)
-			plugin.sandbox.logger.error(line, error);
-		else
-			console.error(new Date().toLocaleTimeString()+" [Error] "+line, error);
-	}
-
-	function logInfo(line) {
-		if (plugin.sandbox.logger)
-			plugin.sandbox.logger.plugin(line);
-		else
-			console.log(new Date().toLocaleTimeString()+" [Plugin] "+line);
-	}
 
 	function declareGlobal(pluginName, handle, obj) {
 		plugin.sandbox[handle] = obj;
@@ -41,18 +43,18 @@ module.exports = function (globals) {
 			return false;
 		}
 		try {
-			let p = fs.readFileSync(fn).toString();
-			return p;
+			let plug = fs.readFileSync(fn).toString();
+			return plug;
 		} catch (error) {
 			logError("Couldn't read "+fn+": "+error.message, error);
 			return false;
 		}
 	}
 
-	function loadPluginFromSource(fn, p) {
+	function loadPluginFromSource(fn, plug) {
 		try {
 			logInfo("Loading "+fn+" ...");
-			let src = "(function () {"+p+"})()";
+			let src = "(function () {"+plug+"})()";
 			vm.runInContext(src, vmContext, {filename: fn});
 			src = null;
 			return true;
@@ -63,38 +65,35 @@ module.exports = function (globals) {
 	}
 
 	function loadPlugin(fn) {
-		let p = readPlugin(fn);
-		if (p === false)
+		let plug = readPlugin(fn);
+		if (plug === false)
 			return;
-		return loadPluginFromSource(fn, p);
+		return loadPluginFromSource(fn, plug);
 	}
 
 	function loadCorePlugins(pluginOrder) {
-		pluginOrder.forEach(p => loadPlugin("core/"+p+".js"));
+		pluginOrder.forEach(plug => loadPlugin("core/"+plug+".js"));
 	}
 
-	function pluginIsAllowed(p, dp) {
-		if (!dp.length)
+	function pluginIsAllowed(plug, disabled_plugins) {
+		if (!disabled_plugins.length)
 			return true;
-		let lp = p.toLowerCase();
-		for (let i = 0; i < dp.length; i++)
-			if (dp[i].toLowerCase() === lp)
+		for (let i = 0; i < disabled_plugins.length; i++)
+			if (disabled_plugins[i].toLowerCase() === plug)
 				return false;
 		return true;
 	}
 
 	function loadOptionalPlugins() {
-		let pluginList = fs.readdirSync("./plugins"),
-			dp = plugin.sandbox.config.disabled_plugins || [],
-			plugins = [];
-		pluginList.forEach(p => {
-			if (p.slice(-3) !== ".js")
-				return;
-			if (pluginIsAllowed(p.slice(0,-3), dp))
-				plugins.push(p);
-		});
-		if (plugins.length)
-			plugins.forEach(p => loadPlugin("plugins/"+p));
+		const pluginList = fs.readdirSync("./plugins"),
+			disabled_plugins = plugin.sandbox.config.disabled_plugins || [];
+		for (let i = 0; i < pluginList.length; i++) {
+			const plug = pluginList[i];
+			if (plug.slice(-3) !== ".js")
+				continue;
+			if (pluginIsAllowed(plug.slice(0,-3).toLowerCase(), disabled_plugins))
+				loadPlugin("plugins/"+plug);
+		}
 	}
 
 	plugin.sandbox.plugin = {
