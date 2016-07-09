@@ -74,7 +74,9 @@ function trimJson(res) {
 }
 
 function fetchJson(sub) {
-	return web.json(r(sub)).then(trimJson);
+	return web.json(r(sub)).then(trimJson, function (err) {
+		logger.debug("JSON FUCKED UP: "+err);
+	});
 }
 
 function getSubsToCheck(entries) {
@@ -196,7 +198,7 @@ bot.command({
 			else
 				irc.say(input.context, listSubreddits());
 			break;
-		case "add":
+		case "add": {
 			if (!logins.isAdmin(input.nick)) {
 				irc.say(input.context, "You need to be an admin to add or remove subreddits I track. See subscribe if you want announcements from a tracked subreddit.");
 				return;
@@ -225,6 +227,7 @@ bot.command({
 				irc.say(input.context, "Something has gone awry.");
 			});
 			break;
+		}
 		case "remove":
 			if (!logins.isAdmin(input.nick)) {
 				irc.say(input.context, "You need to be an admin to add or remove subreddits I track. See subscribe if you want announcements from a tracked subreddit.");
