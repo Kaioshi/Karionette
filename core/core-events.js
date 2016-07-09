@@ -2,6 +2,54 @@
 const nickServConfigured = (config.nickserv_nickname && config.nickserv_hostname && config.nickserv_password);
 let ghostAttempts = 0;
 
+if (config.gc) {
+	let gcAndReport;
+	if (config.memwatch) {
+		gcAndReport = function () {
+			let memuse, report, diff;
+			globals.gc();
+			memuse = process.memoryUsage().rss;
+			if (memuse !== globals.memoryUsage) {
+				report = lib.commaNum(Math.floor(memuse/1024));
+				diff = Math.floor(((memuse-globals.memoryUsage)/1024));
+				if (diff > 0)
+					diff = " [+"+lib.space(lib.commaNum(diff), 6)+" KiB]";
+				else
+					diff = " [-"+lib.space(lib.commaNum(diff.toString().slice(1)), 6)+" KiB]";
+				logger.memr(report+" KIB"+diff);
+				globals.memoryUsage = memuse;
+			}
+		};
+	}
+	bot.event({
+		handle: "gcWaitForConnect",
+		event: "376",
+		once: true,
+		callback: function () {
+			let time;
+			if (globals.gc === undefined) {
+				logger.error("You need to run node with --expose-gc -> $ node --expose-gc boot.js");
+				logger.error("If you don't want regular garbage collection change gc to false in config.")
+				return;
+			}
+			if (config.gcinterval) {
+				time = parseInt(config.gcinterval);
+				if (time <= 0 || time >= 120) {
+					time = 30000; // 30s sane default
+				} else {
+					time = time*1000;
+				}
+			} else {
+				time = 30000;
+			}
+			if (config.memwatch)
+				setInterval(gcAndReport, time);
+			else
+				setInterval(globals.gc, time);
+		}
+	});
+}
+
 bot.event({
 	handle: "corePing",
 	event: "PING",
@@ -16,6 +64,11 @@ function isNickServ(nick, hostname) {
 		return true;
 }
 
+/**
+ * need to determine if our nick is taken. try to register with nickserv if so
+ * and kill the person using for our nick. register an event to wait for that
+ * to finish, then re-take our nick.
+ */
 function getNickBack(nick) {
 	ghostAttempts++;
 	if (ghostAttempts >= 3) {
@@ -94,11 +147,7 @@ function getNickBack(nick) {
 		}
 	});
 }
-/**
- * need to determine if our nick is taken. try to register with nickserv if so
- * and kill the person using for our nick. register an event to wait for that
- * to finish, then re-take our nick.
- */
+
 bot.event({
 	handle: "nickInUse",
 	event: "433",
@@ -206,7 +255,6 @@ bot.event({
 		if (globals.autojoining.length === 0) {
 			delete globals.autojoining;
 			bot.emitEvent("autojoinFinished");
-			logger.debug("Finished joining channels");
 		}
 	}
 });
