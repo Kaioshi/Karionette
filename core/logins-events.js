@@ -74,7 +74,7 @@ bot.command({
 	syntax: config.command_prefix+"getattr <attribute> - Example: "+config.command_prefix+"getattr errorAnnounce",
 	arglen: 1,
 	callback: function (input) {
-		irc.say(input.context, logins.getAttribute(input.nick, input.args[0]));
+		irc.say(input.context, logins.getAttribute(input.nick, input.args[0]).toString());
 	}
 });
 
