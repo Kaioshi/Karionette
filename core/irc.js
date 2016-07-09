@@ -75,9 +75,10 @@ function configureSocket() {
 					openConnection({
 						server: config.server,
 						port: config.port,
-						nickname: config.nickname,
+						nickname: config.nick,
 						username: config.username,
-						realname: config.realname
+						realname: config.realname,
+						password: config.password
 					});
 				}, 15000);
 			}
@@ -93,8 +94,12 @@ function configureSocket() {
 function openConnection(params) {
 	configureSocket();
 	socket.connect(params.port, params.server, function () {
+		if (params.password !== undefined)
+			send("PASS "+params.password);
 		send("NICK "+params.nickname);
 		send("USER "+params.username+" localhost * :"+params.realname);
+		if (config.twitch)
+			send("CAP REQ :twitch.tv/membership");
 		connected = true;
 		if (connectInterval) {
 			clearInterval(connectInterval);
