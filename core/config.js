@@ -1,6 +1,14 @@
 "use strict"; // TODO: redo this.
 const validNickTest = /(^[a-zA-Z0-9_\-\[\]\{\}\^`\|]*$)/;
 
+function configIsValid(config) {
+	const NEED = [ "nickname", "username", "server", "port", "realname", "command_prefix", "secret" ];
+	for (let i = 0; i < NEED.length; i++)
+		if (config[NEED[i]] === undefined)
+			throw new Error(`"${NEED[i].replace(/_/g, " ")}" is not set in your config. See config.example`);
+	return true;
+}
+
 function validNick(nick) {
 	if (nick[0] === "-")
 		return false;
@@ -25,28 +33,28 @@ function singleSpace(lineOfText) { // "foo  bar " -> "foo bar"
 	return str;
 }
 
-function parseEntry(entry) {
-	let ret = [];
-	// these need to be arrays
-	switch (entry[0].toLowerCase()) {
+function parseEntry(field, entry) {
+	switch (field.toLowerCase()) {
 	case "autojoin":
 	case "local_whippingboys":
 	case "enabled_plugins":
-	case "disabled_plugins":
-		entry[1].split(",").forEach(function (element) {
-			if (element.length > 0)
-				ret.push(singleSpace(element));
-		});
-		return ret;
+	case "disabled_plugins": {
+			let ret = [];
+			entry.split(",").forEach(function (element) {
+				if (element.length > 0)
+					ret.push(singleSpace(element));
+			});
+			return ret;
+		}
 	}
-	if (entry[1].toLowerCase() === "true")
+	if (entry.toLowerCase() === "true")
 		return true;
-	if (entry[1].toLowerCase() === "false")
+	if (entry.toLowerCase() === "false")
 		return false;
-	return entry[1];
+	return entry;
 }
 
-function validateConfigEntry(field, entry) {
+function validateConfigEntry(field, entry) { // TODO: add more checks here
 	switch (field) {
 	case "nickname":
 		if (!validNick(entry)) {
@@ -54,29 +62,35 @@ function validateConfigEntry(field, entry) {
 				"\" - Allowed: a-z A-Z 0-9 _ - [ ] { } ^ ` | - no spaces.");
 			return false;
 		}
-		break;
+		return true;
+	default:
+		return true;
 	}
-	return true;
 }
 
 function parseConf(conf) {
 	let config = {};
 	for (let i = 0; i < conf.length; i++) {
-		if (!conf[i] || conf[i][0] === "#")
+		let configLine = conf[i];
+		if (!configLine || !configLine.length || configLine[0] === "#")
 			continue;
-		let entry = [ conf[i].slice(0, conf[i].indexOf(": ")), conf[i].slice(conf[i].indexOf(": ")+2) ];
-		if (entry[0].length > 4 && entry[0].slice(0,3) === "api") {
+		let [field, entry] = [ configLine.slice(0, configLine.indexOf(": ")), configLine.slice(configLine.indexOf(": ")+2) ];
+		if (field.length > 4 && field.slice(0,4) === "api ") {
 			config.api = config.api || {};
-			config.api[entry[0].slice(entry[0].indexOf(" ")+1)] = parseEntry(entry);
+			config.api[field.slice(4)] = entry;
 		} else {
-			entry[0] = entry[0].replace(/ /g, "_");
-			entry[1] = parseEntry(entry);
-			if (!validateConfigEntry(entry[0], entry[1])) {
-				console.error(" * Found a problem with your config ~ please take a look at config.example and match the formatting.");
-				process.exit();
-			}
-			config[entry[0]] = entry[1];
+			field = field.replace(/ /g, "_");
+			entry = parseEntry(field, entry);
+			if (!validateConfigEntry(field, entry))
+				throw new Error("Found a problem in your config ~ look at config.example and match the formatting.");
+			config[field] = entry;
 		}
+	}
+	try {
+		configIsValid(config);
+	} catch (e) {
+		console.log(" * "+e.message);
+		process.exit(1);
 	}
 	config.nick = config.nickname;
 	return config;
@@ -84,32 +98,41 @@ function parseConf(conf) {
 
 let irc_config;
 
-irc_config = parseConf(singleSpace(fs.readFileSync("config").toString()).split("\n"));
+try {
+	irc_config = parseConf(singleSpace(fs.readFileSync("config").toString()).split("\n"));
+} catch (e) {
+	if (e.code === "ENOENT")
+		console.error(" * No config file found, see config.example");
+	else
+		console.log(" * "+e.message);
+	process.exit(1);
+}
+
 irc_config.saveChanges = function () { // saves changes and returns how many changes were made.
-	let field, entry, i, l, changes, // while preserving the file layout.
+	let field, entry, changes, // while preserving the file layout.
 		newconf = {}, fields = [],
 		oldconfig = fs.readFileSync("config").toString().split("\n");
 
 	Object.keys(irc_config).forEach(function (field) {
-		if (field !== "nick" && field !== "address" && field !== "saveChanges") {
-			if (field === "api") {
-				Object.keys(irc_config[field]).forEach(function (subfield) {
-					entry = field+" "+subfield;
-					entry = entry.replace(/_/g, " ");
-					newconf[entry] = irc_config[field][subfield];
-				});
-			} else {
-				entry = field.replace(/_/g, " ");
-				if (Array.isArray(irc_config[field]))
-					newconf[entry] = irc_config[field].join(", ");
-				else
-					newconf[entry] = irc_config[field].toString();
-			}
+		if (/nick|saveChanges|address/.test(field))
+			return;
+		if (field === "api") {
+			Object.keys(irc_config[field]).forEach(function (subfield) {
+				entry = field+" "+subfield;
+				entry = entry.replace(/_/g, " ");
+				newconf[entry] = irc_config[field][subfield];
+			});
+		} else {
+			entry = field.replace(/_/g, " ");
+			if (Array.isArray(irc_config[field]))
+				newconf[entry] = irc_config[field].join(", ");
+			else
+				newconf[entry] = irc_config[field].toString();
 		}
 	});
 	// change existing entries
 	changes = 0;
-	for (i = 0, l = oldconfig.length; i < l; i++) {
+	for (let i = 0, l = oldconfig.length; i < l; i++) {
 		if (!oldconfig[i] || oldconfig[i][0] === "#")
 			continue;
 		field = oldconfig[i].slice(0, oldconfig[i].indexOf(": "));
