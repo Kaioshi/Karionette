@@ -34,6 +34,7 @@ function inteSupp (str, obj) { // this matches on the entire '{word}' rather tha
 
 const lib = {
 	decode: require("./lib/entities.js").decode,
+	space: space,
 	delay: function libDelay(fn, delay) { // promise version of setTimeout
 		return new Promise(function (resolve) {
 			setTimeout(function () {
