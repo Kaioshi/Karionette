@@ -1,25 +1,26 @@
 "use strict";
-let	logDay = new Date().getDate(),
-	logFile;
+const colourStrip = /\u001b\[[0-9]+m/g;
+let logDay, logFile;
+
 
 if (!fs.existsSync("data/logs"))
 	fs.mkdirSync("data/logs");
 
-function zero(n) { return n < 10 ? "0" + n : n.toString(); }
-
-function logFileDate(d) {
-	return d.getFullYear()+"-"+zero(d.getMonth()+1)+"-"+zero(d.getDate());
+function updateLogLocation(date) {
+	let d = date.toJSON().slice(0, 10),
+		dir = "data/logs/"+d.slice(0, 7);
+	logFile = dir+"/"+d+".log";
+	logDay = date.getDate();
+	if (!fs.existsSync(dir))
+		fs.mkdirSync(dir);
+	if (!fs.existsSync(logFile))
+		fs.writeFileSync(logFile, "");
 }
 
-function writeLog(date, line) {      // XXX: Can not use logger.* functions in this call.
-	if (date.getDate() !== logDay) { // Recursive loops, yo!
-		logDay = date.getDate();     // new day, new log, new dog, new.. fog.. pog. whatever.
-		logFile = "data/logs/"+logFileDate(date)+".log";
-		fs.writeFileSync(logFile, "");
-	}
-	if (logFile === undefined)
-		logFile = "data/logs/"+logFileDate(date)+".log";
-	fs.appendFile(logFile, line.replace(/\u001b\[[0-9]+m/g, "") + "\n");
+function writeLog(date, line) {
+	if (date.getDate() !== logDay)
+		updateLogLocation(date);
+	fs.appendFile(logFile, line.replace(colourStrip, ""));
 }
 
 function shd(text) { // colourful
@@ -42,45 +43,44 @@ function shd(text) { // colourful
 	return "\u001b[90m["+text+"\u001b[90m]\u001b[0m";
 }
 
+updateLogLocation(new Date());
+
 const logger = {
-	log: function (type, line, out, lineOpt) {
+	log: function (type, line, print) {
 		let date = new Date();
-		if (type)
-			line = shd(type)+" "+line;
-		if (config.logging_timestamp && (!lineOpt || lineOpt.timestamp !== false))
-			line = date.toLocaleTimeString()+" "+line;
-		if (out)
-			process.stdout.write(line+"\n");
+		line = date.toLocaleTimeString()+" "+shd(type)+" "+line+"\n";
+		if (print)
+			process.stdout.write(line);
 		writeLog(date, line);
 	},
-	memr: function (line) {
-		let date = "";
-		if (config.logging_timestamp)
-			date = new Date().toLocaleTimeString()+" ";
-		process.stdout.write(`${date}${shd("MemR")} ${line}\n`);
-	},
-	chat: function (line) { this.log("Chat", line, config.logging_chat); },
-	denied: function (line) { this.log("Denied", line, true); },
-	ignored: function (line) { this.log("Ignored", line, true); },
-	traffic: function (line) { this.log("Traf", line, config.logging_traffic); },
-	info: function (line, options) { this.log("Info", line, config.logging_info, options); },
-	server: function (line) { this.log("Serv", line, config.logging_serv); },
-	debug: function (line, options) { this.log("DEBUG", line, config.logging_debug, options); },
-	sent: function (line, silent) { this.log("Sent", line, (silent ? false : true)); },
-	plugin: function (line) { this.log("Plugin", line, true); },
-	misc: function (line, options) { this.log("Misc", line, true, options); },
-	error: function (line, err, options) {
-		this.log("Error", "\u001b[31m"+line+"\u001b[0m", true, options);
-		bot.emitEvent("Event: Error", line);
-		if (err && err.stack) {
-			this.log("Error", "\u001b[30;1m" + err.stack + "\u001b[0m", true, options);
-			bot.emitEvent("Event: Error Stack", err.stack);
+	// skipping the log file for memreports
+	memr: function (line) { process.stdout.write(`${new Date().toLocaleTimeString()} ${shd("MemR")} ${line}\n`); },
+	chat: function (line) { logger.log("Chat", line, config.logging_chat); },
+	denied: function (line) { logger.log("Denied", line, true); },
+	ignored: function (line) { logger.log("Ignored", line, true); },
+	traffic: function (line) { logger.log("Traf", line, config.logging_traffic); },
+	info: function (line) { logger.log("Info", line, config.logging_info); },
+	server: function (line) { logger.log("Serv", line, config.logging_serv); },
+	debug: function (line) { logger.log("DEBUG", line, config.logging_debug); },
+	sent: function (line, silent) { logger.log("Sent", line, (silent ? false : true)); },
+	plugin: function (line) { logger.log("Plugin", line, true); },
+	misc: function (line) { logger.log("Misc", line, true); },
+	warning: function (line) { logger.warn(line); },
+	warn: function (line) { logger.log("Warning", "\u001b[33m"+line+"\u001b[0m", true); },
+	error: function (error, err) {
+		if (error.stack) { // logger.error(Error)
+			logger.log("Error", "\u001b[31m"+error.message+"\u001b[0m", true);
+			bot.emitEvent("Event: Error", error.message);
+			logger.log("Error", "\u001b[30;1m"+error.stack+"\u001b[0m", true);
+			bot.emitEvent("Event: Error Stack", error.stack);
+		} else { // logger.error("custom message", Error)
+			logger.log("Error", "\u001b[31m"+error+"\u001b[0m", true);
+			bot.emitEvent("Event: Error", error);
+			if (err && err.stack) { // logger.error("custom message")
+				logger.log("Error", "\u001b[30;1m" + err.stack + "\u001b[0m", true);
+				bot.emitEvent("Event: Error Stack", err.stack);
+			}
 		}
-	},
-	warning: function (line, options) { this.warn(line, options); },
-	warn: function (line, options) {
-		globals.lastWarning = new Date().toLocaleTimeString()+" [Warning] "+line;
-		this.log("Warning", "\u001b[33m"+line+"\u001b[0m", true, options);
 	}
 };
 
