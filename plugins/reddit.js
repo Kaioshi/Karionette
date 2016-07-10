@@ -74,9 +74,7 @@ function trimJson(res) {
 }
 
 function fetchJson(sub) {
-	return web.json(r(sub)).then(trimJson, function (err) {
-		logger.debug("JSON FUCKED UP: "+err);
-	});
+	return web.json(r(sub)).then(trimJson);
 }
 
 function getSubsToCheck(entries) {
@@ -97,16 +95,17 @@ function checkSubs() {
 	.then(function (fetched) {
 		findNewPosts(fetched, entries);
 	}).catch(function (error) {
-		logger.error("checkSubs: "+error, error);
+		if (error instanceof SyntaxError) // sometimes reddit responds with HTML "busy", we don't care.
+			return;
+		logger.error("checkSubs: "+error.message, error);
 	});
 }
 
 function subscribe(nick, sub) {
-	let entry = subDB.getOne(sub),
-		lnick;
+	const entry = subDB.getOne(sub);
 	if (!entry)
 		return "I'm not watching r/"+sub;
-	lnick = nick.toLowerCase();
+	let lnick = nick.toLowerCase();
 	if (entry.announce.indexOf(lnick) > -1)
 		return "You're already on the announce list for r/"+sub;
 	entry.announce.push(lnick);
