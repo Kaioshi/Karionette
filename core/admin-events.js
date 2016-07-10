@@ -10,11 +10,11 @@ bot.command({
 		switch (input.args[0].toLowerCase()) {
 		case "announce":
 			logins.setAttribute(input.nick, "errorAnnounce", true);
-			irc.say(input.context, "k.");
+			irc.say(input.context, "You will get error announcements from now on.");
 			break;
 		case "unannounce":
 			logins.unsetAttribute(input.nick, "errorAnnounce");
-			irc.say(input.context, "k.");
+			irc.say(input.context, "Removed. Who's gonna fix me now? ;_;");
 			break;
 		default:
 			irc.say(input.context, bot.cmdHelp("errors", "syntax"));
@@ -24,9 +24,7 @@ bot.command({
 });
 
 function getErrorAnnounceList() {
-	return logins.nickList(true).filter(function (nick) {
-		return logins.getAttribute(nick, "errorAnnounce");
-	});
+	return logins.nickList(true).filter(nick => logins.getAttribute(nick, "errorAnnounce"));
 }
 
 bot.event({
@@ -43,13 +41,9 @@ bot.event({
 	handle: "errorStackAnnouncer",
 	event: "Event: Error Stack",
 	callback: function (error) {
-		let announceTo = getErrorAnnounceList(),
-			errorMessage = error.split("\n");
-		announceTo.forEach(function (nick) {
-			let messages = [];
-			for (let i = 0; i < errorMessage.length; i++)
-				messages.push([ "notice", nick, errorMessage[i] ]);
-			irc.rated(messages);
+		const errorMessage = error.split("\n");
+		getErrorAnnounceList().forEach(nick => {
+			irc.rated(errorMessage.map(err => [ "notice", nick, err ]), 1000);
 		});
 	}
 });
@@ -95,16 +89,14 @@ bot.command({
 	admin: true,
 	arglen: 1,
 	callback: function (input) {
-		let p = input.args[0];
-		if (p.slice(-3) !== ".js")
-			p += ".js";
-		if (!fs.existsSync(input.args[0])) {
+		const plug = input.args[0].slice(-3) === ".js" ? input.args[0] : input.args[0]+".js";
+		if (!fs.existsSync(plug)) {
 			irc.say(input.context, "There is no such plugin. o.o;");
 			return;
 		}
-		bot.emitEvent("Event: Reloading plugin "+input.args[0].slice(0,-3));
-		if (plugin.load(input.args[0]))
-			irc.say(input.context, "Reloaded the "+input.args[0]+" plugin.");
+		bot.emitEvent("Event: Reloading plugin "+plug.slice(0,-3));
+		if (plugin.load(plug))
+			irc.say(input.context, "Reloaded the "+plug+" plugin.");
 		else
 			irc.say(input.context, "Something broke.");
 	}
@@ -129,7 +121,7 @@ bot.command({
 	admin: true,
 	arglen: 1,
 	callback: function (input) {
-		irc.say(input.args[0], "\x01ACTION "+input.args.slice(1).join(" ")+"\x01");
+		irc.action(input.args[0], input.args.slice(1).join(" "));
 	}
 });
 
@@ -140,11 +132,10 @@ bot.command({
 	admin: true,
 	arglen: 1,
 	callback: function (input) {
-		if (input.args[1]) {
+		if (input.args[1])
 			irc.join(input.args[0], input.args[1]);
-		} else {
+		else
 			irc.join(input.args[0]);
-		}
 	}
 });
 
@@ -171,18 +162,18 @@ bot.command({
 	admin: true,
 	arglen: 1,
 	callback: function (input) {
-		if (input.args[0][0] === "#") {
-			config.autojoin = config.autojoin || [];
-			if (lib.hasElement(config.autojoin, input.args[0])) {
-				irc.say(input.context, input.args[0]+" is already on the autojoin list.");
-				return;
-			}
-			config.autojoin.push(input.args[0].toLowerCase());
-			config.saveChanges();
-			irc.say(input.context, "Added " + input.args[0] + " to autojoin list");
-		} else {
-			irc.say(input.context, "Herp.");
+		if (input.args[0][0] !== "#") {
+			irc.say(input.context, bot.cmdHelp("autojoin", "syntax"));
+			return;
 		}
+		config.autojoin = config.autojoin || [];
+		if (lib.hasElement(config.autojoin, input.args[0])) {
+			irc.say(input.context, input.args[0]+" is already on the autojoin list.");
+			return;
+		}
+		config.autojoin.push(input.args[0].toLowerCase());
+		config.saveChanges();
+		irc.say(input.context, "Added " + input.args[0] + " to autojoin list");
 	}
 });
 
@@ -193,19 +184,19 @@ bot.command({
 	admin: true,
 	arglen: 1,
 	callback: function (input) {
-		if (input.args[0][0] === "#") {
-			if (config.autojoin && config.autojoin.length > 0 && lib.hasElement(config.autojoin, input.args[0])) {
-				input.args[0] = input.args[0].toLowerCase();
-				config.autojoin = config.autojoin.filter(function (element) {
-					return (element.toLowerCase() !== input.args[0]);
-				});
-				config.saveChanges();
-				irc.say(input.context, "Removed!");
-			} else {
-				irc.say(input.context, input.args[0]+" isn't on the autojoin list.");
-			}
+		if (input.args[0][0] !== "#") {
+			irc.say(input.context, bot.cmdHelp("unautojoin", "syntax"));
+			return;
+		}
+		if (config.autojoin && config.autojoin.length > 0 && lib.hasElement(config.autojoin, input.args[0])) {
+			input.args[0] = input.args[0].toLowerCase();
+			config.autojoin = config.autojoin.filter(function (element) {
+				return (element.toLowerCase() !== input.args[0]);
+			});
+			config.saveChanges();
+			irc.say(input.context, "Removed!");
 		} else {
-			irc.say(input.context, "Derp.");
+			irc.say(input.context, input.args[0]+" isn't on the autojoin list.");
 		}
 	}
 });
