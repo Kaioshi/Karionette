@@ -123,7 +123,7 @@ bot.command({
 		if (entry.message)
 			irc.say(input.context, `${entry.nick} was last seen talking ${lib.duration(entry.message.date)} ago ~ ${entry.message.message}`);
 		if (entry.left)
-			irc.say(input.context, entry.left.message.replace("{timeAgo}", lib.duration(entry.left.date))+" ago");
+			irc.say(input.context, entry.left.message.replace("{timeAgo}", lib.duration(entry.left.date)+" ago"));
 	}
 });
 
