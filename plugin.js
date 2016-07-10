@@ -52,7 +52,7 @@ module.exports = function (globals) {
 
 	function loadPlugin(fn) {
 		let plug = readPlugin(fn);
-		if (plug === false)
+		if (plug === false || !plug.length)
 			return;
 		try {
 			logInfo("Loading "+fn+" ...");
