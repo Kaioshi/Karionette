@@ -16,7 +16,7 @@ const plugin = require("./plugin.js")(global.globals);
 plugin.loadCorePlugins([ // the order matters
 	"bot", "config", "logger", "lib", "ticker", "web", "db", "words", "ial", "alias", "ignore",
 	"logins", "perms", "bot-parse", "irc", "admin-events", "words-events", "core-events",
-	"logins-events", "seen-events", "ial-events", "perms-events", "alias-events", "config-events"
+	"logins-events", "ial-events", "perms-events", "alias-events", "config-events"
 ]);
 plugin.loadOptionalPlugins();
 
