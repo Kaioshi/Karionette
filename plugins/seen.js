@@ -3,22 +3,22 @@
 const seen = {};
 
 function setLast(chan, nick, type, line) {
+	const lnick = nick.toLowerCase(),
+		lchan = chan.toLowerCase();
 	if (!seen[chan])
 		seen[chan] = new DB.Json({filename: "seen/"+chan});
-	const lnick = nick.toLowerCase(),
-		lchan = chan.toLowerCase(),
-		entry = seen[lchan].getOne(lnick) || {};
+	const entry = seen[lchan].getOne(lnick) || {};
 	entry.nick = nick;
 	entry[type] = { message: line, date: Date.now() };
 	seen[lchan].saveOne(lnick, entry);
 }
 
 function removeUserLeft(chan, nick) {
-	if (!seen[chan])
-		seen[chan] = new DB.Json({filename: "seen/"+chan});
 	const lchan = chan.toLowerCase(),
-		lnick = nick.toLowerCase(),
-		entry = seen[lchan].getOne(lnick);
+		lnick = nick.toLowerCase();
+	if (!seen[lchan])
+		seen[lchan] = new DB.Json({filename: "seen/"+lchan});
+	const entry = seen[lchan].getOne(lnick);
 	if (!entry)
 		return;
 	if (entry.left) {
