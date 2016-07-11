@@ -3,6 +3,8 @@
 const seen = {};
 
 function setLast(chan, nick, type, line) {
+	if (!seen[chan])
+		seen[chan] = new DB.Json({filename: "seen/"+chan});
 	const lnick = nick.toLowerCase(),
 		lchan = chan.toLowerCase(),
 		entry = seen[lchan].getOne(lnick) || {};
@@ -12,6 +14,8 @@ function setLast(chan, nick, type, line) {
 }
 
 function removeUserLeft(chan, nick) {
+	if (!seen[chan])
+		seen[chan] = new DB.Json({filename: "seen/"+chan});
 	const lchan = chan.toLowerCase(),
 		lnick = nick.toLowerCase(),
 		entry = seen[lchan].getOne(lnick);
@@ -42,10 +46,6 @@ bot.event({
 	handle: "seenJoin",
 	event: "JOIN",
 	callback: function (input) {
-		if (input.nick === config.nick) {
-			const lchan = input.context.toLowerCase();
-			seen[lchan] = new DB.Json({filename: "seen/"+lchan});
-		}
 		removeUserLeft(input.context, input.nick);
 	}
 });
