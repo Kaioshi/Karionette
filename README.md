@@ -51,6 +51,7 @@ User variables can be defined with ```;var add varName variable contents```
 
 ## Dependencies & Install
 
+* Node.js 6.x or higher.
 * You will need [curl](https://github.com/curl/curl) installed for web fetches.
 * Copy "config.example" to "config" and edit appropriately.
 * Copy the "DEFAULT_data" directory to "data"; there are things you can edit in here, too.
