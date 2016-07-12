@@ -36,7 +36,6 @@ class DB {
 	write() {
 		if (!this._modified) { // if DB wasn't accessed for >5 minutes, clear the data.
 			if (this._loaded && (!this._lastAccess || (Date.now()-this._lastAccess) >= 600000)) {
-				logger.debug(this.fn+"'s data wasn't accessed for over 10 minutes, clearing it.");
 				this._data = null;
 				this._loaded = false;
 			}
