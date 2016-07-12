@@ -61,6 +61,12 @@ class Json extends DB {
 	random() { return this.data[lib.randSelect(Object.keys(this.data))]; }
 	saveOne(handle, entry) { this._modified = true; this.data[handle] = entry; }
 	getOne(handle) { return this.data[handle] || false; }
+	removeOne(handle) {
+		if (this.data[handle]) {
+			delete this.data[handle];
+			this._modified = true;
+		}
+	}
 	hasOne(handle) { return this.data[handle] !== undefined; }
 	getKeys() { return Object.keys(this.data); }
 }
@@ -89,6 +95,13 @@ class List extends DB {
 		const index = this.indexOf(entry, ignoreCase);
 		if (index > -1)
 			return this.data[index];
+	}
+	removeOne(entry) {
+		const index = this.indexOf(entry);
+		if (index > -1) {
+			this.data.splice(index,1);
+			this._modified = true;
+		}
 	}
 	search(searchString, ignoreCase) { // returns an array of entries that contain match
 		let ret = [];
