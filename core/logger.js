@@ -27,7 +27,7 @@ function shd(text) { // colourful
 	switch (text) {
 	case "Chat": text = "\u001b[36m"+text; break;
 	case "Denied": text = "\u001b[36mChat-"+text; break;
-	case "Ignored": text = "\u001b[36mIgnored"+text; break;
+	case "Ignored": text = "\u001b[36mChat-"+text; break;
 	case "Sent": text = "\u001b[32m"+text; break;
 	case "Info": text = "\u001b[94m"+text; break;
 	case "Traf": text = "\u001b[37m"+text; break;
