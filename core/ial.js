@@ -1,7 +1,8 @@
 // internal address list take 2. maintains both user/channel lists as "first class"
 "use strict";
-
-let uidCounter = 0, channels = {}, users = {}, ial;
+const channels = {}, users = {},
+	listTypes = [ "nicks", "opped", "halfopped", "voiced", "ircop" ];
+let uidCounter = 0;
 
 class Channel {
 	constructor(ch) {
@@ -36,8 +37,8 @@ class Channel {
 	}
 
 	removeStatus(status, nick) {
-		let index;
-		if ((index = this[status].indexOf(nick)) > -1)
+		const index =this[status].indexOf(nick);
+		if (index > -1)
 			this[status].splice(index, 1);
 	}
 
@@ -47,10 +48,9 @@ class Channel {
 	}
 
 	removeNick(nick) {
-		let index, listTypes = [ "nicks", "opped", "halfopped", "voiced", "ircop" ];
 		for (let i = 0; i < listTypes.length; i++) {
-			index = -1;
-			if ((index = this[listTypes[i]].indexOf(nick)) > -1)
+			const index = this[listTypes[i]].indexOf(nick);
+			if (index > -1)
 				this[listTypes[i]].splice(index, 1);
 		}
 		if (this.active[nick])
@@ -58,10 +58,9 @@ class Channel {
 	}
 
 	updateNick(oldnick, newnick) {
-		let index, listTypes = [ "nicks", "opped", "halfopped", "voiced", "ircop" ];
 		for (let i = 0; i < listTypes.length; i++) {
-			index = -1;
-			if ((index = this[listTypes[i]].indexOf(oldnick)) > -1)
+			const index = this[listTypes[i]].indexOf(oldnick);
+			if (index > -1)
 				this[listTypes[i]][index] = newnick;
 		}
 		if (this.active[oldnick]) {
@@ -92,7 +91,7 @@ class User {
 	}
 
 	ison(channel) {
-		let lch = channel.toLowerCase();
+		const lch = channel.toLowerCase();
 		for (let i = 0; i < this.channels.length; i++)
 			if (this.channels[i].toLowerCase() === lch)
 				return true;
@@ -100,8 +99,8 @@ class User {
 	}
 
 	removeChannel(ch) {
-		let index;
-		if ((index = this.channels.indexOf(ch)) > -1)
+		const index = this.channels.indexOf(ch);
+		if (index > -1)
 			this.channels.splice(index, 1);
 	}
 
@@ -110,27 +109,23 @@ class User {
 			this.channels.push(ch);
 	}
 }
-
-globals.users = users;
-globals.channels = channels;
-
 // for fixing user input.
 function findNickCase(nick) {
-	let i, lnick, nicks;
 	if (users[nick])
 		return nick;
-	nicks = Object.keys(users);
-	for (i = 0, lnick = nick.toLowerCase(); i < nicks.length; i++)
+	const nicks = Object.keys(users),
+		lnick = nick.toLowerCase();
+	for (let i = 0; i < nicks.length; i++)
 		if (lnick === nicks[i].toLowerCase())
 			return nicks[i];
 }
 
 function findChannelCase(ch) {
-	let i, lch, chans;
 	if (channels[ch])
 		return ch;
-	chans = Object.keys(channels);
-	for (i = 0, lch = ch.toLowerCase(); i < chans.length; i++)
+	const chans = Object.keys(channels),
+		lch = ch.toLowercase();
+	for (let i = 0; i < chans.length; i++)
 		if (lch === chans[i].toLowerCase())
 			return chans[i];
 }
@@ -146,7 +141,8 @@ function addUser(nick, userhost) {
 }
 
 function nickChange(oldnick, newnick) {	// update channel entries
-	for (let i = 0, chans = Object.keys(channels); i < chans.length; i++)
+	const chans = Object.keys(channels);
+	for (let i = 0; i < chans.length; i++)
 		channels[chans[i]].updateNick(oldnick, newnick);
 	// change user entries
 	users[newnick] = users[oldnick];
@@ -162,7 +158,8 @@ function userJoined(ch, nick) {
 function userLeft(ch, nick, uid) {
 	if (nick === config.nick) { // purge it from users as well since we can't track them now.
 		delete channels[ch];
-		for (let i = 0, nicks = Object.keys(users); i < nicks.length; i++)
+		const nicks = Object.keys(users);
+		for (let i = 0; i < nicks.length; i++)
 			users[nicks[i]].removeChannel(ch);
 	} else {
 		if (users[nick].uid === uid) {
@@ -175,12 +172,13 @@ function userLeft(ch, nick, uid) {
 		}
 	}
 }
-
+// TODO figure out a smarter way to ensure things are done in order. not Promises
 function userQuit(nick, uid) { // KILL 'EM ALL
 	// avoids a race condition with the quit timer when people nickchange before it's removed the stale entry
 	if (users[nick].uid === uid) { // (nickchange removes entries too.)
 		delete users[nick];
-		for (let i = 0, chans = Object.keys(channels); i < chans.length; i++)
+		const chans = Object.keys(channels);
+		for (let i = 0; i < chans.length; i++)
 			channels[chans[i]].removeNick(nick);
 	} else {
 		logger.debug(`userQuit: uid didn't match (${nick}, ${uid})`);
@@ -188,12 +186,10 @@ function userQuit(nick, uid) { // KILL 'EM ALL
 }
 
 function Active(ch, seconds) {
-	let now, active,
-		nicks = Object.keys(channels[ch].active);
+	const nicks = Object.keys(channels[ch].active);
 	if (!nicks.length)
-		return [];
-	active = [];
-	now = Date.now();
+		return nicks;
+	const active = [], now = Date.now();
 	seconds = seconds || 600; // 10 minutes
 	for (let i = 0; i < nicks.length; i++) {
 		if (((now - channels[ch].active[nicks[i]])/1000) <= seconds)
@@ -203,14 +199,14 @@ function Active(ch, seconds) {
 }
 
 function getUser(nick) {
-	let nickname;
-	if ((nickname = findNickCase(nick)) !== undefined)
+	const nickname = findNickCase(nick);
+	if (nickname !== undefined)
 		return users[nickname];
 }
 
 function getChannel(ch) {
-	let chan;
-	if ((chan = findChannelCase(ch)) !== undefined)
+	const chan = findChannelCase(ch);
+	if (chan !== undefined)
 		return channels[chan];
 }
 
@@ -225,15 +221,14 @@ function getNicks() {
 function maskMatch(user, mask) {
 	return new RegExp(mask.trim().replace(/\./g, "\\.").replace(/\?/g, ".").replace(/\*/g, "([^ ]+|)"), "i").test(user);
 }
-
+// returns a list of nicks that match the mask, only for channel if provided
 function maskSearch(mask, channel) {
-	// returns a list of nicks that match the mask
-	// only for channel if provided
-	let i, nicks, ch, matches = [],
-		regMask = new RegExp("^"+mask.trim().replace(/\./g, "\\.").replace(/\?/g, ".").replace(/\*/g, "([^ ]+|)")+"$", "i");
+	let ch;
 	if (channel)
 		ch = findChannelCase(channel);
-	for (i = 0, nicks = Object.keys(users); i < nicks.length; i++) {
+	const nicks = Object.keys(users), matches = [],
+		regMask = new RegExp("^"+mask.trim().replace(/\./g, "\\.").replace(/\?/g, ".").replace(/\*/g, "([^ ]+|)")+"$", "i");
+	for (let i = 0; i < nicks.length; i++) {
 		if (regMask.test(users[nicks[i]].fulluser)) {
 			if (!ch) {
 				matches.push(nicks[i]);
@@ -246,10 +241,11 @@ function maskSearch(mask, channel) {
 }
 
 function regexSearch(reg, channel) { // TODO condense these two
-	let i, nicks, ch, matches = [];
+	let ch;
 	if (channel)
 		ch = findChannelCase(channel);
-	for (i = 0, nicks = Object.keys(users); i < nicks.length; i++) {
+	const matches = [], nicks = Object.keys(users);
+	for (let i = 0; i < nicks.length; i++) {
 		if (reg.test(users[nicks[i]].fulluser)) {
 			if (!ch)
 				matches.push(nicks[i]);
@@ -260,7 +256,7 @@ function regexSearch(reg, channel) { // TODO condense these two
 	}
 	return matches;
 }
-ial = {
+const ial = {
 	addChannel: addChannel,
 	addUser: addUser,
 	userJoined: userJoined,
