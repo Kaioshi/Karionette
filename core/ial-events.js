@@ -132,7 +132,7 @@ bot.event({
 			uid = ial.User(nick).uid;
 		setTimeout(function () {
 			ial.userLeft(ch, nick, uid);
-		}, 200);
+		}, 50);
 	}
 });
 
@@ -146,7 +146,7 @@ bot.event({
 		ial.Channel(input.context).setActive(input.nick);
 		setTimeout(function () {
 			ial.userLeft(ch, kicked, uid);
-		}, 200);
+		}, 50);
 	}
 });
 
@@ -159,7 +159,7 @@ bot.event({
 		let nick = input.nick, uid = ial.User(nick).uid;
 		setTimeout(function () {
 			ial.userQuit(nick, uid);
-		}, 200);
+		}, 50);
 	}
 });
 
