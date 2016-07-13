@@ -1,7 +1,7 @@
 // Subreddit announcer
 "use strict";
 
-let subDB = new DB.Json({filename: "subreddits"});
+const subDB = new DB.Json({filename: "reddit/subreddits"});
 
 function r(sub) {
 	return "https://www.reddit.com/r/"+sub+"/new/.json?limit=10";
@@ -21,30 +21,34 @@ function shortenRedditLink(link, sub, id) {
 	return link;
 }
 
+function getDeliveryMethod(nick) { // this ugliness brought to you by the letter R[anma].
+	const method = new DB.List({filename: "reddit/methods"}).search(nick+": ", true);
+	if (method && method.length)
+		return method[0].split(": ")[1];
+	return "notice";
+}
+
 function findNewPosts(fetched, entries) {
-	let announcements = [];
+	const announcements = [], methods = {}, isOnline = {};
 	for (let i = 0; i < fetched.length; i++) {
 		if (!fetched[i].posts.length) // no posts
 			continue;
-		let release = fetched[i],
-			changed = false,
-			sub = release.sub.toLowerCase(),
-			seen = entries[sub].seen || [];
+		const release = fetched[i], sub = release.sub.toLowerCase();
+		let changed = false, seen = entries[sub].seen || [];
 		for (let k = 0; k < release.posts.length; k++) {
-			let post = release.posts[k];
+			const post = release.posts[k],
+				postMessage = lib.decode(`r/${sub} - ${post.title} ~ ${shortenRedditLink(post.link, entries[sub].subreddit, post.id)}`);
 			if (seen.indexOf(post.id) > -1) // seen it
 				continue;
 			changed = true;
 			seen.push(post.id);
 			for (let n = 0; n < entries[sub].announce.length; n++) {
-				let nick = entries[sub].announce[n];
-				if (!ial.User(nick))
+				const nick = entries[sub].announce[n];
+				methods[nick] = methods[nick] || getDeliveryMethod(nick);
+				isOnline[nick] = isOnline[nick] || (ial.User(nick) ? true : false);
+				if (!isOnline[nick])
 					continue;
-				announcements.push([
-					"notice",
-					nick,
-					lib.decode(`r/${sub} - ${post.title} ~ ${shortenRedditLink(post.link, entries[sub].subreddit, post.id)}`)
-				]);
+				announcements.push([ methods[nick], nick, postMessage ]);
 			}
 		}
 		if (changed) {
@@ -60,8 +64,7 @@ function findNewPosts(fetched, entries) {
 }
 
 function trimJson(res) {
-	let ret = [],
-		hits = res.data.children;
+	const ret = [], hits = res.data.children;
 	for (let i = 0; i < hits.length; i++) {
 		ret.push({
 			id: hits[i].data.id,
@@ -78,8 +81,7 @@ function fetchJson(sub) {
 }
 
 function getSubsToCheck(entries) {
-	let keys = Object.keys(entries),
-		ret = [];
+	const ret = [], keys = Object.keys(entries);
 	for (let i = 0; i < keys.length; i++) {
 		if (entries[keys[i]].announce && entries[keys[i]].announce.length)
 			ret.push(fetchJson(keys[i]));
@@ -90,22 +92,22 @@ function getSubsToCheck(entries) {
 function checkSubs() {
 	if (!subDB.size())
 		return;
-	let entries = subDB.getAll();
+	const entries = subDB.getAll();
 	Promise.all(getSubsToCheck(entries))
-	.then(function (fetched) {
-		findNewPosts(fetched, entries);
-	}).catch(function (error) {
-		if (error instanceof SyntaxError) // sometimes reddit responds with HTML "busy", we don't care.
-			return;
-		logger.error("checkSubs: "+error.message, error);
-	});
+		.then(function (fetched) {
+			findNewPosts(fetched, entries);
+		}).catch(function (error) {
+			if (error instanceof SyntaxError) // sometimes reddit responds with HTML "busy", we don't care.
+				return;
+			logger.error("checkSubs: "+error.message, error);
+		});
 }
 
 function subscribe(nick, sub) {
 	const entry = subDB.getOne(sub);
 	if (!entry)
 		return "I'm not watching r/"+sub;
-	let lnick = nick.toLowerCase();
+	const lnick = nick.toLowerCase();
 	if (entry.announce.indexOf(lnick) > -1)
 		return "You're already on the announce list for r/"+sub;
 	entry.announce.push(lnick);
@@ -116,10 +118,10 @@ function subscribe(nick, sub) {
 }
 
 function unsubscribe(nick, sub) {
-	let entry = subDB.getOne(sub);
+	const entry = subDB.getOne(sub);
 	if (!entry)
 		return "I'm not watching r/"+sub;
-	let lnick = nick.toLowerCase(),
+	const lnick = nick.toLowerCase(),
 		index = entry.announce.indexOf(lnick);
 	if (index === -1)
 		return "You're not on the announce list for r/"+sub;
@@ -156,9 +158,7 @@ function listSubreddits(target) {
 	if (!subDB.size())
 		return "I'm not announcing updates to any subreddits.";
 	if (target) { // go through the entries and list them if they're announced to target
-		let entries = subDB.getAll(),
-			ltarget = target.toLowerCase(),
-			ret = [];
+		const entries = subDB.getAll(), ltarget = target.toLowerCase(), ret = [];
 		Object.keys(entries).forEach(function (entry) {
 			if (entries[entry].announce.indexOf(ltarget) > -1)
 				ret.push(entries[entry].subreddit);
@@ -187,7 +187,7 @@ bot.event({
 bot.command({
 	command: "subreddit",
 	help: "Subreddit announcer.",
-	syntax: `${config.command_prefix}subreddit <add/remove/subscribe/unsubscribe/list> [subreddit] [target] - Example: ${config.command_prefix}subreddit add aww - add and remove are admin only.`,
+	syntax: `${config.command_prefix}subreddit <add/remove/subscribe/unsubscribe/list/method> [subreddit] [target] - Example: ${config.command_prefix}subreddit add aww - add and remove are admin only.`,
 	arglen: 1,
 	callback: function subreddit(input) {
 		switch (input.args[0].toLowerCase()) {
@@ -252,6 +252,18 @@ bot.command({
 			}
 			irc.say(input.context, unsubscribe(input.nick, input.args[1].toLowerCase()));
 			break;
+		case "method": {
+			const arg = input.args[1] ? input.args[1] : false;
+			if (!arg || (arg !== "msg" && arg !== "notice")) {
+				irc.say(input.context, `[Help] Syntax: ${config.command_prefix}subreddit method <msg/notice> - say will PM you.`);
+				return;
+			}
+			const methodDB = new DB.List({filename: "reddit/methods"});
+			methodDB.removeMatching(`${input.nick}: `, true);
+			methodDB.saveOne(input.nick+": "+(arg === "msg" ? "say" : arg));
+			irc.say(input.context, "I'll deliver your subreddit updates via "+(arg === "msg" ? "/msg" : "/notice")+" from now on.");
+			break;
+		}
 		case "check":
 			checkSubs();
 			break;
