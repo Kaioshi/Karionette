@@ -52,8 +52,8 @@ class DB {
 }
 
 class Json extends DB {
-	constructor(fileName) {
-		super(fileName, {}, fn => JSON.parse(fs.readFileSync(fn).toString()),
+	constructor(filename) {
+		super(filename, {}, fn => JSON.parse(fs.readFileSync(fn).toString()),
 			(fn, data) => fs.writeFileSync(fn, JSON.stringify(data, null, 3)));
 	}
 	size() { return Object.keys(this.data).length; }
@@ -71,8 +71,8 @@ class Json extends DB {
 }
 
 class List extends DB {
-	constructor(fileName) {
-		super(fileName, [], fn => fs.readFileSync(fn).toString().split("\n"),
+	constructor(filename) {
+		super(filename, [], fn => fs.readFileSync(fn).toString().split("\n"),
 			(fn, data) => fs.writeFileSync(fn, data.join("\n")));
 	}
 	size() { return this.data.length; }
@@ -90,6 +90,21 @@ class List extends DB {
 		}
 		return this.data.indexOf(entry);
 	}
+	findIndex(searchString, ignoreCase) {
+		if (ignoreCase) {
+			const match = searchString.toLowerCase();
+			for (let i = 0; i < this.data.length; i++) {
+				if (this.data[i].toLowerCase().indexOf(match) > -1)
+					return i;
+			}
+		} else {
+			for (let i = 0; i < this.data.length; i++) {
+				if (this.data[i].indexOf(searchString) > -1)
+					return i;
+			}
+		}
+		return -1;
+	}
 	getOne(entry, ignoreCase) {
 		const index = this.indexOf(entry, ignoreCase);
 		if (index > -1)
@@ -102,15 +117,22 @@ class List extends DB {
 			this._modified = true;
 		}
 	}
-	search(searchString, ignoreCase) { // returns an array of entries that contain match
+	search(searchString, ignoreCase, index) { // returns an array of entries or indexes that contain searchString
 		let ret = [];
 		const match = ignoreCase ? searchString.toLowerCase() : searchString;
 		for (let i = 0; i < this.data.length; i++) {
 			const line = ignoreCase ? this.data[i].toLowerCase() : this.data[i];
 			if (line.indexOf(match) > -1)
-				ret.push(this.data[i]);
+				ret.push(index ? i : this.data[i]);
 		}
 		return ret;
+	}
+	removeMatching(searchString, ignoreCase) {
+		let index;
+		while ((index = this.findIndex(searchString, ignoreCase)) > -1) {
+			this.data.splice(index, 1);
+			this._modified = true;
+		}
 	}
 }
 
