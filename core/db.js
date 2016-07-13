@@ -58,16 +58,16 @@ class Json extends DB {
 	}
 	size() { return Object.keys(this.data).length; }
 	random() { return this.data[lib.randSelect(Object.keys(this.data))]; }
+	hasOne(handle) { return this.data[handle] !== undefined; }
+	getKeys() { return Object.keys(this.data); }
 	saveOne(handle, entry) { this._modified = true; this.data[handle] = entry; }
 	getOne(handle) { return this.data[handle] || false; }
 	removeOne(handle) {
-		if (this.data[handle]) {
+		if (this.data[handle] !== undefined) {
 			delete this.data[handle];
 			this._modified = true;
 		}
 	}
-	hasOne(handle) { return this.data[handle] !== undefined; }
-	getKeys() { return Object.keys(this.data); }
 }
 
 class List extends DB {
@@ -123,12 +123,16 @@ process.on("SIGINT", function () { // Ctrl-C - since we capture it we have to ex
 
 plugin.declareGlobal("db", "DB", {
 	Json: function (options) {
+		if (!options || options.filename === undefined)
+			throw new Error("filename isn't optional in new DB.Json({filename: \"filename\"})");
 		const fn = "data/"+options.filename+".json";
 		if (dbCache[fn])
 			return dbCache[fn];
 		return new Json(fn);
 	},
 	List: function (options) {
+		if (!options || options.filename === undefined)
+			throw new Error("filename isn't optional in new DB.List({filename: \"filename\"})");
 		const fn = "data/"+options.filename+".txt";
 		if (dbCache[fn])
 			return dbCache[fn];
