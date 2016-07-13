@@ -255,7 +255,7 @@ bot.command({
 		case "method": {
 			const arg = input.args[1] ? input.args[1] : false;
 			if (!arg || (arg !== "msg" && arg !== "notice")) {
-				irc.say(input.context, `[Help] Syntax: ${config.command_prefix}subreddit method <msg/notice> - say will PM you.`);
+				irc.say(input.context, `[Help] Syntax: ${config.command_prefix}subreddit method <msg/notice>`);
 				return;
 			}
 			const methodDB = new DB.List({filename: "reddit/methods"});
