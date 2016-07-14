@@ -96,23 +96,11 @@ function logLine(type, inputLine) {
 		logger.chat(inputLine);
 		break;
 	case "MODE":
-		logger.traffic(inputLine);
-		break;
 	case "TOPIC":
-		logger.traffic(inputLine);
-		break;
 	case "JOIN":
-		logger.traffic(inputLine);
-		break;
 	case "PART":
-		logger.traffic(inputLine);
-		break;
 	case "NICK":
-		logger.traffic(inputLine);
-		break;
 	case "QUIT":
-		logger.traffic(inputLine);
-		break;
 	case "KICK":
 		logger.traffic(inputLine);
 		break;
@@ -131,7 +119,7 @@ bot.parse = function botParse(inputLine) {
 	}
 
 	input = inputLine.trim().split(" ");
-	if (ignore.check(input)) {
+	if (ignore.check(inputLine)) {
 		logger.ignored(inputLine);
 		return; // ignored
 	}
