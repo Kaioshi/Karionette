@@ -1,5 +1,5 @@
 "use strict";
-const dbCache = {};
+const dbCache = new Map();
 
 class DB {
 	constructor(fn, defaultData, readFunc, writeFunc) {
@@ -9,15 +9,12 @@ class DB {
 		this._writeFile = writeFunc;
 		this._defaultData = defaultData;
 		this._loaded = false;
-		dbCache[this.fn] = this;
+		dbCache.set(this.fn, this);
 	}
-	static saveCache() { Object.keys(dbCache).forEach(db => dbCache[db].write()); }
+	static saveCache() { dbCache.forEach(db => db.write()); }
 	get data() { this.read(); return this._data; }
-	set data(data) { this._data = data; }
-	getAll() { return this.data; }
-	saveAll(data) { this._modified = true; this._data = data; }
+	set data(data) { this.read(); this._data = data; }
 	read() {
-		this._lastAccess = Date.now();
 		if (this._loaded)
 			return;
 		if (!fs.existsSync(this.fn) || fs.lstatSync(this.fn).size === 0) {
@@ -34,13 +31,8 @@ class DB {
 		}
 	}
 	write() {
-		if (!this._modified) { // if DB wasn't accessed for >5 minutes, clear the data.
-			if (this._loaded && (!this._lastAccess || (Date.now()-this._lastAccess) >= 600000)) {
-				this._data = null;
-				this._loaded = false;
-			}
+		if (!this._modified)
 			return;
-		}
 		try {
 			logger.info("Saving "+this.fn+" ...");
 			this._writeFile(this.fn, this.data);
@@ -51,30 +43,41 @@ class DB {
 	}
 }
 
-class Json extends DB {
-	constructor(filename) {
-		super(filename, {}, fn => JSON.parse(fs.readFileSync(fn).toString()),
-			(fn, data) => fs.writeFileSync(fn, JSON.stringify(data, null, 3)));
-	}
-	size() { return Object.keys(this.data).length; }
-	random() { return this.data[lib.randSelect(Object.keys(this.data))]; }
-	hasOne(handle) { return this.data[handle] !== undefined; }
-	getKeys() { return Object.keys(this.data); }
-	saveOne(handle, entry) { this._modified = true; this.data[handle] = entry; }
-	getOne(handle) { return this.data[handle] || false; }
-	removeOne(handle) {
-		if (this.data[handle] !== undefined) {
-			delete this.data[handle];
-			this._modified = true;
-		}
-	}
+function objToMap(obj) {
+	let map = new Map();
+	Object.keys(obj).forEach(key => map.set(key, obj[key]));
+	return map;
 }
 
+function mapToObj(map) {
+	let obj = {};
+	map.forEach((value, key) => obj[key] = value);
+	return obj;
+}
+
+function writeJson(fn, data) { fs.writeFileSync(fn, JSON.stringify(mapToObj(data), null, 3)); }
+function readJson(fn) { return objToMap(JSON.parse(fs.readFileSync(fn).toString())); }
+
+class Json extends DB {
+	constructor(filename) { super(filename, new Map(), readJson, writeJson); }
+	size() { return this.data.size; }
+	random() { return lib.randSelect([ ...this.data ]); }
+	hasOne(key) { return this.data.has(key); }
+	getKeys() { return [ ...this.data.keys() ]; }
+	saveOne(key, value) { this._modified = true; this.data.set(key, value); }
+	getOne(key) { return this.data.get(key); }
+	getAll() { return mapToObj(this.data); }
+	saveAll(obj) { this._modified = true; this._data = objToMap(obj); }
+	removeOne(key) { this._modified = true; return this.data.delete(key); }
+}
+
+function writeList(fn, data) { fs.writeFileSync(fn, data.join("\n")); }
+function readList(fn) { return fs.readFileSync(fn).toString().split("\n"); }
+
 class List extends DB {
-	constructor(filename) {
-		super(filename, [], fn => fs.readFileSync(fn).toString().split("\n"),
-			(fn, data) => fs.writeFileSync(fn, data.join("\n")));
-	}
+	constructor(filename) { super(filename, [], readList, writeList); }
+	getAll() { return this.data; }
+	saveAll(arr) { this._modified = true; this._data = arr; }
 	size() { return this.data.length; }
 	random() { return lib.randSelect(this.data); }
 	saveOne(entry) { this._modified = true; this.data.push(entry); }
@@ -136,7 +139,9 @@ class List extends DB {
 	}
 }
 
-setInterval(DB.saveCache, 300000);
+ticker.start(300); // save every 5 minutes
+bot.event({ handle: "save DB Cache", event: "Ticker: 300s tick", callback: DB.saveCache });
+
 process.on("closing", DB.saveCache); // regular quit
 process.on("SIGINT", function () { // Ctrl-C - since we capture it we have to exit manually
 	DB.saveCache();
@@ -148,16 +153,12 @@ plugin.declareGlobal("db", "DB", {
 		if (!options || options.filename === undefined)
 			throw new Error("filename isn't optional in new DB.Json({filename: \"filename\"})");
 		const fn = "data/"+options.filename+".json";
-		if (dbCache[fn])
-			return dbCache[fn];
-		return new Json(fn);
+		return dbCache.get(fn) || new Json(fn);
 	},
 	List: function (options) {
 		if (!options || options.filename === undefined)
 			throw new Error("filename isn't optional in new DB.List({filename: \"filename\"})");
 		const fn = "data/"+options.filename+".txt";
-		if (dbCache[fn])
-			return dbCache[fn];
-		return new List(fn);
+		return dbCache.get(fn) || new List(fn);
 	}
 });
