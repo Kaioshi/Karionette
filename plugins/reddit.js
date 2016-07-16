@@ -28,22 +28,24 @@ function getDeliveryMethod(nick) { // this ugliness brought to you by the letter
 	return "notice";
 }
 
-function findNewPosts(fetched, entries) {
+function findNewPosts(fetched) {
 	const announcements = [], methods = {}, isOnline = {};
 	for (let i = 0; i < fetched.length; i++) {
 		if (!fetched[i].posts.length) // no posts
 			continue;
-		const release = fetched[i], sub = release.sub.toLowerCase();
-		let changed = false, seen = entries[sub].seen || [];
+		const release = fetched[i],
+			sub = release.sub.toLowerCase(),
+			entry = subDB.getOne(sub);
+		let changed = false, seen = entry.seen || [];
 		for (let k = 0; k < release.posts.length; k++) {
 			const post = release.posts[k],
-				postMessage = lib.decode(`r/${sub} - ${post.title} ~ ${shortenRedditLink(post.link, entries[sub].subreddit, post.id)}`);
+				postMessage = lib.decode(`r/${sub} - ${post.title} ~ ${shortenRedditLink(post.link, entry.subreddit, post.id)}`);
 			if (seen.indexOf(post.id) > -1) // seen it
 				continue;
 			changed = true;
 			seen.push(post.id);
-			for (let n = 0; n < entries[sub].announce.length; n++) {
-				const nick = entries[sub].announce[n];
+			for (let n = 0; n < entry.announce.length; n++) {
+				const nick = entry.announce[n];
 				methods[nick] = methods[nick] || getDeliveryMethod(nick);
 				isOnline[nick] = isOnline[nick] || (ial.User(nick) ? true : false);
 				if (!isOnline[nick])
@@ -54,13 +56,12 @@ function findNewPosts(fetched, entries) {
 		if (changed) {
 			if (seen.length > 20)
 				seen = seen.slice(-20);
-			entries[sub].seen = seen;
+			entry.seen = seen;
+			subDB.saveOne(sub, entry);
 		}
 	}
-	if (announcements.length) {
-		subDB.saveAll(entries);
+	if (announcements.length)
 		irc.rated(announcements, 1000);
-	}
 }
 
 function trimJson(res) {
@@ -80,25 +81,24 @@ function fetchJson(sub) {
 	return web.json(r(sub)).then(trimJson);
 }
 
-function getSubsToCheck(entries) {
-	const ret = [], keys = Object.keys(entries);
-	for (let i = 0; i < keys.length; i++) {
-		if (entries[keys[i]].announce && entries[keys[i]].announce.length)
-			ret.push(fetchJson(keys[i]));
-	}
+function getSubsToCheck() {
+	const ret = [];
+	subDB.data.forEach((entry, sub) => {
+		if (entry.announce && entry.announce.length)
+			ret.push(fetchJson(sub));
+	});
 	return ret;
 }
 
 function checkSubs() {
 	if (!subDB.size())
 		return;
-	const entries = subDB.getAll();
-	Promise.all(getSubsToCheck(entries))
+	Promise.all(getSubsToCheck())
 		.then(function (fetched) {
-			findNewPosts(fetched, entries);
+			findNewPosts(fetched);
 		}).catch(function (error) {
 			if (error instanceof SyntaxError) // sometimes reddit responds with HTML "busy", we don't care.
-				return;
+				return; // also sometimes there's so much 'inner html' in the response it doesn't end in real json :
 			logger.error("checkSubs: "+error.message, error);
 		});
 }
