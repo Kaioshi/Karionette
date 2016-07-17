@@ -61,7 +61,7 @@ function readJson(fn) { return objToMap(JSON.parse(fs.readFileSync(fn).toString(
 class Json extends DB {
 	constructor(filename) { super(filename, new Map(), readJson, writeJson); }
 	size() { return this.data.size; }
-	random() { return lib.randSelect([ ...this.data ]); }
+	random() { return lib.randSelect([ ...this.data.values() ]); }
 	hasOne(key) { return this.data.has(key); }
 	getKeys() { return [ ...this.data.keys() ]; }
 	saveOne(key, value) { this._modified = true; this.data.set(key, value); }
