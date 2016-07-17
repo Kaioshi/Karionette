@@ -44,7 +44,7 @@ function replaceSingleVar(match, context, from) {
 	case "{from}": return magicInputFondler(from);
 	case "{whippingBoy}": return magicInputFondler(lib.randSelect(config.local_whippingboys));
 	case "{channel}": return magicInputFondler(context);
-	case "{randThing}": return lib.randSelect(randDB.getAll());
+	case "{randThing}": return randDB.random();
 	case "{randNick}": return magicInputFondler(randNick(context, from));
 	case "{verb}": return words.verb.random().base;
 	case "{verbs}": return words.verb.random().s;
