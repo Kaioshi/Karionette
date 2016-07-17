@@ -74,7 +74,7 @@ module.exports = function (globals) {
 		if (plug.slice(-3) !== ".js")
 			return false;
 		if (plugin.sandbox.config.enabled_plugins && plugin.sandbox.config.enabled_plugins.length)
-			return !plugin.sandbox.config.enabled_plugins.some(p => p.toLowerCase() !== plug.slice(0, -3).toLowerCase());
+			return plugin.sandbox.config.enabled_plugins.some(p => p.toLowerCase() === plug.slice(0, -3).toLowerCase());
 		if (plugin.sandbox.config.disabled_plugins && plugin.sandbox.config.disabled_plugins.length)
 			return !plugin.sandbox.config.disabled_plugins.some(p => p.toLowerCase() === plug.slice(0, -3).toLowerCase());
 		return true;
