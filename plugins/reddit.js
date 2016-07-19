@@ -38,18 +38,18 @@ function findNewPosts(fetched) {
 			entry = subDB.getOne(sub);
 		let changed = false, seen = entry.seen || [];
 		for (let k = 0; k < release.posts.length; k++) {
+			if (seen.indexOf(release.posts[k].id) > -1) // seen it
+				continue;
 			const post = release.posts[k],
 				postMessage = lib.decode(`r/${sub} - ${post.title} ~ ${shortenRedditLink(post.link, entry.subreddit, post.id)}`);
-			if (seen.indexOf(post.id) > -1) // seen it
-				continue;
 			changed = true;
 			seen.push(post.id);
 			for (let n = 0; n < entry.announce.length; n++) {
 				const nick = entry.announce[n];
-				methods[nick] = methods[nick] || getDeliveryMethod(nick);
-				isOnline[nick] = isOnline[nick] || (ial.User(nick) ? true : false);
-				if (!isOnline[nick])
+				isOnline[nick] = isOnline[nick] || (ial.User(nick) ? "online" : "offline");
+				if (isOnline[nick] === "offline")
 					continue;
+				methods[nick] = methods[nick] || getDeliveryMethod(nick);
 				announcements.push([ methods[nick], nick, postMessage ]);
 			}
 		}
