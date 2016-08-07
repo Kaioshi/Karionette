@@ -1,40 +1,42 @@
 "use strict";
 
 module.exports = function (globals) {
+	let vmContext;
 	const vm = require("vm"),
 		fs = require("fs"),
-		plugin = {
-			sandbox: {
-				console: console,
-				require: require,
-				fs: fs,
-				setInterval: setInterval,
-				setTimeout: setTimeout,
-				clearInterval: clearInterval,
-				process: process,
-				globals: globals
-			}
-		};
-	let vmContext,
-		logInfo = function (line) {
-			if (plugin.sandbox.logger) {
-				logInfo = plugin.sandbox.logger.plugin;
-				logInfo(line);
-			} else {
-				process.stdout.write(new Date().toLocaleTimeString()+" [Plugin] "+line+"\n");
-			}
-		},
-		logError = function (line, error) {
-			if (plugin.sandbox.logger) {
-				logError = plugin.sandbox.logger.error;
-				logError(line, error);
-			} else {
-				console.error(new Date().toLocaleTimeString()+" [Error] "+line, error);
-			}
-		};
+		importables = { fs, process, require, console, setInterval, setTimeout, clearInterval },
+		plugin = { sandbox: { globals } };
 
-	function declareGlobal(pluginName, handle, obj) {
-		plugin.sandbox[handle] = obj;
+	function logInfo(line) {
+		if (plugin.sandbox.logger)
+			plugin.sandbox.logger.plugin(line);
+		else
+			process.stdout.write(new Date().toLocaleTimeString()+" \u001b[96mPlug\u001b[0m "+line+"\n");
+	}
+
+	function logError(line, error) {
+		if (plugin.sandbox.logger)
+			plugin.sandbox.logger.error(line, error);
+		else
+			console.error(new Date().toLocaleTimeString()+" Error "+line, error);
+	}
+
+	function pluginGlobal(globalName, obj) {
+		plugin.sandbox[globalName] = obj;
+	}
+
+	function pluginExport(exportName, obj) {
+		importables[exportName] = obj;
+	}
+
+	function pluginImport(importName) {
+		if (importables[importName] === undefined)
+			throw new Error("No such importable: "+importName);
+		return importables[importName];
+	}
+
+	function pluginImportMany(...importNames) {
+		return importNames.map(importName => pluginImport(importName));
 	}
 
 	function readPlugin(fn) {
@@ -56,12 +58,11 @@ module.exports = function (globals) {
 			return;
 		try {
 			logInfo("Loading "+fn+" ...");
-			let src = "(function () {"+plug+"})()";
-			vm.runInContext(src, vmContext, {filename: fn});
-			src = null; plug = null;
+			vm.runInContext("{"+plug+"}", vmContext, {filename: fn});
 			return true;
 		} catch (error) {
 			logError("Error in "+fn+": "+error.message, error);
+			process.exit(1);
 			return false;
 		}
 	}
@@ -88,7 +89,10 @@ module.exports = function (globals) {
 
 	plugin.sandbox.plugin = {
 		load: loadPlugin,
-		declareGlobal: declareGlobal
+		global: pluginGlobal,
+		import: pluginImport,
+		importMany: pluginImportMany,
+		export: pluginExport
 	};
 
 	vmContext = vm.createContext(plugin.sandbox);
