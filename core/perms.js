@@ -1,196 +1,143 @@
 // permissions mark 2.1!
 "use strict";
 
-let perms,
-	permissionDB = new DB.Json({filename: "perms"}),
-	permsDB = permissionDB.getAll();
-
-function ensureObj(type, item, entry) {
-	if (!permsDB[type]) permsDB[type] = {};
-	if (!permsDB[type][item]) permsDB[type][item] = {};
-	if (!permsDB[type][item][entry]) permsDB[type][item][entry] = {};
-}
+const [DB, logins, ial] = plugin.importMany("DB", "logins", "ial"),
+	permissionDB = new DB.Json({filename: "perms"});
 
 function alterEntry(username, act, action, type, item) {
-	if (!username) {
-		logger.debug("Incorrect call to alterEntry("+[username, act, action, type, item].join(", ")+")");
-		return;
-	}
+	const perm = permissionDB.getOne(type);
 	if (action === "delete") {
 		if (act === "all") {
-			if (permsDB[type][item]) {
-				delete permsDB[type][item];
-				permissionDB.saveAll(permsDB);
-			}
+			delete perm[item];
+			permissionDB.saveOne(type, perm);
 		} else {
-			if (permsDB[type] && permsDB[type][item] && permsDB[type][item][act]) {
-				delete permsDB[type][item][act];
-				permissionDB.saveAll(permsDB);
+			if (perm[item][act]) {
+				delete perm[item][act];
+				permissionDB.saveOne(type, perm);
 			}
 		}
 		return;
 	}
+	perm[item] = perm[item] || Object.create(null);
+	perm[item][action] = perm[item][action] || Object.create(null);
 	if (act === "add") {
-		ensureObj(type, item, action);
-		permsDB[type][item][action][username] = true;
-		permissionDB.saveAll(permsDB);
+		perm[item][action][username] = true;
+		permissionDB.saveOne(type, perm);
 	} else {
-		ensureObj(type, item, action);
-		if (permsDB[type][item][action][username]) {
-			delete permsDB[type][item][action][username];
-			if (Object.keys(permsDB[type][item][action]).length === 0)
-				delete permsDB[type][item][action];
-			permissionDB.saveAll(permsDB);
+		if (perm[item][action[username]]) {
+			delete perm[item][action][username];
+			if (!Object.keys(perm[item][action]).length)
+				delete perm[item][action];
+			permissionDB.saveOne(type, perm);
 		}
 	}
 }
 
-function Save() {
-	permissionDB.saveAll(permsDB);
+function hasPermission(from, nick, user, type, item) {
+	if (logins.isAdmin(nick) || !permissionDB.hasOne(type))
+		return true;
+	const perm = permissionDB.getOne(type);
+	if (!perm[item] || (perm[item].owner && perm[item].owner[user]))
+		return true;
+	if (perm[item].deny) {
+		if (perm[item].deny[user])
+			return false;
+		const keys = Object.keys(perm[item].deny);
+		for (let i = 0; i < keys.length; i++) {
+			if (keys[i].includes("!") || keys[i].includes("*")) {
+				if (ial.maskMatch(from, keys[i]))
+					return false;
+			}
+		}
+	}
+	return false;
 }
 
 function Action(from, action, type, item, username) {
-	let user, nick,
-		permission = false;
-	if (!(from && action && type && item)) {
-		logger.warn("Incorrect call to perms.Action("+[from, action, type, item, username].join(", ")+")");
-		return;
-	}
-	nick = from.split("!")[0];
-	user = logins.getUsername(nick);
-	// all of these actions require ownership - or no owner set, (or admin).
-	permission = logins.isAdmin(nick); // check admin first.
-	if (!permission) {
-		if (!permsDB[type] || !permsDB[type][item]) {
-			permission = true;
-		} else { // there are entries for this.
-			if (permsDB[type][item].owner) {
-				if (permsDB[type][item].owner[user]) {
-					permission = true;
-				}
-			}
-		}
-		if (permsDB[type] && permsDB[type][item] && permsDB[type][item].deny) {
-			if (permsDB[type][item].deny[user]) {
-				logger.debug("Denied based on user");
-				return false; // blacklist
-			}
-			let keys = Object.keys(permsDB[type][item].deny);
-			for (let i = 0; i < keys.length; i++) {
-				if (keys[i].indexOf("!") > -1 || keys[i].indexOf("*") > -1) {
-					if (ial.maskMatch(from, keys[i])) {
-						logger.debug("Denied based on mask");
-						return false; // also blacklist
-					}
-				}
-			}
-		}
-	} else {
-		action = action.split(" ");
-		alterEntry((username ? username : user), action[1], action[0], type, item);
+	const nick = from.split("!")[0],
+		user = logins.getUsername(nick);
+	if (hasPermission(from, nick, user, type)) {
+		const act = action.split(" ");
+		alterEntry((username ? username : user), act[1], act[0], type, item);
 		return true;
 	}
 	return false;
 }
 
-function Info(from, type, item) { // this is awful
-	let ret = [];
-	if (!(from && type && item)) {
-		logger.warn("Incorrect call to perms.Info("+[from, type, item].join(", ")+")");
-		return;
-	}
+function Info(from, type, item) {
 	if (type === "command" && !logins.isAdmin(from.split("!")[0]))
-		return -2; // only admins can set command permissions
-	if (permsDB[type] && permsDB[type][item]) {
-		if (permsDB[type][item].owner && Object.keys(permsDB[type][item].owner).length > 0) {
-			ret.push("Owners: "+Object.keys(permsDB[type][item].owner).join(", "));
-		}
-		if (permsDB[type][item].deny && Object.keys(permsDB[type][item].deny).length > 0) {
-			ret.push("Denies: "+Object.keys(permsDB[type][item].deny).join(", "));
-		}
-		if (permsDB[type][item].allow && Object.keys(permsDB[type][item].allow).length > 0) {
-			ret.push("Allows: "+Object.keys(permsDB[type][item].allow).join(", "));
-		}
-	} else {
+		return -2;
+	const perm = permissionDB.getOne(type), ret = [];
+	if (!perm || !perm[item])
 		return -1; // no such item
-	}
-	if (ret.length > 0)
+	if (perm[item].owner && Object.keys(perm[item].owner).length)
+		ret.push("Owners: "+Object.keys(perm[item].owner).join(", "));
+	if (perm[item].deny && Object.keys(perm[item].deny).length)
+		ret.push("Denies: "+Object.keys(perm[item].deny).join(", "));
+	if (perm[item].allow && Object.keys(perm[item].allow).length)
+		ret.push("Allows: "+Object.keys(perm[item].allow).join(", "));
+	if (ret.length)
 		return ret;
-	return -1; // no such item, but it has an empty permissions section. bugs!
+	return -1; // this is awful
 }
 
 function isOwner(from, type, item) {
-	let user, nick;
-	if (!(from && type && item)) {
-		logger.warn("Incorrect call to perms.isOwner("+[from, type, item].join(", ")+")");
-		return;
-	} // if the item has no permissions, true
-	if (!permsDB[type] || !permsDB[type][item]) {
-		logger.debug("isOwner: returned no permissions");
+	if (!permissionDB.hasOne(type))
 		return true;
-	}
-	nick = from.split("!")[0];
+	const nick = from.split("!")[0];
 	if (logins.isAdmin(nick))
-		return true; // if admin, always yes
-	// plebs below!
-	user = logins.getUsername(nick);
+		return true;
+	const user = logins.getUsername(nick);
 	if (!user)
-		return; // not logged in
-	if (permsDB[type][item].owner && Object.keys(permsDB[type][item].owner).length > 0) {
-		if (permsDB[type][item].owner[user])
+		return false;
+	const perm = permissionDB.getOne(type);
+	if (!perm[item])
+		return true;
+	if (perm[item].owner) {
+		if (perm[item].owner[user])
 			return true;
-		return;
-	} // unclaimed, let em at it
-	logger.warn("Unclaimed "+type+" "+item+" being edited by "+from);
-	return true;
+		return false;
+	}
+	return true; // unclaimed
 }
 
 function hasPerms(type, item) {
-	if (permsDB[type] && permsDB[type][item] && Object.keys(permsDB[type][item]).length > 0)
+	const perm = permissionDB.getOne(type);
+	if (perm && perm[item] && Object.keys(perm[item]).length)
 		return true;
+	return false;
 }
 
 function Check(from, type, item) {
-	// return true if they have permission to edit this item
-	let user, nick;
-	if (!(from && type && item)) {
-		logger.warn("Incorrect call to perms.Check("+[from, type, item].join(", ")+")");
-		return;
-	}
-	nick = from.split("!")[0];
-	// if admin, always yes
+	const nick = from.split("!")[0];
 	if (logins.isAdmin(nick))
+		return true; // plebs below!
+	const perm = permissionDB.getOne(type);
+	if (!perm || !perm[item])
 		return true;
-	// plebs below!
-	user = logins.getUsername(nick);
-	if (!permsDB[type] || !permsDB[type][item])
-		return true; // no permissions are set, free for all
-	if (permsDB[type][item].owner && Object.keys(permsDB[type][item].owner).length > 0) {
-		if (user && permsDB[type][item].owner[user])
+	const user = logins.getUsername(nick);
+	if (perm[item].owner && user && perm[item].owner[user])
+		return true;
+	// check allow list - if there is an allow list, we consider it a whitelist. if they aren't on this, deny
+	if (perm[item].allow) {
+		if (user && perm[item].allow[user])
 			return true;
-	} // check allow list - if there is an allow list, we consider it a whitelist. if they aren't on this, deny
-	if (permsDB[type][item].allow && Object.keys(permsDB[type][item].allow).length > 0) {
-		if (user && permsDB[type][item].allow[user])
-			return true;
-		return;
+		return false;
 	} // check deny list - if there is a deny list but no allow, we consider it a black list.
-	if (permsDB[type][item].deny && Object.keys(permsDB[type][item].deny).length > 0) {
-		if (user && permsDB[type][item].deny[user])
-			return;
-		else {
-			let keys = Object.keys(permsDB[type][item].deny);
-			for (let i = 0; i < keys.length; i++) {
-				if (ial.maskMatch(from, keys[i]))
-					return; // denied based on mask
-			}
-		} // yay. if you got this far you weren't the owner, but there was no allow list and you weren't on the deny list,
-	} // if it existed. Huzzah. You get the cookie. Monkey. You get the Cookie Monkey. It poops delicious cookies.
+	if (perm[item].deny) {
+		if (user && perm[item].deny[user])
+			return false;
+		const keys = Object.keys(perm[item].deny);
+		for (let i = 0; i < keys.length; i++) {
+			if (ial.maskMatch(from, keys[i]))
+				return false;
+		}
+	}
 	return true;
 }
 
-perms = {
-	DB: permsDB,
-	Save: Save,
+const perms = {
+	DB: permissionDB,
 	Action: Action,
 	Info: Info,
 	isOwner: isOwner,
@@ -198,4 +145,4 @@ perms = {
 	Check: Check
 };
 
-plugin.declareGlobal("perms", "perms", perms);
+plugin.export("perms", perms);
