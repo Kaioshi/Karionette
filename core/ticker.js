@@ -1,22 +1,23 @@
 // tickers!
 "use strict";
-let	tickers = {}, ticker;
+const [setInterval, clearInterval] = plugin.importMany("setInterval", "clearInterval");
 
-ticker = {
-	start: function startTicker(interval) {
-		if (tickers[interval])
+class Ticker {
+	constructor() { this.tickers = Object.create(null); }
+	start(interval) {
+		if (this.tickers[interval])
 			return; // already running this ticker
-		tickers[interval] = setInterval(function () {
+		this.tickers[interval] = setInterval(function() {
 			bot.emitEvent("Ticker: "+interval+"s tick");
 		}, parseInt(interval, 10)*1000);
-	},
-	stop: function stopTicker(interval) {
-		if (!tickers || !tickers[interval])
-			return;
-		tickers[interval].close();
-		clearInterval(tickers[interval]);
-		delete tickers[interval];
 	}
-};
+	stop(interval) {
+		if (!this.tickers[interval])
+			return;
+		this.tickers[interval].close();
+		clearInterval(this.tickers[interval]);
+		delete this.tickers[interval];
+	}
+}
 
-plugin.declareGlobal("ticker", "ticker", ticker);
+plugin.export("ticker", new Ticker());
