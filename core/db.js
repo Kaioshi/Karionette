@@ -36,7 +36,7 @@ function saveAndExit() {
 }
 
 class DBObject {
-	constructor(obj) { this.setAll(obj); }
+	constructor(obj=Object.create(null)) { this.setAll(obj); }
 	size() { return this.keys.length; }
 	findKey(key) {
 		const lkey = key.toLowerCase();
@@ -135,7 +135,10 @@ class Json extends DB {
 	_writeFile() { return JSON.stringify(this._data.obj, null, 3); }
 	_readFile() { return new DBObject(JSON.parse(fs.readFileSync(this.fn).toString())); }
 	clear() {
-		this._data.clear();
+		if (this._data)
+			this._data.clear();
+		else
+			this._data = new DBObject();
 		this._modified = false;
 		this._loaded = false;
 	}
