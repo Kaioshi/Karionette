@@ -1,232 +1,307 @@
 "use strict";
+const [setInterval, clearInterval, alias, perms, logins, ignore] =
+	plugin.importMany("setInterval", "clearInterval", "alias", "perms", "logins", "ignore"),
+	net = plugin.import("require")("net"),
+	sanityCheck = /\n|\r|\t/g;
 
-const net = require("net");
-const sanityCheck = /\n|\r|\t/g;
-let connected = false,
-	connectInterval,
-	bufferedData = "",
-	socket = new net.Socket();
-
-function handleData(data) {
-	let index;
-	if (bufferedData.length) {
-		data = bufferedData+data;
-		bufferedData = "";
+class Connection {
+	constructor() {
+		this._connected = false;
+		this.buffer = "";
 	}
-	while ((index = data.indexOf("\r\n")) > -1) {
-		bot.parse(data.slice(0, index));
-		data = data.slice(index+2);
-	}
-	if (data.length) // server doesn't always end on \r\n per packet
-		bufferedData = data; // so we dump the remainder on the front of the next one
-}
-
-function sanitise(message) {
-	if (sanityCheck.test(message))
-		message = message.replace(sanityCheck, "");
-}
-
-// Send a message via the open socket
-function send(data, opts) {
-	if (!data || data.length === 0) {
-		logger.error("Tried to send no data");
-		return;
-	}
-	if (data.length > 510) {
-		logger.error("Tried to send data > 510 chars in length: " + data);
-		return;
-	}
-	sanitise(data); // remove \n \r \t
-	if (opts) {
-		if (opts.nolog) {
-			socket.write(data+"\r\n", "utf8");
-		} else if (opts.silent) {
-			socket.write(data+"\r\n", "utf8");
-			logger.sent(data, true);
+	quit() { this._connected = false; this.socket.end(); }
+	send(data) { this.socket.write(data+"\r\n", "utf8"); logger.sent(data); }
+	configure() {
+		if (this.socket) {
+			this.socket.destroy();
+			this.socket = null;
 		}
-	} else {
-		socket.write(data+"\r\n", "utf8");
-		logger.sent(data);
+		this.socket = new net.Socket();
+		this.socket.setNoDelay(false);
+		this.socket.setEncoding("utf8");
+		this.socket.setTimeout(300000, () => this.socket.destroy());
+		this.socket.on("close", hadError => {
+			if (!hadError || !this._connected) {
+				bot.emitEvent("closing");
+				logger.warn("Disconnected. Exiting process...");
+				this.socket.end();
+			} else {
+				logger.warn("Disconnected. Attempting to reconnect in 15 seconds...");
+				if (!this._connectInterval)
+					this._connectInterval = setInterval(() => this.connect(), 15000);
+			}
+		});
+		this.socket.on("error", err => {
+			logger.error("Socket error!", err);
+			this.socket.destroy();
+		});
+		this.socket.on("data", data => this.handleData(data));
 	}
+	connect() {
+		this.configure();
+		this.socket.connect(config.port, config.server, () => {
+			if (config.password !== undefined)
+				this.send("PASS "+config.password);
+			this.send("NICK "+config.nickname);
+			this.send("USER "+config.username+" localhost * :"+config.realname);
+			if (config.twitch)
+				this.send("CAP REQ :twitch.tv/membership");
+			this._connected = true;
+			if (this._connectInterval) {
+				clearInterval(this._connectInterval);
+				delete this._connectInterval;
+			}
+		});
+	}
+	handleData(data) {
+		let index;
+		if (this.buffer.length) {
+			data = this.buffer+data;
+			this.buffer = "";
+		}
+		while ((index = data.indexOf("\r\n")) > -1) {
+			irc._input.parse(data.slice(0, index));
+			data = data.slice(index+2);
+		}
+		if (data.length) // server doesn't always end on \r\n per packet
+			this.buffer = data; // so we dump the remainder on the front of the next one
+	}
+
 }
 
-// Configure the socket appropriately
-function configureSocket() {
-	socket.setNoDelay(true);
-	socket.setEncoding("utf8");
-	// Connection TimeOut support
-	socket.setTimeout(300000, function socketTimeout() {
-		// If fails, error and close events trigger
-		send("VERSION");
-		socket.destroy();
-	});
-	socket.on("close", function socketCloseEvent(hadError) {
-		if (!(hadError || connected)) {
-			process.emit("closing");
-			logger.warn("Socket closed. Exiting process...");
-			socket.end();
-			setTimeout(process.exit, 1000);
-		} else {
-			logger.warn("Socket closed. Attempting to reconnect in 15 seconds...");
-			socket = new net.Socket();
-			if (!connectInterval) {
-				connectInterval = setInterval(function () {
-					logger.warn("Attempting reconnect...");
-					openConnection({
-						server: config.server,
-						port: config.port,
-						nickname: config.nick,
-						username: config.username,
-						realname: config.realname,
-						password: config.password
-					});
-				}, 15000);
+class IRCParser { // this class lives in the future, man.
+	_cleanNick(nick) { // removes trailing : , from nicks.
+		let nickCompletionCharacters = [ ",", ":" ];
+		if (nickCompletionCharacters.indexOf(nick[nick.length-1]) > -1)
+			return nick.slice(1, -1);
+		return nick.slice(1);
+	}
+	_getCommand(input) {
+		let command, pos, tmp1, tmp2;
+		tmp1 = input[3].slice(1).toLowerCase();
+		if (tmp1[0] === config.command_prefix) {
+			pos = 3;
+			command = tmp1.slice(1);
+		} else if (input[4]) {
+			tmp2 = this._cleanNick(input[3]);
+			tmp1 = input[4].toLowerCase();
+			if (tmp2.toLowerCase() === config.nick.toLowerCase()) {
+				pos = 4;
+				command = tmp1;
 			}
 		}
-	});
-	socket.on("error", function socketErrorEvent(e) {
-		logger.error("Socket error!", e);
-		socket.destroy();
-	});
-	socket.on("data", handleData);
-}
-
-function openConnection(params) {
-	configureSocket();
-	socket.connect(params.port, params.server, function () {
-		if (params.password !== undefined)
-			send("PASS "+params.password);
-		send("NICK "+params.nickname);
-		send("USER "+params.username+" localhost * :"+params.realname);
-		if (config.twitch)
-			send("CAP REQ :twitch.tv/membership");
-		connected = true;
-		if (connectInterval) {
-			clearInterval(connectInterval);
-			connectInterval = null;
+		if (command) {
+			if (bot.cmdExists(command))
+				return [ "command", command, pos ];
+			if (alias.db.hasOne(command))
+				return [ "alias", command, pos ];
 		}
-	});
-}
-
-function getMaxMessageLength(prefix) {
-	if (config.address)
-		return 508-(config.nick+config.address+prefix).length+3;
-	return 473-prefix.length;
-}
-
-function sendMessage(type, context, message, maxmsgs) {
-	let sliceAt, prefix, max;
-	if (typeof message !== "string") {
-		logger.error("Tried to send a non-String message: type -> "+typeof message);
-		return;
 	}
-	if (!message) {
-		logger.error("Tried to send an empty message: "+[type, context, message].join(", "));
-		return;
+	_arglenCheck(command, args) {
+		let needed = bot.commandArglen(command);
+		if (needed > 0 && (args === undefined || needed > args.length))
+			return false;
+		return true;
 	}
-	prefix = type+" "+context+" :";
-	max = getMaxMessageLength(prefix);
-	if (message.length <= max) {
-		send(prefix+message);
-		return;
-	}
-	maxmsgs = maxmsgs || 3;
-	while (--maxmsgs >= 0) {
-		if (message.length > max) {
-			sliceAt = message.lastIndexOf(" ", max-5); // " ..\r\n" = 5
-			send(prefix+message.slice(0, sliceAt)+" ..");
-			message = message.slice(sliceAt+1); // +1 removes the trailing space
+	_handleMessage(inputLine, input, params) {
+		let cmd, permission = true, aliasSyntax;
+		if ((cmd = this._getCommand(input)) !== undefined) {
+			params.command = cmd;
+			if (params.command[0] === "alias") {
+				if (!perms.Check(params.user, "alias", params.command[1]))
+					permission = false;
+				params.alias = params.command[1];
+				params.aliasArgs = input.slice(params.command[2]+1).join(" ");
+				aliasSyntax = alias.syntax(params.alias, params.aliasArgs.length);
+				params.raw = alias.transform(params.raw, params.command[1], alias.db.getOne(params.alias), params.aliasArgs);
+				params.data = params.raw.slice(params.raw.indexOf(" :")+2);
+				input = params.raw.split(" ");
+				params.command = input[3].slice(2);
+			} else {
+				if (params.command[2] === 4) {
+					params.data = input.slice(4).join(" ");
+					params.args = input.slice(5);
+				}
+				params.command = params.command[1];
+			}
+		}
+		params.message = input.slice(3).join(" ").slice(1);
+		if (params.command) {
+			if (bot.commandNeedsAdmin(params.command) && !logins.isAdmin(params.nick)) {
+				irc.say(params.context, "Bitch_, please.");
+				return logger.denied(inputLine);
+			}
+			if (!params.args)
+				params.args = input.slice(4);
+			params.data = params.data.slice(params.data.indexOf(" ")+1);
+			if (params.args.length === 0)
+				delete params.args;
+			if (bot.isCommandAlias(params.command))
+				params.command = bot.commandAlias(params.command);
+			if (!permission) {
+				irc.say(params.context, "You don't have permission to do that.");
+				return logger.denied(inputLine);
+			}
+			logger.chat(inputLine);
+			if (aliasSyntax) {// no command should happen if an alias syntax was wrong
+				irc.say(params.context, aliasSyntax);
+			} else if (!this._arglenCheck(params.command, params.args)) {
+				irc.say(params.context, bot.cmdHelp(params.command, "syntax"));
+			} else {
+				return bot.emitCommand(params.command, params);
+			}
 		} else {
-			send(prefix+message);
+			return logger.chat(inputLine);
+		}
+	}
+	_logLine(type, inputLine) {
+		switch (type) {
+		case "PRIVMSG":
+			return logger.chat(inputLine);
+		case "MODE":
+		case "TOPIC":
+		case "JOIN":
+		case "PART":
+		case "NICK":
+		case "QUIT":
+		case "KICK":
+			return logger.traffic(inputLine);
+		default:
+			return logger.server(inputLine);
+		}
+	}
+	parse(inputLine) {
+		if (inputLine.slice(0,4) === "PING")
+			return irc.pong(inputLine.slice(6));
+		if (ignore.check(inputLine))
+			return logger.ignored(inputLine);
+		let params, bangIndex,
+			input = inputLine.trim().split(" "),
+			type = input[0][0] === ":" ? input[1] : input[0];
+		if (!bot.hasEvent(type))
+			return this._logLine(type, inputLine);
+		params = Object.create(null);
+		params.raw = inputLine;
+		// fill in mojojojo
+		bangIndex = input[0].indexOf("!");
+		if (bangIndex > -1) {
+			params.nick = input[0].slice(1, bangIndex);
+			params.address = input[0].slice(bangIndex+1);
+			params.user = input[0].slice(1);
+			params.context = (input[2][0] !== ":" ? input[2] : input[2].slice(1));
+			params.data = inputLine.slice(inputLine.indexOf(" :")+2);
+			if (params.context[0] !== "#")
+				params.context = params.nick;
+			else
+				params.channel = params.context;
+		}
+		switch (type) {
+		case "PRIVMSG":
+			this._handleMessage(inputLine, input, params);
+			break;
+		case "MODE":
+			params.mode = (input[3][0] !== ":" ? input[3] : input[3].slice(1));
+			params.affected = input.slice(4);
+			logger.traffic(inputLine);
+			break;
+		case "TOPIC":
+			params.topic = input.slice(3).join(" ").slice(1);
+			logger.traffic(inputLine);
+			break;
+		case "JOIN":
+			logger.traffic(inputLine);
+			break;
+		case "PART":
+			params.reason = (input[3] ? input.slice(3).join(" ").slice(1) : "");
+			logger.traffic(inputLine);
+			break;
+		case "NICK":
+			params.newnick = input[2].slice(1);
+			logger.traffic(inputLine);
+			break;
+		case "QUIT":
+			params.reason = input.slice(2).join(" ").slice(1);
+			logger.traffic(inputLine);
+			break;
+		case "KICK":
+			params.kicked = input[3];
+			params.reason = input.slice(4).join(" ").slice(1);
+			logger.traffic(inputLine);
+			break;
+		default:
+			logger.server(inputLine);
 			break;
 		}
+		return bot.emitEvent(type, params);
 	}
 }
 
-const irc = {
-	open: openConnection,
-	quit: function quitConnection(msg) {
-		connected = false;
-		msg = msg || config.quit_msg;
-		send("QUIT :" + msg);
-		socket.end();
-	},
-	raw: function raw(message) {
-		send(message);
-	},
-	// IRC COMMANDS
-	pong: function pong(challenge) {
-		send("PONG :"+challenge, { nolog: true });
-	},
-	join: function join(channel, key) {
-		if (key) {
-			send("JOIN "+channel+" "+key);
-		} else {
-			send("JOIN "+channel);
+class IRC {
+	constructor() {
+		this.conn = new Connection();
+		this._input = new IRCParser();
+		this._sendQueue = [];
+	}
+	static sanitise(line) {
+		if (sanityCheck.test(line))
+			return line.replace(sanityCheck, "");
+		return line;
+	}
+	connect() { this.conn.connect(); }
+	send(data) { this.conn.send(IRC.sanitise(data)); }
+	queueMessage(message, lowPriority) {
+		if (lowPriority) // end of the line
+			this._sendQueue.push(message);
+		else
+			this._sendQueue.unshift(message);
+		if (!this._processingQueue) {
+			this._processingQueue = true;
+			this._processQueue();
 		}
-	},
-	part: function part(channel, reason) {
-		if (reason) {
-			send("PART "+channel+" :"+reason);
-		} else {
-			send("PART "+channel);
-		}
-	},
-	say: function say(context, message, maxmsgs) {
-		sendMessage("PRIVMSG", context, message, maxmsgs);
-	},
-	rated: function rated(messages, delay) {
-		// messages = [ [ method, target, message ], ... ]
-		if (!messages.length) {
-			logger.debug("Tried to irc.rated() an empty array");
-			return;
-		}
-		delay = delay || 500;
-		let repeater = setInterval(() => {
-			let msg = messages.shift();
+	}
+	_processQueue(delay=10) {
+		this._processingQueue = setInterval(() => {
+			if (delay === 10 && this._sendQueue.length >= 3) {
+				clearInterval(this._processingQueue);
+				return this._processQueue(750);
+			}
+			const msg = this._sendQueue.shift();
 			if (msg)
-				this[msg[0]](msg[1], msg[2]);
-			else
-				clearInterval(repeater);
+				this.send(msg);
+			else {
+				clearInterval(this._processingQueue);
+				this._processingQueue = false;
+			}
 		}, delay);
-	},
-	action: function action(channel, actionMsg, maxActions) {
-		this.say(channel, "\x01ACTION "+actionMsg+"\x01", maxActions);
-	},
-	notice: function notice(target, noticeMsg, maxNotices) {
-		sendMessage("NOTICE", target, noticeMsg, maxNotices);
-	},
-	// OP/DEOP/etc TODO: make op/deop/ban etc take multiple nicks/banmasks
-	// op: function op(target, nick) { // UNUSED FROM HERE ON
-	// 	send("MODE "+target+" +o "+nick);
-	// },
-	// deop: function deop(target, nick) {
-	// 	send("MODE "+target+" -o "+nick);
-	// },
-	// voice: function voice(target, nick) {
-	// 	send("MODE "+target+" +v "+nick);
-	// },
-	// devoice: function devoice(target, nick) {
-	// 	send("MODE "+target+" -v "+nick);
-	// },
-	// halfop: function halfop(target, nick) {
-	// 	send("MODE "+target+" +h "+nick);
-	// },
-	// dehalfop: function dehalfop(target, nick) {
-	// 	send("MODE "+target+" -h "+nick);
-	// },
-	// kick: function kick(target, nick, reason) {
-	// 	send("KICK "+target+" "+nick+" :"+reason);
-	// },
-	// ban: function ban(target, banmask) {
-	// 	send("MODE "+target+" +b "+banmask);
-	// },
-	// unban: function unban(target, banmask) {
-	// 	send("MODE "+target+" -b "+banmask);
-	// },
-	// topic: function topic(target, message) {
-	// 	send("TOPIC "+target+" :"+message);
-	// }
-};
+	}
+	longMessage(target, message) {
+		while (message.length > 345) {
+			const index = message.lastIndexOf(" ", 345); // -5 for ".."
+			this.queueMessage(target+message.slice(0, index)+" ..", true);
+			message = message.slice(index+1);
+		}
+		if (message.length)
+			this.queueMessage(target+message, true);
+	}
+	say(target, message, lowPriority) {
+		if (message.length > 345)
+			this.longMessage("PRIVMSG "+target+" :", message);
+		else
+			this.queueMessage("PRIVMSG "+target+" :"+message, lowPriority);
+	}
+	notice(target, message, lowPriority) {
+		if (message.length > 345)
+			this.longMessage("NOTICE "+target+" :", message);
+		else
+			this.queueMessage("NOTICE "+target+" :"+message, lowPriority);
+	}
+	action(target, message, lowPriority) { this.queueMessage("PRIVMSG "+target+" :\x01ACTION "+message+"\x01", lowPriority); }
+	rated(messages) { messages.forEach(msg => this[msg[0]](msg[1], msg[2], true)); }
+	join(channel, key) { this.send("JOIN "+channel+(key ? " "+key : "")); }
+	part(channel, reason) { this.send("PART "+channel+(reason ? " :"+reason : "")); }
+	pong(challenge) { this.conn.socket.write("PONG :"+challenge+"\r\n"); }
+	quit(message) { this.send("QUIT"+(message ? " :"+message : "")); this.conn.quit(); }
+	raw(data) { this.send(data); }
+}
 
-plugin.declareGlobal("irc", "irc", irc);
+plugin.global("irc", new IRC());
