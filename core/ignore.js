@@ -1,46 +1,45 @@
 "use strict";
+const ial = plugin.import("ial");
 
-let ignoreDB = new DB.List({filename: "ignore"}),
-	ignoreCache = {},
-	ignored = ignoreDB.getAll();
-
-plugin.declareGlobal("ignore", "ignore", {
-	check: function checkIgnored(input) {
-		let user = input.slice(1, input.indexOf(" "));
-		// fast path! :D
-		if (ignoreCache[user] !== undefined)
-			return ignoreCache[user];
+class Ignore {
+	constructor() {
+		this._cache = Object.create(null);
+		this.db = plugin.import("DB").List({filename: "ignore"});
+	}
+	list() { return this.db.data.join(", "); }
+	check(input) {
+		const user = input.slice(1, input.indexOf(" "));
+		if (this._cache[user] !== undefined)
+			return this._cache[user];
+		if (user.includes(".")) { // server
+			this._cache[user] = false;
+			return false;
+		}
 		// slow path. :<
-		for (let i = 0; i < ignored.length; i++) {
-			if (ial.maskMatch(user, ignored[i])) { // <- this is why we keep it in memory.
-				ignoreCache[user] = true;
+		for (let i = 0; i < this.db.data.length; i++) {
+			if (ial.maskMatch(user, this.db.data[i])) { // <- this is why we keep it in memory.
+				this._cache[user] = true;
 				return true;
 			}
 		}
-		ignoreCache[user] = false;
+		this._cache[user] = false;
 		return false;
-	},
-	add: function ignoreAdd(target) { // moving this here since this is the only place that pokes it.
-		if (!lib.hasElement(ignored, target)) {
-			ignored.push(target);
-			ignoreDB.saveAll(ignored);
-			ignoreCache = {}; // reset
+	}
+	add(target) { // moving this here since this is the only place that pokes it.
+		if (!this.db.hasOne(target)) {
+			this.db.saveOne(target);
+			this._cache = Object.create(null); // reset
 			return target+" has been added to ignore.";
 		}
 		return target+" is already being ignored.";
-	},
-	remove: function unignore(target) {
-		for (let i = 0; i < ignored.length; i++) {
-			if (ignored[i] === target) {
-				ignored.splice(i, 1);
-				ignoreDB.saveAll(ignored);
-				ignoreCache = {}; // reset
-				return target+" has been removed from ignore.";
-			}
+	}
+	remove(target) {
+		if (this.db.removeOne(target)) {
+			this._cache = Object.create(null); // reset
+			return target+" has been removed from ignore.";
 		}
 		return target+" was not being ignored.";
-	},
-	list: function ignoreList() {
-		return ignored.join(", ");
 	}
-});
+}
+
+plugin.export("ignore", new Ignore());
