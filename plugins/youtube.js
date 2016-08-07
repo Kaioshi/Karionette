@@ -1,6 +1,8 @@
 "use strict";
 // youtubes!
 
+const [web, lib] = plugin.importMany("web", "lib");
+
 bot.command({
 	command: [ "yt", "youtube", "y" ],
 	help: "Searches YouTube!",
@@ -42,9 +44,7 @@ bot.command({
 					yt.nick = input.nick;
 					irc.say(input.context, lib.formatOutput(config.youtube_format, yt));
 				} else {
-					irc.say(input.context,
-						lib.formatOutput("{title} - [{duration}] {date} - {channel} - {views} views ~ {link}", yt),
-						false);
+					irc.say(input.context, lib.formatOutput("{title} - [{duration}] {date} - {channel} - {views} views ~ {link}", yt), false);
 				}
 			}, function (error) {
 				irc.say(input.context, error.message);

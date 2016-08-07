@@ -1,6 +1,7 @@
 "use strict";
 
-const seen = {};
+const [fs, lib, DB, ial] = plugin.importMany("fs", "lib", "DB", "ial"),
+	seen = {};
 
 function setLast(chan, nick, type, line) {
 	const lnick = nick.toLowerCase(),
@@ -32,9 +33,8 @@ function removeUserLeft(chan, nick) {
 bot.event({
 	handle: "seenMsg",
 	event: "PRIVMSG",
+	condition: function (input) { return input.channel !== undefined; },
 	callback: function (input) {
-		if (!input.channel)
-			return;
 		const message = (input.data.slice(0,7) === "\x01ACTION" ?
 				"* "+input.nick+" "+input.message.slice(8,-1) :
 				"<"+input.nick+"> "+input.message);

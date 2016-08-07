@@ -1,5 +1,6 @@
 "use strict";
-let lfmBindingsDB = new DB.Json({filename: "lfm"});
+const [DB, lib, web] = plugin.importMany("DB", "lib", "web"),
+	lfmBindingsDB = new DB.Json({filename: "lfm"});
 
 function dura(ms) {
 	let secs = Math.floor(ms/1000),

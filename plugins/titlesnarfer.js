@@ -1,56 +1,61 @@
 // url title snarfer XXX rewrite needed
 "use strict";
-let url = require("url"),
+const [DB, lib, web, fs] = plugin.importMany("DB", "lib", "web", "fs"),
+	url = plugin.import("require")("url"),
 	titleFilterDB = new DB.Json({filename: "titlefilters"}),
 	ytReg = /v=([^ &\?]+)/i,
 	ytBReg = /^\/([^ &\?]+)/,
-	recentURLs = {},
-	titleReg, sayTitle;
+	recentURLs = {};
+let titleReg, sayTitle;
 
 if (config.titlesnarfer_inline) {
 	titleReg = /<title?[^>]+>([^<]+)<\/title>/i;
 	sayTitle = function (context, uri, old, record, length) {
-		let reg, title;
 		if (urlIsTooRecent(uri.href, record))
 			return;
-		return web.fetch(uri.href, {}, length).then(function (body) {
-			if (!body) {
-				logger.warn(uri.href + " - returned no body.");
-				return;
-			}
-			reg = titleReg.exec(body.replace(/\n|\t|\r/g, ""));
-			if (!reg || !reg[1]) {
+		lib.runPromise(function *() {
+			try {
+				const body = yield web.fetch(uri.href, {}, length);
+				if (!body) {
+					logger.warn(uri.href+" returned no body.");
+					return;
+				}
+				const reg = titleReg.exec(body.replace(/\n|\t|\r/g, ""));
+				if (!reg || !reg[1]) {
+					if (record)
+						recordURL(record[0], record[1], record[2]);
+					return;
+				}
+				const title = lib.singleSpace(lib.decode(reg[1]));
 				if (record)
 					recordURL(record[0], record[1], record[2]);
-				return;
+				if (!isFilteredTitle(title))
+					irc.say(context, trimTitle(title)+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""));
+			} catch (error) {
+				logger.warn("sayTitle failed: "+error.message, error);
 			}
-			title = lib.singleSpace(lib.decode(reg[1]));
-			if (record)
-				recordURL(record[0], record[1], record[2], title);
-			if (!isFilteredTitle(title))
-				irc.say(context, trimTitle(title)+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""));
-		}).catch(function (error) {
-			logger.error("sayTitle failed: "+error, error);
 		});
 	};
 } else {
 	sayTitle = function (context, uri, old, record) {
-		let title;
 		if (urlIsTooRecent(uri.href, record))
 			return;
-		return web.json("http://felt.ninja:5036/?singlespace=1&uri="+uri.href).then(function (result) { // THIS PROMISE NEEDS AN ERROR FUNCTION
-			if (result.error) {
+		lib.runCallback(function *(resume) {
+			try {
+				const result = JSON.parse(yield web.fetchAsync("http://felt.ninja:5036/?singlespace=1&uri="+uri.href, {}, resume));
+				if (result.error) {
+					if (record)
+						recordURL(record[0], record[1], record[2]);
+					return;
+				}
+				const title = lib.decode(result.title);
 				if (record)
-					recordURL(record[0], record[1], record[2]);
-				return;
+					recordURL(record[0], record[1], record[2], title);
+				if (!isFilteredTitle(title))
+					irc.say(context, trimTitle(title)+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""));
+			} catch(err) {
+				logger.error("sayTitle failed: "+err, err);
 			}
-			title = lib.decode(result.title);
-			if (record)
-				recordURL(record[0], record[1], record[2], title);
-			if (!isFilteredTitle(title))
-				irc.say(context, trimTitle(title)+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""));
-		}).catch(function (err) {
-			logger.error("sayTitle failed: "+err, err);
 		});
 	};
 }
@@ -204,6 +209,8 @@ bot.event({
 	event: "PRIVMSG",
 	condition: function (input) {
 		if (input.args !== undefined)
+			return false;
+		if (!input.channel)
 			return false;
 		input.url = findURL(input.message);
 		if (!input.url) {

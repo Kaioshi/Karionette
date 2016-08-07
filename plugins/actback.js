@@ -1,10 +1,11 @@
 "use strict";
-let randDB = new DB.List({filename: "randomThings"}),
+const [DB, web, lib, setTimeout, words, ial] = plugin.importMany("DB", "web", "lib", "setTimeout", "words", "ial"),
+	randDB = new DB.List({filename: "randomThings"}),
 	denyDB = new DB.Json({filename: "actback/deny"}),
 	statsDB = new DB.Json({filename: "actback/stats"}),
 	repliesDB = new DB.Json({filename: "actback/replies"}),
-	questionDB = new DB.Json({filename: "actback/questions"}),
-	varParseLimit = 3;
+	questionDB = new DB.Json({filename: "actback/questions"});
+let varParseLimit = 3;
 
 function getWpm(line) {
 	return Math.floor((line.length / 5.0) * 1000);
@@ -65,8 +66,10 @@ bot.command({
 		if (input.args[0][0] === "#") {
 			target = input.args[0].toLowerCase();
 			if (!input.args[1]) {
-				if (denyDB.hasOne(target)) irc.say(input.context, "actback is allowed in "+target+".");
-				else irc.say(input.context, "actback is denied in "+target+".");
+				if (denyDB.hasOne(target))
+					irc.say(input.context, "actback is allowed in "+target+".");
+				else
+					irc.say(input.context, "actback is denied in "+target+".");
 				return;
 			}
 			input.data = input.args.slice(1).join(" ");
@@ -211,48 +214,43 @@ bot.event({
 		return actionMatching(input); // doing this in a function so the regex updates w/nick changes
 	},
 	callback: function (input) {
-		let line, stats, randReply, tmp, randReplies,
-			args, verb, obj, method, modverb;
-
 		if (Math.random()*100 <= 20) {
 			sayNocontext(input.context);
 			return;
 		}
-		randReplies = repliesDB.getAll();
-		args = input.match[0].split(" ");
-		verb = args[0];
-		obj = input.match[3] && input.match[3].length ? transformObj(input.match[3]) : null;
-		method = lib.randSelect([ "say", "action"]);
-		if (verb.indexOf("\"") > -1) verb = verb.replace(/\"/g, "");
+		const args = input.match[0].split(" "),
+			obj = input.match[3] && input.match[3].length ? transformObj(input.match[3]) : null,
+			method = lib.randSelect([ "say", "action"]);
+		let verb = args[0],
+			modverb, tmp, stats, randReply, line;
+		if (verb.indexOf("\"") > -1)
+			verb = verb.replace(/\"/g, "");
 		// Check for adverb
 		if (verb.slice(-2) === "ly") {
-			if (words.adverb.get(verb) !== verb && config.api.wordnik) {
+			if (words.adverb.get(verb) !== verb && config.api.wordnik)
 				words.lookup("adverb", verb);
-			}
 			modverb = args[0].slice(0, -2);
 			verb = args[1];
 		}
 		tmp = words.verb.get(verb);
-		if (tmp) {
+		if (tmp)
 			verb = tmp;
-		} else {
-			if (config.api.wordnik) {
+		else {
+			if (config.api.wordnik)
 				words.lookup("verb", verb);
-			}
-			if (verb.slice(-3) === "hes") {
+			if (verb.slice(-3) === "hes")
 				verb = verb.slice(0, -2); // "touches" vs. "acquires"
-			} else if (verb.slice(-1) === "s") {
+			else if (verb.slice(-1) === "s")
 				verb = verb.slice(0, -1);
-			}
 			verb = { base: verb, s: verb+"s", ed: verb+"ed", ing: verb+"ing" };
 		}
-		if (!randReplies[verb.s] && !randReplies.alts[verb.s]) {
-			randReply = lib.randSelect(randReplies.defa[method]);
-		} else {
-			if (randReplies.alts[verb.s]) {
-				verb.s = randReplies.alts[verb.s];
-			}
-			randReply = lib.randSelect(randReplies[verb.s][method]);
+		const altVerbs = repliesDB.getOne("alts")[verb.s] || false;
+		if (!repliesDB.hasOne(verb.s) && !altVerbs)
+			randReply = lib.randSelect(repliesDB.getOne("defa")[method]);
+		else {
+			if (altVerbs !== false)
+				verb.s = altVerbs;
+			randReply = lib.randSelect(repliesDB.getOne(verb.s)[method]);
 		}
 		stats = statsDB.getOne(verb.s) || 0;
 		statsDB.saveOne(verb.s, (stats+1));
@@ -263,7 +261,6 @@ bot.event({
 			line = lib.molest(line);
 		if (line.indexOf("℅") > -1)
 			line = line.replace(/℅/g, "|");
-		randReplies = null;
 		setTimeout(function () {
 			irc[method](input.context, line);
 		}, getWpm(line));

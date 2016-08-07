@@ -1,6 +1,7 @@
 // remembers things
 "use strict";
-let memDB = new DB.Json({filename: "remember"}),
+const [DB, lib] = plugin.importMany("DB", "lib"),
+	memDB = new DB.Json({filename: "remember"}),
 	dunno = [
 		"I dunno.",
 		"no idea",
@@ -29,8 +30,10 @@ bot.command({
 		}
 		old = memDB.getOne(reg[1]);
 		memDB.saveOne(reg[1], [ reg[2], reg[3] ]);
-		if (old) irc.say(input.context, "Updated - "+reg[1]+" "+reg[2]+" \""+reg[3]+"\"");
-		else irc.say(input.context, "Added - "+reg[1]+" "+reg[2]+" \""+reg[3]+"\"");
+		if (old)
+			irc.say(input.context, "Updated - "+reg[1]+" "+reg[2]+" \""+reg[3]+"\"");
+		else
+			irc.say(input.context, "Added - "+reg[1]+" "+reg[2]+" \""+reg[3]+"\"");
 	}
 });
 
@@ -40,12 +43,9 @@ bot.command({
 	syntax: config.command_prefix+"memories [-find <string>] - no arg to list memories"+
 		" - Example: "+config.command_prefix+"memories -f pantsu",
 	callback: function (input) {
-		let memories, term,
-			handles = [],
-			ret = [];
 		if (!input.args || !input.args[0]) {
-			memories = Object.keys(memDB.getAll());
-			if (memories.length > 0)
+			const memories = memDB.data.keys;
+			if (memories.length)
 				irc.say(input.context, "I have "+memories.length+" memories: "+lib.sort(memories).join(", "));
 			else
 				irc.say(input.context, "I..I don't remember anything. ;~;");
@@ -53,28 +53,29 @@ bot.command({
 		}
 		switch (input.args[0]) {
 		case "-f":
-		case "-find":
+		case "-find": { // oh god kill me
 			if (!input.args[1]) {
 				irc.say(input.context, bot.cmdHelp("memories", "syntax"));
 				return;
 			}
-			term = input.args.slice(1).join(" ");
-			memories = memDB.getAll();
-			Object.keys(memories).forEach(function (memory) {
-				if (memory.indexOf(term) > -1) handles.push(memory);
-				else if (memories[memory][1].indexOf(term) > -1) ret.push(memory);
+			const term = input.args.slice(1).join(" "),
+				handles = [], ret = [];
+			memDB.forEach((memory, handle) => {
+				if (handle.includes(term))
+					handles.push(handle);
+				else if (memory[1].includes(term))
+					ret.push(handle);
 			});
-			if (handles.length === 0 && ret.length === 0) {
+			if (handles.length === 0 && ret.length === 0)
 				irc.say(input.context, "No matches. :<");
-			} else {
-				if (handles.length > 0) {
+			else {
+				if (handles.length)
 					irc.say(input.context, "Memory handles matching \""+term+"\": "+lib.sort(handles).join(", "));
-				}
-				if (ret.length > 0) {
+				if (ret.length)
 					irc.say(input.context, "Memories matching \""+term+"\": "+lib.sort(ret).join(", "));
-				}
 			}
-			break;
+			break; // I'm sorry
+		}
 		default:
 			irc.say(input.context, bot.cmdHelp("memories", "syntax"));
 			break;

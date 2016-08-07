@@ -1,6 +1,8 @@
 ﻿// gets BTC
 "use strict";
 
+const [web, lib] = plugin.importMany("web", "lib");
+
 function currencyURL(code) {
     return `https://api.bitcoinaverage.com/exchanges/${code}`;
 }

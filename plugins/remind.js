@@ -1,7 +1,7 @@
 // Reminders!
 "use strict";
-let reminders,
-	reminderDB = new DB.List({filename: "reminders", queue: true});
+const [DB, setTimeout, ial] = plugin.importMany("DB", "setTimeout", "ial"),
+	reminderDB = new DB.List({filename: "reminders"});
 
 function transformTime(timeUnits, time) {
 	if (timeUnits.indexOf("second") > -1) { time = time * 1000; }
@@ -15,12 +15,7 @@ function expectedTime(time) {
 }
 
 function loadReminders() {
-	reminders = reminderDB.getAll() || [];
-	if (reminders.length > 0) {
-		reminders.forEach(function (reminder) {
-			startReminder(reminder);
-		});
-	}
+	reminderDB.forEach(reminder => startReminder(reminder));
 }
 
 function startReminder(reminder) {
@@ -40,33 +35,19 @@ function startReminder(reminder) {
 					message: reg[2]+", you weren't here! ;_; late "+reg[4]
 				});
 			}
-			removeReminder(reminder);
+			reminderDB.removeOne(reminder);
 		}, time);
 	} else {
 		irc.say(reg[3], reg[2]+": Sorry, I was offline! ;_; late "+reg[4]);
-		removeReminder(reminder);
+		reminderDB.removeOne(reminder);
 	}
-}
-
-function removeReminder(reminder) {
-	let i;
-	for (i = 0; i < reminders.length; i++) {
-		if (reminders[i] === reminder) {
-			reminders.splice(i,1);
-			reminder = null;
-			reminderDB.saveAll(reminders);
-			return;
-		}
-	}
-	logger.error("Failed to remove reminder \""+reminder+"\" - dumped reminders into globals.lastReminders");
 }
 
 function addReminder(time, nick, context, reminder) {
 	time = expectedTime(time);
 	reminder = time+" "+nick+"@"+context+" "+reminder;
 	startReminder(reminder);
-	reminders.push(reminder);
-	reminderDB.saveAll(reminders);
+	reminderDB.saveOne(reminder);
 }
 
 bot.event({

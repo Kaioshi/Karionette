@@ -1,6 +1,7 @@
 // v0.11 plugin by coding amateur ranma. collects ecchi
 "use strict";
-let hottieDB = new DB.Json({filename: "hotties"}),
+const [lib, DB] = plugin.importMany("lib", "DB"),
+	hottieDB = new DB.Json({filename: "hotties"}),
 	help = {
 		tag: "[Help] Syntax: "+config.command_prefix+"hottie tag <url> +tag1 +tag2 -tag3 - adds the \
 			first two, removes last. Tags may not have spaces.",
@@ -23,7 +24,7 @@ function makeTime(time) {
 
 function convertHotties(ch) {
 	let changed = 0, hotties = hottieDB.getAll(),
-		url, tags, i, l, k, n, tmp, context, entry;
+		url, tags, i, l, k, n, tmp, context;
 	for (context in hotties) {
 		i = 0; l = hotties[context].length;
 		for (; i < l; i++) {
@@ -60,7 +61,7 @@ bot.command({
 		+config.command_prefix+"hottie add https://i.imgur.com/tdGsifl.gif Spongebob",
 	arglen: 1,
 	callback: function (input) {
-		let i, l, k, n, hottie, hotties, tmp, first, ptagMatch, tagMatch, urlMatch, time, addTag, remTag;
+		let i, l, k, n, hottie, hotties, tmp, ptagMatch, tagMatch, urlMatch, addTag, remTag;
 		if (!input.channel) {
 			irc.say(input.context, "You can only use this in a channel.");
 			return;
@@ -157,7 +158,7 @@ bot.command({
 			irc.say(input.context, "Added o7");
 			break;
 		case "remove":
-			if (!input.args[1]) { 
+			if (!input.args[1]) {
 				irc.say(input.context, help.remove);
 				return;
 			}
@@ -251,4 +252,3 @@ bot.command({
 		}
 	}
 });
-

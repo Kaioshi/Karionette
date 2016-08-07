@@ -1,6 +1,6 @@
 "use strict";
+const [alias, perms, lib] = plugin.importMany("alias", "perms", "lib");
 
-// Handles Alias interface
 bot.command({
 	command: "alias",
 	help: "Allows user defined 'commands' (Eg: The alias "+config.command_prefix+

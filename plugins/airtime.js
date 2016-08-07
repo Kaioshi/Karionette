@@ -1,5 +1,8 @@
 // Commie airtimes - this command is poorly named.
 "use strict";
+
+const [web, lib] = plugin.importMany("web", "lib");
+
 bot.command({
 	command: "airtime",
 	help: "Hopefully shows airtimes of Commie things.",

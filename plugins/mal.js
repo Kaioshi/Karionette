@@ -1,5 +1,8 @@
 // Unofficial MAL-API (clone) Fondler
 "use strict";
+
+const [web, lib] = plugin.importMany("web", "lib");
+
 function getGenres(genres) {
 	let ret = [];
 	genres.forEach(function (item) {

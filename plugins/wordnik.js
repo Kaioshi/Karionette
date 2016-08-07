@@ -1,4 +1,6 @@
 "use strict";
+const [ial, lib, web] = plugin.importMany("ial", "lib", "web");
+
 bot.command({
 	command: "define",
 	help: "Defines words or phrases using wordnik.",

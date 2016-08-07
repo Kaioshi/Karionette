@@ -1,6 +1,7 @@
 "use strict";
 
-let words, badWords = {};
+const [DB, web, lib] = plugin.importMany("DB", "web", "lib"),
+	badWords = {};
 
 function addBad(type, word) {
 	let lword = word.toLowerCase(), ltype = type.toLowerCase();
@@ -16,7 +17,7 @@ function checkBad(type, word) {
 	return badWords[ltype].hasOne(lword);
 }
 
-words = {
+const words = {
 	lookup: function (type, word) {
 		let uri;
 		word = word.toLowerCase();
@@ -24,7 +25,7 @@ words = {
 		if (checkBad(type, word))
 			return; // known bad word
 		switch (type) {
-		case "verb":
+		case "verb": {
 			let verb;
 			if (!config.api.wordnik) {
 				logger.debug("Word discovery needs a wordnik API. Get one at http://developer.wordnik.com and put it in your config.");
@@ -65,6 +66,7 @@ words = {
 				logger.debug(error.message);
 			});
 			break;
+		}
 		default:
 			uri = "http://api.wordnik.com:80/v4/word.json/"+word+
 				"/definitions?limit=1&includeRelated=false&sourceDictionaries=all&useCanonical=false&includeTags=false&api_key="+config.api.wordnik;
@@ -281,4 +283,4 @@ words.load("personalPronoun");
 words.load("possessivePronoun");
 words.load("preposition");
 
-plugin.declareGlobal("words", "words", words);
+plugin.export("words", words);

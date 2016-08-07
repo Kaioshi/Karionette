@@ -1,7 +1,7 @@
 // Subreddit announcer
 "use strict";
-
-const subDB = new DB.Json({filename: "reddit/subreddits"});
+const [DB, lib, web, logins, ial, ticker] = plugin.importMany("DB", "lib", "web", "logins", "ial", "ticker"),
+	subDB = new DB.Json({filename: "reddit/subreddits"});
 
 function r(sub) {
 	return "https://www.reddit.com/r/"+sub+"/new/.json?limit=10";
@@ -28,40 +28,31 @@ function getDeliveryMethod(nick) { // this ugliness brought to you by the letter
 	return "notice";
 }
 
-function findNewPosts(fetched) {
-	const announcements = [], methods = {}, isOnline = {};
-	for (let i = 0; i < fetched.length; i++) {
-		if (!fetched[i].posts.length) // no posts
+function findNewPosts(subreddit) {
+	const methods = {}, isOnline = {}, sub = subreddit.sub.toLowerCase(), entry = subDB.getOne(sub);
+	let changed = false;
+	entry.seen = entry.seen || [];
+	for (let k = 0; k < subreddit.posts.length; k++) {
+		if (entry.seen.indexOf(subreddit.posts[k].id) > -1) // seen it
 			continue;
-		const release = fetched[i],
-			sub = release.sub.toLowerCase(),
-			entry = subDB.getOne(sub);
-		let changed = false, seen = entry.seen || [];
-		for (let k = 0; k < release.posts.length; k++) {
-			if (seen.indexOf(release.posts[k].id) > -1) // seen it
+		const post = subreddit.posts[k],
+			postMessage = lib.decode(`r/${sub} - ${post.title} ~ ${shortenRedditLink(post.link, entry.subreddit, post.id)}`);
+		changed = true;
+		entry.seen.push(post.id);
+		for (let n = 0; n < entry.announce.length; n++) {
+			const nick = entry.announce[n];
+			isOnline[nick] = isOnline[nick] || (ial.User(nick) ? "online" : "offline");
+			if (isOnline[nick] === "offline")
 				continue;
-			const post = release.posts[k],
-				postMessage = lib.decode(`r/${sub} - ${post.title} ~ ${shortenRedditLink(post.link, entry.subreddit, post.id)}`);
-			changed = true;
-			seen.push(post.id);
-			for (let n = 0; n < entry.announce.length; n++) {
-				const nick = entry.announce[n];
-				isOnline[nick] = isOnline[nick] || (ial.User(nick) ? "online" : "offline");
-				if (isOnline[nick] === "offline")
-					continue;
-				methods[nick] = methods[nick] || getDeliveryMethod(nick);
-				announcements.push([ methods[nick], nick, postMessage ]);
-			}
-		}
-		if (changed) {
-			if (seen.length > 20)
-				seen = seen.slice(-20);
-			entry.seen = seen;
-			subDB.saveOne(sub, entry);
+			methods[nick] = methods[nick] || getDeliveryMethod(nick);
+			irc[methods[nick]](nick, postMessage, true);
 		}
 	}
-	if (announcements.length)
-		irc.rated(announcements, 1000);
+	if (changed) {
+		if (entry.seen.length > 20)
+			entry.seen = entry.seen.slice(-20);
+		subDB.saveOne(sub, entry);
+	}
 }
 
 function trimJson(res) {
@@ -77,30 +68,19 @@ function trimJson(res) {
 	return { sub: hits[0].data.subreddit, posts: ret };
 }
 
-function fetchJson(sub) {
-	return web.json(r(sub)).then(trimJson);
-}
-
-function getSubsToCheck() {
-	const ret = [];
-	subDB.data.forEach((entry, sub) => {
-		if (entry.announce && entry.announce.length)
-			ret.push(fetchJson(sub));
-	});
-	return ret;
-}
-
 function checkSubs() {
 	if (!subDB.size())
 		return;
-	Promise.all(getSubsToCheck())
-		.then(function (fetched) {
-			findNewPosts(fetched);
-		}).catch(function (error) {
-			if (error instanceof SyntaxError) // sometimes reddit responds with HTML "busy", we don't care.
-				return; // also sometimes there's so much 'inner html' in the response it doesn't end in real json :
-			logger.error("checkSubs: "+error.message, error);
-		});
+	lib.runCallback(function *(cb) { try {
+		for (let i = 0; i < subDB.data.keys.length; i++) {
+			const sub = subDB.data.obj[subDB.data.keys[i]];
+			if (!sub.announce || !sub.announce.length)
+				continue;
+			findNewPosts(trimJson(JSON.parse(yield web.fetchAsync(r(sub.subreddit), null, cb))));
+		}
+	} catch (err) {
+		logger.error("checkSubs - "+err.message, err.stack);
+	}});
 }
 
 function subscribe(nick, sub) {
@@ -158,11 +138,12 @@ function listSubreddits(target) {
 	if (!subDB.size())
 		return "I'm not announcing updates to any subreddits.";
 	if (target) { // go through the entries and list them if they're announced to target
-		const entries = subDB.getAll(), ltarget = target.toLowerCase(), ret = [];
-		Object.keys(entries).forEach(function (entry) {
-			if (entries[entry].announce.indexOf(ltarget) > -1)
-				ret.push(entries[entry].subreddit);
-		});
+		const ret = [], ltarget = target.toLowerCase();
+		for (let i = 0; i < subDB.data.keys.length; i++) {
+			const sub = subDB.data.keys[i];
+			if (subDB.data.obj[sub].announce.includes(ltarget))
+				ret.push(subDB.data.obj[sub].subreddit);
+		}
 		if (!ret.length)
 			return "I'm not announcing any subreddit updates to "+target+".";
 		return reddits(ret)+" updates are being sent to "+target+".";

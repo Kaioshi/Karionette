@@ -42,7 +42,7 @@ logging traffic: true
 gc: true
 # time between forced garbage collections in seconds (default: 30)
 #gcinterval: 15
-# report memory changes between GC events
+# report memory changes between GC events (to console)
 #memwatch: true
 
 # prompt (users don't need this)

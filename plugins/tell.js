@@ -1,6 +1,7 @@
 ﻿// Tell someone something on join if saved message for them
 "use strict";
-let msgDB = new DB.Json({filename: "messages"});
+const [DB, lib, ial, setTimeout] = plugin.importMany("DB", "lib", "ial", "setTimeout"),
+	msgDB = new DB.Json({filename: "messages"});
 
 function checkMessages(input, context, newnick) {
 	let lnick, lcontext, msgs, send, len;
@@ -51,12 +52,14 @@ function addMessage(message) {
 bot.event({
 	handle: "messageMsg",
 	event: "PRIVMSG",
+	condition: function (input) { return input.channel !== undefined; },
 	callback: checkMessages
 });
 
 bot.event({
 	handle: "messageJoin",
 	event: "JOIN",
+	condition: function (input) { return input.nick !== config.nick; },
 	callback: checkMessages
 });
 

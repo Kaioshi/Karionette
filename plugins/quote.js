@@ -1,6 +1,7 @@
 // collects quotes
 "use strict";
-let quoteDB = new DB.Json({filename: "quotes"});
+const [DB, lib] = plugin.importMany("DB", "lib"),
+	quoteDB = new DB.Json({filename: "quotes"});
 
 function zero(n) {
 	return (n > 9 ? n : "0"+n);
@@ -19,7 +20,7 @@ bot.command({
 		config.command_prefix+"quote add <Mari> mitches be like, \">implying\"",
 	arglen: 1,
 	callback: function (input) {
-		let i, k, quote, quotes, tmp, matches, time, removeQuoteByIndex;
+		let quote, quotes, tmp, matches, time, removeQuoteByIndex;
 		if (!input.channel) {
 			irc.say(input.context, "You can only use this in a channel for now, sorry.");
 			return;
@@ -37,7 +38,7 @@ bot.command({
 				quote.num = 1;
 			} else { // make sure there are no duplicates
 				quote.num = quotes.length+1;
-				for (i = 0; i < quotes.length; i++) {
+				for (let i = 0; i < quotes.length; i++) {
 					if (quotes[i].quote === quote.quote) {
 						tmp = quotes[i].from.split("!")[0];
 						tmp = (tmp.toLowerCase() === input.nick.toLowerCase() ? "you" : tmp);
@@ -83,7 +84,7 @@ bot.command({
 					return;
 				}
 
-				for (i = 0, k = 0; i < quotes.length; i++) {
+				for (let i = 0; i < quotes.length; i++) {
 					if (quotes[i].num === input.args[1]) {
 						irc.say(input.context, "Removed quote: \""+quotes[i].quote+
 							"\" ~ which was added by "+quotes[i].from+" on "+makeTime(quotes[i].date)+".");
@@ -96,7 +97,7 @@ bot.command({
 			}
 
 			quote = input.args.slice(1).join(" ");
-			for (i = 0; i < quotes.length; i++) {
+			for (let i = 0; i < quotes.length; i++) {
 				if (quotes[i].quote === quote) {
 					irc.say(input.context, "Removed quote: \""+quotes[i].quote+
 						"\" ~ which was added by "+quotes[i].from+" on "+makeTime(quotes[i].date)+".");
@@ -106,7 +107,7 @@ bot.command({
 			}
 			irc.say(input.context, "Couldn't find it. :\\");
 			break;
-		case "find":
+		case "find": {
 			if (!input.args[1]) {
 				irc.say(input.context, "[Help] Syntax: "+config.command_prefix+
 					"quote find <string> - returns a random quote which contains string - Example: "+config.command_prefix+
@@ -119,7 +120,8 @@ bot.command({
 				return;
 			}
 			quote = input.args.slice(1).join(" ").toLowerCase();
-			for (matches = [], i = 0; i < quotes.length; i++) {
+			matches = [];
+			for (let i = 0; i < quotes.length; i++) {
 				if (quotes[i].quote.toLowerCase().indexOf(quote) > -1) {
 					matches.push(quotes[i]);
 				}
@@ -128,11 +130,12 @@ bot.command({
 				irc.say(input.context, "No match found.");
 				return;
 			}
-			i = Math.floor(Math.random()*matches.length);
+			let i = Math.floor(Math.random()*matches.length);
 			time = makeTime(matches[i].date);
 			irc.say(input.context, (matches.length > 1 ? "("+matches.length+" matches) " : "")+
 				"Quote #"+matches[i].num+" added by "+matches[i].from.split("!")[0]+" on "+time+": "+matches[i].quote);
 			break;
+		}
 		case "get":
 			quotes = quoteDB.getOne(input.context);
 			if (!quotes || quotes.length === 0) {
@@ -144,7 +147,7 @@ bot.command({
 					"quote get "+Math.floor(Math.random()*quotes.length+1)+".");
 				return;
 			}
-			for (i = 0; i < quotes.length; i++) {
+			for (let i = 0; i < quotes.length; i++) {
 				if (quotes[i].num === parseInt(input.args[1])) {
 					irc.say(input.context, "Quote #"+quotes[i].num+" added by "+quotes[i].from.split("!")[0]+
 						" on "+makeTime(quotes[i].date)+": "+quotes[i].quote);

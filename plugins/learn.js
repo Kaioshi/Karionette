@@ -1,7 +1,8 @@
 // ;learn keyword =/is/as string here
 // !keyword [@ nick]
 "use strict";
-let learnDB = new DB.Json({filename: "learnedThings"}),
+const DB = plugin.import("DB"),
+	learnDB = new DB.Json({filename: "learnedThings"}),
 	learnRegex = /^([^=]+) = (.*)$/,
 	knowledgeRegex = /^([^@]+) @ (.*)$/;
 
@@ -67,16 +68,14 @@ bot.event({
 		return input.message[0] === getPrefix();
 	},
 	callback: function (input) {
-		let entry, reg, target = "";
-		if (input.message[0] === getPrefix()) {
+		let target = "",
 			entry = input.message.slice(1);
-			reg = knowledgeRegex.exec(entry);
-			if (reg) {
-				target = reg[2]+": ";
-				entry = reg[1];
-			}
-			if (learnDB.hasOne(entry))
-				irc.say(input.context, target+learnDB.getOne(entry));
+		const reg = knowledgeRegex.exec(entry);
+		if (reg) {
+			target = reg[2]+": ";
+			entry = reg[1];
 		}
+		if (learnDB.hasOne(entry))
+			irc.say(input.context, target+learnDB.getOne(entry));
 	}
 });

@@ -1,5 +1,7 @@
 "use strict";
 
+const [web, lib] = plugin.importMany("web", "lib");
+
 function makeKey(len) {
 	let i = 0, n, ret = "";
 	len = len || 8;

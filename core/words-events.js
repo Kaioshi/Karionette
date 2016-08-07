@@ -1,5 +1,6 @@
 // word motherflipper!
 "use strict";
+const [words, logins] = plugin.importMany("words", "logins");
 
 function tokenizeLine(line) {
 	let ret = [], hit = false,
@@ -128,8 +129,10 @@ bot.command({
 				break;
 			case "get":
 				entry = words.verb.get(input.args[2]);
-				if (!entry) irc.say(input.context, "I don't know it.");
-				else irc.say(input.context, entry.base+" - "+entry.s+" - "+entry.ed+" - "+entry.ing);
+				if (!entry)
+					irc.say(input.context, "I don't know it.");
+				else
+					irc.say(input.context, entry.base+" - "+entry.s+" - "+entry.ed+" - "+entry.ing);
 				break;
 			case "remove":
 				if (!logins.isAdmin(input.nick)) {

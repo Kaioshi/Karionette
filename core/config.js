@@ -1,5 +1,6 @@
 "use strict"; // TODO: redo this.
-const validNickTest = /(^[a-zA-Z0-9_\-\[\]\{\}\^`\|]*$)/;
+const [fs, console] = plugin.importMany("fs", "console"),
+	validNickTest = /(^[a-zA-Z0-9_\-\[\]\{\}\^`\|]*$)/;
 
 function configIsValid(config) {
 	const NEED = [ "nickname", "username", "server", "port", "realname", "command_prefix", "secret" ];
@@ -160,4 +161,4 @@ irc_config.saveChanges = function () { // saves changes and returns how many cha
 	return changes;
 };
 
-plugin.declareGlobal("config", "config", irc_config);
+plugin.global("config", irc_config);

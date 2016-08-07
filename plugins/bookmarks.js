@@ -1,6 +1,7 @@
 // per-user / per-channel / global "bookmarks"
 "use strict";
-let bookmarkDB = new DB.Json({filename: "bookmarks"}),
+const [DB, lib] = plugin.importMany("DB", "lib"),
+	bookmarkDB = new DB.Json({filename: "bookmarks"}),
 	bmhelp = {
 		add: "[Help] Syntax: "+config.command_prefix+
 			"bm -add [-c(hannel)|-u(ser)] <bookmark handle> <http://url.here.pantsu.org> - "+

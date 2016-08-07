@@ -1,5 +1,6 @@
 "use strict";
-let randDB = new DB.List({filename: "randomThings"});
+const [DB, lib] = plugin.importMany("DB", "lib"),
+	randDB = new DB.List({filename: "randomThings"});
 
 bot.command({
 	command: "random",

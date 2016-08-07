@@ -1,22 +1,22 @@
-"use strict"; // uses words, DB, lib, config, ial
+"use strict";
+
+const [DB, lib, ial, words] = plugin.importMany("DB", "lib", "ial", "words"),
+	aliasDB = new DB.Json({filename: "alias/alias"}),
+	varDB = new DB.Json({filename: "alias/vars"}),
+	helpDB = new DB.Json({filename: "alias/help"}),
+	randDB = new DB.List({filename: "randomThings"}),
+	randNicks = [
+		"someone", "Spiderman", "Iron Man", "Orgasmo", "Invader Zim", "Jo Brand", "Stephen Fry", "David Mitchell",
+		"Lee Mack", "Joffrey", "Hillary Clinton", "Solid Snake", "Kirby", "a wild Jigglypuff", "Steve Holt", "Bob Loblaw"
+	];
 let argsDone = false,
 	varParseLimit = 3;
-const randNicks = [
-	"someone", "Spiderman", "Iron Man", "Orgasmo", "Invader Zim", "Jo Brand", "Stephen Fry", "David Mitchell",
-	"Lee Mack", "Joffrey", "Hillary Clinton", "Solid Snake", "Kirby", "a wild Jigglypuff", "Steve Holt",
-	"Bob Loblaw"
-];
 
 function magicInputFondler(text) {
 	if (text.indexOf("|") > -1)
 		return text.replace(/\|/g, "℅");
 	return text;
 }
-
-let aliasDB = new DB.Json({filename: "alias/alias"}),
-	varDB = new DB.Json({filename: "alias/vars"}),
-	helpDB = new DB.Json({filename: "alias/help"}),
-	randDB = new DB.List({filename: "randomThings"});
 
 function getWhippingBoy() {
 	if (config.local_whippingboys && config.local_whippingboys.length)
@@ -71,11 +71,9 @@ function replaceSingleVar(match, context, from) {
 			}
 		}
 		// must be a variable name, or jibberish.
-		variable = match.toLowerCase();
-		if (varDB.hasOne(variable))
-			return varDB.getOne(variable).data;
+		variable = varDB.getOne(match, true);
+		return variable !== undefined ? variable.data : match;
 	}
-	return match;
 }
 
 function replaceVars(args, context, from, line) {
@@ -110,34 +108,40 @@ function replaceVars(args, context, from, line) {
 	return lib.singleSpace(line);
 }
 
-plugin.declareGlobal("alias", "alias", {
+function syntax(aliasName, arglen) {
+	let help = helpDB.getOne(aliasName);
+	if (help && help.arglen && help.arglen > arglen) {
+		if (help.syntax)
+			return "[Help] Alias syntax: "+config.command_prefix+aliasName+" "+help.syntax;
+		return "[Help] Alias \""+aliasName+"\" has a minimum argument length of "+help.arglen;
+	}
+}
+
+function transform(line, command, aliasName, aliasArgs) {
+	let context, nick;
+	nick = line.slice(1, line.indexOf("!"));
+	context = line.slice(line.indexOf("PRIVMSG ")+8);
+	context = context.slice(0, context.indexOf(" "));
+	line = line.slice(0, line.indexOf(" :")+3)+aliasName;
+	if (aliasArgs.indexOf("|") > -1 && !aliasArgs.match(/\{\((.*\|?)\)\}|\{\[(.*\|?)\]\}/))
+		aliasArgs = aliasArgs.replace(/\|/g, "℅");
+	aliasArgs = aliasArgs.split(" ");
+	line = replaceVars(aliasArgs, context, nick, line);
+	if (line.match(/\{\((.*\|?)\)\}/))
+		line = lib.parseVarList(line);
+	if (line.match(/\{\[(.*\|?)\]\}/))
+		line = lib.molest(line);
+	if (line.indexOf("℅") > -1)
+		line = line.replace(/℅/g, "|");
+	return line;
+}
+
+const alias = {
 	db: aliasDB,
 	varDB: varDB,
 	helpDB: helpDB,
-	syntax: function syntax(aliasName, arglen) {
-		let help = helpDB.getOne(aliasName);
-		if (help && help.arglen && help.arglen > arglen) {
-			if (help.syntax)
-				return "[Help] Alias syntax: "+config.command_prefix+aliasName+" "+help.syntax;
-			return "[Help] Alias \""+aliasName+"\" has a minimum argument length of "+help.arglen;
-		}
-	},
-	transform: function transform(line, command, aliasName, aliasArgs) {
-		let context, nick;
-		nick = line.slice(1, line.indexOf("!"));
-		context = line.slice(line.indexOf("PRIVMSG ")+8);
-		context = context.slice(0, context.indexOf(" "));
-		line = line.slice(0, line.indexOf(" :")+3)+aliasName;
-		if (aliasArgs.indexOf("|") > -1 && !aliasArgs.match(/\{\((.*\|?)\)\}|\{\[(.*\|?)\]\}/))
-			aliasArgs = aliasArgs.replace(/\|/g, "℅");
-		aliasArgs = aliasArgs.split(" ");
-		line = replaceVars(aliasArgs, context, nick, line);
-		if (line.match(/\{\((.*\|?)\)\}/))
-			line = lib.parseVarList(line);
-		if (line.match(/\{\[(.*\|?)\]\}/))
-			line = lib.molest(line);
-		if (line.indexOf("℅") > -1)
-			line = line.replace(/℅/g, "|");
-		return line;
-	}
-});
+	syntax: syntax,
+	transform: transform
+};
+
+plugin.export("alias", alias);

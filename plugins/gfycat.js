@@ -1,5 +1,8 @@
 // http://upload.gfycat.com/transcode?fetchUrl=i.imgur.com/lKi99vn.gif
 "use strict";
+
+const web = plugin.import("web");
+
 bot.command({
 	command: [ "gfycat", "gfy" ],
 	help: "Gfycat frontend.",

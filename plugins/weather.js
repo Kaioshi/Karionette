@@ -1,6 +1,7 @@
 // weather!
 "use strict";
-var weatherDB = new DB.Json({filename: "weather"});
+const [DB, lib, web] = plugin.importMany("DB", "lib", "web"),
+	weatherDB = new DB.Json({filename: "weather"});
 
 function tellEmSteveDave(location, conditions, temp) {
 	return lib.randSelect([
@@ -13,17 +14,17 @@ function tellEmSteveDave(location, conditions, temp) {
 }
 
 function toCelsius(kelvin) {
-	var ret = (kelvin-273.15).toString();
+	const ret = (kelvin-273.15).toString();
 	return (ret.indexOf(".") > -1 ? ret.slice(0, ret.indexOf(".")+2) : ret);
 }
 
 function toFahrenheit(kelvin) {
-	var ret = ((kelvin*1.8)-459.67).toString();
+	const ret = ((kelvin*1.8)-459.67).toString();
 	return (ret.indexOf(".") > -1 ? ret.slice(0, ret.indexOf(".")+3) : ret);
 }
 
 function getConditions(weather) {
-	var ret = [];
+	const ret = [];
 	weather.forEach(function (condition) {
 		if (condition.description) {
 			ret.push(condition.description.toLowerCase());
@@ -47,7 +48,7 @@ function fondleCountry(country) {
 }
 
 function getLocation(nick, context, args) {
-	var location;
+	let location;
 	if (args && args[0].toLowerCase() === "-bind") {
 		if (!args[1]) return;
 		location = args.slice(1).join(" ");
@@ -64,20 +65,18 @@ bot.command({
 	help: "Weather thing! Weathers.",
 	syntax: config.command_prefix+"weather [-bind] [<city / state & country>] [<bound nick>]",
 	callback: function (input) {
-		var uri, temp, place,
-			location = getLocation(input.nick, input.context, input.args);
-
+		const location = getLocation(input.nick, input.context, input.args);
 		if (!location) {
 			irc.say(input.context, bot.cmdHelp("weather", "syntax"));
 			return;
 		}
-		uri = "http://api.openweathermap.org/data/2.5/weather?q="+location;
+		const uri = "http://api.openweathermap.org/data/2.5/weather?q="+location;
 		web.json(uri).then(function (resp) {
 			if (resp.cod === "404")
 				irc.say(input.context, "Couldn't find \""+location+"\"");
 			else {
-				temp = toCelsius(resp.main.temp)+"C / "+toFahrenheit(resp.main.temp)+"F";
-				place = (resp.name ? resp.name+", " : "")+fondleCountry(resp.sys.country);
+				const temp = toCelsius(resp.main.temp)+"C / "+toFahrenheit(resp.main.temp)+"F",
+					place = (resp.name ? resp.name+", " : "")+fondleCountry(resp.sys.country);
 				irc.say(input.context, tellEmSteveDave(place, getConditions(resp.weather), temp));
 			}
 		});
@@ -89,7 +88,7 @@ function assignTemps(kelvin) {
 }
 
 function getForecast(fc) {
-	var day, temps = {}, ret = "", i;
+	let day, temps = {}, ret = "", i;
 	for (i = 0; i < fc.length; i++) {
 		day = new Date(fc[i].dt_txt).toUTCString(); day = day.slice(0, day.indexOf(","));
 		temps[day] = temps[day] || { min: assignTemps(fc[i].main.temp), max: assignTemps(fc[i].main.temp) };
@@ -112,7 +111,7 @@ bot.command({
 	help: "Weather forecast! Forecasts.",
 	syntax: config.command_prefix+"forecast [-bind] [<city / state & country>] [<bound nick>]",
 	callback: function (input) {
-		var uri, place,
+		let uri, place,
 			location = getLocation(input.nick, input.context, input.args);
 		if (!location) {
 			irc.say(input.context, bot.cmdHelp("forecast", "syntax"));

@@ -1,5 +1,7 @@
 "use strict";
 
+const [fs, lib, logins, ignore] = plugin.importMany("fs", "lib", "logins", "ignore");
+
 bot.command({
 	command: "errors",
 	help: "Add/remove yourself to/from the error announcer. Admin only.",
@@ -30,11 +32,7 @@ function getErrorAnnounceList() {
 bot.event({
 	handle: "errorAnnouncer",
 	event: "Event: Error",
-	callback: function (error) {
-		getErrorAnnounceList().forEach(function (nick) {
-			irc.notice(nick, "\x02Error\x02: "+error);
-		});
-	}
+	callback: error => getErrorAnnounceList().forEach(nick => irc.notice(nick, "\x02Error\x02: "+error.message))
 });
 
 bot.event({
@@ -42,9 +40,7 @@ bot.event({
 	event: "Event: Error Stack",
 	callback: function (error) {
 		const errorMessage = error.split("\n");
-		getErrorAnnounceList().forEach(nick => {
-			irc.rated(errorMessage.map(err => [ "notice", nick, err ]), 1000);
-		});
+		getErrorAnnounceList().forEach(nick => errorMessage.forEach(err => irc.notice(nick, err)));
 	}
 });
 
@@ -55,9 +51,7 @@ bot.command({
 		"ignore mitch*!*@is.annoying.com",
 	admin: true,
 	arglen: 1,
-	callback: function (input) {
-		irc.say(input.context, ignore.add(input.args[0]));
-	}
+	callback: input => irc.say(input.context, ignore.add(input.args[0]))
 });
 
 
@@ -68,18 +62,14 @@ bot.command({
 		"unignore mitch*!*@is.annoying.com",
 	admin: true,
 	arglen: 1,
-	callback: function (input) {
-		irc.say(input.context, ignore.remove(input.args[0]));
-	}
+	callback: input => irc.say(input.context, ignore.remove(input.args[0]))
 });
 
 bot.command({
 	command: "ignorelist",
 	help: "Shows ignore list.",
 	admin: true,
-	callback: function (input) {
-		irc.say(input.context, (ignore.list() || "Ignoring no one. ;)"));
-	}
+	callback: input => irc.say(input.context, (ignore.list() || "Ignoring no one. ;)"))
 });
 
 bot.command({
@@ -108,9 +98,7 @@ bot.command({
 	syntax: config.command_prefix+"raw <text to send to server>",
 	admin: true,
 	arglen: 1,
-	callback: function (input) {
-		irc.raw(input.data);
-	}
+	callback: input => irc.raw(input.data)
 });
 
 bot.command({
@@ -120,9 +108,7 @@ bot.command({
 		config.command_prefix+"act #anime whips Deide's behind.",
 	admin: true,
 	arglen: 1,
-	callback: function (input) {
-		irc.action(input.args[0], input.args.slice(1).join(" "));
-	}
+	callback: input => irc.action(input.args[0], input.args.slice(1).join(" "))
 });
 
 bot.command({
@@ -205,7 +191,5 @@ bot.command({
 	command: "quit",
 	help: "Quits!",
 	admin: true,
-	callback: function (input) {
-		irc.quit((input.data ? input.data : "PEACE! I'm out."));
-	}
+	callback: input => irc.quit(input.args && input.args.length ? input.args.join(" ") : "PEACE! I'm out.")
 });

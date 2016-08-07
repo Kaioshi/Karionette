@@ -1,9 +1,11 @@
 ﻿// Urban dictionary look-up
 "use strict";
 
+const [web, lib] = plugin.importMany("web", "lib");
+
 function bestAnswersByScore(ud) {
-	let i, ret = [];
-	for (i = 0; i < ud.length; i++) {
+	let ret = [];
+	for (let i = 0; i < ud.length; i++) {
 		if (ud[i].thumbs_down > ud[i].thumbs_up || ud[i].thumbs_down > (ud[i].thumbs_up/2))
 			ud.splice(i,1);
 	}

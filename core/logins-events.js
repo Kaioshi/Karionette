@@ -1,5 +1,24 @@
 // user logins :<
 "use strict";
+
+const logins = plugin.import("logins");
+
+bot.event({
+	handle: "onStartLoginValidation",
+	event: "autojoinFinished",
+	once: true,
+	callback: function validateLastLogins() {
+		const ial = plugin.import("ial"),
+			nicks = ial.Nicks();
+		logins.db.forEach(user => {
+			if (nicks.includes(user.nick)) {
+				if (ial.User(user.nick).fulluser === user.fulluser)
+					logins.identify(user.nick, user.username, user.password);
+			}
+		});
+	}
+});
+
 bot.command({
 	command: "identify",
 	help: "Identifies you with "+config.nick+". See also: unidentify, whoami, adduser, deluser, passwd",

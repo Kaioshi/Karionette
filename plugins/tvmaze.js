@@ -1,6 +1,8 @@
 // http://api.tvmaze.com/search/shows?q=girls
 "use strict";
 
+const [lib, web] = plugin.importMany("lib", "web");
+
 function zero(n) {
 	if (n <= 9)
 		return "0"+n;

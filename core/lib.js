@@ -1,8 +1,9 @@
 "use strict";
 // General Helpers
-let memProfcache = {},
+const [fs, console, setTimeout, process] = plugin.importMany("fs", "console", "setTimeout", "process"),
+	memProfcache = {},
 	timedCache = {},
-	memuseLast = process.memoryUsage().rss;
+	varRegex = /\{\([^\{]*?[^\(]*?\)\}/g;
 
 function firstHit(arr) {
 	for (let i = 0; i < arr.length; i++) {
@@ -17,13 +18,7 @@ function plural(n, word) {
 }
 
 function space(text, len) {
-	let ret = "",
-		diff = len-text.length;
-	while (diff > 0) {
-		ret = ret+" ";
-		diff--;
-	}
-	return ret+text;
+	return " ".repeat(len-text.length)+text;
 }
 
 function inteSupp (str, obj) { // this matches on the entire '{word}' rather than 'word'
@@ -33,14 +28,30 @@ function inteSupp (str, obj) { // this matches on the entire '{word}' rather tha
 }
 
 const lib = {
-	decode: require("./lib/entities.js").decode,
+	decode: plugin.import("require")("./lib/entities.js").decode,
 	space: space,
-	delay: function libDelay(fn, delay) { // promise version of setTimeout
-		return new Promise(function (resolve) {
-			setTimeout(function () {
-				resolve(fn());
-			}, delay);
+	runPromise: function runPromise(g) {
+		const it = g();
+		(function iterate(value) {
+			const ret = it.next(value);
+			if (ret.done)
+				return;
+			if (ret.value.then)
+				ret.value.then(iterate, err => it.throw(err));
+			else {
+				logger.debug("plain value");
+				setTimeout(() => iterate(ret.value), 0);
+			}
+		})();
+	},
+	runCallback: function runCallback(g) {
+		const it = g(function (err, ret) {
+			if (err)
+				it.throw(err);
+			else
+				it.next(ret);
 		});
+		it.next();
 	},
 	timestamp: function (line) {
 		let time = new Date().toLocaleTimeString();
@@ -86,17 +97,14 @@ const lib = {
 	},
 	parseVarList: function (str) {
 		// Errryday I'm fondlin'
-		let result, regex;
-		regex = /\{\([^\{]*?[^\(]*?\)\}/g;
-		result = str.replace(regex, lib.randVarListItem.bind(this));
-		if (result.match(regex)) {
+		const result = str.replace(varRegex, lib.randVarListItem);
+		if (result.match(varRegex)) {
 			return lib.parseVarList(result);
 		}
 		return lib.singleSpace(result);
 	},
 	molest: function (result) {
-		let reg,
-			res2 = result;
+		let reg, res2 = result;
 
 		while ((reg = /(\{\[(.*?|)\]\})/.exec(res2))) {
 			reg[2] = reg[2].split("|");
@@ -107,10 +115,8 @@ const lib = {
 		return lib.singleSpace(result);
 	},
 	stringContainsAny: function (string, matches, ignoreCase) {
-		let i, line = string.slice();
-		if (ignoreCase)
-			line = line.toLowerCase();
-		for (i = 0; i < matches.length; i++) {
+		let line = ignoreCase ? string.toLowerCase() : string;
+		for (let i = 0; i < matches.length; i++) {
 			if (ignoreCase && line.indexOf(matches[i].toLowerCase()) > -1)
 				return true;
 			if (line.indexOf(matches[i]) > -1)
@@ -174,22 +180,6 @@ const lib = {
 		delete memProfcache[desc];
 		diff = null;
 	},
-	memReport: function() {
-		let memuse = process.memoryUsage().rss,
-			report, diff;
-		if (memuse !== memuseLast) {
-			report = lib.commaNum(Math.floor(memuse/1024));
-			diff = Math.floor(((memuse-memuseLast)/1024));
-			if (diff > 0) {
-				diff = " [+"+space(lib.commaNum(diff), 5)+" KiB]";
-			} else {
-				diff = " [-"+space(lib.commaNum(diff.toString().slice(1)), 5)+" KiB]";
-			}
-			logger.memr(report+" KIB"+diff);
-			memuseLast = memuse;
-		}
-		memuse = null; report = null; diff = null;
-	},
 	timeReport: function(handle) {
 		let diff;
 		if (!timedCache[handle]) {
@@ -240,26 +230,28 @@ const lib = {
 		secs = (secs % 60);
 		mins = (mins % 60);
 		hours = (hours % 24);
-		days %= 365.25; days = Math.round(days);
+		days %= 365.25;
+		days = Math.round(days);
 		if (years)
 			duration = years+(short ? "y " : plural(years, " year")+", ");
 		if (days)
-			duration += days+(short ? "d " : plural(days, " day")+", ");
+			duration = duration+days+(short ? "d " : plural(days, " day")+", ");
 		if (hours)
-			duration += hours+(short ? "h " : plural(hours, " hour")+", ");
+			duration = duration+hours+(short ? "h " : plural(hours, " hour")+", ");
 		if (mins)
-			duration += mins+(short ? "m " : plural(mins, " minute")+" and ");
-		duration += secs+(short ? "s" : plural(secs, " second"));
+			duration = duration+mins+(short ? "m " : plural(mins, " minute")+" and ");
+		duration = duration+secs+(short ? "s" : plural(secs, " second"));
 		return duration;
 	},
 	fs: {
 		makePath: function (p) {
-			let i, path, curPath;
+			logger.debug("makePath "+p);
+			let path, curPath;
 			if (fs.existsSync(p))
 				return true;
 			path = p.split("/").slice(0, -1);
 			curPath = "";
-			for (i = 0; i < path.length; i++) {
+			for (let i = 0; i < path.length; i++) {
 				if (!path[i].length)
 					continue;
 				curPath += path[i]+"/";
@@ -277,4 +269,4 @@ const lib = {
 	}
 };
 
-plugin.declareGlobal("lib", "lib", lib);
+plugin.export("lib", lib);

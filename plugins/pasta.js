@@ -1,5 +1,6 @@
 "use strict";
-let pastaDB = new DB.Json({filename: "pastas"}), fs = require("fs");
+const [DB, fs, lib, web, logins] = plugin.importMany("DB", "fs", "lib", "web", "logins"),
+	pastaDB = new DB.Json({filename: "pastas"});
 
 function formatOutput(tmpl, obj) {
 	return tmpl.replace(/\{\{([^\{\} ]+)\}\}/g, function (a, b) {

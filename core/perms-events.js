@@ -1,6 +1,8 @@
 // perms fondling
 "use strict";
 
+const [alias, perms, logins] = plugin.importMany("alias", "perms", "logins");
+
 function itemExists(type, item) {
 	switch (type) {
 	case "variable":
@@ -76,8 +78,7 @@ bot.command({
 	syntax: config.command_prefix+"claim <alias/variable/command> <name of alias/variable/command>",
 	arglen: 2,
 	callback: function (input) {
-		let reg, admin, user;
-		reg = /^(alias|variable|command) ([^ ]+)/.exec(input.data.toLowerCase());
+		const reg = /^(alias|variable|command) ([^ ]+)/.exec(input.data.toLowerCase());
 		if (!reg) {
 			irc.say(input.context, bot.cmdHelp("claim", "syntax"));
 			return;
@@ -86,28 +87,25 @@ bot.command({
 			irc.say(input.context, "There is no "+reg[2]+" "+reg[1]+" to claim.");
 			return;
 		}
-		admin = logins.isAdmin(input.nick);
-		user = logins.getUsername(input.nick);
+		const user = logins.getUsername(input.nick);
 		if (!user) {
 			irc.say(input.context, "You need to be identified with me to claim anything.");
 			return;
 		}
-		if (!perms.hasPerms(reg[1], reg[2])) {
-			if (reg[1] === "command" && !admin) {
+		const type = reg[1], item = reg[2];
+		if (!perms.hasPerms(type, item)) {
+			if (reg[1] === "command" && !logins.isAdmin(input.nick)) {
 				irc.say(input.context, "Only admins can claim commands.");
 				return;
 			}
-			if (!perms.DB[reg[1]])
-				perms.DB[reg[1]] = {};
-			if (!perms.DB[reg[1]][reg[2]])
-				perms.DB[reg[1]][reg[2]] = {};
-			if (!perms.DB[reg[1]][reg[2]].owner)
-				perms.DB[reg[1]][reg[2]].owner = {};
-			perms.DB[reg[1]][reg[2]].owner[user] = true;
-			perms.Save();
-			irc.say(input.context, "You're now the proud new owner of the "+reg[2]+" "+reg[1]+".");
+			const perm = perms.DB.getOne(type) || {};
+			perm[item] = perm[item] || {};
+			perm[item].owner = perm[item].owner || {};
+			perm[item].owner[user] = true;
+			perms.DB.saveOne(type, perm);
+			irc.say(input.context, "You're now the proud new owner of the "+item+" "+type+".");
 		} else {
-			irc.say(input.context, reg[1]+" "+reg[2]+" is not unclaimed.");
+			irc.say(input.context, type+" "+item+" is not unclaimed.");
 		}
 	}
 });

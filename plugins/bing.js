@@ -1,4 +1,6 @@
 "use strict";
+const [web, lib] = plugin.importMany("web", "lib");
+
 bot.command({
 	command: [ "bing", "b" ],
 	help: "Bing searches things.",

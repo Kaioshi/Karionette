@@ -1,6 +1,8 @@
 // internal address list, updates itself whenever there is movement.
 "use strict";
 
+const [lib, ial, setTimeout] = plugin.importMany("lib", "ial", "setTimeout");
+
 bot.command({
 	command: "ial",
 	help: "Allows admins to poke the bot's internal address list.",
@@ -181,8 +183,8 @@ bot.event({
 			return true;
 	},
 	callback: function ialMode(input) {
-		let i, give = false, affected = input.affected.slice();
-		for (i = 0; i < input.mode.length; i++) {
+		let give = false, affected = input.affected.slice();
+		for (let i = 0; i < input.mode.length; i++) {
 			if (input.mode[i] === "+") {
 				give = true;
 				continue;
@@ -238,9 +240,8 @@ bot.event({
 bot.event({
 	handle: "ialMsg",
 	event: "PRIVMSG",
+	condition: function (input) { return input.channel !== undefined; },
 	callback: function (input) {
-		if (!input.channel)
-			return; // query
 		ial.Channel(input.channel).setActive(input.nick);
 	}
 });

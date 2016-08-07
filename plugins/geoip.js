@@ -1,5 +1,6 @@
 "use strict";
-let url = require("url");
+const [lib, ial, web] = plugin.importMany("lib", "ial", "web"),
+	url = plugin.import("require")("url");
 
 bot.command({
 	command: "geoip",

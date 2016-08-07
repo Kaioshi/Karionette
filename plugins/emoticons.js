@@ -1,5 +1,7 @@
 // http://unicodeemoticons.com/
 // http://rishida.net/tools/conversion/
+const setTimeout = plugin.import("setTimeout");
+
 "use strict";
 bot.command({
 	command: "get",

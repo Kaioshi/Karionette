@@ -1,26 +1,26 @@
 "use strict";
-const nickServConfigured = (config.nickserv_nickname && config.nickserv_hostname && config.nickserv_password);
+const [lib, process, setInterval, logins, alias] = plugin.importMany("lib", "process", "setInterval", "logins", "alias"),
+	nickServConfigured = (config.nickserv_nickname && config.nickserv_hostname && config.nickserv_password);
 let ghostAttempts = 0;
 
 if (config.gc) {
-	let gcAndReport;
-	if (config.memwatch) {
-		gcAndReport = function () {
-			let memuse, report, diff;
+	let gcAndReport = config.memwatch ?	(function () {
+		let lastMemuse = 0;
+		return function () {
 			globals.gc();
-			memuse = process.memoryUsage().rss;
-			if (memuse !== globals.memoryUsage) {
-				report = lib.commaNum(Math.floor(memuse/1024));
-				diff = Math.floor(((memuse-globals.memoryUsage)/1024));
+			const memuse = process.memoryUsage().rss;
+			if (memuse !== lastMemuse) {
+				const report = lib.commaNum(Math.floor(memuse/1024));
+				let diff = Math.floor(((memuse-lastMemuse)/1024));
 				if (diff > 0)
 					diff = " [+"+lib.space(lib.commaNum(diff), 6)+" KiB]";
 				else
 					diff = " [-"+lib.space(lib.commaNum(diff.toString().slice(1)), 6)+" KiB]";
 				logger.memr(report+" KIB"+diff);
-				globals.memoryUsage = memuse;
+				lastMemuse = memuse;
 			}
-		};
-	}
+		}
+	})() : null;
 	bot.event({
 		handle: "gcWaitForConnect",
 		event: "376",
@@ -34,11 +34,10 @@ if (config.gc) {
 			}
 			if (config.gcinterval) {
 				time = parseInt(config.gcinterval);
-				if (time <= 0 || time >= 120) {
+				if (time <= 0 || time >= 120)
 					time = 30000; // 30s sane default
-				} else {
+				else
 					time = time*1000;
-				}
 			} else {
 				time = 30000;
 			}
@@ -50,18 +49,11 @@ if (config.gc) {
 	});
 }
 
-bot.event({
-	handle: "corePing",
-	event: "PING",
-	callback: function (input) {
-		irc.pong(input.challenge);
-	}
-});
-
 function isNickServ(nick, hostname) {
 	if (config.nickserv_nickname.toLowerCase() === nick.toLowerCase() &&
 		config.nickserv_hostname.toLowerCase() === hostname.toLowerCase())
 		return true;
+	return false;
 }
 
 /**
