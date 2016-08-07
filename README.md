@@ -43,7 +43,7 @@ Built in alias variables:
 
 There is also a random selection syntax:
 
-  * ```{(thing or|other thing)}``` - you can nest variables too, built in or user defined. variables can hold the random selector too - ```;var add randthingy {(button|shoe|banana|your dad)}``` - then in an alias reference ```{randthingy}``` and you will get one of the random elements - for example: ```;alias add thing say {randthing}``` which is called by ```;thing``` will return button, shoe, banana, or your dad.
+  * ```{(thing or|other thing)}``` - you can nest variables too, built in or user defined. variables can hold the random selector too - ```;var add randthingy {(button|shoe|banana|your dad)}``` - then in an alias reference ```{randthingy}``` and you will get one of the random elements - for example: ```;alias add thing say {randthingy}``` which is called by ```;thing``` will return button, shoe, banana, or your dad.
 
 User variables can be defined with ```;var add varName variable contents```
 
