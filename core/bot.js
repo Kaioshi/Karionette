@@ -1,170 +1,109 @@
 "use strict";
 
-// commandList is kept up to date so that we don't have to Object.keys(commands)
-// every time a command is attempted.
-let bot = {}, events = {}, commandList = [], commands = {}, commandAliases = {};
+class Bot {
+	constructor() {
+		this._events = Object.create(null);
+		this._commands = Object.create(null);
+		this._commandAliases = Object.create(null);
+		this._commandList = [];
+	}
+	_updateCommandList() {
+		this._commandList = Object.keys(this._commands).concat(Object.keys(this._commandAliases));
+	}
+	_removeCommand(cmd) {
+		if (!this._commands[cmd])
+			return;
+		this._commands[cmd] = null;
+		delete this._commands[cmd];
+		for (const command in this._commandAliases)
+			if (this._commandAliases[command] === cmd)
+				delete this._commandAliases[command];
+	}
+	_removeEvent(type, handle) {
+		this._events[type][handle] = null;
+		delete this._events[type][handle];
+	}
 
-function objContains(obj, items) {
-	for (let i = 0; i < items.length; i++) {
-		if (obj[items[i]] === undefined)
+	commandArglen(cmd) {
+		if (this.cmdExists(cmd)) {
+			if (this._commandAliases[cmd])
+				return this._commands[this._commandAliases[cmd]].arglen || 0;
+			return this._commands[cmd].arglen || 0;
+		}
+	}
+	cmdHelp(cmd, type) {
+		const command = this._commandAliases[cmd] || cmd;
+		if (!this._commands[command] || !this._commands[command][type])
+			return "[Help] No such help type: "+type;
+		switch (type) {
+			case "help": return "[Help] "+this._commands[command][type];
+			case "syntax": return "[Help] Syntax: "+this._commands[command][type];
+			case "options": return "[Help] Options: "+this._commands[command][type];
+			default: return;
+		}
+	}
+	commandNeedsAdmin(cmd) {
+		if (!this.cmdExists(cmd))
 			return false;
+		if (this.isCommandAlias(cmd))
+			return this._commands[this._commandAliases[cmd]].admin || false;
+		return this._commands[cmd].admin || false;
 	}
-	return true;
-}
-
-function hasEvent(e) {
-	return events[e] !== undefined;
-}
-
-function eventsIndexOf(trigger, handle) {
-	if (events[trigger] === undefined)
-		return -1;
-	for (let i = 0; i < events[trigger].length; i++) {
-		if (handle === events[trigger][i].handle)
-			return i;
+	isCommandAlias(cmd) { return this._commandAliases[cmd] !== undefined; }
+	commandAlias(cmd) { return this._commandAliases[cmd]; }
+	cmdExists(cmd) { return this._commandList.includes(cmd); }
+	cmdList() { return Object.keys(this._commands); } // not including aliases
+	hasEvent(eventHandle) { return this._events[eventHandle] !== undefined; }
+	event(ev) {
+		if (!ev.event || !ev.handle || !ev.callback)
+			throw new Error("Events need to contain at least event, handle and callback elements.");
+		this._events[ev.event] = this._events[ev.event] || Object.create(null);
+		if (this._events[ev.event][ev.handle])
+			this._removeEvent(ev.event, ev.handle);
+		if (ev.once) {
+			ev.cb = ev.callback;
+			ev.callback = input => {
+				this._removeEvent(ev.event, ev.handle);
+				ev.cb(input);
+			};
+		}
+		this._events[ev.event][ev.handle] = ev;
 	}
-	return -1;
-}
-
-function registerEvent(e) {
-	unregisterEvent(e.event, e.handle); // There Can Be Only Juan
-	events[e.event] = events[e.event] || [];
-	events[e.event].push(e);
-}
-
-function unregisterEvent(trigger, handle) {
-	let index = eventsIndexOf(trigger, handle);
-	if (index > -1)
-		events[trigger].splice(index, 1);
-}
-
-function registerCommand(c) {
-	if (Array.isArray(c.command)) {
-		unregisterCommand(c.command[0]);
-		commands[c.command[0]] = c;
-		c.command.slice(1).forEach(function (cmd) {
-			commandAliases[cmd] = c.command[0];
-		});
-	} else {
-		unregisterCommand(c.command);
-		commands[c.command] = c;
+	command(cmd) {
+		if (!cmd.command || !cmd.help || !cmd.callback)
+			throw new Error("Commands need to contain at least command, help and callback elements.");
+		if (Array.isArray(cmd.command)) {
+			this._removeCommand(cmd.command[0]);
+			this._commands[cmd.command[0]] = cmd;
+			cmd.command.slice(1).forEach(commandAlias => this._commandAliases[commandAlias] = cmd.command[0]);
+		} else {
+			this._removeCommand(cmd.command);
+			this._commands[cmd.command] = cmd;
+		}
+		this._updateCommandList();
 	}
-	updateCommandList();
-}
-
-function unregisterCommand(cmd) {
-	if (commands[cmd] === undefined)
-		return;
-	delete commands[cmd];
-	Object.keys(commandAliases).forEach(function (entry) {
-		if (commandAliases[entry] === cmd)
-			delete commandAliases[entry];
-	});
-	updateCommandList();
-}
-
-function updateCommandList() {
-	commandList = Object.keys(commands).concat(Object.keys(commandAliases));
-}
-
-function emitCommand(c, input) {
-	if (commands[c])
-		commands[c].callback(input);
-}
-
-function emitEvent(e, input) {
-	let toRemove;
-	if (events[e] === undefined || !events[e].length)
-		return;
-	for (let i = 0; i < events[e].length; i++) {
-		if (events[e][i].condition === undefined || events[e][i].condition(input)) {
-			if (events[e][i].regex) {
-				let match = events[e][i].regex.exec(input.raw);
-				if (match) {
-					input.match = match;
-					events[e][i].callback(input);
+	emitCommand(cmd, input) {
+		if (this._commands[cmd])
+			this._commands[cmd].callback(input);
+	}
+	emitEvent(type, input) {
+		if (!this._events[type])
+			return;
+		for (const handle in this._events[type]) {
+			const event = this._events[type][handle];
+			if (event.condition === undefined || event.condition(input)) {
+				if (!event.regex)
+					event.callback(input);
+				else {
+					const match = event.regex.exec(input.raw);
+					if (match) {
+						input.match = match;
+						event.callback(input);
+					}
 				}
-			} else {
-				events[e][i].callback(input);
-			}
-			if (events[e][i].once) {
-				toRemove = toRemove || [];
-				toRemove.push([events[e][i].event, events[e][i].handle]);
 			}
 		}
 	}
-	if (toRemove)
-		toRemove.forEach(ev => unregisterEvent(ev[0], ev[1]));
 }
 
-function commandNeedsAdmin(cmd) {
-	if (bot.cmdExists(cmd)) {
-		if (commandAliases[cmd])
-			return commands[commandAliases[cmd]].admin || false;
-		return commands[cmd].admin || false;
-	}
-	return false;
-}
-
-function commandArglen(cmd) {
-	if (bot.cmdExists(cmd)) {
-		if (commandAliases[cmd])
-			return commands[commandAliases[cmd]].arglen || 0;
-		return commands[cmd].arglen || 0;
-	}
-}
-
-function commandAlias(cmd) {
-	return commandAliases[cmd];
-}
-
-function isCommandAlias(cmd) {
-	return Object.keys(commandAliases).indexOf(cmd) > -1;
-}
-
-function cmdHelp(cmd, type) {
-	let command = commandAliases[cmd] || cmd;
-	if (!commands[command] || !commands[command][type])
-		return;
-	switch (type) {
-	case "help": return "[Help] "+commands[command][type];
-	case "syntax": return "[Help] Syntax: "+commands[command][type];
-	case "options": return "[Help] Options: "+commands[command][type];
-	default: return;
-	}
-}
-
-function cmdList() {
-	return Object.keys(commands); // not including command aliases in this
-}
-
-function cmdExists(cmd) {
-	return commandList.indexOf(cmd) > -1;
-}
-
-function event(e) {
-	if (!objContains(e, [ "handle", "event", "callback" ]))
-		return;
-	registerEvent(e);
-}
-
-function command(c) {
-	if (!objContains(c, [ "command", "help", "callback" ]))
-		return;
-	registerCommand(c);
-}
-
-bot.emitEvent = emitEvent;
-bot.commandNeedsAdmin = commandNeedsAdmin;
-bot.commandArglen = commandArglen;
-bot.commandAlias = commandAlias;
-bot.isCommandAlias = isCommandAlias;
-bot.cmdHelp = cmdHelp;
-bot.cmdList = cmdList;
-bot.cmdExists = cmdExists;
-bot.event = event;
-bot.command = command;
-bot.hasEvent = hasEvent;
-bot.emitCommand = emitCommand;
-
-plugin.declareGlobal("bot", "bot", bot); // this is a problem~
+plugin.global("bot", new Bot());
