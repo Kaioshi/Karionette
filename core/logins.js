@@ -1,225 +1,169 @@
 "use strict";
+const ial = plugin.import("ial");
 
-let users = {},
-	loggedIn = {}, // username -> nick for quick lookups via username
-	loginDB = new DB.Json({filename: "logins"});
-
-function UserLogin(nick, fulluser, username, password, secret) {
-	this.nick = nick;
-	this.fulluser = fulluser;
-	this.registered = new Date();
-	this.loginTime = this.registered.valueOf();
-	this.username = username;
-	this.password = password;
-	if (secret === config.secret)
-		this.admin = true;
-	else
-		this.admin = false;
+class UserLogin {
+	constructor(nick, fulluser, username, password, secret) {
+		this.nick = nick;
+		this.fulluser = fulluser;
+		this.registered = new Date();
+		this.loginTime = this.registered.valueOf();
+		this.username = username;
+		this.password = password;
+		this.admin = secret === config.secret ? true : false;
+	}
 }
 
-bot.event({
-	handle: "onStartLoginValidation",
-	event: "autojoinFinished",
-	callback: function validateLastLogins() {
-		let index, nicks = ial.Nicks(),
-			loginusers = loginDB.getAll(), keys = Object.keys(loginusers);
-		for (let i = 0; i < keys.length; i++) {
-			if ((index = nicks.indexOf(loginusers[keys[i]].nick)) > -1) {
-				if (ial.User(nicks[index]).fulluser === loginusers[keys[i]].fulluser)
-					identify(nicks[index], loginusers[keys[i]].username, loginusers[keys[i]].password);
-			}
+class Logins {
+	constructor() {
+		this.users = Object.create(null);
+		this.loggedIn = Object.create(null);
+		this.db = new plugin.import("DB").Json({filename: "logins"});
+	}
+	getNick(username) { return this.loggedIn[username]; }
+	getUsername(nick) {
+		if (this.users[nick])
+			return this.users[nick].username;
+	}
+	nickList(adminsOnly) {
+		if (adminsOnly)
+			return Object.keys(this.users).filter(nick => this.users[nick].admin);
+		return Object.keys(this.users);
+	}
+	userList() {
+		let ret = [];
+		for (const nick in this.users)
+			ret.push(this.users[nick].username+(this.users[nick].admin ? " (Admin)" : "")+" -> "+this.users[nick].fulluser);
+		return ret;
+	}
+	addLogin(nick, username, password, secret) {
+		if (this.db.hasOne(username))
+			return "Username "+username+" is taken.";
+		if (this.users[nick])
+			return "You're already logged in. Unidentify to add a new user.";
+		const user = new UserLogin(nick, ial.User(nick).fulluser, username, password, secret);
+		this.db.saveOne(username, user);
+		this.users[nick] = user;
+		this.loggedIn[username] = nick;
+		return "Added "+username+(user.admin ? " as an Admin" : "")+
+			"! Don't forget to identify if you reconnect. You're now identified as \""+username+"\".";
+	}
+	remLogin(nick, username, password) {
+		let user;
+		if (!this.users[nick])
+			return "You need to identify first.";
+		const caller = this.users[nick];
+		if (caller.admin)// LIKE A BOSS
+			this.db.removeOne(username);
+		else {
+			if (caller.username !== username)
+				return "Only admins can remove other users.";
+			if (password === undefined)
+				return "Only admins can remove logins without supplying the password.";
+			user = this.db.getOne(username);
+			if (!user)
+				return "There is no such user.";
+			if (user.password !== password)
+				return "Wrong password.";
+			this.db.removeOne(username);
 		}
+		if (this.loggedIn[username]) {
+			delete this.users[this.loggedIn[username]];
+			delete this.loggedIn[username];
+		}
+		return "Removed. o7";
 	}
-});
-
-function getUsername(nick) {
-	if (users[nick])
-		return users[nick].username;
-}
-
-function getNick(username) {
-	return loggedIn[username];
-}
-
-function nickList(adminsOnly) {
-	if (adminsOnly) {
-		return Object.keys(users).filter(function (nick) {
-			return users[nick].admin;
-		});
+	passwd(nick, newpass, username) {
+		if (!this.users[nick])
+			return "You haven't identified yet.";
+		const caller = this.users[nick];
+		if (username) {
+			if (!caller.admin)
+				return "Only admins can set passwords for other users.";
+			if (!this.db.hasOne(username))
+				return "There is no such user.";
+			const user = this.db.getOne(username);
+			user.password = newpass;
+			this.db.saveOne(username, user);
+			return username+"'s password has been updated.";
+		}
+		caller.password = newpass;
+		this.db.saveOne(caller.username, caller);
+		return "Your password has been updated.";
 	}
-	return Object.keys(users);
-}
-
-function userList() {
-	let ret = [];
-	Object.keys(users).forEach(function (nick) {
-		ret.push(users[nick].username+(users[nick].admin ? " (Admin)" : "")+" -> "+users[nick].fulluser);
-	});
-	return ret;
-}
-
-function addLogin(nick, username, password, secret) {
-	let user;
-	if (loginDB.hasOne(username))
-		return "Username "+username+" is taken.";
-	if (users[nick])
-		return "You're already logged in. Unidentify to add a new user.";
-	user = new UserLogin(nick, ial.User(nick).fulluser, username, password, secret);
-	loginDB.saveOne(username, user);
-	users[nick] = user;
-	loggedIn[username] = nick;
-	return "Added "+username+(user.admin ? " as an Admin" : "")+"! Don't forget to identify if you reconnect. You're now identified as \""+username+"\".";
-}
-
-function remLogin(nick, username, password) {
-	let user, caller;
-	if (!users[nick])
-		return "You need to identify first.";
-	caller = users[nick];
-	if (caller.admin) { // LIKE A BOSS
-		loginDB.removeOne(username);
-	} else {
-		if (caller.username !== username)
-			return "Only admins can remove other users.";
-		if (password === undefined)
-			return "Only admins can remove logins without supplying the password.";
-		user = loginDB.getOne(username);
+	identify(nick, username, password) {
+		if (this.users[nick])
+			return "You are already identified as \""+this.users[nick].username+"\", unidentify first.";
+		if (this.loggedIn[username])
+			return username+" is already logged in.";
+		const user = this.db.getOne(username);
 		if (!user)
 			return "There is no such user.";
 		if (user.password !== password)
 			return "Wrong password.";
-		loginDB.removeOne(username);
+		user.nick = nick;
+		user.fulluser = ial.User(nick).fulluser;
+		user.loginTime = Date.now();
+		this.users[nick] = user;
+		this.loggedIn[username] = nick;
+		this.db.saveOne(user.username, user);
+		return "You are now identified as "+username+".";
 	}
-	if (loggedIn[username]) {
-		delete users[loggedIn[username]];
-		delete loggedIn[username];
+	unidentify(nick) {
+		if (!this.users[nick])
+			return "You haven't identified yet.";
+		const user = this.users[nick];
+		delete this.loggedIn[user.username];
+		delete user.nick;
+		delete user.fulluser;
+		this.db.saveOne(user.username, user);
+		delete this.users[nick];
+		return "I no longer recognise you.";
 	}
-	return "Removed. o7";
-}
-
-function passwd(nick, newpass, username) {
-	let caller, user;
-	if (!users[nick])
-		return "You haven't identified yet.";
-	caller = users[nick];
-	if (username) {
-		if (!caller.admin)
-			return "Only admins can set passwords for other users.";
-		if (!loginDB.hasOne(username))
-			return "There is no such user.";
-		user = loginDB.getOne(username);
-		user.password = newpass;
-		loginDB.saveOne(username, user);
-		return username+"'s password has been updated.";
+	isAdmin(nick) {
+		if (this.users[nick])
+			return this.users[nick].admin;
+		return false;
 	}
-	caller.password = newpass;
-	loginDB.saveOne(caller.username, caller);
-	return "Your password has been updated.";
-}
-
-function identify(nick, username, password) {
-	let user;
-	if (users[nick])
-		return "You are already identified as \""+users[nick].username+"\", unidentify first.";
-	if (loggedIn[username])
-		return username+" is already logged in.";
-	user = loginDB.getOne(username);
-	if (!user)
-		return "There is no such user.";
-	if (user.password !== password)
-		return "Wrong password.";
-	user.nick = nick;
-	user.fulluser = ial.User(nick).fulluser;
-	user.loginTime = Date.now();
-	users[nick] = user;
-	loggedIn[username] = nick;
-	loginDB.saveOne(user.username, user);
-	return "You are now identified as "+username+".";
-}
-
-function unidentify(nick) {
-	let user;
-	if (!users[nick])
-		return "You haven't identified yet.";
-	user = users[nick];
-	delete loggedIn[user.username];
-	delete user.nick;
-	delete user.fulluser;
-	loginDB.saveOne(user.username, user);
-	delete users[nick];
-	return "I no longer recognise you.";
-}
-
-function isAdmin(nick) {
-	if (users[nick])
-		return users[nick].admin;
-	return false;
-}
-
-function isLoggedIn(nick) {
-	return users[nick] !== undefined;
-}
-
-function nickChange(oldnick, newnick) {
-	if (users[oldnick]) {
-		users[newnick] = users[oldnick];
-		delete users[oldnick];
-		users[newnick].nick = newnick;
-		users[newnick].fulluser = newnick+"!"+users[newnick].fulluser.split("!")[1];
-		loggedIn[users[newnick].username] = newnick;
-		loginDB.saveOne(users[newnick].username, users[newnick]);
+	isLoggedIn(nick) { return this.users[nick] !== undefined; }
+	nickChange(oldnick, newnick) {
+		if (this.users[oldnick]) {
+			this.users[newnick] = this.users[oldnick];
+			delete this.users[oldnick];
+			this.users[newnick].nick = newnick;
+			this.users[newnick].fulluser = newnick+"!"+this.users[newnick].fulluser.split("!")[1];
+			this.loggedIn[this.users[newnick].username] = newnick;
+			this.db.saveOne(this.users[newnick].username, this.users[newnick]);
+		}
+	}
+	setAttribute(nick, attr, value) {
+		if (!this.users[nick])
+			return "You need to identify first.";
+		const user = this.users[nick];
+		user.attr = user.attr || {};
+		user.attr[attr] = value;
+		this.db.saveOne(user.username, user);
+		return "Added. o7";
+	}
+	getAttribute(nick, attr) {
+		if (!this.users[nick])
+			return "You need to identify first.";
+		const user = this.users[nick];
+		user.attr = user.attr || {};
+		if (!user.attr[attr])
+			return "You have no '"+attr+"' attribute set.";
+		return user.attr[attr];
+	}
+	unsetAttribute(nick, attr) {
+		if (!this.users[nick])
+			return "You need to identify first.";
+		const user = this.users[nick];
+		user.attr = user.attr || {};
+		if (!user.attr[attr])
+			return "You have no '"+attr+"' attribute set.";
+		delete user.attr[attr];
+		this.db.saveOne(user.username, user);
+		return "Removed. o7";
 	}
 }
 
-function setAttribute(nick, attr, value) {
-	let user;
-	if (!users[nick])
-		return "You need to identify first.";
-	user = users[nick];
-	user.attr = user.attr || {};
-	user.attr[attr] = value;
-	loginDB.saveOne(user.username, user);
-	return "Added. o7";
-}
-
-function getAttribute(nick, attr) {
-	let user;
-	if (!users[nick])
-		return "You need to identify first.";
-	user = users[nick];
-	user.attr = user.attr || {};
-	if (!user.attr[attr])
-		return "You have no '"+attr+"' attribute set.";
-	return user.attr[attr];
-}
-
-function unsetAttribute(nick, attr) {
-	let user;
-	if (!users[nick])
-		return "You need to identify first.";
-	user = users[nick];
-	user.attr = user.attr || {};
-	if (!user.attr[attr])
-		return "You have no '"+attr+"' attribute set.";
-	delete user.attr[attr];
-	loginDB.saveOne(user.username, user);
-	return "Removed. o7";
-}
-
-plugin.declareGlobal("logins", "logins", {
-	addLogin: addLogin,
-	remLogin: remLogin,
-	identify: identify,
-	unidentify: unidentify,
-	passwd: passwd,
-	nickChange: nickChange,
-	isAdmin: isAdmin,
-	isLoggedIn: isLoggedIn,
-	getUsername: getUsername,
-	getNick: getNick,
-	nickList: nickList,
-	userList: userList,
-	setAttribute: setAttribute,
-	getAttribute: getAttribute,
-	unsetAttribute: unsetAttribute
-});
+plugin.export("logins", new Logins());
