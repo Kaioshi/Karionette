@@ -169,7 +169,9 @@ class List extends DB {
 		}
 	}
 	clear() {
-		if (this._data.length) {
+		if (!this._data)
+			this._data = [];
+		else if (this._data.length) {
 			this._data = null;
 			this._data = [];
 		}
