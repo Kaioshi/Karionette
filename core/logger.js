@@ -1,87 +1,63 @@
 "use strict";
-const colourStrip = /\u001b\[[0-9]+m/g;
-let logDay, logFile;
+const [fs, process] = plugin.importMany("fs", "process"),
+	colourStrip = /\u001b\[[0-9]+m/g;
 
-
-if (!fs.existsSync("data/logs"))
-	fs.mkdirSync("data/logs");
-
-function updateLogLocation(date) {
-	let d = date.toJSON().slice(0, 10),
-		dir = "data/logs/"+d.slice(0, 7);
-	logFile = dir+"/"+d+".log";
-	logDay = date.getDate();
-	if (!fs.existsSync(dir))
-		fs.mkdirSync(dir);
-	if (!fs.existsSync(logFile))
-		fs.writeFileSync(logFile, "");
-}
-
-function writeLog(date, line) {
-	if (date.getDate() !== logDay)
-		updateLogLocation(date);
-	fs.appendFile(logFile, line.replace(colourStrip, ""));
-}
-
-function shd(text) { // colourful
-	switch (text) {
-	case "Chat": text = "\u001b[36m"+text; break;
-	case "Denied": text = "\u001b[36mChat-"+text; break;
-	case "Ignored": text = "\u001b[36mChat-"+text; break;
-	case "Sent": text = "\u001b[32m"+text; break;
-	case "Info": text = "\u001b[94m"+text; break;
-	case "Traf": text = "\u001b[37m"+text; break;
-	case "Error": text = "\u001b[91m"+text; break;
-	case "Warning": text = "\u001b[93m"+text; break;
-	case "Serv": text = "\u001b[0m"+text; break;
-	case "DEBUG": text = "\u001b[93m"+text; break;
-	case "Misc": text = "\u001b[97m"+text; break;
-	case "Plugin": text = "\u001b[96m"+text; break;
-	case "MemR": text = "\u001b[92m"+text; break;
-	default: text = "\u001b[97m"+text; break;
+class Logger {
+	constructor() {
+		if (!fs.existsSync("data/logs"))
+			fs.mkdirSync("data/logs");
+		this.updateLogLocation(new Date());
 	}
-	return "\u001b[90m["+text+"\u001b[90m]\u001b[0m";
-}
-
-updateLogLocation(new Date());
-
-const logger = {
-	log: function (type, line, print) {
-		let date = new Date();
-		line = date.toLocaleTimeString()+" "+shd(type)+" "+line+"\n";
+	updateLogLocation(date) {
+		const d = date.toJSON().slice(0, 10),
+			dir = "data/logs/"+d.slice(0,7);
+		this.logFile = dir+"/"+d+".log";
+		this.logDay = date.getDate();
+		if (!fs.existsSync(dir))
+			return fs.mkdirSync(dir);
+		if (!fs.existsSync(this.logFile))
+			return fs.writeFileSync(this.logFile, "");
+	}
+	appendLog(date, line) {
+		if (date.getDate() !== this.logDay)
+			this.updateLogLocation(date);
+		return fs.appendFile(this.logFile, line.replace(colourStrip, ""));
+	}
+	log(line, print) {
+		const date = new Date();
+		line = date.toLocaleTimeString()+" "+line+"\n";
 		if (print)
 			process.stdout.write(line);
-		writeLog(date, line);
-	},
-	// skipping the log file for memreports
-	memr: function (line) { process.stdout.write(`${new Date().toLocaleTimeString()} ${shd("MemR")} ${line}\n`); },
-	chat: function (line) { logger.log("Chat", line, config.logging_chat); },
-	denied: function (line) { logger.log("Denied", line, true); },
-	ignored: function (line) { logger.log("Ignored", line, true); },
-	traffic: function (line) { logger.log("Traf", line, config.logging_traffic); },
-	info: function (line) { logger.log("Info", line, config.logging_info); },
-	server: function (line) { logger.log("Serv", line, config.logging_serv); },
-	debug: function (line) { logger.log("DEBUG", line, config.logging_debug); },
-	sent: function (line, silent) { logger.log("Sent", line, (silent ? false : true)); },
-	plugin: function (line) { logger.log("Plugin", line, true); },
-	misc: function (line) { logger.log("Misc", line, true); },
-	warning: function (line) { logger.warn(line); },
-	warn: function (line) { logger.log("Warning", "\u001b[33m"+line+"\u001b[0m", true); },
-	error: function (error, err) {
+		return this.appendLog(date, line);
+	}
+	memr(line) { return process.stdout.write(`${new Date().toLocaleTimeString()} \u001b[92mMemR\u001b[0m ${line}\n`); }
+	chat(line) { return this.log("\u001b[36mChat\u001b[0m "+line, true); }
+	denied(line) { return this.log("\u001b[36mChat-Denied\u001b[0m "+line, true); }
+	ignored(line) { return this.log("\u001b[36mChat-Ignored\u001b[0m "+line, true); }
+	traffic(line) { return this.log("\u001b[37mTraf\u001b[0m "+line, config.logging_traffic); }
+	info(line) { return this.log("\u001b[94mInfo\u001b[0m "+line, config.logging_info); }
+	server(line) { return this.log("\u001b[35mServ\u001b[0m "+line, config.logging_serv); }
+	debug(line) { return this.log("\u001b[93mDBUG\u001b[0m "+line, config.logging_debug); }
+	sent(line, silent) { return this.log("\u001b[32mSent\u001b[0m "+line, (silent ? false : true)); }
+	plugin(line) { return this.log("\u001b[96mPlug\u001b[0m "+line, true); }
+	misc(line) { return this.log("\u001b[97mMisc\u001b[0m "+line, true); }
+	warning(line) { return this.warn(line); }
+	warn(line) { return this.log("\u001b[93mWarn\u001b[33m "+line+"\u001b[0m", true); }
+	error(error, err) {
 		if (error.stack) { // logger.error(Error)
-			logger.log("Error", "\u001b[31m"+error.message+"\u001b[0m", true);
+			this.log("\u001b[91mError \u001b[31m"+error.message+"\u001b[0m", true);
 			bot.emitEvent("Event: Error", error.message);
-			logger.log("Error", "\u001b[30;1m"+error.stack+"\u001b[0m", true);
-			bot.emitEvent("Event: Error Stack", error.stack);
+			this.log("\u001b[91mError \u001b[30;1m"+error.stack+"\u001b[0m", true);
+			return bot.emitEvent("Event: Error Stack", error.stack);
 		} else { // logger.error("custom message", Error)
-			logger.log("Error", "\u001b[31m"+error+"\u001b[0m", true);
+			this.log("\u001b[31mError \u001b[31m"+error+"\u001b[0m", true);
 			bot.emitEvent("Event: Error", error);
 			if (err && err.stack) { // logger.error("custom message")
-				logger.log("Error", "\u001b[30;1m" + err.stack + "\u001b[0m", true);
-				bot.emitEvent("Event: Error Stack", err.stack);
+				this.log("\u001b[31mError \u001b[30;1m"+err.stack+"\u001b[0m", true);
+				return bot.emitEvent("Event: Error Stack", err.stack);
 			}
 		}
 	}
-};
+}
 
-plugin.declareGlobal("logger", "logger", logger);
+plugin.global("logger", new Logger());
