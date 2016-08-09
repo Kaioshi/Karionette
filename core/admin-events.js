@@ -1,5 +1,5 @@
 "use strict";
-
+const console = plugin.import("console");
 const [fs, lib, logins, ignore] = plugin.importMany("fs", "lib", "logins", "ignore");
 
 bot.command({
@@ -32,7 +32,7 @@ function getErrorAnnounceList() {
 bot.event({
 	handle: "errorAnnouncer",
 	event: "Event: Error",
-	callback: error => getErrorAnnounceList().forEach(nick => irc.notice(nick, "\x02Error\x02: "+error.message))
+	callback: error => getErrorAnnounceList().forEach(nick => irc.notice(nick, "\x02Error\x02: "+error))
 });
 
 bot.event({
