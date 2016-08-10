@@ -31,15 +31,17 @@ bot.command({
 				irc.say(input.context, "Invalid wordnik API key.");
 				return;
 			}
-			if (!resp.length)
-				throw Error("Couldn't find it. "+notFound(input.context));
+			if (!resp.length) {
+				irc.say(input.context, "Couldn't find it. "+notFound(input.context));
+				return;
+			}
 			irc.say(input.context, resp.map((def, i) => `${i+1}) [${def.partOfSpeech}] ${def.text}`).join(", "));
 			uri = `http://api.wordnik.com:80/v4/word.json/${query}/topExample?useCanonical=false&api_key=${config.api.wordnik}`;
 			resp = JSON.parse(yield web.fetchAsync(uri, null, cb));
 			if (resp.text && resp.title)
 				irc.say(input.context, lib.decode(lib.singleSpace(`${resp.text} ${resp.title}`)));
 		} catch (err) {
-			irc.say(input.context, err.message);
+			logger.error(";define - "+err.message, err.stack);
 		}});
 	}
 });
