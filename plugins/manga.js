@@ -1,7 +1,7 @@
-// combined mangafox / mangastream
+// combined mangafox / mangastream / batoto
 "use strict";
 
-const [DB, lib, web, ticker, ial, fs] = plugin.importMany("DB", "lib", "web", "ticker", "ial", "fs"),
+const [DB, lib, web, ticker, ial] = plugin.importMany("DB", "lib", "web", "ticker", "ial"),
 	mangaDB = {
 		mangafox: new DB.Json({filename: "manga/mangafox"}),
 		mangastream: new DB.Json({filename: "manga/mangastream"}),
@@ -9,8 +9,10 @@ const [DB, lib, web, ticker, ial, fs] = plugin.importMany("DB", "lib", "web", "t
 	};
 
 function isNewRelease(release, manga) {
-	if (!manga.latest || !manga.latest.length)
+	if (!manga.latest || !manga.latest.length) {
+		manga.latest = [ release.date ];
 		return true;
+	}
 	let newest = 0;
 	for (let i = 0; i < manga.latest.length; i++) {
 		if (!Number.isInteger(manga.latest[i])) //cruft
@@ -23,6 +25,7 @@ function isNewRelease(release, manga) {
 			manga.latest.shift();
 		return true;
 	}
+	return false;
 }
 
 function findUpdates(type, releases) {
@@ -43,7 +46,7 @@ function findUpdates(type, releases) {
 					isOnline[target] = isOnline[target] || (ial.User(target) ? "online" : "offline");
 					if (isOnline[target] !== "offline")
 						irc.notice(target, releaseMessage, true);
-					else
+					else if (bot.queueMessage)
 						bot.queueMessage({ method: "notice", nick: target, message: releaseMessage });
 				}
 			}
@@ -260,7 +263,8 @@ function parseMangaCmd(input) {
 
 ticker.start(300); // start a 5 minute ticker
 function convertFromFragDB() { // XXX remove this after ranma has run it
-	Object.keys(mangaDB).forEach(function (db) {
+	const fs = plugin.import("fs");
+	Object.keys(mangaDB).forEach(db => {
 		let dir = "data/db/"+db;
 		if (fs.existsSync(dir)) {
 			logger.warn("CONVERTING FRAGDB "+db+" TO REGULAR DB");
