@@ -30,8 +30,8 @@ module.exports = function (globals) {
 	}
 
 	function pluginImport(importName) {
-		if (importables[importName] === undefined)
-			throw new Error("No such importable: "+importName);
+		if (importables[importName] === undefined && !loadPlugin("core/"+importName+".js") && !loadPlugin("plugins/"+importName+".js"))
+				throw new Error("No such importable: "+importName);
 		return importables[importName];
 	}
 

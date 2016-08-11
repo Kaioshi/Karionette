@@ -1,5 +1,4 @@
 "use strict";
-const console = plugin.import("console");
 const [fs, lib, logins, ignore] = plugin.importMany("fs", "lib", "logins", "ignore");
 
 bot.command({
