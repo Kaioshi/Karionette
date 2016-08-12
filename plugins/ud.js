@@ -30,7 +30,7 @@ bot.command({
 	arglen: 1,
 	callback: function ud(input) {
 		web.json("http://api.urbandictionary.com/v0/define?term="+input.data).then(function (json) {
-			irc.say(input.context, bestAnswersByScore(json.list), 1);
+			irc.say(input.context, bestAnswersByScore(json.list), true, 2);
 		}).catch(function (err) {
 			irc.say(input.context, "Somethin' done broke.");
 			logger.error(err, err);
