@@ -16,7 +16,7 @@ function checkGits(target) {
 			return; // nothing new
 		gitDB.saveOne("latest", resp[0].commit.author.date);
 		if (target)
-			resp.forEach(commit => irc.say(target, commit.commit.message+" ~ "+commit.html_url));
+			resp.forEach(commit => irc.say(target, commit.commit.message+" ~ "+commit.html_url, true));
 	} catch (error) {
 		logger.error("checkGits - "+error.message, error.stack);
 	}});
@@ -37,7 +37,7 @@ bot.command({
 				stdout.split("\n").forEach(line => {
 					if (line[0] === " " && line[1] !== " ") {
 						changes = true;
-						irc.say(input.context, line.trim());
+						irc.say(input.context, line.trim(), true);
 					}
 				});
 				if (!changes)
