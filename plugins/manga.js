@@ -1,31 +1,24 @@
 // combined mangafox / mangastream / batoto
 "use strict";
 
-const [DB, lib, web, ticker, ial] = plugin.importMany("DB", "lib", "web", "ticker", "ial"),
-	mangaDB = {
-		mangafox: new DB.Json({filename: "manga/mangafox"}),
-		mangastream: new DB.Json({filename: "manga/mangastream"}),
-		batoto: new DB.Json({filename: "manga/batoto"})
-	};
+const [DB, lib, web, ticker, ial] = plugin.importMany("DB", "lib", "web", "ticker", "ial");
+const mangaDB = {
+	mangafox: new DB.Json({filename: "manga/mangafox"}),
+	mangastream: new DB.Json({filename: "manga/mangastream"}),
+	batoto: new DB.Json({filename: "manga/batoto"})
+};
 
 function isNewRelease(release, manga) {
-	if (!manga.latest || !manga.latest.length) {
-		manga.latest = [ release.date ];
+	if (!manga.latest) {
+		manga.latest = [ release.title ];
 		return true;
 	}
-	let newest = 0;
-	for (let i = 0; i < manga.latest.length; i++) {
-		if (!Number.isInteger(manga.latest[i])) //cruft
-			manga.latest[i] = manga.latest[i].date;
-		newest = manga.latest[i] > newest ? manga.latest[i] : newest;
-	}
-	if (release.date > newest) {
-		manga.latest.push(release.date);
-		if (manga.latest.length > 5)
-			manga.latest.shift();
-		return true;
-	}
-	return false;
+	if (manga.latest.includes(release.title))
+		return false;
+	if (manga.latest.length > 9)
+		manga.latest.shift();
+	manga.latest.push(release.title);
+	return true;
 }
 
 function findUpdates(type, releases) {
