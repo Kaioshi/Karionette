@@ -12,11 +12,10 @@ function checkGits(target) {
 	lib.runCallback(function *main(cb) { try {
 		const latest = gitDB.getOne("latest");
 		const resp = JSON.parse(yield web.fetchAsync("https://api.github.com/repos/Kaioshi/Karionette/commits"+(latest ? "?since="+latest : ""), null, cb));
-		if (resp[0].commit.author.date === latest)
-			return; // nothing new
-		gitDB.saveOne("latest", resp[0].commit.author.date);
+		if (resp[0].commit.author.date !== latest)
+			gitDB.saveOne("latest", resp[0].commit.author.date);
 		if (target)
-			resp.forEach(commit => irc.say(target, commit.commit.message+" ~ "+commit.html_url, true));
+			resp.filter(commit => commit.commit.author.date !== latest).forEach(commit => irc.say(target, commit.commit.message+" ~ "+commit.html_url, true));
 	} catch (error) {
 		logger.error("checkGits - "+error.message, error.stack);
 	}});
