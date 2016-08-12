@@ -274,24 +274,24 @@ class IRC {
 			}
 		}, delay);
 	}
-	longMessage(target, message) {
-		while (message.length > 345) {
+	longMessage(target, message, maxLines = 3) {
+		while (message.length > 345 && maxLines--) {
 			const index = message.lastIndexOf(" ", 345); // -5 for ".."
 			this.queueMessage(target+message.slice(0, index)+" ..", true);
 			message = message.slice(index+1);
 		}
-		if (message.length)
+		if (maxLines > 0 && message.length)
 			this.queueMessage(target+message, true);
 	}
-	say(target, message, lowPriority) {
+	say(target, message, lowPriority, maxLines) {
 		if (message.length > 345)
-			this.longMessage("PRIVMSG "+target+" :", message);
+			this.longMessage("PRIVMSG "+target+" :", message, maxLines);
 		else
 			this.queueMessage("PRIVMSG "+target+" :"+message, lowPriority);
 	}
-	notice(target, message, lowPriority) {
+	notice(target, message, lowPriority, maxLines) {
 		if (message.length > 345)
-			this.longMessage("NOTICE "+target+" :", message);
+			this.longMessage("NOTICE "+target+" :", message, maxLines);
 		else
 			this.queueMessage("NOTICE "+target+" :"+message, lowPriority);
 	}
