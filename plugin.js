@@ -4,7 +4,7 @@ module.exports = function (globals) {
 	let vmContext;
 	const vm = require("vm"),
 		fs = require("fs"),
-		importables = { fs, process, require, console, setInterval, setTimeout, clearInterval },
+		importables = { fs, process, require, console, setInterval, setTimeout, clearInterval, Buffer },
 		plugin = { sandbox: { globals } };
 
 	function logInfo(line) {
@@ -31,7 +31,7 @@ module.exports = function (globals) {
 
 	function pluginImport(importName) {
 		if (importables[importName] === undefined && !loadPlugin("core/"+importName+".js") && !loadPlugin("plugins/"+importName+".js"))
-				throw new Error("No such importable: "+importName);
+			throw new Error("No such importable: "+importName);
 		return importables[importName];
 	}
 
