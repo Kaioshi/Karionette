@@ -31,7 +31,7 @@ function getErrorAnnounceList() {
 bot.event({
 	handle: "errorAnnouncer",
 	event: "Event: Error",
-	callback: error => getErrorAnnounceList().forEach(nick => irc.notice(nick, "\x02Error\x02: "+error))
+	callback: error => getErrorAnnounceList().forEach(nick => irc.notice(nick, "\x02Error\x02: "+error, true))
 });
 
 bot.event({
@@ -39,7 +39,7 @@ bot.event({
 	event: "Event: Error Stack",
 	callback: function (error) {
 		const errorMessage = error.split("\n");
-		getErrorAnnounceList().forEach(nick => errorMessage.forEach(err => irc.notice(nick, err)));
+		getErrorAnnounceList().forEach(nick => errorMessage.forEach(err => irc.notice(nick, err, true)));
 	}
 });
 
