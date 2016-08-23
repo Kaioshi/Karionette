@@ -104,6 +104,19 @@ bot.event({
 });
 
 bot.event({
+	handle: "ialMsg",
+	event: "PRIVMSG",
+	callback: function (input) {
+		if (!input.channel) {
+			if (!ial.User(input.nick))
+				ial.addUser(input.nick, input.address);
+		} else {
+			ial.Channel(input.channel).setActive(input.nick);
+		}
+	}
+});
+
+bot.event({
 	handle: "ialJoin",
 	event: "JOIN",
 	callback: function ialJoin(input) {
@@ -234,14 +247,5 @@ bot.event({
 	callback: function ialRawTopic(input) {
 		let params = input.raw.split(" ");
 		ial.Channel(params[3]).topic = params.slice(4).join(" ").slice(1);
-	}
-});
-
-bot.event({
-	handle: "ialMsg",
-	event: "PRIVMSG",
-	condition: function (input) { return input.channel !== undefined; },
-	callback: function (input) {
-		ial.Channel(input.channel).setActive(input.nick);
 	}
 });
