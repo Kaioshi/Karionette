@@ -125,7 +125,6 @@ class IRCParser { // this class lives in the future, man.
 				params.command = params.command[1];
 			}
 		}
-		params.message = input.slice(3).join(" ").slice(1);
 		if (params.command) {
 			if (bot.commandNeedsAdmin(params.command) && !logins.isAdmin(params.nick)) {
 				irc.say(params.context, "Bitch_, please.");
@@ -171,6 +170,7 @@ class IRCParser { // this class lives in the future, man.
 		}
 	}
 	parse(inputLine) {
+		let handleMessage = false;
 		if (inputLine.slice(0,4) === "PING")
 			return irc.pong(inputLine.slice(6));
 		if (ignore.check(inputLine))
@@ -197,7 +197,8 @@ class IRCParser { // this class lives in the future, man.
 		}
 		switch (type) {
 		case "PRIVMSG":
-			this._handleMessage(inputLine, input, params);
+			params.message = input.slice(3).join(" ").slice(1);
+			handleMessage = true;
 			break;
 		case "MODE":
 			params.mode = (input[3][0] !== ":" ? input[3] : input[3].slice(1));
@@ -232,7 +233,9 @@ class IRCParser { // this class lives in the future, man.
 			logger.server(inputLine);
 			break;
 		}
-		return bot.emitEvent(type, params);
+		bot.emitEvent(type, params);
+		if (handleMessage) // process (possible) commands after events
+			return this._handleMessage(inputLine, input, params);
 	}
 }
 
