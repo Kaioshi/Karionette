@@ -3,6 +3,8 @@ typings/
 node_modules/
 ps.sh
 jsconfig.json
-data/
+data/*
+!data/www/
+!data/www/*
 config
 .eslintrc.json

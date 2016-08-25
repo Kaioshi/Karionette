@@ -23,10 +23,10 @@ function writeList(user, list, type, tpl) {
 			target: type === "c" ? "#"+user.target : user.target,
 			list: list,
 			data: user.lists[list].sort(function (a, b) {
-					return a.name.toLocaleString().toLowerCase().localeCompare(b.name.toLocaleString().toLowerCase());
-				}).map(function (item) {
-					return "<li><a href='"+(item.link ? item.link : "#")+"'>"+item.name+"</a></li>";
-				}).join("\n")
+				return a.name.toLocaleString().toLowerCase().localeCompare(b.name.toLocaleString().toLowerCase());
+			}).map(function (item) {
+				return "<li><a href='"+(item.link ? item.link : "#")+"'>"+item.name+"</a></li>";
+			}).join("\n")
 		},
 		template = fs.readFileSync("data/www/templates/" + tpl + ".html").toString(),
 		target = user.target.toLowerCase(),
@@ -289,7 +289,7 @@ function pastaCmd(input) {
 		user.template = template;
 		pastaDB.saveOne(target, user);
 		irc.say(input.context, writeList(user, list, type, user.template));
-	break;
+		break;
 	default:
 		irc.say(input.context, bot.cmdHelp(cmd, "syntax"));
 		break;
