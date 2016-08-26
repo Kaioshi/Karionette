@@ -107,8 +107,7 @@ cursor: pointer;
 	font-size: 0.8em;
 	text-align: center;
 	padding: 5px;
-	height: 1.3em;
-	background-color: rgba(0, 0, 0, 0.5);
+	background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.6), rgba(0,0,0,0.5), rgba(0,0,0,0));
 }
 
 .anime-search {
