@@ -290,29 +290,25 @@ bot.command({
 	help: "Seriously?",
 	syntax: config.command_prefix+"help [<command or alias you want help with>] - supply no command in order to list commands (does not list aliases).",
 	callback: function (input) {
-		let cmd, help, syntax, options;
 		if (!input.args) { // show all commands
 			irc.say(input.context, "Available commands: "+bot.cmdList().sort().join(", "));
 			return;
 		}
-		cmd = input.args[0].toLowerCase();
-		help = bot.cmdHelp(cmd, "help");
+		const cmd = input.args[0].toLowerCase(),
+			help = bot.cmdHelp(cmd, "help");
 		if (help) {
-			syntax = bot.cmdHelp(cmd, "syntax");
-			options = bot.cmdHelp(cmd, "options");
+			const syntax = bot.cmdHelp(cmd, "syntax");
 			irc.say(input.context, help);
 			if (syntax)
 				irc.say(input.context, syntax);
-			if (options)
-				irc.say(input.context, options);
 		} else {
 			// maybe it's an alias! with alias help set!
-			help = alias.helpDB.getOne(cmd);
-			if (help && (help.help || help.syntax)) {
-				if (help.help)
-					irc.say(input.context, "[Help] "+help.help);
-				if (help.syntax)
-					irc.say(input.context, "[Help] Alias syntax: "+config.command_prefix+cmd+" "+help.syntax);
+			const aliasHelp = alias.helpDB.getOne(cmd);
+			if (aliasHelp && (aliasHelp.help || aliasHelp.syntax)) {
+				if (aliasHelp.help)
+					irc.say(input.context, "[Help] "+aliasHelp.help);
+				if (aliasHelp.syntax)
+					irc.say(input.context, "[Help] Alias syntax: "+config.command_prefix+cmd+" "+aliasHelp.syntax);
 			} else {
 				irc.say(input.context, "\""+cmd+"\" either has no help set, or isn't a command or alias.");
 			}
