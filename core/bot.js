@@ -34,11 +34,10 @@ class Bot {
 	cmdHelp(cmd, type) {
 		const command = this._commandAliases[cmd] || cmd;
 		if (!this._commands[command] || !this._commands[command][type])
-			return "[Help] No such help type: "+type;
+			return;
 		switch (type) {
 			case "help": return "[Help] "+this._commands[command][type];
 			case "syntax": return "[Help] Syntax: "+this._commands[command][type];
-			case "options": return "[Help] Options: "+this._commands[command][type];
 			default: return;
 		}
 	}
