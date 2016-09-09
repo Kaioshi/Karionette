@@ -29,6 +29,8 @@ function getDeliveryMethod(nick) { // this ugliness brought to you by the letter
 }
 
 function findNewPosts(subreddit) {
+	if (!subreddit)
+		return; // probably failed JSON.parse
 	const methods = {}, isOnline = {}, sub = subreddit.sub.toLowerCase(), entry = subDB.getOne(sub);
 	let changed = false;
 	entry.seen = entry.seen || [];
@@ -55,7 +57,14 @@ function findNewPosts(subreddit) {
 	}
 }
 
-function trimJson(res) {
+function trimJson(source) {
+	let res;
+	try {
+		res = JSON.parse(source);
+	} catch (err) {
+		// die quietly. sometimes reddit returns non-JSON when overloaded.
+		return;
+	}
 	const ret = [], hits = res.data.children;
 	for (let i = 0; i < hits.length; i++) {
 		ret.push({
@@ -76,7 +85,7 @@ function checkSubs() {
 			const sub = subDB.data.obj[subDB.data.keys[i]];
 			if (!sub.announce || !sub.announce.length)
 				continue;
-			findNewPosts(trimJson(JSON.parse(yield web.fetchAsync(r(sub.subreddit), null, cb))));
+			findNewPosts(trimJson(yield web.fetchAsync(r(sub.subreddit), null, cb), sub.subreddit));
 		}
 	} catch (err) {
 		logger.error("checkSubs - "+err.message, err.stack);
