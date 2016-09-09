@@ -2,6 +2,10 @@
 "use strict";
 
 const [web, lib] = plugin.importMany("web", "lib");
+const regex = {
+	anime: [ /https?:\/\/myanimelist\.net\/anime\/([0-9]+)\/?/, /https?:\/\/myanimelist\.net\/anime\.php\?id=([0-9]+)/ ],
+	manga: [ /https?:\/\/myanimelist\.net\/manga\/([0-9]+)\/?/, /https?:\/\/myanimelist\.net\/anime\.php\?id=([0-9]+)/ ]
+};
 
 function getGenres(genres) {
 	let ret = [];
@@ -14,32 +18,26 @@ function getGenres(genres) {
 }
 
 function doSearch(type, context, title, synopsis, google) {
-	let id;
-	web.google("site:myanimelist.net/"+type+"/ "+title).then(function (results) {
+	lib.runCallback(function *main(cb) { try {
+		const results = yield web.googleAsync(`site:myanimelist.net/${type}/ ${title}`, 1, cb);
 		if (results.notFound) {
 			irc.say(context, web.notFound());
 			return;
 		}
-		id = new RegExp("http://myanimelist\\.net/"+type+"/([0-9]+)/?", "i").exec(results.items[0].url);
-		if (!id)
-			id = new RegExp("http://myanimelist\\.net/"+type+"\\.php\\?id=([0-9]+)", "i").exec(results.items[0].url);
-		if (id)
-			id = id[1];
-		else {
+		let id = regex[type][0].exec(results.items[0].url) || regex[type][1].exec(results.items[0].url);
+		if (!id) {
 			irc.say(context, "Couldn't parse the result from google. Woops.");
-			logger.debug("Need a better regex! URL: "+results[0].url);
+			logger.debug("Need a better regex, URL: "+results.items[0].url);
 			return;
 		}
+		id = id[1];
 		if (google) {
-			irc.say(context, results[0].title.replace(" - MyAnimeList.net", "")+" - "+results.items[0].url+" - "+results.items[0].content);
-		} else {
-			return web.json("https://myanimelistrt.azurewebsites.net/2/"+type+"/"+id);
+			irc.say(context, `${results.items[0].title.replace(" - MyAnimeList.net", "")} - ${results.items[0].url} - ${results.items[0].content}`);
+			return;
 		}
-	}).then(function (media) {
-		if (!media)
-			return; // did the google option ^
+		const media = yield web.jsonAsync(`https://myanimelistrt.azurewebsites.net/2/${type}/${id}`, null, cb);
 		if (media.error) {
-			irc.say(context, "The unofficial MAL API said: "+media.error+" - "+media.details);
+			irc.say(context, `The unofficial MAL API said: ${media.error} - ${media.details}`);
 			return;
 		}
 		let eps = "";
@@ -51,10 +49,10 @@ function doSearch(type, context, title, synopsis, google) {
 		irc.say(context, lib.decode(media.title)+" ~ Rank #"+media.rank+" ["+getGenres(media.genres)+"]"+
 			eps+" - "+media.status+" ~ http://myanimelist.net/"+type+"/"+id);
 		if (synopsis)
-			irc.say(context, lib.stripHtml(lib.decode(media.synopsis)), 1);
-	}).catch(function (error) {
-		logger.error("Error in ;mal -> ", error);
-	});
+			irc.say(context, lib.stripHtml(lib.decode(media.synopsis)), true, 1);
+	} catch (err) {
+		logger.error(";mal -> "+err.message, err);
+	}});
 }
 
 bot.command({
