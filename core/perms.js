@@ -56,6 +56,8 @@ function hasPermission(from, nick, user, type, item) {
 function Action(from, action, type, item, username) {
 	const nick = from.split("!")[0],
 		user = logins.getUsername(nick);
+	if (user === undefined)
+		return false;
 	if (hasPermission(from, nick, user, type)) {
 		const act = action.split(" ");
 		alterEntry((username ? username : user), act[1], act[0], type, item);
@@ -101,6 +103,14 @@ function isOwner(from, type, item) {
 	return true; // unclaimed
 }
 
+function hasOwner(type, item) {
+	const perm = permissionDB.getOne(type);
+	if (perm && perm[item] && Object.keys(perm[item]).length)
+		if (perm[item].owner !== undefined)
+			return true;
+	return false;
+}
+
 function hasPerms(type, item) {
 	const perm = permissionDB.getOne(type);
 	if (perm && perm[item] && Object.keys(perm[item]).length)
@@ -142,6 +152,7 @@ const perms = {
 	Info: Info,
 	isOwner: isOwner,
 	hasPerms: hasPerms,
+	hasOwner: hasOwner,
 	Check: Check
 };
 
