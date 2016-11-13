@@ -112,7 +112,7 @@ bot.command({
 				return;
 			}
 			aliasEntry = alias.db.getOne(cmd);
-			if (aliasEntry && !perms.isOwner(input.user, "alias", cmd)) {
+			if (aliasEntry && perms.hasOwner("alias", cmd) && !perms.isOwner(input.user, "alias", cmd)) {
 				irc.say(input.context, "You need to own the \""+cmd+"\" alias to overwrite it.");
 				return;
 			}
