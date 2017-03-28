@@ -21,7 +21,7 @@ class Logger {
 	appendLog(date, line) {
 		if (date.getDate() !== this.logDay)
 			this.updateLogLocation(date);
-		return fs.appendFile(this.logFile, line.replace(colourStrip, ""));
+		return fs.appendFileSync(this.logFile, line.replace(colourStrip, ""));
 	}
 	log(line, print) {
 		const date = new Date();
