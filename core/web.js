@@ -20,18 +20,18 @@ class Web {
 				args.push(`-A "${this.userAgent}"`);
 			if (opts && opts.headers && Array.isArray(opts.headers) && opts.headers.length)
 				opts.headers.forEach(h => { args.push("-H"); args.push(h); })
-			opts = opts || { opts: { timeout: 15000 } };
+			opts = opts || { opts: { timeout: 15000, maxBuffer: 524288 } };
 			run("curl", args, opts.opts, function (error, stdout, stderr) {
 				if (error) {
 					if (error.code === "ENOENT") {
 						logger.error("You need to install curl on the system.");
 						throw new Error("curl is not installed.");
+					} // quietly error. this maxBuffer stops us downloading huge files
+					if (error.message && error.message === "stdout maxBuffer exceeded") {
+						logger.debug("exceeded max length: "+opts.opts.maxBuffer);
+						return;
 					}
 					throw new Error(error);
-				}
-				if (error && error.code === "ENOENT") {
-					logger.error("You need to install curl on the system.");
-					throw new Error("curl is not installed.");
 				}
 				if (stderr.length)
 					reject(new Error(stderr.replace(/\n|\t|\r|curl: /g, "")));
