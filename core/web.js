@@ -22,16 +22,23 @@ class Web {
 				opts.headers.forEach(h => { args.push("-H"); args.push(h); })
 			opts = opts || { opts: { timeout: 15000, maxBuffer: 524288 } };
 			run("curl", args, opts.opts, function (error, stdout, stderr) {
-				if (error) {
-					if (error.code === "ENOENT") {
-						logger.error("You need to install curl on the system.");
-						throw new Error("curl is not installed.");
-					} // quietly error. this maxBuffer stops us downloading huge files
+				if (error) { // XXX reconsider later
+					// quietly error if it is maxBuffer related - stops us downloading huge files
 					if (error.message && error.message === "stdout maxBuffer exceeded") {
 						logger.debug("exceeded max length: "+opts.opts.maxBuffer);
 						return;
 					}
-					throw new Error(error);
+					switch (error.code) {
+					case "ENOENT":
+						logger.error("You need to install curl on the system.");
+						throw new Error("curl is not installed.");
+						break;
+					case 6: // DNS error, let stderr throw it - if we throw here the stack reveals full urls
+						break;
+					default:
+						throw new Error(error);
+						break;
+					}
 				}
 				if (stderr.length)
 					reject(new Error(stderr.replace(/\n|\t|\r|curl: /g, "")));
@@ -39,53 +46,6 @@ class Web {
 					resolve(stdout);
 			});
 		});
-	}
-	fetchAsync(uri, opts, callback) {
-		let args = [ "--compressed", "-sSL", encodeURI(uri) ];
-		if (!opts || !opts.nouseragent)
-			args.push(`-A "${this.userAgent}"`);
-		if (opts && opts.headers && Array.isArray(opts.headers) && opts.headers.length)
-			opts.headers.forEach(h => { args.push("-H"); args.push(h); });
-		opts = opts || { opts: { timeout: 15000 } };
-		run("curl", args, opts.opts, function (error, stdout, stderr) {
-			if (error && error.code === "ENOENT") {
-				logger.error("You need to install curl on the system.");
-				return callback(new Error("curl is not installed."));
-			}
-			if (stderr.length)
-				return callback(new Error(stderr.replace(/\n|\t|\r|curl: /g, "")));
-			return callback(null, stdout);
-		});
-	}
-	jsonAsync(uri, opts, callback) {
-		this.fetchAsync(uri, opts, (err, stdout) => {
-			if (err)
-				return callback(err);
-			return callback(null, JSON.parse(stdout));
-		});
-	}
-	googleSearchAsync(uri, callback) {
-		this.jsonAsync(uri, null, (err, g) => {
-			if (err)
-				return callback(err);
-			if (g.error)
-				throw new Error("web.googleSearchAsync: "+g.error.message);
-			if (g.queries.request[0].totalResults === "0")
-				return callback(null, { notFound: true });
-			return callback(null, {
-				items: g.items.map(function (item) {
-					return {
-						title: lib.singleSpace(item.title),
-						url: item.link,
-						content: String(item.snippet).replace(/\x01|\n|\t|\r/g, "")
-					};
-				})
-			});
-		});
-	}
-	googleAsync(term, maxResults, callback) {
-		const uri = `https://www.googleapis.com/customsearch/v1?key=${config.api.googlesearch}&cx=002465313170830037306:5cfvjccuofo&num=${maxResults || 1}&prettyPrint=false&q=${term.trim()}`;
-		this.googleSearchAsync(uri, callback);
 	}
 	json(uri, opts) { return this.fetch(uri, opts).then(JSON.parse); }
 	googleSearch(uri) {
@@ -112,28 +72,6 @@ class Web {
 	googleImage(term, maxResults) {
 		const uri = `https://www.googleapis.com/customsearch/v1?key=${config.api.googlesearch}&cx=002465313170830037306:5cfvjccuofo&num=${maxResults || 1}&prettyPrint=false&searchType=image&q=${term.trim()}`;
 		return this.googleSearch(uri);
-	}
-	bing(term, maxResults) {
-		const uri = "https://api.datamarket.azure.com/Bing/SearchWeb/Web?$format=json&Query='"+
-			term+"'&Adult='Off'&Market='en-us'&$top="+(maxResults ? maxResults : 1),
-			auth = plugin.import("Buffer").from(config.api.bing+":"+config.api.bing).toString("base64");
-		return this.json(uri, { headers: [ "Authorization: Basic "+auth ] }).then(b => {
-			if (!b.d.results.length)
-				return { notFound: true };
-			return { items: b.d.results.map(function (item) { return { title: lib.singleSpace(item.Title), url: item.Url, content: item.Description }; }) };
-		});
-	}
-	bingAsync(term, maxResults, callback) {
-		const uri = "https://api.datamarket.azure.com/Bing/SearchWeb/Web?$format=json&Query='"+
-			term+"'&Adult='Off'&Market='en-us'&$top="+(maxResults ? maxResults : 1),
-			auth = plugin.import("Buffer").from(config.api.bing+":"+config.api.bing).toString("base64");
-		this.jsonAsync(uri, { headers: [ "Authorization: Basic "+auth ] }, (err, b) => {
-			if (err)
-				return callback(err);
-			if (!b.d.results.length)
-				return callback(null, { notFound: true });
-			return callback(null, { items: b.d.results.map(function (item) { return { title: lib.singleSpace(item.Title), url: item.Url, content: item.Description }; })})
-		});
 	}
 	youtubeSearch(searchTerm) {
 		const uri = `https://www.googleapis.com/youtube/v3/search?part=id&maxResults=1&q=${searchTerm}&safeSearch=none&type=video&fields=items&key=${config.api.youtube}`;
