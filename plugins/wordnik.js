@@ -18,15 +18,15 @@ bot.command({
 	help: "Defines words or phrases using wordnik.",
 	syntax: config.command_prefix+"define <word/phrase> - Example: "+config.command_prefix+"define butt",
 	arglen: 1,
-	callback: function define(input) {
+	callback: async function define(input) {
 		if (!config.api.wordnik) {
 			irc.say(input.context, "The wordnik plugin requires an API key to be present in config, go to http://developer.wordnik.com to get one.");
 			return;
 		}
-		lib.runCallback(function *main(cb) { try {
+		try {
 			const query = input.data.trim();
 			let uri = `http://api.wordnik.com:80/v4/word.json/${query}/definitions?limit=3&includeRelated=true&sourceDictionaries=wordnet,wiktionary&useCanonical=false&includeTags=false&api_key=${config.api.wordnik}`,
-				resp = JSON.parse(yield web.fetchAsync(uri, null, cb));
+				resp = JSON.parse(await web.fetch(uri, null));
 			if (!Array.isArray(resp)) {
 				irc.say(input.context, "Invalid wordnik API key.");
 				return;
@@ -37,11 +37,11 @@ bot.command({
 			}
 			irc.say(input.context, resp.map((def, i) => `${i+1}) [${def.partOfSpeech}] ${def.text}`).join(", "));
 			uri = `http://api.wordnik.com:80/v4/word.json/${query}/topExample?useCanonical=false&api_key=${config.api.wordnik}`;
-			resp = JSON.parse(yield web.fetchAsync(uri, null, cb));
+			resp = JSON.parse(await web.fetch(uri, null));
 			if (resp.text && resp.title)
 				irc.say(input.context, lib.decode(lib.singleSpace(`${resp.text} ${resp.title}`)));
 		} catch (err) {
 			logger.error(";define - "+err.message, err.stack);
-		}});
+		};
 	}
 });

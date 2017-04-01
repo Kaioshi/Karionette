@@ -3,22 +3,22 @@ const [lib, web, DB] = plugin.importMany("lib", "web", "DB"),
 	run = plugin.import("require")("child_process").execFile,
 	gitDB = new DB.Json({filename: "gitannounce2"});
 
-function checkGits(target) {
+async function checkGits(target) {
 	if (!gitDB.hasOne("announce"))
 		return;
 	const aList = gitDB.getOne("announce");
 	if (!aList || !aList.length)
 		return;
-	lib.runCallback(function *main(cb) { try {
+	try {
 		const latest = gitDB.getOne("latest");
-		const resp = JSON.parse(yield web.fetchAsync("https://api.github.com/repos/Kaioshi/Karionette/commits"+(latest ? "?since="+latest : ""), null, cb));
+		const resp = await web.json("https://api.github.com/repos/Kaioshi/Karionette/commits"+(latest ? "?since="+latest : ""), null);
 		if (resp[0].commit.author.date !== latest)
 			gitDB.saveOne("latest", resp[0].commit.author.date);
 		if (target)
 			resp.filter(commit => commit.commit.author.date !== latest).forEach(commit => irc.say(target, commit.commit.message+" ~ "+commit.html_url, true));
 	} catch (error) {
 		logger.error("checkGits - "+error.message, error.stack);
-	}});
+	}
 }
 
 bot.command({

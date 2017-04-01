@@ -6,14 +6,14 @@ bot.command({
 	help: "Bing searches things.",
 	syntax: config.command_prefix+"bing Oh god why am I using bing",
 	arglen: 1,
-	callback: function bing(input) {
+	callback: async function bing(input) {
 		if (!config.api.bing) {
 			irc.say(input.context, "You need a bing api key in the config. "+
 				"Get one at https://datamarket.azure.com/dataset/bing/searchweb");
 			return;
 		}
-		lib.runCallback(function *main(cb) { try {
-			const results = yield web.bingAsync(input.data, 1, cb);
+		try {
+			const results = await web.bing(input.data, 1);
 			if (results.notFound) {
 				irc.say(input.context, web.notFound());
 				return;
@@ -26,6 +26,6 @@ bot.command({
 			}
 		} catch (err) {
 			logger.error(`;bing - ${err.message}`, err);
-		}});
+		};
 	}
 });

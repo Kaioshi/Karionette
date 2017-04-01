@@ -77,19 +77,19 @@ function trimJson(source) {
 	return { sub: hits[0].data.subreddit, posts: ret };
 }
 
-function checkSubs() {
+async function checkSubs() {
 	if (!subDB.size())
 		return;
-	lib.runCallback(function *(cb) { try {
+	try {
 		for (let i = 0; i < subDB.data.keys.length; i++) {
 			const sub = subDB.data.obj[subDB.data.keys[i]];
 			if (!sub.announce || !sub.announce.length)
 				continue;
-			findNewPosts(trimJson(yield web.fetchAsync(r(sub.subreddit), null, cb), sub.subreddit));
+			findNewPosts(trimJson(await web.fetch(r(sub.subreddit), null), sub.subreddit));
 		}
 	} catch (err) {
 		logger.error("checkSubs - "+err.message, err.stack);
-	}});
+	}
 }
 
 function subscribe(nick, sub) {

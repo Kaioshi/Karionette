@@ -49,29 +49,29 @@ function findUpdates(type, releases) {
 	return hadUpdates;
 }
 
-function checkOne(type, context) {
+async function checkOne(type, context) {
 	if (!mangaDB[type].size()) {
 		if (context)
 			irc.say(context, `I'm  not tracking any releases on ${type}.`);
 		return;
 	}
-	lib.runCallback(function *(cb) { try {
-		const releases = JSON.parse(yield web.fetchAsync("http://felt.ninja:5667/?source="+type, null, cb));
+	try {
+		const releases = await web.json("http://felt.ninja:5667/?source="+type, null);
 		if (!findUpdates(type, releases, context) && context)
 			irc.say(context, "Nothing new. :\\");
 	} catch (err) {
 		logger.error(`manga - checkOne: ${err.message}`, err);
-	}});
+	}
 }
 
-function checkAll() {
-	lib.runCallback(function *(cb) { try {
+async function checkAll() {
+	try {
 		const all = [ "mangafox", "mangastream", "batoto" ].filter(type => mangaDB[type].size() > 0),
-			releases = JSON.parse(yield web.fetchAsync("http://felt.ninja:5667/", null, cb));
+			releases = await web.json("http://felt.ninja:5667/", null);
 		all.forEach(type => findUpdates(type, releases.filter(rel => rel.source === type)));
 	} catch (err) {
 		logger.error(`manga - checkAll: ${err.message}`, err);
-	}});
+	}
 }
 
 bot.event({

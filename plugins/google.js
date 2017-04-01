@@ -7,9 +7,9 @@ bot.command({
 	help: "Google search - returns the first hit.",
 	syntax: `${config.command_prefix}g <search term> - Example: ${config.command_prefix}g puppies`,
 	arglen: 1,
-	callback: function googleSearch(input) {
-		lib.runCallback(function *main(cb) { try {
-			const results = yield web.googleAsync(input.data.trim(), 1, cb);
+	callback: async function googleSearch(input) {
+		try {
+			const results = await web.google(input.data.trim(), 1);
 			if (results.notFound) {
 				irc.say(input.context, web.notFound());
 				return;
@@ -17,7 +17,7 @@ bot.command({
 			irc.say(input.context, `${results.items[0].title} ~ ${results.items[0].url} ~ ${results.items[0].content}`, false, 1);
 		} catch (err) {
 			logger.error(";g - "+err.message, err);
-		}});
+		}
 	}
 });
 
@@ -37,8 +37,9 @@ bot.command({
 	help: "Google image search - returns the first hit.",
 	syntax: `${config.command_prefix}gi puppies`,
 	arglen: 1,
-	callback: function googleImageSearch(input) {
-		web.googleImage(input.data.trim()).then(function (results) {
+	callback: async function googleImageSearch(input) {
+		try {
+			const results = await web.googleImage(input.data.trim());
 			if (results.notFound) {
 				irc.say(input.context, web.notFound());
 				return;
@@ -48,8 +49,8 @@ bot.command({
 			if (url.lastIndexOf(".") < questionIndex)
 				results.items[0].url = url.substring(0, questionIndex);
 			irc.say(input.context, `${results.items[0].title} ~ ${results.items[0].url}`, false, 1);
-		}).catch(function (err) {
+		} catch(err) {
 			logger.error(";gi - "+err.message, err);
-		});
+		}
 	}
 });

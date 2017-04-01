@@ -17,9 +17,9 @@ function getGenres(genres) {
 	return ret.join(", ");
 }
 
-function doSearch(type, context, title, synopsis, google) {
-	lib.runCallback(function *main(cb) { try {
-		const results = yield web.googleAsync(`site:myanimelist.net/${type}/ ${title}`, 1, cb);
+async function doSearch(type, context, title, synopsis, google) {
+	try {
+		const results = await web.google(`site:myanimelist.net/${type}/ ${title}`, 1);
 		if (results.notFound) {
 			irc.say(context, web.notFound());
 			return;
@@ -35,7 +35,7 @@ function doSearch(type, context, title, synopsis, google) {
 			irc.say(context, `${results.items[0].title.replace(" - MyAnimeList.net", "")} - ${results.items[0].url} - ${results.items[0].content}`);
 			return;
 		}
-		const media = yield web.jsonAsync(`https://myanimelistrt.azurewebsites.net/2/${type}/${id}`, null, cb);
+		const media = await web.json(`https://myanimelistrt.azurewebsites.net/2/${type}/${id}`, null);
 		if (media.error) {
 			irc.say(context, `The unofficial MAL API said: ${media.error} - ${media.details}`);
 			return;
@@ -52,7 +52,7 @@ function doSearch(type, context, title, synopsis, google) {
 			irc.say(context, lib.stripHtml(lib.decode(media.synopsis)), true, 1);
 	} catch (err) {
 		logger.error(";mal -> "+err.message, err);
-	}});
+	}
 }
 
 bot.command({

@@ -9,7 +9,7 @@ bot.command({
 	syntax: config.command_prefix + "yt [-c|--channel] <search terms> - Example: "+config.command_prefix+
 		"yt we like big booty mitches",
 	arglen: 1,
-	callback: function (input) {
+	callback: async function (input) {
 		let uri, resp, desc, searchTerm;
 		if (config.api.youtube === undefined) {
 			irc.say(input.context, "You need a YouTube API key in the config. Get one: "+
@@ -22,7 +22,8 @@ bot.command({
 			searchTerm = input.args.slice(1).join(" ");
 			uri = "https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q="+searchTerm+
 				"&safeSearch=none&type=channel&fields=items&key="+config.api.youtube;
-			return web.json(uri).then(function (yt) {
+			try {
+				const yt = await web.json(uri);
 				if (!yt.items.length)
 					irc.say(input.context, "\""+searchTerm+"\" doesn't seem to be a channel on YouTube.");
 				else {
@@ -32,11 +33,13 @@ bot.command({
 						" - Channel launched on "+resp.snippet.publishedAt.split("T")[0]+
 						" ~ https://youtube.com/channel/"+resp.id.channelId);
 				}
-			}, function (error) {
+			} catch (error) {
 				irc.say(input.context, error.message);
-			});
+			}
+			break;
 		default:
-			return web.youtubeSearch(input.data).then(function (yt) {
+			try {
+				const yt = await web.youtubeSearch(input.data);
 				yt.date = yt.date.split("T")[0];
 				yt.views = lib.commaNum(yt.views);
 				if (config.youtube_format !== undefined) {
@@ -46,9 +49,9 @@ bot.command({
 				} else {
 					irc.say(input.context, lib.formatOutput("{title} - [{duration}] {date} - {channel} - {views} views ~ {link}", yt), false);
 				}
-			}, function (error) {
+			} catch (error) {
 				irc.say(input.context, error.message);
-			});
+			}
 		}
 	}
 });

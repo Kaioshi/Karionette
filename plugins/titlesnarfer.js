@@ -10,53 +10,49 @@ let titleReg, sayTitle;
 
 if (config.titlesnarfer_inline) {
 	titleReg = /<title?[^>]+>([^<]+)<\/title>/i;
-	sayTitle = function (context, uri, old, record, length) {
+	sayTitle = async function (context, uri, old, record, length) {
 		if (urlIsTooRecent(uri.href, record))
 			return;
-		lib.runPromise(function *() {
-			try {
-				const body = yield web.fetch(uri.href, {}, length);
-				if (!body) {
-					logger.warn(uri.href+" returned no body.");
-					return;
-				}
-				const reg = titleReg.exec(body.replace(/\n|\t|\r/g, ""));
-				if (!reg || !reg[1]) {
-					if (record)
-						recordURL(record[0], record[1], record[2]);
-					return;
-				}
-				const title = lib.singleSpace(lib.decode(reg[1]));
+		try {
+			const body = await web.fetch(uri.href, (length ? { opts: { timeout: 15000, maxBuffer: length } } : null));
+			if (!body) {
+				logger.warn(uri.href+" returned no body.");
+				return;
+			}
+			const reg = titleReg.exec(body.replace(/\n|\t|\r/g, ""));
+			if (!reg || !reg[1]) {
 				if (record)
 					recordURL(record[0], record[1], record[2]);
-				if (!isFilteredTitle(title))
-					irc.say(context, trimTitle(title)+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""));
-			} catch (error) {
-				logger.warn("sayTitle failed: "+error.message, error);
+				return;
 			}
-		});
+			const title = lib.singleSpace(lib.decode(reg[1]));
+			if (record)
+				recordURL(record[0], record[1], record[2]);
+			if (!isFilteredTitle(title))
+				irc.say(context, trimTitle(title)+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""));
+		} catch (error) {
+			logger.warn("sayTitle failed: "+error.message, error);
+		}
 	};
 } else {
-	sayTitle = function (context, uri, old, record) {
+	sayTitle = async function (context, uri, old, record) {
 		if (urlIsTooRecent(uri.href, record))
 			return;
-		lib.runCallback(function *(resume) {
-			try {
-				const result = JSON.parse(yield web.fetchAsync("http://felt.ninja:5036/?singlespace=1&uri="+uri.href, {}, resume));
-				if (result.error) {
-					if (record)
-						recordURL(record[0], record[1], record[2]);
-					return;
-				}
-				const title = lib.decode(result.title);
+		try {
+			const result = await web.json("http://felt.ninja:5036/?singleplace=1&uri="+uri.href);
+			if (result.error) {
 				if (record)
-					recordURL(record[0], record[1], record[2], title);
-				if (!isFilteredTitle(title))
-					irc.say(context, trimTitle(title)+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""));
-			} catch(err) {
-				logger.error("sayTitle failed: "+err, err);
+					recordURL(record[0], record[1], record[2]);
+				return;
 			}
-		});
+			const title = lib.decode(result.title);
+			if (record)
+				recordURL(record[0], record[1], record[2], title);
+			if (!isFilteredTitle(title))
+				irc.say(context, trimTitle(title)+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""));
+		} catch(err) {
+			logger.error("sayTitle failed: "+err, err);
+		}
 	};
 }
 
@@ -164,8 +160,9 @@ function getURL(channel, url) { // make this less bad.
 	urls = null;
 }
 
-function youtubeIt(context, id, old, record) {
-	return web.youtubeByID(id).then(function (yt) {
+async function youtubeIt(context, id, old, record) {
+	try {
+		const yt = await web.youtubeByID(id);
 		let resp;
 		yt.date = yt.date.split("T")[0];
 		yt.views = lib.commaNum(yt.views);
@@ -178,13 +175,13 @@ function youtubeIt(context, id, old, record) {
 		irc.say(context, resp+(old ? " ("+old+")" : ""));
 		if (record)
 			recordURL(record[0], record[1], record[2], yt.title);
-	}, function (error) {
-		if (error.reason === "keyInvalid")
+	} catch (error) {
+		if (error.reason === "keyInvalid") {
 			irc.say(context, "You need a youtube API key in the config. See https://developers.google.com/youtube/v3/getting-started");
-		// probably a wrong link past here, we don't care
-	}).catch(function (error) {
+			return;
+		}
 		logger.error("youtubeIt failed: "+error, error);
-	});
+	}
 }
 
 function findURL(line) {
@@ -220,7 +217,7 @@ bot.event({
 		return true;
 	},
 	callback: function titlesnarfer(input) {
-		let ext, old, record, videoID, domain;
+		let ext, old, record, videoID, domain, length;
 
 		old = getURL(input.channel, input.url.href) || false;
 		if (!old)
@@ -253,6 +250,9 @@ bot.event({
 				input.url.href = input.url.href.slice(0, -ext.length);
 			}
 			break;
+		case "amazon.com": // amazon titles are stupid-deep in the html
+			length = 819200;
+			break;
 		default:
 			if (input.url.path.length > 1 && input.url.path.indexOf(".") > -1) {
 				ext = input.url.path.slice(input.url.path.lastIndexOf(".")+1);
@@ -261,7 +261,7 @@ bot.event({
 			}
 			break;
 		}
-		return sayTitle(input.context, input.url, old, record, 10000);
+		return sayTitle(input.context, input.url, old, record, length);
 	}
 });
 
