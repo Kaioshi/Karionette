@@ -6,10 +6,10 @@ const [setInterval, clearInterval, alias, perms, logins, ignore] =
 
 class Connection {
 	constructor() {
-		this._connected = false;
+		this._quitting = false;
 		this.buffer = "";
 	}
-	quit() { this._connected = false; this.socket.end(); }
+	quit() { this._quitting = true; this.socket.end(); }
 	send(data) { this.socket.write(data+"\r\n", "utf8"); logger.sent(data); }
 	configure() {
 		if (this.socket) {
@@ -20,11 +20,10 @@ class Connection {
 		this.socket.setNoDelay(false);
 		this.socket.setEncoding("utf8");
 		this.socket.setTimeout(300000, () => this.socket.destroy());
-		this.socket.on("close", hadError => {
-			if (!hadError || !this._connected) {
+		this.socket.on("close", () => {
+			if (this._quitting) {
+				logger.warn("Quitting. Exiting process...");
 				bot.emitEvent("closing");
-				logger.warn("Disconnected. Exiting process...");
-				this.socket.end();
 			} else {
 				logger.warn("Disconnected. Attempting to reconnect in 15 seconds...");
 				if (!this._connectInterval)
@@ -46,7 +45,6 @@ class Connection {
 			this.send("USER "+config.username+" localhost * :"+config.realname);
 			if (config.twitch)
 				this.send("CAP REQ :twitch.tv/membership");
-			this._connected = true;
 			if (this._connectInterval) {
 				clearInterval(this._connectInterval);
 				delete this._connectInterval;
