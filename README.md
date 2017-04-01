@@ -51,7 +51,7 @@ User variables can be defined with ```;var add varName variable contents```
 
 ## Dependencies & Install
 
-* Node.js 6.x or higher.
+* Node.js 7.6 or higher - using async/await.
 * You will need [curl](https://github.com/curl/curl) installed for web fetches.
 * Copy "config.example" to "config" and edit appropriately.
 * Copy the "DEFAULT_data" directory to "data"; there are things you can edit in here, too.
@@ -61,6 +61,5 @@ User variables can be defined with ```;var add varName variable contents```
 * You then identify if the bot has forgotten you with ```;identify SuperCoolGuy SuperCoolPassword```
 * You should launch the bot with --expose-gc and gc: true in the config.
   * $ node --expose-gc boot.js
-* I use a simple bash script:
 
-### If you have any problems or questions, feel free to drop by #pyoshi on irc.esper.net and ask - watch out for ranma though. He's bitey.
+### If you have any problems or questions, feel free to drop by #pyoshi on irc.esper.net and ask.
