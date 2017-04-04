@@ -72,6 +72,17 @@ bot.command({
 });
 
 bot.command({
+	command: "restart",
+	help: "Restarts the bot.",
+	syntax: config.command_prefix+"restart",
+	admin: true,
+	callback: function (input) {
+		irc.quit("Restarting...");
+		plugin.import("require")("child_process").fork("./boot.js");
+	}
+});
+
+bot.command({
 	command: "reload",
 	help: "Reloads plugins, or a single plugin.",
 	syntax: config.command_prefix+"reload [<dir>/<plugin>] Example: "+config.command_prefix+"reload core/admin",
