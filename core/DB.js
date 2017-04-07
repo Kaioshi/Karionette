@@ -249,6 +249,7 @@ class List extends DB {
 
 ticker.start(300); // save every 5 minutes
 bot.event({ handle: "save DB Cache", event: "Ticker: 300s tick", callback: saveCache });
+bot.event({ handle: "save DB Cache on event", event: "saveCache", callback: saveCache });
 bot.event({ handle: "save DB on Quit", event: "closing", callback: saveAndExit });
 process.on("SIGINT", saveAndExit); // Ctrl-C etc
 
