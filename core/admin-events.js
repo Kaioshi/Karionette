@@ -25,7 +25,7 @@ bot.command({
 });
 
 function getErrorAnnounceList() {
-	return logins.nickList(true).filter(nick => logins.getAttribute(nick, "errorAnnounce"));
+	return logins.nickList(true).filter(nick => logins.getAttribute(nick, "errorAnnounce") === true);
 }
 
 bot.event({
@@ -77,8 +77,11 @@ bot.command({
 	syntax: config.command_prefix+"restart",
 	admin: true,
 	callback: function (input) {
-		irc.quit("Restarting...");
-		plugin.import("require")("child_process").fork("./boot.js");
+		bot.emitEvent("saveCache");
+		plugin.import("setTimeout")(() => {
+			irc.quit("Restarting..");
+			plugin.import("require")("child_process").fork("./boot.js");
+		}, 1500);
 	}
 });
 
