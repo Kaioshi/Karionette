@@ -1,10 +1,12 @@
 "use strict";
-const [DB, web, lib, setTimeout, words, ial] = plugin.importMany("DB", "web", "lib", "setTimeout", "words", "ial"),
-	randDB = new DB.List({filename: "randomThings"}),
-	denyDB = new DB.Json({filename: "actback/deny"}),
-	statsDB = new DB.Json({filename: "actback/stats"}),
-	repliesDB = new DB.Json({filename: "actback/replies"}),
-	questionDB = new DB.Json({filename: "actback/questions"});
+
+const [DB, web, lib, setTimeout, words, ial] = plugin.importMany("DB", "web", "lib", "setTimeout", "words", "ial");
+const randDB = DB.List({filename: "randomThings"});
+const denyDB = DB.Json({filename: "actback/deny"});
+const statsDB = DB.Json({filename: "actback/stats"});
+const repliesDB = DB.Json({filename: "actback/replies"});
+const questionDB = DB.Json({filename: "actback/questions"});
+
 let varParseLimit = 3;
 
 function getWpm(line) {
@@ -13,15 +15,15 @@ function getWpm(line) {
 
 function sayNocontext(context) {
 	web.json("https://www.reddit.com/r/nocontext/random/.json").then(function (result) {
-		let target = "",
-			line = lib.decode(result[0].data.children[0].data.title);
-		if (context[0] === "#" && lib.chance() > 50) {
+		const line = lib.decode(result[0].data.children[0].data.title);
+		let target;
+		if (context[0] === "#" && lib.chance()) {
 			target = ial.Active(context);
 			if (target.length)
 				target = lib.randSelect(target)+", ";
 		}
 		setTimeout(function () {
-			irc.say(context, target+line);
+			irc.say(context, (target || "")+line);
 		}, getWpm(line));
 	}).catch(function (error) {
 		logger.error("[sayNocontext] "+error, error);
@@ -99,12 +101,12 @@ bot.command({
 	}
 });
 
-function replaceVars(line, context, from, obj, verb) {
+function replaceVars(line, context, from, obj, verb, modverb) {
 	let reg, tmp;
 	varParseLimit--;
 	tmp = line;
 	while ((reg = /(\{[^\{\|\(\)\[\]\} ]+\})/.exec(tmp))) {
-		line = line.replace(reg[1], replaceSingleVar(reg[1], context, from, obj, verb));
+		line = line.replace(reg[1], replaceSingleVar(reg[1], context, from, obj, verb, modverb));
 		tmp = tmp.slice(tmp.indexOf(reg[1]) + reg[1].length);
 	}
 	if (varParseLimit > 0 && line.match(/\{[^\[\(\|\)\] ]+\}/))
