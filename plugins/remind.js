@@ -19,26 +19,26 @@ function loadReminders() {
 }
 
 function startReminder(reminder) {
-	let reg = /^([0-9]+) ([^ ]+)@([^ ]+) (.*)$/.exec(reminder),
-		now = new Date().valueOf(),
-		time = new Date(parseInt(reg[1])).valueOf();
-	time = time-now;
+	const [, remindTime, nick, channel, message] = /^([0-9]+) ([^ ]+)@([^ ]+) (.*)$/.exec(reminder);
+	const time = new Date(parseInt(remindTime)).valueOf() - Date.now();
 	if (time > 0) {
-		setTimeout(function () {
-			if (ial.Channels(reg[2]).length) {
-				irc.say(reg[3], reg[2]+": "+reg[4]);
+		setTimeout(function (nick, channel, message, reminderDB) {
+			if (ial.User(nick) && ial.User(nick).channels.length) {
+				irc.say(channel, nick+": "+message);
 			} else {
 				bot.queueMessage({
 					method: "say",
-					nick: reg[2],
-					channel: reg[3],
-					message: reg[2]+", you weren't here! ;_; late "+reg[4]
+					nick: nick,
+					from: config.command_prefix+"remind",
+					channel: channel,
+					message: "late "+message,
+					time: Date.now()
 				});
 			}
 			reminderDB.removeOne(reminder);
-		}, time);
+		}, time, nick, channel, message, reminderDB);
 	} else {
-		irc.say(reg[3], reg[2]+": Sorry, I was offline! ;_; late "+reg[4]);
+		irc.say(channel, nick+": Sorry, I was offline! ;_; late "+message);
 		reminderDB.removeOne(reminder);
 	}
 }
