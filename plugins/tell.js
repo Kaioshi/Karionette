@@ -1,4 +1,4 @@
-﻿// Tell someone something on join if saved message for them
+// Tell someone something on join if saved message for them
 "use strict";
 const [DB, lib, ial, setTimeout] = plugin.importMany("DB", "lib", "ial", "setTimeout"),
 	msgDB = DB.Json({filename: "messages"});
@@ -34,7 +34,7 @@ function checkMessages(input, context, newnick) {
 		msgs.splice(i, 1); i--; len--;
 	}
 	if (send) {
-		irc.rated(send, 1000);
+		irc.rated(send);
 		if (!msgs.length)
 			msgDB.removeOne(lnick);
 		else
@@ -66,12 +66,8 @@ bot.event({
 bot.event({
 	handle: "messageNick",
 	event: "NICK",
-	callback: function (input) {
-		setTimeout(function () {
-			ial.Channels(input.newnick).forEach(function (channel) {
-				checkMessages(input, channel, true);
-			});
-		}, 250); // <- give IAL time to update
+	callback: function (input) { // give IAL time to update
+		setTimeout(() => ial.User(input.newnick).channels.forEach(channel => checkMessages(input, channel, true)), 250);
 	}
 });
 
