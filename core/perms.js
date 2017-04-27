@@ -53,12 +53,12 @@ function hasPermission(from, nick, user, type, item) {
 	return false;
 }
 
-function Action(from, action, type, item, username) {
+function Action(from, action, type, item, username, item) {
 	const nick = from.split("!")[0],
 		user = logins.getUsername(nick);
 	if (user === undefined)
 		return false;
-	if (hasPermission(from, nick, user, type)) {
+	if (hasPermission(from, nick, user, type, item)) {
 		const act = action.split(" ");
 		alterEntry((username ? username : user), act[1], act[0], type, item);
 		return true;
