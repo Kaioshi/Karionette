@@ -17,7 +17,7 @@ class Logins {
 	constructor() {
 		this.users = Object.create(null);
 		this.loggedIn = Object.create(null);
-		this.db = new plugin.import("DB").Json({filename: "logins"});
+		this.db = plugin.import("DB").Json({filename: "logins"});
 	}
 	getNick(username) { return this.loggedIn[username]; }
 	getUsername(nick) {

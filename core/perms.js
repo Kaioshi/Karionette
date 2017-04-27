@@ -2,7 +2,7 @@
 "use strict";
 
 const [DB, logins, ial] = plugin.importMany("DB", "logins", "ial"),
-	permissionDB = new DB.Json({filename: "perms"});
+	permissionDB = DB.Json({filename: "perms"});
 
 function alterEntry(username, act, action, type, item) {
 	const perm = permissionDB.getOne(type);

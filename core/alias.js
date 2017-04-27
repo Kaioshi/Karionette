@@ -1,10 +1,10 @@
 "use strict";
 
 const [DB, lib, ial, words] = plugin.importMany("DB", "lib", "ial", "words"),
-	aliasDB = new DB.Json({filename: "alias/alias"}),
-	varDB = new DB.Json({filename: "alias/vars"}),
-	helpDB = new DB.Json({filename: "alias/help"}),
-	randDB = new DB.List({filename: "randomThings"}),
+	aliasDB = DB.Json({filename: "alias/alias"}),
+	varDB = DB.Json({filename: "alias/vars"}),
+	helpDB = DB.Json({filename: "alias/help"}),
+	randDB = DB.List({filename: "randomThings"}),
 	randNicks = [
 		"someone", "Spiderman", "Iron Man", "Orgasmo", "Invader Zim", "Jo Brand", "Stephen Fry", "David Mitchell",
 		"Lee Mack", "Joffrey", "Hillary Clinton", "Solid Snake", "Kirby", "a wild Jigglypuff", "Steve Holt", "Bob Loblaw"

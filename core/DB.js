@@ -256,13 +256,13 @@ process.on("SIGINT", saveAndExit); // Ctrl-C etc
 plugin.export("DB", {
 	Json: function (options) {
 		if (!options || options.filename === undefined)
-			throw new Error("filename isn't optional in new DB.Json({filename: \"filename\"})");
+			throw new Error("filename isn't optional in DB.Json({filename: \"filename\"})");
 		const fn = "data/"+options.filename+".json";
 		return dbCache[fn] || new Json(fn);
 	},
 	List: function (options) {
 		if (!options || options.filename === undefined)
-			throw new Error("filename isn't optional in new DB.List({filename: \"filename\"})");
+			throw new Error("filename isn't optional in DB.List({filename: \"filename\"})");
 		const fn = "data/"+options.filename+".txt";
 		return dbCache[fn] || new List(fn);
 	}

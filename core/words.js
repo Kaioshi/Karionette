@@ -6,14 +6,14 @@ const [DB, web, lib] = plugin.importMany("DB", "web", "lib"),
 function addBad(type, word) {
 	let lword = word.toLowerCase(), ltype = type.toLowerCase();
 	if (!badWords[ltype])
-		badWords[ltype] = new DB.List({filename: "words/bad_"+ltype+"s"});
+		badWords[ltype] = DB.List({filename: "words/bad_"+ltype+"s"});
 	badWords[ltype].saveOne(lword);
 }
 
 function checkBad(type, word) {
 	let lword = word.toLowerCase(), ltype = type.toLowerCase();
 	if (!badWords[ltype])
-		badWords[ltype] = new DB.List({filename: "words/bad_"+ltype+"s"});
+		badWords[ltype] = DB.List({filename: "words/bad_"+ltype+"s"});
 	return badWords[ltype].hasOne(lword);
 }
 
@@ -100,7 +100,7 @@ const words = {
 		return "Couldn't find it.";
 	},
 	load: function (type) {
-		words[type].list = new DB.List({filename: "words/"+type+"s"});
+		words[type].list = DB.List({filename: "words/"+type+"s"});
 	},
 	save: function (type) {
 		logger.debug("words.save("+type+") was called");
