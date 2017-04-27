@@ -204,7 +204,7 @@ const words = {
 		remove: function (word) {
 			if (!words.noun.list.hasOne(word))
 				return "I'm not familiar with "+word.split(" ")[0]+".";
-			words.noun.removeOne(word);
+			words.noun.list.removeOne(word);
 			return "Removed. o7";
 		},
 		get: function (word) { // needs to match either singular or plural
