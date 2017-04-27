@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 
 const [web, lib] = plugin.importMany("web", "lib");
 
