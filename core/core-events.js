@@ -72,9 +72,7 @@ function getNickBack(nick) {
 		handle: "waitingForLogin",
 		event: "376",
 		once: true,
-		callback: function () {
-			irc.raw("WHOIS "+config.nickserv_nickname);
-		}
+		callback: () => irc.raw("WHOIS "+config.nickserv_nickname)
 	});
 
 	bot.event({
@@ -103,9 +101,7 @@ function getNickBack(nick) {
 					return true;
 			}
 		},
-		callback: function () {
-			irc.say(config.nickserv_nickname, `GHOST ${nick}`);
-		}
+		callback: () => irc.say(config.nickserv_nickname, `GHOST ${nick}`)
 	});
 
 	bot.event({
@@ -120,9 +116,7 @@ function getNickBack(nick) {
 					return true;
 			}
 		},
-		callback: function () {
-			irc.raw("NICK "+nick);
-		}
+		callback: () => irc.raw("NICK "+nick)
 	});
 
 	bot.event({
@@ -166,9 +160,7 @@ if (nickServConfigured) {
 					return true;
 			}
 		},
-		callback: function () {
-			irc.say(config.nickserv_nickname, "IDENTIFY " + config.nickserv_password);
-		}
+		callback: () => irc.say(config.nickserv_nickname, "IDENTIFY " + config.nickserv_password)
 	});
 }
 
@@ -256,9 +248,7 @@ bot.command({
 	help: "Makes me say something. Duh!",
 	syntax: config.command_prefix+"say <what you want me to say>",
 	arglen: 1,
-	callback: function (input) {
-		irc.say(input.context, input.data);
-	}
+	callback: (input) => irc.say(input.context, input.data)
 });
 
 bot.command({
@@ -266,9 +256,7 @@ bot.command({
 	help: "Makes me do something. Probably erotic.",
 	syntax: config.command_prefix+"action <what you want me to do>",
 	arglen: 1,
-	callback: function (input) {
-		irc.action(input.context, input.data);
-	}
+	callback: (input) => irc.action(input.context, input.data)
 });
 
 bot.command({
@@ -319,36 +307,32 @@ bot.command({
 // Show node version
 bot.command({
 	command: "nodeversion",
-	help: "Shows the node version I'm running.",
+	help: "Shows the node version I'm running - replies via /notice",
+	syntax: config.command_prefix+"nodeversion",
 	admin: true,
-	callback: function (input) {
-		irc.notice(input.nick, lib.nodeVersion());
-	}
+	callback: (input) => irc.notice(input.nick, lib.nodeVersion())
 });
 
 // Memory usage report
 bot.command({
 	command: "memstats",
 	help: "Shows how much memory I'm using.",
-	callback: function (input) {
-		irc.say(input.context, "I'm currently using "+lib.memUse()+" MiB of memory.");
-	}
+	syntax: config.command_prefix+"memstats",
+	callback: (input) => irc.say(input.context, "I'm currently using "+lib.memUse()+" MiB of memory.")
 });
 
 // get uptime
 bot.command({
 	command: "uptime",
 	help: "Shows how long it's been since I was started.",
-	callback: function (input) {
-		irc.say(input.context, "I've been running for "+lib.duration(globals.startTime)+".");
-	}
+	syntax: config.command_prefix+"uptime",
+	callback: (input) => irc.say(input.context, "I've been running for "+lib.duration(globals.startTime)+".")
 });
 
 // Get Mari's age
 bot.command({
 	command: "age",
 	help: "Tells you how old Mari is!",
-	callback: function (input) {
-		irc.say(input.context, "I am "+lib.duration(new Date("1 May 2013 18:40:00 GMT"))+" old, but always sweet as sugar.");
-	}
+	syntax: config.command_prefix+"age",
+	callback: (input) => irc.say(input.context, "I am "+lib.duration(new Date("1 May 2013 18:40:00 GMT"))+" old, but always sweet as sugar.")
 });
