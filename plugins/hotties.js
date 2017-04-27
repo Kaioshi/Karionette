@@ -1,7 +1,7 @@
 // v0.11 plugin by coding amateur ranma. collects ecchi
 "use strict";
 const [lib, DB] = plugin.importMany("lib", "DB"),
-	hottieDB = new DB.Json({filename: "hotties"}),
+	hottieDB = DB.Json({filename: "hotties"}),
 	help = {
 		tag: "[Help] Syntax: "+config.command_prefix+"hottie tag <url> +tag1 +tag2 -tag3 - adds the \
 			first two, removes last. Tags may not have spaces.",

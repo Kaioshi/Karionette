@@ -1,7 +1,7 @@
 // Reminders!
 "use strict";
 const [DB, setTimeout, ial] = plugin.importMany("DB", "setTimeout", "ial"),
-	reminderDB = new DB.List({filename: "reminders"});
+	reminderDB = DB.List({filename: "reminders"});
 
 function transformTime(timeUnits, time) {
 	if (timeUnits.indexOf("second") > -1) { time = time * 1000; }

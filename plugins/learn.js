@@ -2,7 +2,7 @@
 // !keyword [@ nick]
 "use strict";
 const DB = plugin.import("DB"),
-	learnDB = new DB.Json({filename: "learnedThings"}),
+	learnDB = DB.Json({filename: "learnedThings"}),
 	learnRegex = /^([^=]+) = (.*)$/,
 	knowledgeRegex = /^([^@]+) @ (.*)$/;
 

@@ -1,7 +1,7 @@
 // remembers things
 "use strict";
 const [DB, lib] = plugin.importMany("DB", "lib"),
-	memDB = new DB.Json({filename: "remember"}),
+	memDB = DB.Json({filename: "remember"}),
 	dunno = [
 		"I dunno.",
 		"no idea",

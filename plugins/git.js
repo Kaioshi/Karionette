@@ -1,7 +1,7 @@
 "use strict";
 const [lib, web, DB] = plugin.importMany("lib", "web", "DB"),
 	run = plugin.import("require")("child_process").execFile,
-	gitDB = new DB.Json({filename: "gitannounce2"});
+	gitDB = DB.Json({filename: "gitannounce2"});
 
 async function checkGits(target) {
 	if (!gitDB.hasOne("announce"))

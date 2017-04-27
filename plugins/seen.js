@@ -7,7 +7,7 @@ function setLast(chan, nick, type, line) {
 	const lnick = nick.toLowerCase(),
 		lchan = chan.toLowerCase();
 	if (!seen[chan])
-		seen[chan] = new DB.Json({filename: "seen/"+chan});
+		seen[chan] = DB.Json({filename: "seen/"+chan});
 	const entry = seen[lchan].getOne(lnick) || {};
 	entry.nick = nick;
 	entry[type] = { message: line, date: Date.now() };
@@ -18,7 +18,7 @@ function removeUserLeft(chan, nick) {
 	const lchan = chan.toLowerCase(),
 		lnick = nick.toLowerCase();
 	if (!seen[lchan])
-		seen[lchan] = new DB.Json({filename: "seen/"+lchan});
+		seen[lchan] = DB.Json({filename: "seen/"+lchan});
 	const entry = seen[lchan].getOne(lnick);
 	if (!entry)
 		return;
@@ -140,7 +140,7 @@ function convertAllOldSeen() {
 function convertOldSeenTxt(file) {
 	const fn = "data/users/"+file,
 		lchan = file.slice(0,-4),
-		db = new DB.Json({filename: "seen/"+lchan}),
+		db = DB.Json({filename: "seen/"+lchan}),
 		oldSeen = fs.readFileSync(fn).toString().split("\n"),
 		leftReg = /^([^ ]+) ([0-9]+) message: \"(.*)\" left: ([0-9]+) user: \"(.*)\" type: \"(.*)\" message: \"(.*)\"$/,
 		hereReg = /^([^ ]+) ([0-9]+) message: \"(.*)\"$/;
@@ -170,7 +170,7 @@ function convertOldSeenTxt(file) {
 function convertOldSeenJson(file) {
 	const fn = "data/users/"+file,
 		lchan = file.slice(0, -5),
-		db = new DB.Json({filename: "users/"+lchan}),
+		db = DB.Json({filename: "users/"+lchan}),
 		oldSeen = JSON.parse(fs.readFileSync(fn).toString());
 	logger.debug("Converting "+fn+" to new seen format.");
 	Object.keys(oldSeen).forEach(lnick => {

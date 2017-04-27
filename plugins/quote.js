@@ -1,7 +1,7 @@
 // collects quotes
 "use strict";
 const [DB, lib] = plugin.importMany("DB", "lib"),
-	quoteDB = new DB.Json({filename: "quotes"});
+	quoteDB = DB.Json({filename: "quotes"});
 
 function zero(n) {
 	return (n > 9 ? n : "0"+n);

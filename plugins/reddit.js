@@ -1,7 +1,7 @@
 // Subreddit announcer
 "use strict";
 const [DB, lib, web, logins, ial, ticker] = plugin.importMany("DB", "lib", "web", "logins", "ial", "ticker"),
-	subDB = new DB.Json({filename: "reddit/subreddits"});
+	subDB = DB.Json({filename: "reddit/subreddits"});
 
 function r(sub) {
 	return "https://www.reddit.com/r/"+sub+"/new/.json?limit=10";
@@ -22,7 +22,7 @@ function shortenRedditLink(link, sub, id) {
 }
 
 function getDeliveryMethod(nick) { // this ugliness brought to you by the letter R[anma].
-	const method = new DB.List({filename: "reddit/methods"}).search(nick+": ", true);
+	const method = DB.List({filename: "reddit/methods"}).search(nick+": ", true);
 	if (method && method.length)
 		return method[0].split(": ")[1];
 	return "notice";
@@ -248,7 +248,7 @@ bot.command({
 				irc.say(input.context, `[Help] Syntax: ${config.command_prefix}subreddit method <msg/notice>`);
 				return;
 			}
-			const methodDB = new DB.List({filename: "reddit/methods"});
+			const methodDB = DB.List({filename: "reddit/methods"});
 			methodDB.removeMatching(`${input.nick}: `, true);
 			methodDB.saveOne(input.nick+": "+(arg === "msg" ? "say" : arg));
 			irc.say(input.context, "I'll deliver your subreddit updates via "+(arg === "msg" ? "/msg" : "/notice")+" from now on.");

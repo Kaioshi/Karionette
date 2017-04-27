@@ -3,9 +3,9 @@
 
 const [DB, lib, web, ticker, ial] = plugin.importMany("DB", "lib", "web", "ticker", "ial");
 const mangaDB = {
-	mangafox: new DB.Json({filename: "manga/mangafox"}),
-	mangastream: new DB.Json({filename: "manga/mangastream"}),
-	batoto: new DB.Json({filename: "manga/batoto"})
+	mangafox: DB.Json({filename: "manga/mangafox"}),
+	mangastream: DB.Json({filename: "manga/mangastream"}),
+	batoto: DB.Json({filename: "manga/batoto"})
 };
 
 function isNewRelease(release, manga) {

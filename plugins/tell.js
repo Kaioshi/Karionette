@@ -1,7 +1,7 @@
 ﻿// Tell someone something on join if saved message for them
 "use strict";
 const [DB, lib, ial, setTimeout] = plugin.importMany("DB", "lib", "ial", "setTimeout"),
-	msgDB = new DB.Json({filename: "messages"});
+	msgDB = DB.Json({filename: "messages"});
 
 function checkMessages(input, context, newnick) {
 	let lnick, lcontext, msgs, send, len;
