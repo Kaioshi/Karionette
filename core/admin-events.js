@@ -67,6 +67,7 @@ bot.command({
 bot.command({
 	command: "ignorelist",
 	help: "Shows ignore list.",
+	syntax: config.command_prefix+"ignorelist",
 	admin: true,
 	callback: input => irc.say(input.context, (ignore.list() || "Ignoring no one. ;)"))
 });
@@ -141,6 +142,7 @@ bot.command({
 bot.command({
 	command: "part",
 	help: "Leaves channels. Admin only.",
+	syntax: config.command_prefix+"part <#channel> [<reason>]",
 	admin: true,
 	callback: function (input) {
 		if (input.args) {
@@ -153,56 +155,57 @@ bot.command({
 		}
 	}
 });
+// config.saveChanges needs a rewrite
+// bot.command({
+// 	command: "autojoin",
+// 	help: "Adds channels to the autojoin list.",
+// 	syntax: config.command_prefix+"autojoin <channel>",
+// 	admin: true,
+// 	arglen: 1,
+// 	callback: function (input) {
+// 		if (input.args[0][0] !== "#") {
+// 			irc.say(input.context, bot.cmdHelp("autojoin", "syntax"));
+// 			return;
+// 		}
+// 		config.autojoin = config.autojoin || [];
+// 		if (lib.hasElement(config.autojoin, input.args[0])) {
+// 			irc.say(input.context, input.args[0]+" is already on the autojoin list.");
+// 			return;
+// 		}
+// 		config.autojoin.push(input.args[0].toLowerCase());
+// 		config.saveChanges();
+// 		irc.say(input.context, "Added " + input.args[0] + " to autojoin list");
+// 	}
+// });
 
-bot.command({
-	command: "autojoin",
-	help: "Adds channels to the autojoin list.",
-	syntax: config.command_prefix+"autojoin <channel>",
-	admin: true,
-	arglen: 1,
-	callback: function (input) {
-		if (input.args[0][0] !== "#") {
-			irc.say(input.context, bot.cmdHelp("autojoin", "syntax"));
-			return;
-		}
-		config.autojoin = config.autojoin || [];
-		if (lib.hasElement(config.autojoin, input.args[0])) {
-			irc.say(input.context, input.args[0]+" is already on the autojoin list.");
-			return;
-		}
-		config.autojoin.push(input.args[0].toLowerCase());
-		config.saveChanges();
-		irc.say(input.context, "Added " + input.args[0] + " to autojoin list");
-	}
-});
-
-bot.command({
-	command: "unautojoin",
-	help: "Removes channels from the autojoin list.",
-	syntax: config.command_prefix+"unautojoin <channel>",
-	admin: true,
-	arglen: 1,
-	callback: function (input) {
-		if (input.args[0][0] !== "#") {
-			irc.say(input.context, bot.cmdHelp("unautojoin", "syntax"));
-			return;
-		}
-		if (config.autojoin && config.autojoin.length > 0 && lib.hasElement(config.autojoin, input.args[0])) {
-			input.args[0] = input.args[0].toLowerCase();
-			config.autojoin = config.autojoin.filter(function (element) {
-				return (element.toLowerCase() !== input.args[0]);
-			});
-			config.saveChanges();
-			irc.say(input.context, "Removed!");
-		} else {
-			irc.say(input.context, input.args[0]+" isn't on the autojoin list.");
-		}
-	}
-});
+// bot.command({
+// 	command: "unautojoin",
+// 	help: "Removes channels from the autojoin list.",
+// 	syntax: config.command_prefix+"unautojoin <channel>",
+// 	admin: true,
+// 	arglen: 1,
+// 	callback: function (input) {
+// 		if (input.args[0][0] !== "#") {
+// 			irc.say(input.context, bot.cmdHelp("unautojoin", "syntax"));
+// 			return;
+// 		}
+// 		if (config.autojoin && config.autojoin.length > 0 && lib.hasElement(config.autojoin, input.args[0])) {
+// 			input.args[0] = input.args[0].toLowerCase();
+// 			config.autojoin = config.autojoin.filter(function (element) {
+// 				return (element.toLowerCase() !== input.args[0]);
+// 			});
+// 			config.saveChanges();
+// 			irc.say(input.context, "Removed!");
+// 		} else {
+// 			irc.say(input.context, input.args[0]+" isn't on the autojoin list.");
+// 		}
+// 	}
+// });
 
 bot.command({
 	command: "quit",
 	help: "Quits!",
+	syntax: config.command_prefix+"quit [<reason>]",
 	admin: true,
 	callback: input => irc.quit(input.args && input.args.length ? input.args.join(" ") : "PEACE! I'm out.")
 });
