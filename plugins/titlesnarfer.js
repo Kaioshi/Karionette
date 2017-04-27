@@ -2,7 +2,7 @@
 "use strict";
 const [DB, lib, web, fs] = plugin.importMany("DB", "lib", "web", "fs"),
 	url = plugin.import("require")("url"),
-	titleFilterDB = new DB.Json({filename: "titlefilters"}),
+	titleFilterDB = DB.Json({filename: "titlefilters"}),
 	ytReg = /v=([^ &\?]+)/i,
 	ytBReg = /^\/([^ &\?]+)/,
 	recentURLs = {};
@@ -14,11 +14,9 @@ if (config.titlesnarfer_inline) {
 		if (urlIsTooRecent(uri.href, record))
 			return;
 		try {
-			const body = await web.fetch(uri.href, (length ? { opts: { timeout: 15000, maxBuffer: length } } : null));
-			if (!body) {
-				logger.warn(uri.href+" returned no body.");
-				return;
-			}
+			const body = await web.fetch(uri.href, (length !== undefined ? { opts: { timeout: 15000, maxBuffer: length } } : null));
+			if (!body)
+				return logger.warn(uri.href+" returned no body.");
 			const reg = titleReg.exec(body.replace(/\n|\t|\r/g, ""));
 			if (!reg || !reg[1]) {
 				if (record)
@@ -31,7 +29,7 @@ if (config.titlesnarfer_inline) {
 			if (!isFilteredTitle(title))
 				irc.say(context, trimTitle(title)+" ~ "+uri.host.replace("www.", "")+(old ? " ("+old+")" : ""));
 		} catch (error) {
-			logger.warn("sayTitle failed: "+error.message, error);
+			logger.error("sayTitle failed", error);
 		}
 	};
 } else {
@@ -161,11 +159,13 @@ function getURL(channel, url) { // make this less bad.
 }
 
 async function youtubeIt(context, id, old, record) {
+	if (id.length !== 11) // XXX this is no promise from youtube, just how it has gone thus far.
+		return irc.say(context, `Invalid link. YouTube video IDs are 11 characters long, this one is ${id.length} characters long.`);
 	try {
 		const yt = await web.youtubeByID(id);
 		let resp;
 		yt.date = yt.date.split("T")[0];
-		yt.views = lib.commaNum(yt.views);
+		yt.views = isNaN(yt.views) ? yt.views : lib.commaNum(yt.views);
 		if (config.titlesnarfer_youtube_format !== undefined) {
 			yt.b = "\x02";
 			resp = lib.formatOutput(config.titlesnarfer_youtube_format, yt);
