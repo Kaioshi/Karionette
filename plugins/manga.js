@@ -8,11 +8,15 @@ const mangaDB = {
 	batoto: DB.Json({filename: "manga/batoto"})
 };
 
+ticker.start(300); // start a 5 minute ticker
+
 function isNewRelease(release, manga) {
 	if (!manga.latest) {
 		manga.latest = [ release.title ];
 		return true;
 	}
+	if (!Array.isArray(manga.latest)) // fixes old DB style
+		manga.latest = manga.latest.title ? [ manga.latest.title ] : [];
 	if (manga.latest.includes(release.title))
 		return false;
 	if (manga.latest.length > 9)
@@ -57,7 +61,7 @@ async function checkOne(type, context) {
 	}
 	try {
 		const releases = await web.json("http://felt.ninja:5667/?source="+type, null);
-		if (!findUpdates(type, releases, context) && context)
+		if (!findUpdates(type, releases) && context)
 			irc.say(context, "Nothing new. :\\");
 	} catch (err) {
 		logger.error(`manga - checkOne: ${err.message}`, err);
@@ -253,22 +257,3 @@ function parseMangaCmd(input) {
 		break;
 	}
 }
-
-ticker.start(300); // start a 5 minute ticker
-function convertFromFragDB() { // XXX remove this after ranma has run it
-	const fs = plugin.import("fs");
-	Object.keys(mangaDB).forEach(db => {
-		let dir = "data/db/"+db;
-		if (fs.existsSync(dir)) {
-			logger.warn("CONVERTING FRAGDB "+db+" TO REGULAR DB");
-			let FragDB = plugin.import("require")("./lib/fragDB.js")(lib, logger, fs),
-				files = fs.readdirSync(dir),
-				mDB = new FragDB(db).getAll();
-			mangaDB[db].saveAll(mDB);
-			logger.warn("DONE");
-			files.forEach(fn => fs.unlinkSync(dir+"/"+fn));
-			fs.rmdirSync(dir);
-		}
-	});
-}
-convertFromFragDB();
