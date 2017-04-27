@@ -1,4 +1,4 @@
-﻿// Urban dictionary look-up
+// Urban dictionary look-up
 "use strict";
 
 const [web, lib] = plugin.importMany("web", "lib");
