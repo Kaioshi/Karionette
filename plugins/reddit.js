@@ -4,25 +4,25 @@ const [DB, lib, web, logins, ial, ticker] = plugin.importMany("DB", "lib", "web"
 	subDB = DB.Json({filename: "reddit/subreddits"});
 
 function r(sub) {
-	return "https://www.reddit.com/r/"+sub+"/new/.json?limit=10";
+	return `https://www.reddit.com/r/${sub}/new/.json?limit=10`;
 }
 
 function shortenRedditLink(link, sub, id) {
 	if (link.indexOf("reddituploads.com") > -1)
-		return "https://redd.it/"+id;
+		return `https://redd.it/${id}`;
 	if (link.indexOf("www.reddit.com/r/") === -1)
 		return link;
 	let reg = /https\:\/\/www\.reddit\.com\/r\/([^\/]+)\/comments\/([^\/]+)\//.exec(link);
 	if (reg && reg[2]) {
 		if (reg[1].toLowerCase() !== sub)
-			return "https://redd.it/"+reg[2]+" (r/"+reg[1]+")";
-		return "https://redd.it/"+reg[2];
+			return `https://redd.it/${reg[2]} (r/${reg[1]})`;
+		return `https://redd.it/${reg[2]}`;
 	}
 	return link;
 }
 
 function getDeliveryMethod(nick) { // this ugliness brought to you by the letter R[anma].
-	const method = DB.List({filename: "reddit/methods"}).search(nick+": ", true);
+	const method = DB.List({filename: "reddit/methods"}).search(`${nick}: `, true);
 	if (method && method.length)
 		return method[0].split(": ")[1];
 	return "notice";
@@ -58,23 +58,21 @@ function findNewPosts(subreddit) {
 }
 
 function trimJson(source) {
-	let res;
 	try {
-		res = JSON.parse(source);
+		const res = JSON.parse(source);
+		return {
+			sub: res.data.children[0].data.subreddit,
+			posts: res.data.children.map(hit => {
+				return {
+					id: hit.data.id,
+					title: hit.data.title,
+					link: hit.data.url
+				};
+			})
+		};
 	} catch (err) {
-		// die quietly. sometimes reddit returns non-JSON when overloaded.
-		return;
+		return; // die quietly - reddit returns non-JSON when overloaded
 	}
-	const ret = [], hits = res.data.children;
-	for (let i = 0; i < hits.length; i++) {
-		ret.push({
-			id: hits[i].data.id,
-			title: hits[i].data.title,
-			link: hits[i].data.url
-		});
-	}
-	res = null;
-	return { sub: hits[0].data.subreddit, posts: ret };
 }
 
 async function checkSubs() {
@@ -85,20 +83,20 @@ async function checkSubs() {
 			const sub = subDB.data.obj[subDB.data.keys[i]];
 			if (!sub.announce || !sub.announce.length)
 				continue;
-			findNewPosts(trimJson(await web.fetch(r(sub.subreddit), null), sub.subreddit));
+			findNewPosts(trimJson(await web.fetch(r(sub.subreddit))));
 		}
 	} catch (err) {
-		logger.error("checkSubs - "+err.message, err.stack);
+		logger.error(`checkSubs - ${err.message}`, err.stack);
 	}
 }
 
 function subscribe(nick, sub) {
 	const entry = subDB.getOne(sub);
 	if (!entry)
-		return "I'm not watching r/"+sub;
+		return `I'm not watching r/${sub}`;
 	const lnick = nick.toLowerCase();
 	if (entry.announce.indexOf(lnick) > -1)
-		return "You're already on the announce list for r/"+sub;
+		return `You're already on the announce list for r/${sub}`;
 	entry.announce.push(lnick);
 	if (entry.announce.length === 1) // first entry!
 		checkSubs();
@@ -109,14 +107,26 @@ function subscribe(nick, sub) {
 function unsubscribe(nick, sub) {
 	const entry = subDB.getOne(sub);
 	if (!entry)
-		return "I'm not watching r/"+sub;
+		return `I'm not watching r/${sub}`;
 	const lnick = nick.toLowerCase(),
 		index = entry.announce.indexOf(lnick);
 	if (index === -1)
-		return "You're not on the announce list for r/"+sub;
+		return `You're not on the announce list for r/${sub}`;
 	entry.announce.splice(index, 1);
 	subDB.saveOne(sub, entry);
 	return "Removed. o7";
+}
+
+async function checkSubExists(sub) {
+	try {
+		const result = await web.json(`https://www.reddit.com/r/${sub}/new/.json?limit=1`);
+		if (result.error)
+			return false;
+		return true;
+	} catch (err) {
+		logger.error(`${sub} checkSubExists fail`, err);
+		return false;
+	}
 }
 
 function addSubreddit(sub, user) {
@@ -128,7 +138,7 @@ function addSubreddit(sub, user) {
 		announce: [],
 		seen: []
 	});
-	return "Added! To get announcements from r/"+sub+", users need to "+config.command_prefix+"subreddit subscribe "+sub;
+	return `Added! To get announcements from r/${sub}, users need to ${config.command_prefix}subreddit subscribe ${sub}`;
 }
 
 function removeSubreddit(sub) {
@@ -136,11 +146,11 @@ function removeSubreddit(sub) {
 		subDB.removeOne(sub);
 		return "Removed. o7";
 	}
-	return "I'm not watching r/"+sub;
+	return `I'm not watching r/${sub}`;
 }
 
 function reddits(subs) {
-	return lib.commaList(subs.map(sub => "r/"+sub));
+	return lib.commaList(subs.map(sub => `r/${sub}`));
 }
 
 function listSubreddits(target) {
@@ -154,10 +164,10 @@ function listSubreddits(target) {
 				ret.push(subDB.data.obj[sub].subreddit);
 		}
 		if (!ret.length)
-			return "I'm not announcing any subreddit updates to "+target+".";
-		return reddits(ret)+" updates are being sent to "+target+".";
+			return `I'm not announcing any subreddit updates to ${target}.`;
+		return `${reddits(ret)} updates are being sent to ${target}.`;
 	}
-	return "I'm announcing updates to "+reddits(subDB.getKeys())+".";
+	return `I'm announcing updates to ${reddits(subDB.getKeys())}.`;
 }
 
 ticker.start(300); // 5 minute ticker
@@ -179,7 +189,7 @@ bot.command({
 	help: "Subreddit announcer.",
 	syntax: `${config.command_prefix}subreddit <add/remove/subscribe/unsubscribe/list/method> [subreddit] [target] - Example: ${config.command_prefix}subreddit add aww - add and remove are admin only.`,
 	arglen: 1,
-	callback: function subreddit(input) {
+	callback: async function subreddit(input) {
 		switch (input.args[0].toLowerCase()) {
 		case "list":
 			if (input.args[1] !== undefined)
@@ -198,23 +208,20 @@ bot.command({
 			}
 			let lsub = input.args[1].toLowerCase();
 			if (subDB.hasOne(lsub)) {
-				irc.say(input.context, "I'm already watching for updates to r/"+lsub);
+				irc.say(input.context, `I'm already watching for updates to r/${lsub}`);
 				return;
 			} // need to check if the sub exists
-			web.fetch(r(lsub)).then(function (body) {
-				if (body.indexOf("https://www.reddit.com/subreddits/search?q=") > -1) {
-					irc.say(input.context, "r/"+input.args[1]+" doesn't seem to be a thing.");
-					return;
+			try {
+				const subExists = await checkSubExists(lsub);
+				if (subExists) {
+					irc.say(input.context, addSubreddit(lsub, input.user));
+				} else {
+					irc.say(input.context, `r/${lsub} doesn't seem to be a thing on reddit.`);
 				}
-				if (body.indexOf(": banned</title>") > -1) {
-					irc.say(input.context, "r/"+input.args[1]+" is a banned subreddit.");
-					return;
-				}
-				irc.say(input.context, addSubreddit(lsub, input.user, input.context));
-			}).catch(function (error) {
-				logger.error(error, error);
+			} catch (err) {
+				logger.error(`couldn't add r/${lsub}`, err);
 				irc.say(input.context, "Something has gone awry.");
-			});
+			}
 			break;
 		}
 		case "remove":
@@ -250,8 +257,8 @@ bot.command({
 			}
 			const methodDB = DB.List({filename: "reddit/methods"});
 			methodDB.removeMatching(`${input.nick}: `, true);
-			methodDB.saveOne(input.nick+": "+(arg === "msg" ? "say" : arg));
-			irc.say(input.context, "I'll deliver your subreddit updates via "+(arg === "msg" ? "/msg" : "/notice")+" from now on.");
+			methodDB.saveOne(`${input.nick}: ${arg === "msg" ? "say" : arg}`);
+			irc.say(input.context, `I'll deliver your subreddit updates via ${arg === "msg" ? "/msg" : "/notice"} from now on.`);
 			break;
 		}
 		case "check":
@@ -273,7 +280,7 @@ bot.command({
 		web.json("https://www.reddit.com/r/nocontext/random/.json").then(function (result) {
 			irc.say(input.context, result[0].data.children[0].data.title);
 		}).catch(function (error) {
-			logger.error(";nocontext: "+error, error);
+			logger.error("nocontext", error);
 		});
 	}
 });
