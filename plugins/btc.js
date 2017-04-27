@@ -1,4 +1,3 @@
-﻿// gets BTC
 "use strict";
 
 const [web, lib] = plugin.importMany("web", "lib");
