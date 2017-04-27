@@ -1,102 +1,105 @@
 "use strict";
 
-const lib = plugin.import("lib"),
-	run = plugin.import("require")("child_process").execFile;
+const lib = plugin.import("lib");
+const run = plugin.import("require")("child_process").execFile;
+const USERAGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.63 Safari/537.36";
+const notFoundFeels = [
+	":(", "D:", ":V", ">:(", "Sorry!", ":\\", ":<", ">:\\",
+	"I'm not sorry.", "You only have yourself to blame.",
+	"Look what you did.", "For shame.", "Sorry, not sorry."
+];
 
-class Web {
-	constructor() {
-		this.userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.63 Safari/537.36";
-		this._notFoundFeels = [
-			":(", "D:", ":V", ">:(", "Sorry!", ":\\",
-			"I'm not sorry.", "You only have yourself to blame.",
-			"Look what you did.", "For shame.",
-		];
-	}
-	notFound() { return `Couldn't find it. ${lib.randSelect(this._notFoundFeels)}`; }
-	fetch(uri, opts) {
-		return new Promise((resolve, reject) => {
-			let args = [ "--compressed", "-sSL", encodeURI(uri) ];
+function curl(args, opts) {
+	return new Promise((resolve, reject) => {
+		run("curl", args, opts, (error, stdout, stderr) => {
+			if (error) {
+				if (error.message && error.message === "stdout maxBuffer exceeded") {
+					logger.debug("> maxBuffer: "+stdout.length);
+					return resolve(stdout);
+				}
+				switch (error.code) {
+				case "ENOENT":
+					logger.error("You need to install curl on the system.");
+					return reject(new Error("curl is not installed."));
+				case 6: // DNS error, let stderr reject it
+					break;
+				default:
+					return reject(error);
+				}
+			}
+			if (stderr.length)
+				return reject(new Error(stderr.replace(/\n|\t|\r|curl: /g, "")));
+			resolve(stdout);
+		});
+	});
+}
+
+const web = {
+	notFound() { return `Couldn't find it. ${lib.randSelect(notFoundFeels)}`; },
+	async fetch(link, opts) {
+		try {
+			let args = [ "--compressed", "-sSL", encodeURI(link) ];
 			if (!opts || !opts.nouseragent)
-				args.push(`-A "${this.userAgent}"`);
+				args.push(`-A "${USERAGENT}"`);
 			if (opts && opts.headers && Array.isArray(opts.headers) && opts.headers.length)
 				opts.headers.forEach(h => { args.push("-H"); args.push(h); })
 			opts = opts || { opts: { timeout: 15000, maxBuffer: 524288 } };
-			run("curl", args, opts.opts, function (error, stdout, stderr) {
-				if (error) { // XXX reconsider later
-					// quietly error if it is maxBuffer related - stops us downloading huge files
-					if (error.message && error.message === "stdout maxBuffer exceeded") {
-						logger.debug("exceeded max length: "+opts.opts.maxBuffer);
-						return;
-					}
-					switch (error.code) {
-					case "ENOENT":
-						logger.error("You need to install curl on the system.");
-						throw new Error("curl is not installed.");
-						break;
-					case 6: // DNS error, let stderr throw it - if we throw here the stack reveals full urls
-						break;
-					default:
-						throw new Error(error);
-						break;
-					}
-				}
-				if (stderr.length)
-					reject(new Error(stderr.replace(/\n|\t|\r|curl: /g, "")));
-				else
-					resolve(stdout);
-			});
-		});
-	}
-	json(uri, opts) { return this.fetch(uri, opts).then(JSON.parse); }
-	googleSearch(uri) {
-		return this.json(uri).then(g => {
-			if (g.error)
-				throw new Error("web.googleSearch: "+g.error.message);
-			if (g.queries.request[0].totalResults === "0")
-				return { notFound: true };
-			return {
-				items: g.items.map(function (item) {
-					return {
-						title: lib.singleSpace(item.title),
-						url: item.link,
-						content: String(item.snippet).replace(/\x01|\n|\t|\r/g, "")
-					};
-				})
-			}
-		});
-	}
+			const body = await curl(args, opts.opts);
+			return body;
+		} catch (err) {
+			throw new Error(`[web.fetch(${link})]\n${err}`);
+		}
+	},
+	async json(uri, opts) {
+		try {
+			return JSON.parse(await web.fetch(uri, opts));
+		} catch (err) {
+			throw new Error("Couldn't parse JSON from "+uri);
+		}
+	},
+	async googleSearch(uri) {
+		const g = await web.json(uri);
+		if (g.error)
+			throw new Error(`[web.googleSearch]: ${g.error.message}`);
+		if (g.queries.request[0].totalResults === "0")
+			return { notFound: true };
+		return {
+			items: g.items.map(item => {
+				return {
+					title: lib.singleSpace(item.title),
+					url: item.link,
+					content: String(item.snippet).replace(/[\x01\n\t\r]/g, "")
+				};
+			})
+		}
+	},
 	google(term, maxResults) {
-		const uri = `https://www.googleapis.com/customsearch/v1?key=${config.api.googlesearch}&cx=002465313170830037306:5cfvjccuofo&num=${maxResults || 1}&prettyPrint=false&q=${term.trim()}`;
-		return this.googleSearch(uri);
-	}
+		return web.googleSearch(`https://www.googleapis.com/customsearch/v1?key=${config.api.googlesearch}&cx=002465313170830037306:5cfvjccuofo&num=${maxResults || 1}&prettyPrint=false&q=${term.trim()}`);
+	},
 	googleImage(term, maxResults) {
-		const uri = `https://www.googleapis.com/customsearch/v1?key=${config.api.googlesearch}&cx=002465313170830037306:5cfvjccuofo&num=${maxResults || 1}&prettyPrint=false&searchType=image&q=${term.trim()}`;
-		return this.googleSearch(uri);
-	}
-	youtubeSearch(searchTerm) {
-		const uri = `https://www.googleapis.com/youtube/v3/search?part=id&maxResults=1&q=${searchTerm}&safeSearch=none&type=video&fields=items&key=${config.api.youtube}`;
-		return this.json(uri).then(resp => {
-			if (!resp.items.length)
-				throw new Error(searchTerm+" is not a thing on YouTube. "+lib.randSelect(this._notFoundFeels));
-			else
-				return this.youtubeByID(resp.items[0].id.videoId);
-		});
-	}
-	youtubeByID(id) {
-		const uri = `https://www.googleapis.com/youtube/v3/videos?id=${id}&key=${config.api.youtube}&part=snippet,contentDetails,statistics`;
-		return this.json(uri).then(yt => {
-			if (yt.error)
-				throw new Error(yt.error.errors[0]);
-			return {
-				date: yt.items[0].snippet.publishedAt,
-				title: yt.items[0].snippet.title,
-				channel: yt.items[0].snippet.channelTitle,
-				views: yt.items[0].statistics.viewCount,
-				duration: yt.items[0].contentDetails.duration.slice(2).toLowerCase(),
-				link: "https://youtube.com/watch?v="+yt.items[0].id
-			};
-		});
+		return web.googleSearch(`https://www.googleapis.com/customsearch/v1?key=${config.api.googlesearch}&cx=002465313170830037306:5cfvjccuofo&num=${maxResults || 1}&prettyPrint=false&searchType=image&q=${term.trim()}`);
+	},
+	async youtubeSearch(searchTerm) {
+		const resp = await web.json(`https://www.googleapis.com/youtube/v3/search?part=id&maxResults=1&q=${searchTerm}&safeSearch=none&type=video&fields=items&key=${config.api.youtube}`);
+		if (!resp.items.length)
+			throw new Error(`${searchTerm} is not a thing on YouTube. ${lib.randSelect(notFoundFeels)}`);
+		else
+			return web.youtubeByID(resp.items[0].id.videoId);
+	},
+	async youtubeByID(id) {
+		const uri = `https://www.googleapis.com/youtube/v3/videos?id=${id}&key=${config.api.youtube}&part=snippet,contentDetails,statistics&fields=items(id,statistics(viewCount),contentDetails(duration),snippet(publishedAt,title,channelTitle))`;
+		const yt = await web.json(uri);
+		if (yt.error)
+			throw new Error(yt.error.errors[0]);
+		return {
+			date: yt.items[0].snippet.publishedAt,
+			title: yt.items[0].snippet.title,
+			channel: yt.items[0].snippet.channelTitle,
+			views: (yt.items[0].statistics ? yt.items[0].statistics.viewCount : "unknown"),
+			duration: yt.items[0].contentDetails.duration.slice(2).toLowerCase(),
+			link: `https://youtube.com/watch?v=${yt.items[0].id}`
+		};
 	}
 }
 
-plugin.export("web", new Web());
+plugin.export("web", web);
