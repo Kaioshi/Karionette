@@ -11,7 +11,7 @@ process.on("uncaughtException", function caughtUncaughtException(err) {
 const plugin = require("./plugin.js")(globals);
 plugin.loadCorePlugins([ // the order matters
 	"bot", "config", "logger", "irc", "admin-events", "words-events", "core-events",
-	"logins-events", "ial-events", "perms-events", "alias-events", "config-events"
+	"logins-events", "ial-events", "perms-events", "alias-events"
 ]);
 plugin.loadOptionalPlugins();
 
