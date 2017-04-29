@@ -70,14 +70,13 @@ function validateConfigEntry(field, entry) { // TODO: add more checks here
 }
 
 function parseConf(conf) {
-	let config = {};
+	let config = { api: {} };
 	for (let i = 0; i < conf.length; i++) {
 		let configLine = conf[i];
 		if (!configLine || !configLine.length || configLine[0] === "#")
 			continue;
 		let [field, entry] = [ configLine.slice(0, configLine.indexOf(": ")), configLine.slice(configLine.indexOf(": ")+2) ];
 		if (field.length > 4 && field.slice(0,4) === "api ") {
-			config.api = config.api || {};
 			config.api[field.slice(4)] = entry;
 		} else {
 			field = field.replace(/ /g, "_");
