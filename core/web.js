@@ -1,3 +1,4 @@
+// @ts-check
 "use strict";
 
 const lib = plugin.import("lib");
@@ -34,72 +35,93 @@ function curl(args, opts) {
 	});
 }
 
-const web = {
-	notFound() { return `Couldn't find it. ${lib.randSelect(notFoundFeels)}`; },
-	async fetch(link, opts) {
-		try {
-			let args = [ "--compressed", "-sSL", encodeURI(link) ];
-			if (!opts || !opts.nouseragent)
-				args.push(`-A "${USERAGENT}"`);
-			if (opts && opts.headers && Array.isArray(opts.headers) && opts.headers.length)
-				opts.headers.forEach(h => { args.push("-H"); args.push(h); })
-			opts = opts || { opts: { timeout: 15000, maxBuffer: 524288 } };
-			const body = await curl(args, opts.opts);
-			return body;
-		} catch (err) {
-			throw new Error(`[web.fetch(${link})]\n${err}`);
-		}
-	},
-	async json(uri, opts) {
-		try {
-			return JSON.parse(await web.fetch(uri, opts));
-		} catch (err) {
-			throw new Error("Couldn't parse JSON from "+uri);
-		}
-	},
-	async googleSearch(uri) {
-		const g = await web.json(uri);
-		if (g.error)
-			throw new Error(`[web.googleSearch]: ${g.error.message}`);
-		if (g.queries.request[0].totalResults === "0")
-			return { notFound: true };
-		return {
-			items: g.items.map(item => {
-				return {
-					title: lib.singleSpace(item.title),
-					url: item.link,
-					content: String(item.snippet).replace(/[\x01\n\t\r]/g, "")
-				};
-			})
-		}
-	},
-	google(term, maxResults) {
-		return web.googleSearch(`https://www.googleapis.com/customsearch/v1?key=${config.api.googlesearch}&cx=002465313170830037306:5cfvjccuofo&num=${maxResults || 1}&prettyPrint=false&q=${term.trim()}`);
-	},
-	googleImage(term, maxResults) {
-		return web.googleSearch(`https://www.googleapis.com/customsearch/v1?key=${config.api.googlesearch}&cx=002465313170830037306:5cfvjccuofo&num=${maxResults || 1}&prettyPrint=false&searchType=image&q=${term.trim()}`);
-	},
-	async youtubeSearch(searchTerm) {
-		const resp = await web.json(`https://www.googleapis.com/youtube/v3/search?part=id&maxResults=1&q=${searchTerm}&safeSearch=none&type=video&fields=items&key=${config.api.youtube}`);
-		if (!resp.items.length)
-			throw new Error(`${searchTerm} is not a thing on YouTube. ${lib.randSelect(notFoundFeels)}`);
-		else
-			return web.youtubeByID(resp.items[0].id.videoId);
-	},
-	async youtubeByID(id) {
-		const uri = `https://www.googleapis.com/youtube/v3/videos?id=${id}&key=${config.api.youtube}&part=snippet,contentDetails,statistics&fields=items(id,statistics(viewCount),contentDetails(duration),snippet(publishedAt,title,channelTitle))`;
-		const yt = await web.json(uri);
-		if (yt.error)
-			throw new Error(yt.error.errors[0]);
-		return {
-			date: yt.items[0].snippet.publishedAt,
-			title: yt.items[0].snippet.title,
-			channel: yt.items[0].snippet.channelTitle,
-			views: (yt.items[0].statistics ? yt.items[0].statistics.viewCount : "unknown"),
-			duration: yt.items[0].contentDetails.duration.slice(2).toLowerCase(),
-			link: `https://youtube.com/watch?v=${yt.items[0].id}`
-		};
+function notFound() {
+	return `Couldn't find it. ${lib.randSelect(notFoundFeels)}`;
+}
+
+async function fetch(link, opts) {
+	try {
+		let args = [ "--compressed", "-sSL", encodeURI(link) ];
+		if (!opts || !opts.nouseragent)
+			args.push(`-A "${USERAGENT}"`);
+		if (opts && opts.headers && Array.isArray(opts.headers) && opts.headers.length)
+			opts.headers.forEach(h => { args.push("-H"); args.push(h); });
+		opts = opts || { opts: { timeout: 15000, maxBuffer: 524288 } };
+		const body = await curl(args, opts.opts);
+		return body;
+	} catch (err) {
+		throw new Error(`[web.fetch(${link})]\n${err}`);
 	}
 }
 
-plugin.export("web", web);
+async function json(uri, opts) {
+	try {
+		return JSON.parse(await fetch(uri, opts));
+	} catch (err) {
+		throw new Error("Couldn't parse JSON from "+uri);
+	}
+}
+
+async function googleSearch(uri) {
+	const g = await json(uri);
+	if (g.error)
+		throw new Error(`[web.googleSearch]: ${g.error.message}`);
+	if (g.queries.request[0].totalResults === "0")
+		return { notFound: true };
+	return {
+		items: g.items.map(item => {
+			return {
+				title: lib.singleSpace(item.title),
+				url: item.link,
+				content: String(item.snippet).replace(/[\x01\n\t\r]/g, "")
+			};
+		})
+	};
+}
+
+function google(term, maxResults) {
+	return googleSearch(`https://www.googleapis.com/customsearch/v1?key=${config.api.googlesearch}&cx=002465313170830037306:5cfvjccuofo&num=${maxResults || 1}&prettyPrint=false&q=${term.trim()}`);
+}
+
+function googleImage(term, maxResults) {
+	return googleSearch(`https://www.googleapis.com/customsearch/v1?key=${config.api.googlesearch}&cx=002465313170830037306:5cfvjccuofo&num=${maxResults || 1}&prettyPrint=false&searchType=image&q=${term.trim()}`);
+}
+
+async function youtubeSearch(searchTerm) {
+	const resp = await json(`https://www.googleapis.com/youtube/v3/search?part=id&maxResults=1&q=${searchTerm}&safeSearch=none&type=video&fields=items&key=${config.api.youtube}`);
+	if (!resp.items.length)
+		throw new Error(`${searchTerm} is not a thing on YouTube. ${lib.randSelect(notFoundFeels)}`);
+	else
+		return youtubeByID(resp.items[0].id.videoId);
+}
+
+async function youtubeByID(id) {
+	const uri = `https://www.googleapis.com/youtube/v3/videos?id=${id}&key=${config.api.youtube}&part=snippet,contentDetails,statistics&fields=items(id,statistics(viewCount),contentDetails(duration),snippet(publishedAt,title,channelTitle))`;
+	const yt = await json(uri);
+	if (yt.error)
+		throw new Error(yt.error.errors[0]);
+	return {
+		date: yt.items[0].snippet.publishedAt,
+		title: yt.items[0].snippet.title,
+		channel: yt.items[0].snippet.channelTitle,
+		views: (yt.items[0].statistics ? yt.items[0].statistics.viewCount : "unknown"),
+		duration: yt.items[0].contentDetails.duration.slice(2).toLowerCase(),
+		link: `https://youtube.com/watch?v=${yt.items[0].id}`
+	};
+}
+
+async function rss2json(link) {
+	const result = await json(`https://api.rss2json.com/v1/api.json?rss_url=${link}`);
+	return result;
+}
+
+plugin.export("web", {
+	fetch,
+	json,
+	google,
+	googleImage,
+	youtubeByID,
+	youtubeSearch,
+	rss2json,
+	notFound
+});
