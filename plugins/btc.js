@@ -3,7 +3,7 @@
 const [web, lib] = plugin.importMany("web", "lib");
 
 function currencyURL(code) {
-    return `https://api.bitcoinaverage.com/exchanges/${code}`;
+	return `https://api.bitcoinaverage.com/exchanges/${code}`;
 }
 
 let KEYS = ["AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "IDR", "ILS", "MXN", "NOK", "NZD", "PLN", "RON", "RUB", "SEK", "SGD", "USD", "ZAR"];

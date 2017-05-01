@@ -10,7 +10,7 @@ function notFound(context) {
 		"I'm not even sorry. >:D",
 		";_;",
 		"Blame "+(context[0] === "#" ? lib.randSelect(ial.Active(context))+"." : "yourself.")
-	])
+	]);
 }
 
 bot.command({
@@ -42,6 +42,6 @@ bot.command({
 				irc.say(input.context, lib.decode(lib.singleSpace(`${resp.text} ${resp.title}`)));
 		} catch (err) {
 			logger.error(";define - "+err.message, err.stack);
-		};
+		}
 	}
 });

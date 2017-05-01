@@ -86,7 +86,7 @@ async function checkSubs() {
 			findNewPosts(trimJson(await web.fetch(r(sub.subreddit))));
 		}
 	} catch (err) {
-		logger.error(`checkSubs - ${err.message}`, err.stack);
+		logger.error(`checkSubs - ${err.message}`, err);
 	}
 }
 

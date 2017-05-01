@@ -13,7 +13,7 @@ bot.command({
 		try { // extended timeout time since it can take a while - 2 mins
 			const gfy = await web.json(`http://upload.gfycat.com/transcode?fetchUrl=${input.args[0]}`, { opt: { timeout: 120000 }});
 			if (gfy.error || (gfy.task && gfy.task === "error")) {
-				irc.say(input.context, `Couldn't gfycat that. :(`);
+				irc.say(input.context, "Couldn't gfycat that. :(");
 			} else {
 				const shrunk = gfy.gifSize && gfy.gfysize ? ` - Shrunk by ${Math.round((gfy.gifSize - gfy.gfysize)/1024)} KiB` : "";
 				const framerate = gfy.frameRate ? ` - Framerate: ${gfy.frameRate}` : "";

@@ -1,6 +1,6 @@
 "use strict";
 
-const [web, lib] = plugin.importMany("web", "lib");
+const web = plugin.import("web");
 
 bot.command({
 	command: [ "g", "google" ],
