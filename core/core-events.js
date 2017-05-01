@@ -19,7 +19,7 @@ if (config.gc) {
 				logger.memr(report+" KIB"+diff);
 				lastMemuse = memuse;
 			}
-		}
+		};
 	})() : null;
 	bot.event({
 		handle: "gcWaitForConnect",
@@ -29,7 +29,7 @@ if (config.gc) {
 			let time;
 			if (globals.gc === undefined) {
 				logger.error("You need to run node with --expose-gc -> $ node --expose-gc boot.js");
-				logger.error("If you don't want regular garbage collection change gc to false in config.")
+				logger.error("If you don't want regular garbage collection change gc to false in config.");
 				return;
 			}
 			if (config.gcinterval) {
