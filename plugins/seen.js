@@ -128,6 +128,8 @@ bot.command({
 });
 
 function convertAllOldSeen() {
+	if (!fs.existsSync("data/users/"))
+		return;
 	const files = fs.readdirSync("data/users/").filter(file => file[0] === "#"),
 		txtFiles = files.filter(file => file.slice(-4) === ".txt"),
 		jsonFiles = files.filter(file => file.slice(-5) === ".json");
