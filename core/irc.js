@@ -1,6 +1,6 @@
 "use strict";
 
-const [setInterval, clearInterval, Connection, IRCParser] = plugin.importMany("setInterval", "clearInterval", "connection", "ircparser");
+const [setInterval, clearInterval, Connection] = plugin.importMany("setInterval", "clearInterval", "connection");
 const sanityCheck = /[\n\t\r]g/;
 
 class IRC {
