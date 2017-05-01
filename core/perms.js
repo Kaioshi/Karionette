@@ -53,7 +53,7 @@ function hasPermission(from, nick, user, type, item) {
 	return false;
 }
 
-function Action(from, action, type, item, username, item) {
+function Action(from, action, type, item, username) {
 	const nick = from.split("!")[0],
 		user = logins.getUsername(nick);
 	if (user === undefined)
