@@ -1,37 +1,37 @@
 // dice roller!
+const lib = plugin.import("lib");
+
 "use strict";
 bot.command({
 	command: "roll",
 	help: "Roll for initiative sucka!~",
-	syntax: config.command_prefix+"roll NdN+N - Example: "+config.command_prefix+"roll 1d20+5 \"1 dice, 20 sides, bonus 5 modifier (optional)\"",
+	syntax: `${config.command_prefix}roll NdN+N - Example: ${config.command_prefix}roll 1d20+5 "1 dice, 20 sides, bonus 5 modifier (optional)"`,
 	callback: function (input) {
-		let reg, i, rolls, roll, total, summary;
 		if (!input.args)
 			input.args = [ "1d20" ];
-		reg = /(\d+)d(\d+)\+?(\d+)?/i.exec(input.args[0].trim());
+		const reg = /(\d+)d(\d+)\+?(\d+)?/i.exec(input.args[0].trim());
 		if (!reg) {
 			irc.say(input.context, bot.cmdHelp("roll", "syntax"));
 			return;
 		}
-		if (reg[1] > 100) {
+		const rollCount = parseInt(reg[1], 10);
+		const dieSize = parseInt(reg[2], 10);
+		if (rollCount > 100 || rollCount < 1 || dieSize > 100 || dieSize < 1) {
 			irc.say(input.context, "No.");
 			return;
 		}
-		rolls = [];
-		total = 0;
-		reg[1] = parseInt(reg[1], 10);
-		reg[2] = parseInt(reg[2], 10);
-		for (i = 0; i < reg[1]; i++) {
-			roll = Math.round(Math.random()*(reg[2]-1))+1;
+		const rolls = [];
+		let total = 0;
+		for (let i = 0; i < rollCount; i++) {
+			const roll = lib.randNum(1, dieSize);
 			total += roll;
 			rolls.push(roll);
 		}
 		if (reg[3]) {
-			reg[3] = parseInt(reg[3], 10);
-			summary = (total+reg[3])+" ["+total+"+"+reg[3]+"] ("+rolls.join(", ")+")";
+			const bonus = parseInt(reg[3], 10);
+			irc.say(input.context, `${input.nick} rolled: ${(total+bonus)} [${total}+${bonus}] (${rolls.join(", ")})`);
 		} else {
-			summary = total+" ("+rolls.join(", ")+")";
+			irc.say(input.context, `${input.nick} rolled: ${total} (${rolls.join(", ")})`);
 		}
-		irc.say(input.context, input.nick+" rolled: "+summary);
 	}
 });
