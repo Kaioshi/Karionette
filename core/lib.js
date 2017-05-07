@@ -152,8 +152,10 @@ const lib = {
 	randSelect: function (yarr) {
 		return yarr.length > 1 ? yarr[Math.floor(Math.random() * yarr.length)] : yarr[0];
 	},
-	randNum: function (min, max) {
-		return Math.floor(Math.random()*(max-min+1)+min);
+	randNum: function (minimum, maximum) {
+		const min = Math.ceil(minimum);
+		const max = Math.floor(maximum);
+		return Math.floor(Math.random()*(max-min+1))+min;
 	},
 	chance: function (n) {
 		return (Math.floor(Math.random()*100) <= (n ? n : 50));
