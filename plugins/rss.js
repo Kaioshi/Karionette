@@ -75,8 +75,8 @@ async function checkForUpdates() {
 					announceUpdate("notice", feed.announce.notice, message);
 				changed = true;
 			} // rss2json.com returns 20 at a time, should give a safe buffer
-			if (changed && feed.links[link].seen.length > 45)
-				feed.links[link].seen = feed.links[link].seen.slice(-45);
+			if (changed && feed.links[link].seen.length > 100)
+				feed.links[link].seen = feed.links[link].seen.slice(-100);
 		}
 		if (changed)
 			rssDB.saveOne(feedgroup, feed);
