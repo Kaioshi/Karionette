@@ -209,7 +209,7 @@ bot.event({
 			return false;
 		if (!input.channel)
 			return false;
-		input.url = findURL(input.message);
+		input.url = findURL(input.message.replace(/\x01/g, ""));
 		if (!input.url) {
 			delete input.url;
 			return false;
