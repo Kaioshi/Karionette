@@ -2,6 +2,11 @@
 
 const [web, lib] = plugin.importMany("web", "lib");
 
+function shortNum(n) {
+	const num = n.toString();
+	return num.slice(0, num.indexOf(".")+3);
+}
+
 function currencyURL(code) {
 	return `https://apiv2.bitcoinaverage.com/indices/global/ticker/BTC${code}`;
 }
@@ -32,7 +37,7 @@ bot.command({
 			return;
 		}
 		web.json(CURRENCY[cur]).then(function (btc) {
-			irc.say(input.context, `BTC prices in ${cur} - high: ${btc.high}, low: ${btc.low} - average for the day: ${btc.averages.day}, week: ${btc.averages.week}, month: ${btc.averages.month}`);
+			irc.say(input.context, `BTC prices in ${cur} - high: ${shortNum(btc.high)}, low: ${shortNum(btc.low)} - average for the day: ${shortNum(btc.averages.day)}, week: ${shortNum(btc.averages.week)}, month: ${shortNum(btc.averages.month)}`);
 		}).catch(err => {
 			irc.say(input.context, "Somethin' done broke. Whine at Kaioshi.");
 			logger.error(";btc failed", err);
