@@ -10,6 +10,12 @@ const mangaDB = {
 
 ticker.start(300); // start a 5 minute ticker
 
+function fixDumbMangafoxLinks(link) {
+	if (link.slice(0,2) === "//")
+		return "http:"+link;
+	return link;
+}
+
 function isNewRelease(release, manga) {
 	if (!manga.latest) {
 		manga.latest = [ release.title ];
@@ -33,7 +39,7 @@ function findUpdates(type, releases) {
 		for (let k = 0; k < releases.length; k++) {
 			if (!releases[k].title.toLowerCase().includes(title) || !isNewRelease(releases[k], manga))
 				continue;
-			const release = releases[k], releaseMessage = `${lib.decode(release.title)} is out \\o/ ~ ${release.link}`;
+			const release = releases[k], releaseMessage = `${lib.decode(release.title)} is out \\o/ ~ ${fixDumbMangafoxLinks(release.link)}`;
 			hadUpdates = true;
 			for (let n = 0; n < manga.announce.length; n++) {
 				const target = manga.announce[n];
