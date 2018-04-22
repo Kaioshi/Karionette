@@ -44,8 +44,12 @@ async function fetch(link, opts) {
 		let args = [ "--compressed", "-sSL", encodeURI(link) ];
 		if (!opts || !opts.nouseragent)
 			args.push(`-A "${USERAGENT}"`);
-		if (opts && opts.headers && Array.isArray(opts.headers) && opts.headers.length)
-			opts.headers.forEach(h => { args.push("-H"); args.push(h); });
+		if (opts) {
+			if (opts.headers && Array.isArray(opts.headers) && opts.headers.length)
+				opts.headers.forEach(h => { args.push("-H"); args.push(h); });
+			if (opts.post && Array.isArray(opts.post) && opts.post.length)
+				opts.post.forEach(p => { args.unshift(p); args.unshift("-d"); });
+		}
 		opts = opts || { opts: { timeout: 15000, maxBuffer: 524288 } };
 		const body = await curl(args, opts.opts);
 		return body;
