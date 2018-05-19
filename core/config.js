@@ -1,6 +1,6 @@
 "use strict"; // TODO: redo this.
-const [fs, console] = plugin.importMany("fs", "console"),
-	validNickTest = /(^[a-zA-Z0-9_\-\[\]\{\}\^`\|]*$)/;
+const [fs, console, process] = plugin.importMany("fs", "console", "process");
+const validNickTest = /(^[a-zA-Z0-9_\-\[\]\{\}\^`\|]*$)/;
 
 function configIsValid(config) {
 	const NEED = [ "nickname", "username", "server", "port", "realname", "command_prefix", "secret" ];
