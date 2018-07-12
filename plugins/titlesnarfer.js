@@ -158,6 +158,24 @@ function getURL(channel, url) { // make this less bad.
 	urls = null;
 }
 
+async function redditIt(context, link, record) {
+	try {
+		const redditJson = await web.json(`${link}/.json`);
+		if (!Array.isArray(redditJson) || !redditJson.length)
+			return record ? recordURL(record[0], record[1], record[2]) : null;
+		if (!redditJson[0].data || !redditJson[0].data.children || !redditJson[0].data.children.length)
+			return record ? recordURL(record[0], record[1], record[2]) : null;
+		const entry = redditJson[0].data.children[0].data;
+		const url = entry.url && entry.url !== link ? ` - ${entry.url}` : "";
+		const titleReport = `${entry.subreddit_name_prefixed} - ${entry.title}${url}`;
+		irc.say(context, titleReport);
+		if (record)
+			recordURL(record[0], record[1], record[2], titleReport);
+	} catch (error) {
+		logger.error("redditIt failed", error);
+	}
+}
+
 async function youtubeIt(context, id, old, record) {
 	if (id.length !== 11) // XXX this is no promise from youtube, just how it has gone thus far.
 		return irc.say(context, `Invalid link. YouTube video IDs are 11 characters long, this one is ${id.length} characters long.`);
@@ -243,9 +261,11 @@ bot.event({
 			if (videoID)
 				return youtubeIt(input.context, videoID[1], old, record);
 			break;
+		case "reddit.com":
+			return redditIt(input.context, input.url.href, record);
 		case "i.imgur.com":
 			ext = input.url.href.slice(input.url.href.lastIndexOf("."));
-			if (ext.match(/\.gif|\.gifv|\.jpg|\.jpeg|\.png|\.webm/i)) {
+			if (ext.match(/\.gif|\.gifv|\.jpg|\.jpeg|\.png|\.webm|\.mp4/i)) {
 				input.url.path = input.url.path.slice(0, -ext.length);
 				input.url.href = input.url.href.slice(0, -ext.length);
 			}
