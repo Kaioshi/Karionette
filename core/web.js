@@ -1,4 +1,3 @@
-// @ts-check
 "use strict";
 
 const lib = plugin.import("lib");
