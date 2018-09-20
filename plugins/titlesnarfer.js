@@ -24,6 +24,8 @@ if (config.titlesnarfer_inline) {
 				return;
 			}
 			const title = lib.singleSpace(lib.decode(reg[1]));
+			if (title.indexOf(" used Cloudflare to restrict access") > -1)
+				return;
 			if (record)
 				recordURL(record[0], record[1], record[2]);
 			if (!isFilteredTitle(title))
