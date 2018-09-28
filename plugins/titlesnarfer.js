@@ -160,9 +160,15 @@ function getURL(channel, url) { // make this less bad.
 	urls = null;
 }
 
+function slashOrNotToSlash(link) {
+	if (link[link.length-1] !== "/")
+		return link+"/";
+	return link;
+}
+
 async function redditIt(context, link, record) {
 	try {
-		const redditJson = await web.json(`${link}/.json`);
+		const redditJson = await web.json(`${slashOrNotToSlash(link)}.json`);
 		if (!Array.isArray(redditJson) || !redditJson.length)
 			return record ? recordURL(record[0], record[1], record[2]) : null;
 		if (!redditJson[0].data || !redditJson[0].data.children || !redditJson[0].data.children.length)
