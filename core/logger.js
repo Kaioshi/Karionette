@@ -1,5 +1,5 @@
 "use strict";
-const [fs, process] = plugin.importMany("fs", "process"),
+const [fs, process, lib] = plugin.importMany("fs", "process", "lib"),
 	colourStrip = /\u001b\[[0-9]+m/g;
 
 class Logger {
@@ -47,13 +47,13 @@ class Logger {
 		if (error.stack) { // logger.error(Error)
 			this.log("\u001b[91mError \u001b[31m"+error.message+"\u001b[0m", true);
 			bot.emitEvent("Event: Error", error.message);
-			this.log("\u001b[91mError \u001b[30;1m"+error.stack+"\u001b[0m", true);
+			this.log("\u001b[91mError \u001b[30;1m"+lib.objToString(error.stack)+"\u001b[0m", true);
 			return bot.emitEvent("Event: Error Stack", error.stack);
 		} else { // logger.error("custom message", Error)
-			this.log("\u001b[31mError \u001b[31m"+error+"\u001b[0m", true);
+			this.log("\u001b[31mError \u001b[31m"+lib.objToString(error)+"\u001b[0m", true);
 			bot.emitEvent("Event: Error", error);
 			if (err && err.stack) { // logger.error("custom message")
-				this.log("\u001b[31mError \u001b[30;1m"+err.stack+"\u001b[0m", true);
+				this.log("\u001b[31mError \u001b[30;1m"+lib.objToString(err.stack)+"\u001b[0m", true);
 				return bot.emitEvent("Event: Error Stack", err.stack);
 			}
 		}
