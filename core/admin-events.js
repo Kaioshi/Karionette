@@ -38,7 +38,7 @@ bot.event({
 	handle: "errorStackAnnouncer",
 	event: "Event: Error Stack",
 	callback: function (error) {
-		const errorMessage = error.split("\n");
+		const errorMessage = lib.objToString(error).split("\n");
 		getErrorAnnounceList().forEach(nick => errorMessage.forEach(err => irc.notice(nick, err, true)));
 	}
 });
