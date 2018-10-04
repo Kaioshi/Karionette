@@ -102,7 +102,7 @@ async function youtubeByID(id) {
 	const uri = `https://www.googleapis.com/youtube/v3/videos?id=${id}&key=${config.api.youtube}&part=snippet,contentDetails,statistics&fields=items(id,statistics(viewCount),contentDetails(duration),snippet(publishedAt,title,channelTitle))`;
 	const yt = await json(uri);
 	if (yt.error)
-		throw new Error(yt.error.errors[0]);
+		throw new Error(lib.objToString(yt.error.errors[0]));
 	return {
 		date: yt.items[0].snippet.publishedAt,
 		title: yt.items[0].snippet.title,
