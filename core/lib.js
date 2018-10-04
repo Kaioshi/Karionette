@@ -53,6 +53,11 @@ const lib = {
 		});
 		it.next();
 	},
+	objToString: function objToString(obj) {
+		if (typeof obj === "object" && !Array.isArray(obj))
+			return JSON.stringify(obj, null, 3);
+		return obj;
+	},
 	timestamp: function (line) {
 		let time = new Date().toLocaleTimeString();
 		if (line)
