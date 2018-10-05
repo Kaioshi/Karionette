@@ -23,6 +23,8 @@ function curl(args, opts) {
 					return reject(new Error("curl is not installed."));
 				case 6: // DNS error, let stderr reject it
 					break;
+				case 60:
+					return reject(new Error("Failed SSL verification."));
 				default:
 					return reject(error);
 				}
