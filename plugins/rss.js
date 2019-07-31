@@ -4,7 +4,7 @@
  * ;rss remove <handle> [<link>]
  * ;rss subscribe <handle> [<method>]
  * ;rss unsubscribe <handle>
- * ;rss list
+ * ;rss list [<handle>]
  */
 
 const [ticker, lib, ial, logins, DB, web] = plugin.importMany("ticker", "lib", "ial", "logins", "DB", "web");
@@ -68,7 +68,7 @@ async function checkForUpdates() {
 				if (feed.links[link].seen.includes(post.link))
 					continue;
 				feed.links[link].seen.push(post.link);
-				const message = `${post.title} ~ ${post.link}`;
+				const message = `${post.title} ~ ${lib.decode(post.link)}`;
 				if (feed.announce.msg.length)
 					announceUpdate("say", feed.announce.msg, message);
 				if (feed.announce.notice.length)
