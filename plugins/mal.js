@@ -37,7 +37,7 @@ async function doSearch(type, context, title, synopsis, google) {
 		}
 		const media = await web.json(`https://myanimelistrt.azurewebsites.net/2/${type}/${id}`, null);
 		if (media.error) {
-			irc.say(context, `The unofficial MAL API said: ${media.error} - ${media.details}`);
+			irc.say(context, `The unofficial MAL API said: ${media.error.code} - ${media.error.message}`);
 			return;
 		}
 		let eps = "";
