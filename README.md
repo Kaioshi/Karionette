@@ -51,7 +51,7 @@ User variables can be defined with ```;var add varName variable contents```
 
 ## Dependencies & Install
 
-* Node.js 7.6 or higher - using async/await.
+* Node.js 7.6 or higher
 * You will need [curl](https://github.com/curl/curl) installed for web fetches.
 * Copy "config.example" to "config" and edit appropriately.
 * Copy the "DEFAULT_data" directory to "data"; there are things you can edit in here, too.
@@ -62,4 +62,4 @@ User variables can be defined with ```;var add varName variable contents```
 * You should launch the bot with --expose-gc and gc: true in the config.
   * $ node --expose-gc boot.js
 
-### If you have any problems or questions, feel free to drop by #pyoshi on irc.esper.net and ask.
+Note, this isn't updated anymore, many things are broken due to APIs going out of service.
